@@ -9,198 +9,240 @@
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
-        .glow-red { box-shadow: 0 0 25px rgba(239, 68, 68, 0.15); }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
+        .glow-cyan { box-shadow: 0 0 30px rgba(6, 182, 212, 0.15); }
+        .glow-indigo { box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-[#07090f] text-white min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0">
+    <!-- Sidebar Navigation (Cleaned) -->
+    <aside class="w-full lg:w-72 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 shadow-2xl">
         <div>
-            <div class="mb-6 lg:mb-8 flex justify-between items-center lg:block">
+            <div class="mb-8 flex justify-between items-center lg:block">
                 <div>
-                    <h1 class="text-lg font-black uppercase tracking-wider text-red-500">🔐 CONTROL PANEL</h1>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Secure Admin Zone</p>
+                    <h1 class="text-xl font-black uppercase tracking-wider text-red-500 flex items-center gap-2">
+                        <span>⚡</span> MONSTER HUB
+                    </h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mt-1">Secure Core Command</p>
                 </div>
             </div>
-            <nav class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-semibold uppercase tracking-wider scrollbar-none">
-                <a href="control-panel.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap">⚙️ Management Hub</a>
-                <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🔥 Habit Tracker</a>
-                <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
-                <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
-                <a href="hygiene.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🧼 Hygiene Tracker</a>
+            <nav class="flex lg:flex-col gap-2.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-bold uppercase tracking-wider scrollbar-none">
+                <a href="control-panel.html" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap transition">
+                    <span>⚙️</span> Management Hub
+                </a>
             </nav>
         </div>
+        
+        <!-- Sidebar Lock Button -->
         <div class="hidden lg:block pt-6">
-            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer group">
-                <span class="text-sm group-hover:scale-110 transition">🔒</span> <span>Lock Panel</span>
+            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2.5 py-3.5 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-2xl text-xs uppercase tracking-widest transition cursor-pointer group shadow-inner">
+                <span class="text-sm group-hover:scale-125 transition transform">🔒</span> <span>Lock Panel</span>
             </button>
         </div>
     </aside>
 
     <!-- Main Control Area -->
     <main class="flex-1 flex flex-col p-4 sm:p-6 lg:p-10 overflow-y-auto">
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-[#1a1f30]">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-[#1a1f30]">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">System Command Panel</h2>
-                <p class="text-xs text-slate-400 mt-1">Authorized admin management zone for habit vectors, workouts, study subjects, and hygiene routines.</p>
+                <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white flex items-center gap-3">
+                    Master Command Center <span class="text-xs px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-full font-bold uppercase tracking-widest">Horizontal Hub v3.0</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">Select a vector tab below to deploy and manage entries horizontally.</p>
             </div>
-            <div id="adminEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 whitespace-nowrap">
-                Verifying Security...
+            <div id="adminEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2.5 rounded-2xl border border-red-500/20 whitespace-nowrap shadow-lg flex items-center gap-2">
+                <span>Verifying Security...</span>
             </div>
         </header>
 
-        <!-- Management Grid: Habits, Workouts, Study, Hygiene -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pb-12">
-            
-            <!-- HABIT MANAGEMENT SECTION -->
-            <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-red-500 mb-4">🔥 Add Habit Vector</h3>
-                    <form id="createHabitForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Habit Name</label>
-                            <input type="text" id="habitName" required placeholder="e.g., Deep Work / Morning Routine" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category / Tag</label>
-                            <input type="text" id="habitCategory" placeholder="e.g., Health / Morning / Discipline" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Rule / Description</label>
-                            <input type="text" id="habitDesc" placeholder="e.g., Zero distractions allowed" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-red-600/25 transition cursor-pointer">
-                            Deploy Habit Vector
-                        </button>
-                    </form>
-                </div>
+        <!-- Tracker Selection Tabs -->
+        <div class="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none">
+            <button onclick="switchTab('habits')" id="tab-habits" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg shadow-red-600/30 shrink-0">
+                🔥 Habit Vectors
+            </button>
+            <button onclick="switchTab('workouts')" id="tab-workouts" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+                🏋️ Iron Matrix
+            </button>
+            <button onclick="switchTab('study')" id="tab-study" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+                📚 Study Core
+            </button>
+            <button onclick="switchTab('hygiene')" id="tab-hygiene" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+                🧼 Hygiene Protocols
+            </button>
+        </div>
 
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-white mb-4">📋 Active Habit Registry</h3>
-                    <div id="manageHabitsList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-xs text-zinc-500">Loading habits...</p>
+        <!-- TAB CONTENT AREA (Horizontal Grid Layout) -->
+        
+        <!-- 1. HABIT TAB -->
+        <div id="content-habits" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
+            <div class="glass-card p-6 rounded-3xl glow-red">
+                <h3 class="text-base font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2">
+                    <span>🔥</span> Add Habit Vector
+                </h3>
+                <form id="createHabitForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Habit Name</label>
+                        <input type="text" id="habitName" required placeholder="e.g., Deep Work / Morning Routine" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category / Tag</label>
+                        <input type="text" id="habitCategory" placeholder="e.g., Health / Morning / Discipline" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Rule / Description</label>
+                        <input type="text" id="habitDesc" placeholder="e.g., Zero distractions allowed" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-red-600/25 transition cursor-pointer">
+                        Deploy Habit Vector
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 rounded-3xl">
+                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Habit Registry</h3>
+                <div id="manageHabitsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <p class="text-xs text-zinc-500">Loading habits...</p>
                 </div>
             </div>
+        </div>
 
-            <!-- WORKOUT MANAGEMENT SECTION -->
-            <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-red-500 mb-4">🏋️ Add Exercise (Sets & Reps)</h3>
-                    <form id="createWorkoutForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Exercise Name</label>
-                            <input type="text" id="workoutName" required placeholder="e.g., Bench Press / Running" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Sets</label>
-                                <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Reps / Distance</label>
-                                <input type="number" id="workoutReps" value="10" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category</label>
-                            <select id="workoutCategory" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
-                                <option value="Strength">Strength / Lifting</option>
-                                <option value="Cardio">Cardio / Running</option>
-                                <option value="Endurance">Endurance</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-red-600/25 transition cursor-pointer">
-                            Deploy Exercise to Iron Matrix
-                        </button>
-                    </form>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-white mb-4">📋 Active Exercise Registry</h3>
-                    <div id="manageWorkoutsList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-xs text-zinc-500">Loading exercises...</p>
+        <!-- 2. WORKOUT TAB -->
+        <div id="content-workouts" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
+            <div class="glass-card p-6 rounded-3xl glow-blue">
+                <h3 class="text-base font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2">
+                    <span>🏋️</span> Add Exercise (Sets & Reps)
+                </h3>
+                <form id="createWorkoutForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Exercise Name</label>
+                        <input type="text" id="workoutName" required placeholder="e.g., Bench Press / Running" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
                     </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Sets</label>
+                            <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Reps / Distance</label>
+                            <input type="number" id="workoutReps" value="10" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category</label>
+                        <select id="workoutCategory" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                            <option value="Strength">Strength / Lifting</option>
+                            <option value="Cardio">Cardio / Running</option>
+                            <option value="Endurance">Endurance</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
+                        Deploy Exercise to Iron Matrix
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 rounded-3xl">
+                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Exercise Registry</h3>
+                <div id="manageWorkoutsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <p class="text-xs text-zinc-500">Loading exercises...</p>
                 </div>
             </div>
+        </div>
 
-            <!-- STUDY MANAGEMENT SECTION -->
-            <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-blue-400 mb-4">📚 Add Study Category</h3>
-                    <form id="createStudyCatForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject Name</label>
-                            <input type="text" id="studyCatName" required placeholder="e.g., College / P68 / DSA / Gov Exam" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
-                            <input type="number" id="studyCatTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
-                            Deploy Study Category
-                        </button>
-                    </form>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
-                    <div id="manageStudyList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-xs text-zinc-500">Loading study categories...</p>
+        <!-- 3. STUDY TAB -->
+        <div id="content-study" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
+            <div class="glass-card p-6 rounded-3xl glow-indigo">
+                <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
+                    <span>📚</span> Add Study Category
+                </h3>
+                <form id="createStudyCatForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject Name</label>
+                        <input type="text" id="studyCatName" required placeholder="e.g., College / P68 / DSA / Gov Exam" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
+                        <input type="number" id="studyCatTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
+                        Deploy Study Category
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 rounded-3xl">
+                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
+                <div id="manageStudyList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <p class="text-xs text-zinc-500">Loading study categories...</p>
                 </div>
             </div>
+        </div>
 
-            <!-- HYGIENE MANAGEMENT SECTION -->
-            <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-cyan-400 mb-4">🧼 Add Hygiene Task</h3>
-                    <form id="createHygieneForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Task Name</label>
-                            <input type="text" id="hygieneName" required placeholder="e.g., Skin Care / Beard Trim" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Frequency</label>
-                            <select id="hygieneFrequency" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
-                                <option value="daily">Daily Routine</option>
-                                <option value="sunday">Sunday Special Care</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
-                            Deploy Hygiene Vector
-                        </button>
-                    </form>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase tracking-wider text-white mb-4">📋 Active Hygiene Tasks</h3>
-                    <div id="manageHygieneList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-xs text-zinc-500">Loading hygiene tasks...</p>
+        <!-- 4. HYGIENE TAB -->
+        <div id="content-hygiene" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
+            <div class="glass-card p-6 rounded-3xl glow-cyan">
+                <h3 class="text-base font-black uppercase tracking-wider text-cyan-400 mb-4 flex items-center gap-2">
+                    <span>🧼</span> Add Hygiene Task
+                </h3>
+                <form id="createHygieneForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Task Name</label>
+                        <input type="text" id="hygieneName" required placeholder="e.g., Skin Care / Beard Trim" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Frequency</label>
+                        <select id="hygieneFrequency" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
+                            <option value="daily">Daily Routine</option>
+                            <option value="sunday">Sunday Special Care</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
+                        Deploy Hygiene Vector
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 rounded-3xl">
+                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Hygiene Tasks</h3>
+                <div id="manageHygieneList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <p class="text-xs text-zinc-500">Loading hygiene tasks...</p>
                 </div>
             </div>
-
         </div>
 
         <!-- Mobile Logout Button -->
         <div class="block lg:hidden pt-4 pb-8">
-            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2 py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2 py-3.5 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-2xl text-xs uppercase tracking-widest transition cursor-pointer shadow-xl">
                 <span>🔒</span> <span>Lock Control Panel</span>
             </button>
         </div>
     </main>
 
     <script>
+        // Tab Switcher Function
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0";
+            });
+
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            
+            if(tabName === 'habits') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg shadow-red-600/30 shrink-0";
+            if(tabName === 'workouts') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg shadow-blue-600/30 shrink-0";
+            if(tabName === 'study') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 shrink-0";
+            if(tabName === 'hygiene') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 shrink-0";
+        }
+
+        // Session Verification
         fetch('/api/control-panel/session')
             .then(res => res.json())
             .then(data => {
                 if (!data.authenticated) {
                     window.location.href = 'index.html';
                 } else {
-                    document.getElementById('adminEmailDisplay').textContent = `🔒 ${data.email}`;
+                    document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email}`;
                     loadControlData();
                 }
             })
@@ -221,12 +263,12 @@
             const container = document.getElementById('manageHabitsList');
             if(data.success && data.habits.length > 0) {
                 container.innerHTML = data.habits.map(h => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
                             <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[${h.category || 'General'}]</span> ${h.description || 'No description'}</p>
                         </div>
-                        <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -240,12 +282,12 @@
             const container = document.getElementById('manageWorkoutsList');
             if(data.success && data.workouts.length > 0) {
                 container.innerHTML = data.workouts.map(w => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-white truncate">${w.name}</h4>
                             <p class="text-[11px] text-zinc-400 truncate">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
                         </div>
-                        <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -259,12 +301,12 @@
             const container = document.getElementById('manageStudyList');
             if(data.success && data.categories.length > 0) {
                 container.innerHTML = data.categories.map(c => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
                             <p class="text-[11px] text-zinc-400 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
                         </div>
-                        <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -278,12 +320,12 @@
             const container = document.getElementById('manageHygieneList');
             if(data.success && data.tasks.length > 0) {
                 container.innerHTML = data.tasks.map(t => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-white truncate">${t.name}</h4>
                             <p class="text-[11px] text-zinc-400 uppercase font-semibold truncate">Frequency: ${t.frequency}</p>
                         </div>
-                        <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -291,6 +333,7 @@
             }
         }
 
+        // Form Submit Listeners
         document.getElementById('createHabitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('habitName').value;
@@ -363,6 +406,7 @@
             }
         });
 
+        // Delete Handlers
         async function deleteHabit(id) {
             if(!confirm("Delete this habit?")) return;
             await fetch(`/api/habits/${id}`, { method: 'DELETE' });
