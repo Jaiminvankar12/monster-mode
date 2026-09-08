@@ -26,10 +26,10 @@
         }
     </style>
 </head>
-<body class="bg-[#07090f] text-white h-screen w-screen flex items-center justify-center overflow-hidden m-0 p-0">
+<body class="bg-[#07090f] text-white min-h-screen w-full flex items-center justify-center m-0 p-4 lg:p-0">
 
-    <div class="flex w-full h-full bg-[#07090f]">
-        <!-- Left Side: Cinematic Background -->
+    <div class="flex w-full min-h-screen lg:h-full bg-[#07090f]">
+        <!-- Left Side: Cinematic Background (Hidden on mobile) -->
         <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-16 pl-16 hero-bg">
             <div class="z-10 max-w-xl">
                 <h1 class="text-6xl font-black tracking-tight uppercase leading-[1.05] mb-4 text-white drop-shadow-md">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Right Side: Authentication Panel -->
-        <div class="w-full lg:w-[40%] flex flex-col justify-center px-12 lg:px-16 bg-[#07090f]">
+        <div class="w-full lg:w-[40%] flex flex-col justify-center px-4 sm:px-12 lg:px-16 py-10 bg-[#07090f] m-auto">
             
             <div class="mb-6">
                 <h2 id="panelTitle" class="text-2xl font-black uppercase tracking-wider text-white">MONSTER MODE ON</h2>
@@ -102,7 +102,7 @@
                 tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer";
                 tabTracker.className = "flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = "ENTER ADMIN PANEL";
-                emailInput.value = ""; // Admin email pre-fill remove kari didho chhe security mate
+                emailInput.value = ""; // Admin email pre-fill removed for security
             }
         }
 
@@ -167,7 +167,7 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.remove('hidden');
+                errDiv.classList.add('hidden');
             }
         });
     </script>
