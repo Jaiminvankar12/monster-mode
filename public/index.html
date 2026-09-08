@@ -10,7 +10,7 @@
         * { font-family: 'Outfit', sans-serif; }
         .red-glow-btn {
             background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%);
-            box-shadow: 0 0 25px rgba(245, 59, 59, 0.5);
+            box-shadow: 0 0 25px rgba(245, 59, 59, 0.5);    
         }
         .red-glow-tab {
             background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%);
@@ -18,8 +18,8 @@
         }
         .hero-bg {
             background-image: linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
-                            linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
-                            url('https://images.unsplash.com/photo-1577221084712-45b0445d2b00?q=80&w=1200&auto=format&fit=crop');
+                        linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
+                        url('https://images.unsplash.com/photo-1577221084712-45b0445d2b00?q=80&w=1200&auto=format&fit=crop');
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
@@ -102,7 +102,7 @@
                 tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer";
                 tabTracker.className = "flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = "ENTER ADMIN PANEL";
-                emailInput.value = "admin@monstermode.com"; // Preset admin email for quick access
+                emailInput.value = ""; // Admin email pre-fill remove kari didho chhe security mate
             }
         }
 
@@ -129,7 +129,6 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            // Route endpoint based on whether Admin Portal or Tracker Portal is active
             let endpoint = '';
             if (currentPortal === 'admin') {
                 endpoint = '/api/control-panel/login';
@@ -160,10 +159,8 @@
                         setTimeout(() => { toggleRegister(e); }, 1500);
                     } else {
                         if (currentPortal === 'admin') {
-                            // Direct redirect to secure control panel management hub
                             window.location.href = 'control-panel.html';
                         } else {
-                            // Direct redirect to user dashboard
                             window.location.href = 'dashboard.html';
                         }
                     }
