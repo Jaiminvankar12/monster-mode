@@ -13,25 +13,27 @@
         .glow-red { box-shadow: 0 0 25px rgba(239, 68, 68, 0.15); }
     </style>
 </head>
-<body class="bg-[#07090f] text-white h-screen flex overflow-hidden">
+<body class="bg-[#07090f] text-white min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
 
     <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-[#0c0e15] border-r border-[#1a1f30] flex flex-col justify-between p-6">
+    <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0">
         <div>
-            <div class="mb-8">
-                <h1 class="text-lg font-black uppercase tracking-wider text-red-500">🔐 CONTROL PANEL</h1>
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Secure Admin Zone</p>
+            <div class="mb-6 lg:mb-8 flex justify-between items-center lg:block">
+                <div>
+                    <h1 class="text-lg font-black uppercase tracking-wider text-red-500">🔐 CONTROL PANEL</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Secure Admin Zone</p>
+                </div>
             </div>
-            <nav class="space-y-2 text-xs font-semibold uppercase tracking-wider">
-                <a href="control-panel.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30">⚙️ Management Hub</a>
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition">🐲 User Dashboard</a>
-                <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition">🔥 Habit Tracker</a>
-                <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition">🏋️ Workout Tracker</a>
-                <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition">📚 Study Tracker</a>
-                <a href="hygiene.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition">🧼 Hygiene Tracker</a>
+            <nav class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-semibold uppercase tracking-wider scrollbar-none">
+                <a href="control-panel.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap">⚙️ Management Hub</a>
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🐲 User Dashboard</a>
+                <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🔥 Habit Tracker</a>
+                <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
+                <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
+                <a href="hygiene.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🧼 Hygiene Tracker</a>
             </nav>
         </div>
-        <div>
+        <div class="hidden lg:block pt-6">
             <button onclick="logoutAdmin()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
                 Lock Control Panel
             </button>
@@ -39,19 +41,19 @@
     </aside>
 
     <!-- Main Control Area -->
-    <main class="flex-1 flex flex-col overflow-y-auto p-10">
-        <header class="flex justify-between items-center mb-8 pb-6 border-b border-[#1a1f30]">
+    <main class="flex-1 flex flex-col p-4 sm:p-6 lg:p-10 overflow-y-auto">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-[#1a1f30]">
             <div>
-                <h2 class="text-3xl font-black uppercase tracking-tight text-white">System Command Panel</h2>
+                <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">System Command Panel</h2>
                 <p class="text-xs text-slate-400 mt-1">Authorized admin management zone for habit vectors, workouts, study subjects, and hygiene routines.</p>
             </div>
-            <div id="adminEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20">
+            <div id="adminEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 whitespace-nowrap">
                 Verifying Security...
             </div>
         </header>
 
         <!-- Management Grid: Habits, Workouts, Study, Hygiene -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pb-12">
             
             <!-- HABIT MANAGEMENT SECTION -->
             <div class="space-y-6">
@@ -183,6 +185,13 @@
             </div>
 
         </div>
+
+        <!-- Mobile Logout Button -->
+        <div class="block lg:hidden pt-4 pb-8">
+            <button onclick="logoutAdmin()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                Lock Control Panel
+            </button>
+        </div>
     </main>
 
     <script>
@@ -210,12 +219,12 @@
             const container = document.getElementById('manageHabitsList');
             if(data.success && data.habits.length > 0) {
                 container.innerHTML = data.habits.map(h => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl">
-                        <div>
-                            <h4 class="font-bold text-sm text-white">${h.name}</h4>
-                            <p class="text-[11px] text-zinc-400"><span class="text-red-400 font-bold">[${h.category || 'General'}]</span> ${h.description || 'No description'}</p>
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
+                            <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[${h.category || 'General'}]</span> ${h.description || 'No description'}</p>
                         </div>
-                        <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer">Delete</button>
+                        <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -229,12 +238,12 @@
             const container = document.getElementById('manageWorkoutsList');
             if(data.success && data.workouts.length > 0) {
                 container.innerHTML = data.workouts.map(w => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl">
-                        <div>
-                            <h4 class="font-bold text-sm text-white">${w.name}</h4>
-                            <p class="text-[11px] text-zinc-400">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-sm text-white truncate">${w.name}</h4>
+                            <p class="text-[11px] text-zinc-400 truncate">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
                         </div>
-                        <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer">Delete</button>
+                        <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -248,12 +257,12 @@
             const container = document.getElementById('manageStudyList');
             if(data.success && data.categories.length > 0) {
                 container.innerHTML = data.categories.map(c => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl">
-                        <div>
-                            <h4 class="font-bold text-sm text-white">${c.name}</h4>
-                            <p class="text-[11px] text-zinc-400">Target: ${c.dailyTargetMinutes} mins/day</p>
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
+                            <p class="text-[11px] text-zinc-400 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
                         </div>
-                        <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition cursor-pointer">Delete</button>
+                        <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
@@ -267,12 +276,12 @@
             const container = document.getElementById('manageHygieneList');
             if(data.success && data.tasks.length > 0) {
                 container.innerHTML = data.tasks.map(t => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl">
-                        <div>
-                            <h4 class="font-bold text-sm text-white">${t.name}</h4>
-                            <p class="text-[11px] text-zinc-400 uppercase font-semibold">Frequency: ${t.frequency}</p>
+                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-xl gap-2">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-sm text-white truncate">${t.name}</h4>
+                            <p class="text-[11px] text-zinc-400 uppercase font-semibold truncate">Frequency: ${t.frequency}</p>
                         </div>
-                        <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-bold transition cursor-pointer">Delete</button>
+                        <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
                 `).join('');
             } else {
