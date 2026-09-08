@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONSTER MODE ON — Athlete Workout Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        body { background-color: #07090f; color: #f3f4f6; }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-lg">🏋️</div>
+            <div>
+                <h1 class="text-base font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-red-500">ATHLETE</span></h1>
+                <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Performance & Iron Matrix</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition">Dashboard</a>
+            <a href="tracker.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition">Habits</a>
+            <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-4 py-2 rounded-xl transition cursor-pointer">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-8">
+        
+        <!-- Page Title & Streak Badge Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Athlete Performance</span>
+                <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Iron & Muscle Matrix</h2>
+                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date (Asia/Kolkata): Loading...</p>
+            </div>
+            <!-- Streak Badge Component -->
+            <div class="glass-card px-5 py-3 rounded-2xl border border-amber-500/30 flex items-center gap-3 bg-amber-500/5">
+                <span class="text-2xl">🔥</span>
+                <div>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Workout Streak</span>
+                    <span id="workoutStreakLabel" class="text-lg font-black text-amber-400 tracking-wider">0 Days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Carousel Navigation Bar -->
+        <div class="glass-card glow-red p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <button onclick="shiftDate(-1)" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev Day</button>
+                <div class="text-center px-2">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                </div>
+                <button onclick="shiftDate(1)" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next Day →</button>
+            </div>
+
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+
+            <div id="workoutStatusBadge" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5">
+                Loading status...
+            </div>
+        </div>
+
+        <!-- Motivational Athlete Quote Banner -->
+        <div id="quoteBanner" class="hidden glass-card p-5 rounded-2xl mb-6 border-l-4 border-l-red-500 bg-red-500/5">
+            <span class="text-[10px] font-black tracking-widest text-red-400 uppercase">🔥 Athlete Milestone Achieved</span>
+            <p class="text-sm font-bold text-white mt-1 italic">"Pain is temporary. Pride is forever. The iron never lies."</p>
+        </div>
+
+        <!-- Telegram Bot Live Simulation Widget -->
+        <div class="glass-card p-5 rounded-2xl mb-8 border border-blue-500/20 bg-blue-500/5">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-black tracking-widest text-blue-400 uppercase flex items-center gap-1.5">
+                    <span>🤖</span> Telegram Bot Telemetry
+                </span>
+                <span id="telegramBotStatus" class="text-[10px] bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full font-bold uppercase">Live Sync Active</span>
+            </div>
+            <p id="telegramBotLog" class="text-xs text-zinc-300 font-mono">Executing toggle triggers phone alerts via @jaymin_monster_bot...</p>
+        </div>
+
+        <!-- Workouts List Grid -->
+        <div id="workoutsContainer" class="grid gap-4">
+            <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading exercise vectors...</div>
+        </div>
+    </main>
+
+    <script>
+        let currentSelectedDate = "";
+
+        async function fetchWorkouts(dateStr = "") {
+            try {
+                let url = '/api/workouts';
+                if (dateStr) url += `?date=${dateStr}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    currentSelectedDate = data.serverDate;
+                    const dateInput = document.getElementById('targetDateInput');
+                    if (!dateInput.value) {
+                        dateInput.value = data.serverDate;
+                    }
+                    document.getElementById('serverDateDisplay').innerText = `Server Date (Asia/Kolkata): ${data.serverDate}`;
+                    document.getElementById('activeDateLabel').innerText = dateInput.value;
+                    
+                    // Update Streak Display on UI
+                    document.getElementById('workoutStreakLabelinnerText') || (document.getElementById('workoutStreakLabel').innerText = `${data.currentStreak || 0} Days`);
+
+                    updateStatusBanner(data.dateStatus, data.allDone);
+                    renderWorkouts(data.workouts, data.dateStatus);
+
+                    const quoteBanner = document.getElementById('quoteBanner');
+                    if (data.allDone) {
+                        quoteBanner.classList.remove('hidden');
+                    } else {
+                        quoteBanner.classList.add('hidden');
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching workouts:", err);
+            }
+        }
+
+        function shiftDate(days) {
+            const dateInput = document.getElementById('targetDateInput');
+            let currentDate = new Date(dateInput.value || currentSelectedDate);
+            currentDate.setDate(currentDate.getDate() + days);
+            
+            const newDateStr = currentDate.toISOString().split('T')[0];
+            dateInput.value = newDateStr;
+            fetchWorkouts(newDateStr);
+        }
+
+        function onDateChange() {
+            const chosenDate = document.getElementById('targetDateInput').value;
+            if (chosenDate) {
+                fetchWorkouts(chosenDate);
+            }
+        }
+
+        function updateStatusBanner(status, allDone) {
+            const badge = document.getElementById('workoutStatusBadge');
+            if (status === 'LOCKED') {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30";
+                badge.innerText = "🔒 LOCKED — Immutable Past Record";
+            } else if (status === 'FUTURE') {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date";
+            } else if (allDone) {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                badge.innerText = "⚡ ALL WORKOUTS CONQUERED";
+            } else {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30";
+                badge.innerText = "🔥 BATTLE IN PROGRESS";
+            }
+        }
+
+        function renderWorkouts(workouts, dateStatus) {
+            const container = document.getElementById('workoutsContainer');
+            if (workouts.length === 0) {
+                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the system.</p><p class="text-red-500/70 text-xs mt-1">Please add workouts from your Control Panel.</p></div>`;
+                return;
+            }
+
+            const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
+
+            container.innerHTML = workouts.map(w => `
+                <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
+                    <div class="space-y-1.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">${w.category || 'Strength'}</span>
+                            <span class="text-[10px] bg-white/5 text-zinc-300 border border-white/5 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest">Sets: ${w.sets}</span>
+                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Reps: ${w.reps}</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition">${w.name}</h3>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                            ${w.completed ? '✓ Done' : '○ Pending'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleWorkout(id, completed) {
+            try {
+                const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+                const res = await fetch(`/api/workouts/${id}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed, date: targetDate })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.error || "Action rejected by system lock.");
+                } else {
+                    document.getElementById('telegramBotStatus').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold uppercase";
+                    document.getElementById('telegramBotStatus').innerText = "ALERT DISPATCHED TO PHONE";
+                    document.getElementById('telegramBotLog').innerText = `🚀 Telegram message sent to @jaymin_monster_bot with current streak count!`;
+                }
+                fetchWorkouts(targetDate);
+            } catch (err) {
+                alert("Server error during toggle.");
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+        });
+
+        fetchWorkouts();
+    </script>
+</body>
+</html>

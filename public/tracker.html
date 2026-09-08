@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONSTER MODE ON — Habit Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        body { background-color: #07090f; color: #f3f4f6; }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 font-black text-lg">🐲</div>
+            <div>
+                <h1 class="text-base font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-red-500">ON</span></h1>
+                <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Discipline Command Center</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition">Dashboard</a>
+            <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-4 py-2 rounded-xl transition cursor-pointer">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-8">
+        
+        <!-- Page Title -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">🔥 Core Engine</span>
+                <h2 class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Daily Discipline Tracker</h2>
+                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date (Asia/Kolkata): Loading...</p>
+            </div>
+        </div>
+
+        <!-- Date Carousel Navigation Bar -->
+        <div class="glass-card glow-red p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <button onclick="shiftDate(-1)" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev Day</button>
+                <div class="text-center px-2">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                </div>
+                <button onclick="shiftDate(1)" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next Day →</button>
+            </div>
+
+            <!-- Hidden actual date input for tracking -->
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+
+            <div id="dateStatusBadge" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5">
+                Loading status...
+            </div>
+        </div>
+
+        <!-- Habits Status Grid (Read-only status view, managed from control panel) -->
+        <div id="habitsContainer" class="grid gap-4">
+            <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
+        </div>
+    </main>
+
+    <script>
+        let currentSelectedDate = "";
+
+        async function fetchHabits(dateStr = "") {
+            try {
+                let url = '/api/habits';
+                if (dateStr) url += `?date=${dateStr}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    currentSelectedDate = data.serverDate;
+                    const dateInput = document.getElementById('targetDateInput');
+                    if (!dateInput.value) {
+                        dateInput.value = data.serverDate;
+                    }
+                    document.getElementById('serverDateDisplay').innerText = `Server Date (Asia/Kolkata): ${data.serverDate}`;
+                    document.getElementById('activeDateLabel').innerText = dateInput.value;
+                    
+                    updateLockBanner(data.dateStatus || 'UNLOCKED');
+                    renderHabits(data.habits, data.dateStatus);
+                }
+            } catch (err) {
+                console.error("Error fetching habits:", err);
+            }
+        }
+
+        function shiftDate(days) {
+            const dateInput = document.getElementById('targetDateInput');
+            let currentDate = new Date(dateInput.value || currentSelectedDate);
+            currentDate.setDate(currentDate.getDate() + days);
+            
+            const newDateStr = currentDate.toISOString().split('T')[0];
+            dateInput.value = newDateStr;
+            fetchHabits(newDateStr);
+        }
+
+        function onDateChange() {
+            const chosenDate = document.getElementById('targetDateInput').value;
+            if (chosenDate) {
+                fetchHabits(chosenDate);
+            }
+        }
+
+        function updateLockBanner(status) {
+            const badge = document.getElementById('dateStatusBadge');
+            if (status === 'LOCKED') {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30";
+                badge.innerText = "🔒 LOCKED — Immutable Past Record";
+            } else if (status === 'FUTURE') {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date";
+            } else {
+                badge.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                badge.innerText = "🟢 UNLOCKED — Active Today";
+            }
+        }
+
+        function renderHabits(habits, dateStatus) {
+            const container = document.getElementById('habitsContainer');
+            if (habits.length === 0) {
+                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No habits deployed in the system.</p><p class="text-red-500/70 text-xs mt-1">Please add habits from your Control Panel.</p></div>`;
+                return;
+            }
+
+            const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
+            const startDateStr = '2026-09-10'; // Fixed Start Date as requested
+            const startDateObj = new Date(startDateStr);
+            const todayServer = new Date();
+            const diffTime = Math.abs(todayServer - startDateObj);
+            const daysPassed = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+            container.innerHTML = habits.map(h => `
+                <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
+                    <div class="space-y-1.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Start: ${startDateStr}</span>
+                            <span class="text-[10px] bg-white/5 text-zinc-300 border border-white/5 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest">Day ${daysPassed}</span>
+                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">🔥 Streak: ${h.streak || 0} Days</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition">${h.name}</h3>
+                        <p class="text-xs text-zinc-400 font-medium">${h.description || 'No specific rules defined.'}</p>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                        <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                            ${h.completedToday ? '✓ Complete' : '○ Pending'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function toggleHabit(id, completed) {
+            try {
+                const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+                const res = await fetch(`/api/habits/${id}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed, date: targetDate })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alert(data.error || "Action rejected by date lock system.");
+                }
+                fetchHabits(targetDate);
+            } catch (err) {
+                alert("Server error during toggle.");
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+        });
+
+        fetchHabits();
+    </script>
+</body>
+</html>

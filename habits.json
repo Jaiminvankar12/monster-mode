@@ -1,0 +1,56 @@
+[
+  {
+    "id": "habit_workout_auto_admin_master_user",
+    "userId": "admin_master_user",
+    "trackerId": "habit_workout",
+    "name": "🏋️ Complete Daily Workout",
+    "description": "Auto-synced with athlete workout matrix",
+    "activeDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "startDate": "2026-09-10",
+    "status": "active"
+  },
+  {
+    "id": "habit_study_auto_1788863154470",
+    "userId": "1788863154470",
+    "trackerId": "habit_study",
+    "name": "📚 Complete Daily Study Target",
+    "description": "Auto-synced with deep-work study session matrix",
+    "activeDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "startDate": "2026-09-10",
+    "status": "active"
+  },
+  {
+    "id": "habit_study_auto_admin_master_user",
+    "userId": "admin_master_user",
+    "trackerId": "habit_study",
+    "name": "📚 Complete Daily Study Target",
+    "description": "Auto-synced with deep-work study session matrix",
+    "activeDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "startDate": "2026-09-10",
+    "status": "active"
+  }
+]
