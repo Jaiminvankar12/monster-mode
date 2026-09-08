@@ -1,0 +1,50 @@
+/* Global Monster Mode Theme Styles */
+body {
+    background-color: #07090f;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Background Image Fix: No Repeat, Centered, Covered */
+.auth-background {
+    background-image: linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
+                      linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
+                      url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1200&auto=format&fit=crop');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.monster-card {
+    background: #0c0e15;
+    border: 1px solid #1a1f30;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.monster-input {
+    width: 100%;
+    background: #121520;
+    border: 1px solid #1e2336;
+    border-radius: 0.75rem;
+    padding: 0.875rem 1rem;
+    color: white;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.monster-input:focus {
+    border-color: #ff4d4d;
+}
+
+.monster-btn {
+    font-weight: 900;
+    text-transform: uppercase;
+    border-radius: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}

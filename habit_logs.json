@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1788863834385",
+    "userId": "1788863154470",
+    "habitId": "1788863832785",
+    "date": "2026-09-08",
+    "completed": false
+  },
+  {
+    "id": "1788868727601",
+    "userId": "admin_master_user",
+    "habitId": "habit_workout_auto_admin_master_user",
+    "date": "2026-09-08",
+    "completed": false
+  },
+  {
+    "id": "17888758234850.28555754599791416",
+    "userId": "1788863154470",
+    "habitId": "habit_study_auto_1788863154470",
+    "date": "2026-09-08",
+    "completed": false
+  },
+  {
+    "id": "17888764148490.8512027922211944",
+    "userId": "admin_master_user",
+    "habitId": "habit_study_auto_admin_master_user",
+    "date": "2026-09-08",
+    "completed": false
+  },
+  {
+    "id": "1788876507060",
+    "userId": "admin_master_user",
+    "habitId": "habit_workout_auto_admin_master_user",
+    "date": "2026-09-09",
+    "completed": false
+  },
+  {
+    "id": "17888765070600.4561041438166027",
+    "userId": "admin_master_user",
+    "habitId": "habit_study_auto_admin_master_user",
+    "date": "2026-09-09",
+    "completed": false
+  },
+  {
+    "id": "1788876508528",
+    "userId": "admin_master_user",
+    "habitId": "habit_workout_auto_admin_master_user",
+    "date": "2026-09-07",
+    "completed": false
+  },
+  {
+    "id": "17888765085290.9888984337511925",
+    "userId": "admin_master_user",
+    "habitId": "habit_study_auto_admin_master_user",
+    "date": "2026-09-07",
+    "completed": false
+  }
+]
