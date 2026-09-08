@@ -709,7 +709,8 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
     });
 });
 
-app.post('/api/hygiene/tasks', requireAuth, (req, res) => {
+// Fixed: Endpoint changed from '/api/hygiene/tasks' to '/api/hygiene' to match the frontend fetch request
+app.post('/api/hygiene', requireAuth, (req, res) => {
     const { name, frequency } = req.body;
     if (!name) return res.status(400).json({ error: "Task name is required." });
     const tasks = readJSON(HYGIENE_TASKS_FILE);
@@ -725,7 +726,7 @@ app.post('/api/hygiene/tasks', requireAuth, (req, res) => {
     res.json({ success: true, task: newTask });
 });
 
-app.delete('/api/hygiene/tasks/:id', requireAuth, (req, res) => {
+app.delete('/api/hygiene/:id', requireAuth, (req, res) => {
     let tasks = readJSON(HYGIENE_TASKS_FILE);
     const index = tasks.findIndex(t => t.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Task not found." });
