@@ -15,6 +15,20 @@
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-cyan-500 selection:text-white overflow-x-hidden">
 
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-cyan-500/50 max-w-xl w-full glow-cyan space-y-4">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-cyan-400">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Hygiene and grooming protocols are currently in read-only planning preview.
+            </p>
+            <div class="text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Immutable / Not Editable Yet
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Navigation -->
     <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 lg:fixed lg:h-full z-50">
         <div>
@@ -27,7 +41,6 @@
             </div>
             <nav class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-semibold uppercase tracking-wider scrollbar-none">
                 <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📊 Dashboard</a>
-                
                 <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🔥 Habit Tracker</a>
                 <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
                 <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
@@ -109,6 +122,14 @@
 
     <script>
         let currentSelectedDate = "";
+        const LAUNCH_DATE = "2026-09-10";
+
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
+        }
 
         async function fetchHygieneData(dateStr = "") {
             try {
@@ -116,7 +137,7 @@
                 if (dateStr) url += `?date=${dateStr}`;
 
                 const res = await fetch(url);
-                if (res.status === 401) {
+                if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
                     return;
                 }
@@ -203,6 +224,10 @@
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = 'index.html';
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
+        });
 
         fetchHygieneData();
     </script>

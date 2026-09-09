@@ -73,5 +73,26 @@
     "endDate": "",
     "status": "active",
     "createdAt": "2026-09-08T16:56:09.264Z"
+  },
+  {
+    "id": "1788947985790",
+    "userId": "admin_master_user",
+    "trackerId": "habit_1788947985794",
+    "name": "g",
+    "category": "g",
+    "description": "g",
+    "activeDays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "startDate": "2026-09-09",
+    "endDate": "",
+    "status": "active",
+    "createdAt": "2026-09-09T09:59:45.794Z"
   }
 ]
