@@ -277,7 +277,7 @@
             </div>
         </div>
 
-        <!-- TAB 6: EXAM MODE CONFIGURATION -->
+        <!-- TAB 6: EXAM MODE CONFIGURATION (MANUAL MINUTES) -->
         <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
@@ -287,17 +287,13 @@
                     <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-4 rounded-xl">
                         <div>
                             <label class="block text-xs font-black text-white uppercase tracking-wider">Enable Exam Mode</label>
-                            <span class="text-[10px] text-slate-400">Reduces daily study target to lighter hours during exams</span>
+                            <span class="text-[10px] text-slate-400">Reduces daily study target to manual custom minutes</span>
                         </div>
                         <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exam Mode Target (Minutes)</label>
-                        <select id="examModeTarget" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
-                            <option value="60">60 mins (1 Hour)</option>
-                            <option value="90">90 mins (1.5 Hours)</option>
-                            <option value="120">120 mins (2 Hours)</option>
-                        </select>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exam Mode Target (Manual Minutes)</label>
+                        <input type="number" id="examModeTarget" min="15" step="15" value="90" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Enter custom minutes (e.g., 75, 90, 100)">
                     </div>
                     <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
                         Save Exam Mode Config
@@ -306,8 +302,8 @@
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-5xl mb-4 animate-pulse">📝</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix  </h3>
-                <p class="text-xs text-slate-400 max-w-xs">When enabled from this secure panel, your daily study goals seamlessly adapt so you can conquer exams without burnout.</p>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams to avoid burnout.</p>
             </div>
         </div>
 

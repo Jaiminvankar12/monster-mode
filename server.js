@@ -105,7 +105,7 @@ function getHydrationData(userId) {
     return data[userId];
 }
 
-// --- EXAM MODE HELPER ---
+// --- EXAM MODE HELPER (Supports Manual Custom Target Minutes) ---
 function getExamModeData(userId) {
     let data = readJSON(EXAM_MODE_FILE);
     if (!data[userId]) {
@@ -279,11 +279,11 @@ function runServerSyncEngine(userId, targetDate) {
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId && s.date === targetDate);
     
-    // Check Exam Mode Override
+    // Check Exam Mode Override (Manual Target Minutes)
     let examData = getExamModeData(userId);
     let totalTargetMinutes = 0;
     if (examData.enabled) {
-        totalTargetMinutes = examData.targetMinutes;
+        totalTargetMinutes = parseInt(examData.targetMinutes) || 90;
     } else {
         totalTargetMinutes = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
     }
@@ -382,7 +382,7 @@ cron.schedule('0 8 * * 1-6', async () => {
         let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
         let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
         let examData = getExamModeData(userId);
-        let totalStudyTarget = examData.enabled ? examData.targetMinutes : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+        let totalStudyTarget = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
         let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
 
         let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
@@ -503,24 +503,35 @@ app.get('/api/control-panel/session', (req, res) => {
     }
 });
 
-// --- EXAM MODE API ROUTES ---
+// --- EXAM MODE API ROUTES (With Manual Minutes & Telegram Alerts) ---
 app.get('/api/exam-mode', requireAuth, (req, res) => {
     let data = getExamModeData(req.session.userId);
     res.json({ success: true, ...data });
 });
 
-app.post('/api/exam-mode', requireAuth, (req, res) => {
+app.post('/api/exam-mode', requireAuth, async (req, res) => {
     const { enabled, targetMinutes } = req.body;
     let data = readJSON(EXAM_MODE_FILE);
-    data[req.session.userId] = {
+    let userId = req.session.userId;
+    let minutes = targetMinutes ? parseInt(targetMinutes) : 90;
+
+    data[userId] = {
         enabled: enabled !== undefined ? enabled : false,
-        targetMinutes: targetMinutes ? parseInt(targetMinutes) : 90
+        targetMinutes: minutes
     };
     writeJSON(EXAM_MODE_FILE, data);
+
+    if (enabled) {
+        let hoursText = `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+        await sendTelegramAlert(`⚡ *EXAM MODE ACTIVATED*\nDaily study target adjusted to reduce burnout.\n*New Target:* ${minutes} mins (${hoursText})\n\n_Conquer your exams with absolute focus!_ 📚🎯`, `exam_mode_on_${getServerToday()}_${userId}`);
+    } else {
+        await sendTelegramAlert(`⚡ *EXAM MODE DEACTIVATED*\nSystem returned to standard daily study targets. Let's push forward! 🐉🔥`, `exam_mode_off_${getServerToday()}_${userId}`);
+    }
+
     res.json({ success: true, message: "Exam Mode settings updated successfully." });
 });
 
-// --- SANCTUARY PROTOCOL API ROUTES ---
+// --- SANCTUARY PROTOCOL API ROUTES (With Telegram Alerts) ---
 app.get('/api/sanctuary', requireAuth, (req, res) => {
     let data = getSanctuaryData(req.session.userId);
     res.json({ success: true, ...data });
@@ -540,9 +551,9 @@ app.post('/api/sanctuary', requireAuth, async (req, res) => {
     writeJSON(SANCTUARY_FILE, data);
 
     if (enabled) {
-        await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVATED*\nEmergency safe-haven mode online.\n*Reason:* ${data[userId].reason}\n\n_Streaks and targets are frozen. Recover well, Monster._ 🛌✨`);
+        await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVATED*\nEmergency safe-haven mode online.\n*Reason:* ${data[userId].reason}\n\n_Streaks and targets are frozen. Recover well, Monster._ 🛌✨`, `sanctuary_on_${today}_${userId}`);
     } else {
-        await sendTelegramAlert(`⚡ *SANCTUARY PROTOCOL LIFTED*\nSystem returned to full combat readiness. Progress resumed from active state. Let's dominate! 🐉🔥`);
+        await sendTelegramAlert(`⚡ *SANCTUARY PROTOCOL LIFTED*\nSystem returned to full combat readiness. Progress resumed from active state. Let's dominate! 🐉🔥`, `sanctuary_off_${today}_${userId}`);
     }
 
     res.json({ success: true, message: "Sanctuary Protocol status updated.", ...data[userId] });
@@ -841,7 +852,7 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === req.session.userId && s.date === targetDate);
 
     let examData = getExamModeData(req.session.userId);
-    const totalTargetMinutes = examData.enabled ? examData.targetMinutes : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    const totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
