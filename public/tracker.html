@@ -132,10 +132,10 @@
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
             } else if (status === 'FUTURE') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date";
+                badge.innerText = "⚪ PLANNING MODE — Advance Deployment";
             } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "🟢 UNLOCKED — Active Today";
+                badge.innerText = "🟢 UNLOCKED — Active Execution Day";
             }
         }
 
@@ -147,30 +147,27 @@
             }
 
             const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
-            const startDateStr = '2026-09-10';
-            const startDateObj = new Date(startDateStr);
-            const todayServer = new Date();
-            const diffTime = Math.abs(todayServer - startDateObj);
-            const daysPassed = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-            container.innerHTML = habits.map(h => `
-                <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
-                    <div class="space-y-1.5 min-w-0">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Start: ${startDateStr}</span>
-                            <span class="text-[10px] bg-white/5 text-zinc-300 border border-white/5 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest">Day ${daysPassed}</span>
-                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">🔥 Streak: ${h.streak || 0} Days</span>
+            container.innerHTML = habits.map(h => {
+                const startDateStr = h.startDate || '2026-09-10';
+                return `
+                    <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
+                        <div class="space-y-1.5 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Start: ${startDateStr}</span>
+                                <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">🔥 Streak: ${h.streak || 0} Days</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${h.name}</h3>
+                            <p class="text-xs text-zinc-400 font-medium truncate">${h.description || 'No specific rules defined.'}</p>
                         </div>
-                        <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${h.name}</h3>
-                        <p class="text-xs text-zinc-400 font-medium truncate">${h.description || 'No specific rules defined.'}</p>
+                        <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
+                            <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                                ${h.completedToday ? '✓ Complete' : '○ Pending'}
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
-                        <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
-                            ${h.completedToday ? '✓ Complete' : '○ Pending'}
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function toggleHabit(id, completed) {
