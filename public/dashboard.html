@@ -10,12 +10,18 @@
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
-        .dynamic-glow { box-shadow: 0 0 30px var(--theme-glow, rgba(239, 68, 68, 0.15)); }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass-card:hover { border-color: rgba(255, 255, 255, 0.15); }
+        .dynamic-glow { box-shadow: 0 0 35px var(--theme-glow, rgba(239, 68, 68, 0.15)); }
         :root {
             --theme-primary: #ef4444;
             --theme-glow: rgba(239, 68, 68, 0.15);
         }
+        /* Custom smooth scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #07090f; }
+        ::-webkit-scrollbar-thumb { background: #1a1f30; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2a324a; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -24,14 +30,14 @@
     <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 lg:fixed lg:h-full z-50">
         <div>
             <div class="mb-6 lg:mb-8 flex items-center gap-3">
-                <span class="text-2xl">🐉</span>
+                <span class="text-2xl animate-pulse">🐉</span>
                 <div>
                     <h1 class="text-sm font-black uppercase tracking-wider text-white">MONSTER MODE</h1>
                     <p class="text-[9px] text-red-500 uppercase tracking-widest font-bold">System Command Center</p>
                 </div>
             </div>
             <nav class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-semibold uppercase tracking-wider scrollbar-none">
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap">📊 Dashboard</a>
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap transition">📊 Dashboard</a>
                 <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🔥 Habit Tracker</a>
                 <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
                 <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
@@ -56,6 +62,34 @@
                 Verifying Session...
             </div>
         </header>
+
+        <!-- Focus of the Day (Custom Daily Goal #1 Mission) -->
+        <div class="glass-card p-5 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <span class="text-2xl">🎯</span>
+                <div class="w-full sm:w-auto flex-1">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-amber-400">Today's #1 Core Mission (Focus of the Day)</h3>
+                    <input type="text" id="dailyMissionInput" placeholder="e.g., Complete Web Dev module & clear DSA arrays..." onchange="saveDailyMission(this.value)" class="w-full bg-transparent text-white text-sm font-bold mt-1 outline-none border-b border-white/10 focus:border-amber-500 pb-1 transition">
+                </div>
+            </div>
+            <button onclick="saveDailyMissionBtn()" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-amber-600/30 transition cursor-pointer shrink-0">
+                Lock Mission
+            </button>
+        </div>
+
+        <!-- Emergency "Panic Button" / Motivation Surge Mode Widget -->
+        <div class="glass-card p-5 rounded-2xl mb-8 border-2 border-red-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow bg-red-600/5">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl animate-pulse">⚡</span>
+                <div>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-red-400">Procrastination Alert?</h3>
+                    <p class="text-[10px] text-zinc-400">Trigger emergency psychological override and hardcore roast.</p>
+                </div>
+            </div>
+            <button onclick="triggerEmergencySurge()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer animate-bounce">
+                🚨 EMERGENCY SURGE MODE
+            </button>
+        </div>
 
         <!-- Theme & Dynamic Accent Switcher -->
         <div class="glass-card p-4 sm:p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow">
@@ -132,6 +166,66 @@
     <script>
         let yearlyChartInstance = null;
 
+        // Daily Mission (Focus of the Day) LocalStorage Management
+        function saveDailyMission(val) {
+            localStorage.setItem('monster_daily_mission', val);
+        }
+
+        function saveDailyMissionBtn() {
+            const val = document.getElementById('dailyMissionInput').value;
+            localStorage.setItem('monster_daily_mission', val);
+            alert("🎯 Today's Core Mission locked successfully!");
+        }
+
+        // Web Audio API Beep Generator
+        function playBeepSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.8);
+            } catch (e) {
+                console.log("Audio alert played");
+            }
+        }
+
+        // Emergency Surge Modal Logic
+        function triggerEmergencySurge() {
+            playBeepSound();
+            let emergencyQuotes = [
+                "STOP SCROLLING. The world doesn't care about your feelings, it cares about your results. GET UP!",
+                "Every second you waste here, someone else is outworking you. EXECUTE NOW!",
+                "Excuses are poison to an apex predator. Open your study core or hit the iron. NOW!",
+                "You didn't start Monster Mode to be average. Drop the phone, lock in, and conquer!"
+            ];
+            let randomQuote = emergencyQuotes[Math.floor(Math.random() * emergencyQuotes.length)];
+            
+            let modalHtml = `
+                <div id="emergencyModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+                    <div class="glass-card border-2 border-red-500 p-8 rounded-3xl max-w-lg w-full text-center dynamic-glow space-y-6">
+                        <div class="text-4xl animate-bounce">🚨</div>
+                        <h2 class="text-xl font-black uppercase tracking-widest text-red-500">SYSTEM OVERRIDE ACTIVE</h2>
+                        <p class="text-base sm:text-lg font-extrabold text-white tracking-wide italic">"${randomQuote}"</p>
+                        <button onclick="closeEmergencyModal()" class="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer">
+                            I AM LOCKED IN — RESUME MISSION
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeEmergencyModal() {
+            let modal = document.getElementById('emergencyModal');
+            if(modal) modal.remove();
+        }
+
         function setAccentTheme(theme) {
             localStorage.setItem('monster_accent_theme', theme);
             applyTheme(theme);
@@ -156,6 +250,10 @@
         window.addEventListener('DOMContentLoaded', () => {
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
             applyTheme(savedTheme);
+
+            let savedMission = localStorage.getItem('monster_daily_mission') || '';
+            const missionInput = document.getElementById('dailyMissionInput');
+            if(missionInput) missionInput.value = savedMission;
         });
 
         async function loadDashboardData() {

@@ -153,24 +153,43 @@
 
         <!-- 3. STUDY TAB -->
         <div id="content-study" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
-            <div class="glass-card p-6 rounded-3xl glow-indigo">
-                <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
-                    <span>📚</span> Add Study Category
-                </h3>
-                <form id="createStudyCatForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject Name</label>
-                        <input type="text" id="studyCatName" required placeholder="e.g., College / P68 / DSA / Gov Exam" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
+            <div class="space-y-8">
+                <div class="glass-card p-6 rounded-3xl glow-indigo">
+                    <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
+                        <span>📚</span> Add Study Category
+                    </h3>
+                    <form id="createStudyCatForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject Name</label>
+                            <input type="text" id="studyCatName" required placeholder="e.g., College / P68 / DSA / Gov Exam" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
+                            <input type="number" id="studyCatTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
+                            Deploy Study Category
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Global Pomodoro Configuration Card -->
+                <div class="glass-card p-6 rounded-3xl glow-indigo">
+                    <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
+                        <span>⏱️</span> Global Pomodoro Default Settings
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Default Focus Duration (Minutes)</label>
+                            <input type="number" id="globalPomoDefault" value="25" min="1" max="1440" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
+                        </div>
+                        <button onclick="saveGlobalPomoSettings()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
+                            Save Global Pomodoro Default
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
-                        <input type="number" id="studyCatTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-                        Deploy Study Category
-                    </button>
-                </form>
+                </div>
             </div>
+
             <div class="glass-card p-6 rounded-3xl">
                 <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
                 <div id="manageStudyList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
@@ -235,6 +254,13 @@
             if(tabName === 'hygiene') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 shrink-0";
         }
 
+        // Global Pomodoro Settings Management
+        function saveGlobalPomoSettings() {
+            const mins = document.getElementById('globalPomoDefault').value;
+            localStorage.setItem('monster_default_pomo_mins', mins);
+            alert(`✅ Global Pomodoro default set to ${mins} minutes successfully!`);
+        }
+
         // Session Verification
         fetch('/api/control-panel/session')
             .then(res => res.json())
@@ -255,6 +281,11 @@
             loadWorkouts();
             loadStudyCategories();
             loadHygieneTasks();
+
+            // Load saved Pomodoro setting
+            let savedMins = localStorage.getItem('monster_default_pomo_mins') || '25';
+            const inputField = document.getElementById('globalPomoDefault');
+            if(inputField) inputField.value = savedMins;
         }
 
         async function loadHabits() {
@@ -421,7 +452,7 @@
 
         async function deleteStudyCategory(id) {
             if(!confirm("Delete this study category?")) return;
-            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
+            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' >> 0 });
             loadStudyCategories();
         }
 
