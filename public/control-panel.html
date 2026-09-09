@@ -86,20 +86,23 @@
 
         <!-- Horizontal Hub Navigation Tabs -->
         <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5">
-            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[120px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[110px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🔥 Habits
             </button>
-            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🏋️ Workouts
             </button>
-            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 📚 Study Core
             </button>
-            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🧼 Hygiene
             </button>
-            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 💧 Hydration
+            </button>
+            <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                ⚡ Exam Mode
             </button>
         </div>
 
@@ -271,6 +274,40 @@
             </div>
         </div>
 
+        <!-- TAB 6: EXAM MODE CONFIGURATION -->
+        <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
+                    <span>⚡</span> Configure Exam Mode (Study Override)
+                </h3>
+                <form id="updateExamModeForm" class="space-y-4">
+                    <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-4 rounded-xl">
+                        <div>
+                            <label class="block text-xs font-black text-white uppercase tracking-wider">Enable Exam Mode</label>
+                            <span class="text-[10px] text-slate-400">Reduces daily study target to lighter hours during exams</span>
+                        </div>
+                        <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exam Mode Target (Minutes)</label>
+                        <select id="examModeTarget" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
+                            <option value="60">60 mins (1 Hour)</option>
+                            <option value="90">90 mins (1.5 Hours)</option>
+                            <option value="120">120 mins (2 Hours)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
+                        Save Exam Mode Config
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4 animate-pulse">📝</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Exam Mode Matrix</h3>
+                <p class="text-xs text-slate-400 max-w-xs">When enabled from this secure panel, your daily study goals seamlessly adapt so you can conquer exams without burnout.</p>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -288,14 +325,15 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'hydration'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'hydration', 'examMode'].forEach(t => {
                 document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
-                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[110px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
             document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
-            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[120px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[110px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             
             if (tab === 'hydration') loadHydrationConfig();
+            if (tab === 'examMode') loadExamModeConfig();
         }
 
         function showStatusMessage(message, type = 'success') {
@@ -555,6 +593,39 @@
                     showStatusMessage("Hydration config updated successfully", 'success');
                 } else {
                     showStatusMessage("Failed to update hydration settings", 'error');
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
+            }
+        });
+
+        // --- EXAM MODE CONFIG MANAGEMENT ---
+        async function loadExamModeConfig() {
+            try {
+                const res = await fetch('/api/exam-mode');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('examModeEnabled').checked = data.enabled;
+                    document.getElementById('examModeTarget').value = data.targetMinutes || 90;
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('updateExamModeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const enabled = document.getElementById('examModeEnabled').checked;
+            const targetMinutes = document.getElementById('examModeTarget').value;
+
+            try {
+                const res = await fetch('/api/exam-mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled, targetMinutes })
+                });
+                if (res.ok) {
+                    showStatusMessage("Exam Mode updated successfully", 'success');
+                } else {
+                    showStatusMessage("Failed to update Exam Mode", 'error');
                 }
             } catch (err) {
                 showStatusMessage("Server connection error", 'error');
