@@ -21,6 +21,7 @@ const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
 const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
 const HYDRATION_FILE = path.join(__dirname, 'hydration_data.json');
 const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
+const SANCTUARY_FILE = path.join(__dirname, 'sanctuary_mode.json');
 const NOTIFICATION_LOGS_FILE = path.join(__dirname, 'notification_logs.json');
 const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 
@@ -83,7 +84,7 @@ function readJSON(file) {
                 { id: 'h6', userId: 'default', name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h7', userId: 'default', name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
-        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE) {
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE) {
             initial = {};
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
@@ -110,6 +111,16 @@ function getExamModeData(userId) {
     if (!data[userId]) {
         data[userId] = { enabled: false, targetMinutes: 90 };
         writeJSON(EXAM_MODE_FILE, data);
+    }
+    return data[userId];
+}
+
+// --- SANCTUARY PROTOCOL HELPER ---
+function getSanctuaryData(userId) {
+    let data = readJSON(SANCTUARY_FILE);
+    if (!data[userId]) {
+        data[userId] = { enabled: false, activatedAt: null, reason: "" };
+        writeJSON(SANCTUARY_FILE, data);
     }
     return data[userId];
 }
@@ -143,12 +154,20 @@ function calculateWorkoutStreak(userId) {
     const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId);
     if (workouts.length === 0) return 0;
 
+    let sanctuary = getSanctuaryData(userId);
     let streak = 0;
     let d = new Date();
     
     while (true) {
         let dateStr = d.toISOString().split('T')[0];
         if (dateStr < MONSTER_LAUNCH_DATE) break;
+
+        // Sanctuary Protocol Freeze Check: Preserve streak during emergencies
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
 
         let dayDone = workouts.every(w => {
             let log = logs.find(l => l.workoutId === w.id && l.date === dateStr);
@@ -174,12 +193,20 @@ function calculateStreak(userId, type) {
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
     if (type === 'workout') return calculateWorkoutStreak(userId);
+    let sanctuary = getSanctuaryData(userId);
     let d = new Date();
     let streak = 0;
     
     while (true) {
         let dateStr = d.toISOString().split('T')[0];
         if (dateStr < MONSTER_LAUNCH_DATE) break;
+
+        // Sanctuary Protocol Freeze Check
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
 
         let dayPassed = true;
 
@@ -345,6 +372,12 @@ cron.schedule('0 8 * * 1-6', async () => {
     for (let user of users) {
         let userId = user.id;
         let today = getServerToday();
+        let sanctuary = getSanctuaryData(userId);
+        if (sanctuary.enabled) {
+            console.log(`🛡️ [Sanctuary Active]: Skipping morning brief for user ${userId}.`);
+            continue;
+        }
+
         let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId);
         let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
         let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
@@ -370,6 +403,13 @@ cron.schedule('0 22 * * *', async () => {
     for (let user of users) {
         let userId = user.id;
         let today = getServerToday();
+        let sanctuary = getSanctuaryData(userId);
+        
+        if (sanctuary.enabled) {
+            await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_${userId}`);
+            continue;
+        }
+
         let syncRes = runServerSyncEngine(userId, today);
         let workoutStreak = calculateWorkoutStreak(userId);
 
@@ -478,6 +518,34 @@ app.post('/api/exam-mode', requireAuth, (req, res) => {
     };
     writeJSON(EXAM_MODE_FILE, data);
     res.json({ success: true, message: "Exam Mode settings updated successfully." });
+});
+
+// --- SANCTUARY PROTOCOL API ROUTES ---
+app.get('/api/sanctuary', requireAuth, (req, res) => {
+    let data = getSanctuaryData(req.session.userId);
+    res.json({ success: true, ...data });
+});
+
+app.post('/api/sanctuary', requireAuth, async (req, res) => {
+    const { enabled, reason } = req.body;
+    let data = readJSON(SANCTUARY_FILE);
+    let userId = req.session.userId;
+    let today = getServerToday();
+
+    data[userId] = {
+        enabled: enabled !== undefined ? enabled : false,
+        activatedAt: enabled ? today : null,
+        reason: reason || "Medical Emergency / Recovery"
+    };
+    writeJSON(SANCTUARY_FILE, data);
+
+    if (enabled) {
+        await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVATED*\nEmergency safe-haven mode online.\n*Reason:* ${data[userId].reason}\n\n_Streaks and targets are frozen. Recover well, Monster._ 🛌✨`);
+    } else {
+        await sendTelegramAlert(`⚡ *SANCTUARY PROTOCOL LIFTED*\nSystem returned to full combat readiness. Progress resumed from active state. Let's dominate! 🐉🔥`);
+    }
+
+    res.json({ success: true, message: "Sanctuary Protocol status updated.", ...data[userId] });
 });
 
 // --- HYDRATION API ROUTES ---
