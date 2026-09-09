@@ -672,6 +672,24 @@ app.post('/api/habits', requireAuth, (req, res) => {
     res.json({ success: true, habit: newHabit });
 });
 
+// HABITS PUT (EDIT) ROUTE
+app.put('/api/habits/:id', requireAuth, (req, res) => {
+    let habits = readJSON(HABITS_FILE);
+    const index = habits.findIndex(h => h.id === req.params.id && h.userId === req.session.userId);
+    if (index === -1) return res.status(404).json({ error: "Habit not found." });
+
+    const { name, category, description, startDate } = req.body;
+    habits[index] = {
+        ...habits[index],
+        name: name || habits[index].name,
+        category: category || habits[index].category,
+        description: description !== undefined ? description : habits[index].description,
+        startDate: startDate || habits[index].startDate
+    };
+    writeJSON(HABITS_FILE, habits);
+    res.json({ success: true, message: "Habit updated successfully.", habit: habits[index] });
+});
+
 app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     const habitId = req.params.id;
     const { date, completed } = req.body;
@@ -752,8 +770,8 @@ app.post('/api/workouts', requireAuth, (req, res) => {
         userId: req.session.userId,
         name,
         sets: sets || 3,
-        value: value || reps || 10,  // Supports both value or reps
-        unit: unit || 'Reps',          // Ensures 'Mins' or 'Reps' is saved
+        value: value || reps || 10,
+        unit: unit || 'Reps',
         category: category || "Strength",
         startDate: startDate || MONSTER_LAUNCH_DATE,
         createdAt: new Date().toISOString()
@@ -761,6 +779,25 @@ app.post('/api/workouts', requireAuth, (req, res) => {
     workouts.push(newWorkout);
     writeJSON(WORKOUTS_FILE, workouts);
     res.json({ success: true, workout: newWorkout });
+});
+
+// WORKOUTS PUT (EDIT) ROUTE
+app.put('/api/workouts/:id', requireAuth, (req, res) => {
+    let workouts = readJSON(WORKOUTS_FILE);
+    const index = workouts.findIndex(w => w.id === req.params.id && w.userId === req.session.userId);
+    if (index === -1) return res.status(404).json({ error: "Workout not found." });
+
+    const { name, sets, value, unit, category } = req.body;
+    workouts[index] = {
+        ...workouts[index],
+        name: name || workouts[index].name,
+        sets: sets || workouts[index].sets,
+        value: value || workouts[index].value,
+        unit: unit || workouts[index].unit,
+        category: category || workouts[index].category
+    };
+    writeJSON(WORKOUTS_FILE, workouts);
+    res.json({ success: true, message: "Workout updated successfully.", workout: workouts[index] });
 });
 
 app.delete('/api/workouts/:id', requireAuth, (req, res) => {
@@ -833,6 +870,22 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
     categories.push(newCat);
     writeJSON(STUDY_CATEGORIES_FILE, categories);
     res.json({ success: true, category: newCat });
+});
+
+// STUDY CATEGORIES PUT (EDIT) ROUTE
+app.put('/api/study/categories/:id', requireAuth, (req, res) => {
+    let categories = readJSON(STUDY_CATEGORIES_FILE);
+    const index = categories.findIndex(c => c.id === req.params.id && c.userId === req.session.userId);
+    if (index === -1) return res.status(404).json({ error: "Category not found." });
+
+    const { name, dailyTargetMinutes } = req.body;
+    categories[index] = {
+        ...categories[index],
+        name: name || categories[index].name,
+        dailyTargetMinutes: dailyTargetMinutes ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes
+    };
+    writeJSON(STUDY_CATEGORIES_FILE, categories);
+    res.json({ success: true, message: "Study category updated successfully.", category: categories[index] });
 });
 
 app.delete('/api/study/categories/:id', requireAuth, (req, res) => {
@@ -985,6 +1038,22 @@ app.post('/api/hygiene', requireAuth, (req, res) => {
     tasks.push(newTask);
     writeJSON(HYGIENE_TASKS_FILE, tasks);
     res.json({ success: true, task: newTask });
+});
+
+// HYGIENE PUT (EDIT) ROUTE
+app.put('/api/hygiene/:id', requireAuth, (req, res) => {
+    let tasks = readJSON(HYGIENE_TASKS_FILE);
+    const index = tasks.findIndex(t => t.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Task not found." });
+
+    const { name, frequency } = req.body;
+    tasks[index] = {
+        ...tasks[index],
+        name: name || tasks[index].name,
+        frequency: frequency || tasks[index].frequency
+    };
+    writeJSON(HYGIENE_TASKS_FILE, tasks);
+    res.json({ success: true, message: "Hygiene task updated successfully.", task: tasks[index] });
 });
 
 app.delete('/api/hygiene/:id', requireAuth, (req, res) => {
