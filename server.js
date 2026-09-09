@@ -463,7 +463,7 @@ app.get('/api/habits', requireAuth, (req, res) => {
 });
 
 app.post('/api/habits', requireAuth, (req, res) => {
-    const { name, category, description, endDate } = req.body;
+    const { name, category, description, endDate, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Habit name is required." });
     const habits = readJSON(HABITS_FILE);
     const newHabit = {
@@ -474,7 +474,7 @@ app.post('/api/habits', requireAuth, (req, res) => {
         category: category || "General",
         description: description || "",
         activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-        startDate: MONSTER_LAUNCH_DATE,
+        startDate: startDate || MONSTER_LAUNCH_DATE,
         endDate: endDate || "",
         status: "active",
         createdAt: new Date().toISOString()
@@ -495,8 +495,7 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
 
     const dateStatus = validateDateAccess(targetDate);
     if (dateStatus === 'LOCKED') return res.status(403).json({ error: "🔒 LOCKED: Past records immutable." });
-    if (dateStatus === 'FUTURE') return res.status(403).json({ error: "⚪ NOT ACTIVE: Future dates." });
-
+    // Allow checking during planning mode preview if needed, or enforce strict check
     const habits = readJSON(HABITS_FILE);
     const habit = habits.find(h => h.id === habitId && h.userId === req.session.userId);
     if (!habit) return res.status(404).json({ error: "Habit not found." });
@@ -561,7 +560,7 @@ app.get('/api/workouts', requireAuth, (req, res) => {
 });
 
 app.post('/api/workouts', requireAuth, (req, res) => {
-    const { name, sets, reps, category } = req.body;
+    const { name, sets, reps, category, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Exercise name is required." });
     const workouts = readJSON(WORKOUTS_FILE);
     const newWorkout = {
@@ -571,7 +570,7 @@ app.post('/api/workouts', requireAuth, (req, res) => {
         sets: sets || 3,
         reps: reps || 10,
         category: category || "Strength",
-        startDate: MONSTER_LAUNCH_DATE,
+        startDate: startDate || MONSTER_LAUNCH_DATE,
         createdAt: new Date().toISOString()
     };
     workouts.push(newWorkout);
@@ -599,7 +598,6 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
 
     const dateStatus = validateDateAccess(targetDate);
     if (dateStatus === 'LOCKED') return res.status(403).json({ error: "🔒 LOCKED: Past records immutable." });
-    if (dateStatus === 'FUTURE') return res.status(403).json({ error: "⚪ NOT ACTIVE: Future dates." });
 
     let logs = readJSON(WORKOUT_LOGS_FILE);
     let index = logs.findIndex(l => l.workoutId === workoutId && l.date === targetDate && l.userId === req.session.userId);
@@ -636,7 +634,7 @@ app.get('/api/study/categories', requireAuth, (req, res) => {
 });
 
 app.post('/api/study/categories', requireAuth, (req, res) => {
-    const { name, dailyTargetMinutes } = req.body;
+    const { name, dailyTargetMinutes, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required." });
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const newCat = {
@@ -644,6 +642,7 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
         userId: req.session.userId,
         name,
         dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120,
+        startDate: startDate || MONSTER_LAUNCH_DATE,
         createdAt: new Date().toISOString()
     };
     categories.push(newCat);
@@ -706,7 +705,6 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
 
     const dateStatus = validateDateAccess(targetDate);
     if (dateStatus === 'LOCKED') return res.status(403).json({ error: "🔒 LOCKED: Past study logs immutable." });
-    if (dateStatus === 'FUTURE') return res.status(403).json({ error: "⚪ NOT ACTIVE: Future study dates." });
 
     const sessions = readJSON(STUDY_SESSIONS_FILE);
     const newSession = {
@@ -796,7 +794,7 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
 });
 
 app.post('/api/hygiene', requireAuth, (req, res) => {
-    const { name, frequency } = req.body;
+    const { name, frequency, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Task name is required." });
     const tasks = readJSON(HYGIENE_TASKS_FILE);
     const newTask = {
@@ -804,7 +802,7 @@ app.post('/api/hygiene', requireAuth, (req, res) => {
         userId: req.session.userId,
         name,
         frequency: frequency || 'daily',
-        startDate: MONSTER_LAUNCH_DATE
+        startDate: startDate || MONSTER_LAUNCH_DATE
     };
     tasks.push(newTask);
     writeJSON(HYGIENE_TASKS_FILE, tasks);
@@ -831,7 +829,6 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
 
     const dateStatus = validateDateAccess(targetDate);
     if (dateStatus === 'LOCKED') return res.status(403).json({ error: "🔒 LOCKED: Past hygiene logs are immutable." });
-    if (dateStatus === 'FUTURE') return res.status(403).json({ error: "⚪ NOT ACTIVE: Future dates." });
 
     let logs = readJSON(HYGIENE_LOGS_FILE);
     let index = logs.findIndex(l => l.taskId === taskId && l.date === targetDate && l.userId === req.session.userId);
