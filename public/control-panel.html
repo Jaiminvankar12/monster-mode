@@ -3,375 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONSTER MODE ON — Control Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <title>MONSTER MODE ON — Master Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
-        .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
-        .glow-cyan { box-shadow: 0 0 30px rgba(6, 182, 212, 0.15); }
-        .glow-indigo { box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); }
-        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .red-glow-tab { background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%); box-shadow: 0 0 20px rgba(245, 59, 59, 0.4); }
+        
+        /* Top-Right Inline Status Notification Animation Container */
+        #inlineStatusNotification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .status-toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(-15px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .status-toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .status-toast.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+        }
+        .status-toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
-<body class="bg-[#07090f] text-white min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
+<body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full lg:w-72 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 shadow-2xl">
-        <div>
-            <div class="mb-8 flex justify-between items-center lg:block">
-                <div>
-                    <h1 class="text-xl font-black uppercase tracking-wider text-red-500 flex items-center gap-2">
-                        <span>⚡</span> MONSTER HUB
-                    </h1>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-extrabold mt-1">Secure Core Command</p>
-                </div>
+    <!-- Top-Right Floating Notification Host -->
+    <div id="inlineStatusNotification"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl animate-pulse">🐉</span>
+            <div>
+                <h1 class="text-sm font-black uppercase tracking-wider text-white">MONSTER HUB</h1>
+                <p class="text-[9px] text-red-500 uppercase tracking-widest font-bold">Secure Core Command</p>
             </div>
-            <nav class="flex lg:flex-col gap-2.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-bold uppercase tracking-wider scrollbar-none">
-                <a href="control-panel.html" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-red-600 text-white font-extrabold shadow-lg shadow-red-600/30 whitespace-nowrap transition">
-                    <span>⚙️</span> Management Hub
-                </a>
-            </nav>
         </div>
-        
-        <!-- Sidebar Lock Button -->
-        <div class="hidden lg:block pt-6">
-            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2.5 py-3.5 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-2xl text-xs uppercase tracking-widest transition cursor-pointer group shadow-inner">
-                <span class="text-sm group-hover:scale-125 transition transform">🔒</span> <span>Lock Panel</span>
+        <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xs font-bold text-slate-300 hover:text-white uppercase tracking-wider transition">📊 Dashboard</a>
+            <button onclick="adminLogout()" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition cursor-pointer">
+                Log Out
             </button>
         </div>
-    </aside>
+    </header>
 
-    <!-- Main Control Area -->
-    <main class="flex-1 flex flex-col p-4 sm:p-6 lg:p-10 overflow-y-auto">
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-[#1a1f30]">
-            <div>
-                <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-                    Master Command Center <span class="text-xs px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-full font-bold uppercase tracking-widest">Horizontal Hub v3.0</span>
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-400 mt-1">Select a vector tab below to deploy and manage entries horizontally.</p>
-            </div>
-            <div id="adminEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2.5 rounded-2xl border border-red-500/20 whitespace-nowrap shadow-lg flex items-center gap-2">
-                <span>Verifying Security...</span>
-            </div>
-        </header>
+    <!-- Main Command Center Area -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8">
+        
+        <div class="mb-8">
+            <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white">Master Command Center</h2>
+            <p class="text-xs text-slate-400 mt-1">Select a vector tab below to deploy and manage entries.</p>
+        </div>
 
-        <!-- Tracker Selection Tabs -->
-        <div class="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none">
-            <button onclick="switchTab('habits')" id="tab-habits" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg shadow-red-600/30 shrink-0">
+        <!-- Horizontal Hub Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5">
+            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[140px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🔥 Habit Vectors
             </button>
-            <button onclick="switchTab('workouts')" id="tab-workouts" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🏋️ Iron Matrix
             </button>
-            <button onclick="switchTab('study')" id="tab-study" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 📚 Study Core
             </button>
-            <button onclick="switchTab('hygiene')" id="tab-hygiene" class="px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0">
+            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🧼 Hygiene Protocols
             </button>
         </div>
 
-        <!-- 1. HABIT TAB -->
-        <div id="content-habits" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
-            <div class="glass-card p-6 rounded-3xl glow-red">
-                <h3 class="text-base font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2">
-                    <span>🔥</span> Add Habit Vector
+        <!-- TAB 1: HABIT VECTORS -->
+        <div id="sectionHabits" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Add Habit Form -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
+                    <span>➕</span> Add Habit Vector
                 </h3>
                 <form id="createHabitForm" class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Habit Name</label>
-                        <input type="text" id="habitName" required placeholder="e.g., Deep Work / Morning Routine" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label>
+                        <input type="text" id="habitName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Deep Work / Morning Routine">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category / Tag</label>
-                        <input type="text" id="habitCategory" placeholder="e.g., Health / Morning / Discipline" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category / Tag</label>
+                        <input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Health / Discipline">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Rule / Description</label>
-                        <input type="text" id="habitDesc" placeholder="e.g., Zero distractions allowed" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Rule / Description</label>
+                        <input type="text" id="habitDesc" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Zero distractions allowed">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Execution Start Date (Planning Mode)</label>
-                        <input type="date" id="habitStartDate" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date (Planning Mode)</label>
+                        <input type="date" id="habitStartDate" value="2026-09-10" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
                     </div>
-                    <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-red-600/25 transition cursor-pointer">
+                    <button type="submit" class="w-full py-4 red-glow-tab hover:opacity-95 text-white font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer mt-2">
                         Deploy Habit Vector
                     </button>
                 </form>
             </div>
-            <div class="glass-card p-6 rounded-3xl">
-                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Habit Registry</h3>
-                <div id="manageHabitsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
-                    <p class="text-xs text-zinc-500">Loading habits...</p>
+
+            <!-- Active Habit Registry -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+                    <span>📋</span> Active Habit Registry
+                </h3>
+                <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading habits...</p>
                 </div>
             </div>
         </div>
 
-        <!-- 2. WORKOUT TAB -->
-        <div id="content-workouts" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
-            <div class="glass-card p-6 rounded-3xl glow-blue">
-                <h3 class="text-base font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2">
-                    <span>🏋️</span> Add Exercise (Sets & Reps)
-                </h3>
+        <!-- TAB 2: WORKOUTS (IRON MATRIX) -->
+        <div id="sectionWorkouts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6">🏋️ Deploy Exercise Vector</h3>
                 <form id="createWorkoutForm" class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Exercise Name</label>
-                        <input type="text" id="workoutName" required placeholder="e.g., Bench Press / Running" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exercise Name</label>
+                        <input type="text" id="workoutName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Bench Press / Squats">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Sets</label>
-                            <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
+                            <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Reps / Distance</label>
-                            <input type="number" id="workoutReps" value="10" min="1" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reps</label>
+                            <input type="number" id="workoutReps" value="10" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Category</label>
-                        <select id="workoutCategory" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                            <option value="Strength">Strength / Lifting</option>
-                            <option value="Cardio">Cardio / Running</option>
-                            <option value="Endurance">Endurance</option>
-                        </select>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label>
+                        <input type="text" id="workoutCategory" value="Strength" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                     </div>
-                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
-                        Deploy Exercise to Iron Matrix
+                    <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
+                        Deploy Workout
                     </button>
                 </form>
             </div>
-            <div class="glass-card p-6 rounded-3xl">
-                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Exercise Registry</h3>
-                <div id="manageWorkoutsList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
-                    <p class="text-xs text-zinc-500">Loading exercises...</p>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Workout Matrix</h3>
+                <div id="workoutsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading workouts...</p>
                 </div>
             </div>
         </div>
 
-        <!-- 3. STUDY TAB -->
-        <div id="content-study" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
-            <div class="space-y-8">
-                <div class="glass-card p-6 rounded-3xl glow-indigo">
-                    <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
-                        <span>📚</span> Add Study Category
-                    </h3>
-                    <form id="createStudyCatForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject Name</label>
-                            <input type="text" id="studyCatName" required placeholder="e.g., College / P68 / DSA / Gov Exam" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
-                            <input type="number" id="studyCatTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-                            Deploy Study Category
-                        </button>
-                    </form>
-                </div>
+        <!-- TAB 3: STUDY CORE -->
+        <div id="sectionStudy" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">📚 Create Study Subject</h3>
+                <form id="createStudyForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
+                        <input type="text" id="studyName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none" placeholder="e.g., Web Dev / DSA">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
+                        <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
+                        Deploy Study Vector
+                    </button>
+                </form>
             </div>
-            <div class="glass-card p-6 rounded-3xl">
-                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
-                <div id="manageStudyList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
-                    <p class="text-xs text-zinc-500">Loading study categories...</p>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Study Categories</h3>
+                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
                 </div>
             </div>
         </div>
 
-        <!-- 4. HYGIENE TAB -->
-        <div id="content-hygiene" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12 hidden">
-            <div class="glass-card p-6 rounded-3xl glow-cyan">
-                <h3 class="text-base font-black uppercase tracking-wider text-cyan-400 mb-4 flex items-center gap-2">
-                    <span>🧼</span> Add Hygiene Task
-                </h3>
+        <!-- TAB 4: HYGIENE PROTOCOLS -->
+        <div id="sectionHygiene" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-6">🧼 Add Grooming Task</h3>
                 <form id="createHygieneForm" class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Task Name</label>
-                        <input type="text" id="hygieneName" required placeholder="e.g., Skin Care / Beard Trim" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Name</label>
+                        <input type="text" id="hygieneName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none" placeholder="e.g., Skin Care">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Frequency</label>
-                        <select id="hygieneFrequency" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 outline-none transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Frequency</label>
+                        <select id="hygieneFreq" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none">
                             <option value="daily">Daily Routine</option>
-                            <option value="sunday">Sunday Special Care</option>
+                            <option value="sunday">Sunday Special Grooming</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
-                        Deploy Hygiene Protocol
+                    <button type="submit" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">
+                        Deploy Hygiene Task
                     </button>
                 </form>
             </div>
-            <div class="glass-card p-6 rounded-3xl">
-                <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Hygiene Tasks</h3>
-                <div id="manageHygieneList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
-                    <p class="text-xs text-zinc-500">Loading hygiene tasks...</p>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Hygiene Protocols</h3>
+                <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading hygiene tasks...</p>
                 </div>
             </div>
         </div>
+
     </main>
 
     <script>
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('[id^="tab-"]').forEach(el => {
-                el.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-[#131622] text-slate-300 hover:bg-[#1a1f30] shrink-0";
-            });
-
-            document.getElementById(`content-${tabName}`).classList.remove('hidden');
-            const activeTab = document.getElementById(`tab-${tabName}`);
-            
-            if(tabName === 'habits') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg shadow-red-600/30 shrink-0";
-            if(tabName === 'workouts') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg shadow-blue-600/30 shrink-0";
-            if(tabName === 'study') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 shrink-0";
-            if(tabName === 'hygiene') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 shrink-0";
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('habitStartDate');
-            if (dateInput) {
-                const tomorrow = new Date();
-                dateInput.value = tomorrow.toISOString().split('T')[0];
-            }
-
-            // Session Verification Check
-            fetch('/api/control-panel/session')
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.authenticated) {
-                        window.location.href = 'index.html';
-                    } else {
-                        document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email || 'Admin'}`;
-                        loadControlData();
-                    }
-                })
-                .catch(() => {
+        // Session Verification
+        async function verifyAdminSession() {
+            try {
+                const res = await fetch('/api/control-panel/session');
+                const data = await res.json();
+                if (!data.authenticated) {
                     window.location.href = 'index.html';
-                });
-        });
+                }
+            } catch (err) {
+                window.location.href = 'index.html';
+            }
+        }
+        verifyAdminSession();
 
-        async function loadControlData() {
-            loadHabits();
-            loadWorkouts();
-            loadStudyCategories();
-            loadHygieneTasks();
+        function switchTab(tab) {
+            ['habits', 'workouts', 'study', 'hygiene'].forEach(t => {
+                document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
+                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            });
+            document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[140px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
         }
 
+        // --- INLINE ANIMATED STATUS MESSAGE TOAST ---
+        function showStatusMessage(message, type = 'success') {
+            const host = document.getElementById('inlineStatusNotification');
+            host.innerHTML = '';
+
+            const icon = type === 'success' ? '✓' : '🗑';
+            const toastClass = type === 'success' ? 'success' : 'error';
+
+            const toast = document.createElement('div');
+            toast.className = `status-toast ${toastClass}`;
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            
+            host.appendChild(toast);
+
+            setTimeout(() => { toast.classList.add('show'); }, 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => { toast.remove(); }, 350);
+            }, 2500);
+        }
+
+        // --- HABITS MANAGEMENT ---
         async function loadHabits() {
             try {
                 const res = await fetch('/api/habits');
-                if(res.status === 403 || res.status === 401) { return; }
                 const data = await res.json();
-                const container = document.getElementById('manageHabitsList');
-                if(data.success && data.habits && data.habits.length > 0) {
+                const container = document.getElementById('habitsListContainer');
+                if (data.success && data.habits.length > 0) {
                     container.innerHTML = data.habits.map(h => `
-                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
-                                <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[Start: ${h.startDate || '2026-09-10'}]</span> ${h.description || 'No description'}</p>
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white">${h.name}</h4>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-10'}</span>
                             </div>
-                            <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                            <button onclick="deleteHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No habits registered.</p>`;
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`;
                 }
-            } catch(e) {}
+            } catch (err) {}
         }
 
-        async function loadWorkouts() {
-            try {
-                const res = await fetch('/api/workouts');
-                if(res.status === 403 || res.status === 401) { return; }
-                const data = await res.json();
-                const container = document.getElementById('manageWorkoutsList');
-                if(data.success && data.workouts && data.workouts.length > 0) {
-                    container.innerHTML = data.workouts.map(w => `
-                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-white truncate">${w.name}</h4>
-                                <p class="text-[11px] text-zinc-400 truncate">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
-                            </div>
-                            <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No exercises registered.</p>`;
-                }
-            } catch(e) {}
-        }
-
-        async function loadStudyCategories() {
-            try {
-                const res = await fetch('/api/study/categories');
-                if(res.status === 403 || res.status === 401) { return; }
-                const data = await res.json();
-                const container = document.getElementById('manageStudyList');
-                if(data.success && data.categories && data.categories.length > 0) {
-                    container.innerHTML = data.categories.map(c => `
-                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
-                                <p class="text-[11px] text-zinc-400 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
-                            </div>
-                            <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No study categories registered.</p>`;
-                }
-            } catch(e) {}
-        }
-
-        async function loadHygieneTasks() {
-            try {
-                const res = await fetch('/api/hygiene');
-                if(res.status === 403 || res.status === 401) { return; }
-                const data = await res.json();
-                const container = document.getElementById('manageHygieneList');
-                if(data.success && data.tasks && data.tasks.length > 0) {
-                    container.innerHTML = data.tasks.map(t => `
-                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-sm text-white truncate">${t.name}</h4>
-                                <p class="text-[11px] text-zinc-400 uppercase font-semibold truncate">Frequency: ${t.frequency}</p>
-                            </div>
-                            <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No hygiene tasks registered.</p>`;
-                }
-            } catch(e) {}
-        }
-
-        // Form Submit Listeners
         document.getElementById('createHabitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('habitName').value;
+            const nameInput = document.getElementById('habitName');
+            const name = nameInput.value;
             const category = document.getElementById('habitCategory').value || 'General';
             const description = document.getElementById('habitDesc').value;
             const startDate = document.getElementById('habitStartDate').value || "2026-09-10";
 
-            const res = await fetch('/api/habits', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, category, description, startDate })
-            });
-
-            if (res.ok) {
-                document.getElementById('createHabitForm').reset();
-                loadHabits();
+            try {
+                const res = await fetch('/api/habits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, category, description, startDate })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    nameInput.value = '';
+                    document.getElementById('habitDesc').value = '';
+                    showStatusMessage(`${name} added successfully`, 'success');
+                    loadHabits();
+                } else {
+                    showStatusMessage(data.error || "Failed to add habit", 'error');
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
             }
         });
 
+        async function deleteHabit(id, habitName) {
+            try {
+                const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok) {
+                    showStatusMessage(`${habitName} deleted`, 'error');
+                    loadHabits();
+                } else {
+                    showStatusMessage(data.error || "Failed to delete habit", 'error');
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
+            }
+        }
+
+        // --- WORKOUTS MANAGEMENT ---
+        async function loadWorkouts() {
+            try {
+                const res = await fetch('/api/workouts');
+                const data = await res.json();
+                const container = document.getElementById('workoutsListContainer');
+                if (data.success && data.workouts.length > 0) {
+                    container.innerHTML = data.workouts.map(w => `
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.reps} Reps</span>
+                            </div>
+                            <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No workouts deployed yet.</p>`;
+                }
+            } catch (err) {}
+        }
+
         document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('workoutName').value;
+            const nameInput = document.getElementById('workoutName');
+            const name = nameInput.value;
             const sets = document.getElementById('workoutSets').value;
             const reps = document.getElementById('workoutReps').value;
             const category = document.getElementById('workoutCategory').value;
@@ -379,77 +378,129 @@
             const res = await fetch('/api/workouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, sets, reps, category })
+                body: JSON.stringify({ name, sets, reps, category, startDate: "2026-09-10" })
             });
-
             if (res.ok) {
-                document.getElementById('createWorkoutForm').reset();
+                nameInput.value = '';
+                showStatusMessage(`${name} added successfully`, 'success');
                 loadWorkouts();
             }
         });
 
-        document.getElementById('createStudyCatForm').addEventListener('submit', async (e) => {
+        async function deleteWorkout(id, name) {
+            const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showStatusMessage(`${name} deleted`, 'error');
+                loadWorkouts();
+            }
+        }
+
+        // --- STUDY MANAGEMENT ---
+        async function loadStudy() {
+            try {
+                const res = await fetch('/api/study/categories');
+                const data = await res.json();
+                const container = document.getElementById('studyListContainer');
+                if (data.success && data.categories.length > 0) {
+                    container.innerHTML = data.categories.map(c => `
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
+                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day</span>
+                            </div>
+                            <button onclick="deleteStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study categories created yet.</p>`;
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('createStudyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('studyCatName').value;
-            const dailyTargetMinutes = document.getElementById('studyCatTarget').value;
+            const nameInput = document.getElementById('studyName');
+            const name = nameInput.value;
+            const dailyTargetMinutes = document.getElementById('studyTarget').value;
 
             const res = await fetch('/api/study/categories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, dailyTargetMinutes })
+                body: JSON.stringify({ name, dailyTargetMinutes, startDate: "2026-09-10" })
             });
-
             if (res.ok) {
-                document.getElementById('createStudyCatForm').reset();
-                loadStudyCategories();
+                nameInput.value = '';
+                showStatusMessage(`${name} added successfully`, 'success');
+                loadStudy();
             }
         });
 
+        async function deleteStudy(id, name) {
+            const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showStatusMessage(`${name} deleted`, 'error');
+                loadStudy();
+            }
+        }
+
+        // --- HYGIENE MANAGEMENT ---
+        async function loadHygiene() {
+            try {
+                const res = await fetch('/api/hygiene');
+                const data = await res.json();
+                const container = document.getElementById('hygieneListContainer');
+                if (data.success && data.tasks.length > 0) {
+                    container.innerHTML = data.tasks.map(t => `
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white">${t.name}</h4>
+                                <span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span>
+                            </div>
+                            <button onclick="deleteHygiene('${t.id}', '${t.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`;
+                }
+            } catch (err) {}
+        }
+
         document.getElementById('createHygieneForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('hygieneName').value;
-            const frequency = document.getElementById('hygieneFrequency').value;
+            const nameInput = document.getElementById('hygieneName');
+            const name = nameInput.value;
+            const frequency = document.getElementById('hygieneFreq').value;
 
             const res = await fetch('/api/hygiene', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, frequency })
+                body: JSON.stringify({ name, frequency, startDate: "2026-09-10" })
             });
-
             if (res.ok) {
-                document.getElementById('createHygieneForm').reset();
-                loadHygieneTasks();
+                nameInput.value = '';
+                showStatusMessage(`${name} added successfully`, 'success');
+                loadHygiene();
             }
         });
 
-        async function deleteHabit(id) {
-            if(!confirm("Delete this habit?")) return;
-            await fetch(`/api/habits/${id}`, { method: 'DELETE' });
-            loadHabits();
+        async function deleteHygiene(id, name) {
+            const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showStatusMessage(`${name} deleted`, 'error');
+                loadHygiene();
+            }
         }
 
-        async function deleteWorkout(id) {
-            if(!confirm("Delete this exercise?")) return;
-            await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
-            loadWorkouts();
+        async function adminLogout() {
+            await fetch('/api/control-panel/logout', { method: 'POST' });
+            window.location.href = 'index.html';
         }
 
-        async function deleteStudyCategory(id) {
-            if(!confirm("Delete this study category?")) return;
-            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-            loadStudyCategories();
-        }
-
-        async function deleteHygieneTask(id) {
-            if(!confirm("Delete this hygiene task?")) return;
-            await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
-            loadHygieneTasks();
-        }
-
-        function logoutAdmin() {
-            fetch('/api/control-panel/logout', { method: 'POST' })
-                .then(() => window.location.href = 'index.html');
-        }
+        // Initial Loads
+        loadHabits();
+        loadWorkouts();
+        loadStudy();
+        loadHygiene();
     </script>
 </body>
 </html>
