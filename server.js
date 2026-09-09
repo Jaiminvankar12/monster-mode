@@ -20,6 +20,7 @@ const STUDY_SESSIONS_FILE = path.join(__dirname, 'study_sessions.json');
 const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
 const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
 const HYDRATION_FILE = path.join(__dirname, 'hydration_data.json');
+const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
 const NOTIFICATION_LOGS_FILE = path.join(__dirname, 'notification_logs.json');
 const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 
@@ -82,7 +83,7 @@ function readJSON(file) {
                 { id: 'h6', userId: 'default', name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h7', userId: 'default', name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
-        } else if (file === USER_XP_FILE || file === HYDRATION_FILE) {
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE) {
             initial = {};
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
@@ -99,6 +100,16 @@ function getHydrationData(userId) {
     if (!data[userId]) {
         data[userId] = { goal: 3000, glassSize: 250, logs: {} };
         writeJSON(HYDRATION_FILE, data);
+    }
+    return data[userId];
+}
+
+// --- EXAM MODE HELPER ---
+function getExamModeData(userId) {
+    let data = readJSON(EXAM_MODE_FILE);
+    if (!data[userId]) {
+        data[userId] = { enabled: false, targetMinutes: 90 };
+        writeJSON(EXAM_MODE_FILE, data);
     }
     return data[userId];
 }
@@ -241,9 +252,17 @@ function runServerSyncEngine(userId, targetDate) {
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId && s.date === targetDate);
     
-    let totalTargetMinutes = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    // Check Exam Mode Override
+    let examData = getExamModeData(userId);
+    let totalTargetMinutes = 0;
+    if (examData.enabled) {
+        totalTargetMinutes = examData.targetMinutes;
+    } else {
+        totalTargetMinutes = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    }
+
     let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
-    let studyDone = categories.length > 0 && totalStudiedMinutes >= totalTargetMinutes;
+    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
 
     let studyHabit = habits.find(h => h.userId === userId && h.name.toLowerCase().includes('study'));
     if (!studyHabit) {
@@ -329,14 +348,15 @@ cron.schedule('0 8 * * 1-6', async () => {
         let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId);
         let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
         let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
-        let totalStudyTarget = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+        let examData = getExamModeData(userId);
+        let totalStudyTarget = examData.enabled ? examData.targetMinutes : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
         let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
 
         let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
                       `📅 *Date:* ${today}\n\n` +
                       `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
                       `🏋️ *Workouts Today:* ${workouts.length} exercises on deck.\n` +
-                      `📚 *Study Target:* ${studyHoursStr} deep-work.\n\n` +
+                      `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''}.\n\n` +
                       `*"Zero excuses. Absolute control. Dominate today!"* ⚡`;
 
         await sendTelegramAlert(message, `morning_brief_${today}_${userId}`);
@@ -360,7 +380,7 @@ cron.schedule('0 22 * * *', async () => {
         let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
                       `📅 *Date:* ${today}\n\n` +
                       `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
-                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m\n` +
+                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m\n` +
                       `💧 *Hydration:* ${consumed} ml / ${hydData.goal} ml (${percent}%)\n` +
                       `🧼 *Hygiene:* Logged & Checked\n\n` +
                       `*"Rest well, Monster. No disturbances. Tomorrow we conquer again."* 🛡️`;
@@ -441,6 +461,23 @@ app.get('/api/control-panel/session', (req, res) => {
     } else {
         res.status(403).json({ authenticated: false });
     }
+});
+
+// --- EXAM MODE API ROUTES ---
+app.get('/api/exam-mode', requireAuth, (req, res) => {
+    let data = getExamModeData(req.session.userId);
+    res.json({ success: true, ...data });
+});
+
+app.post('/api/exam-mode', requireAuth, (req, res) => {
+    const { enabled, targetMinutes } = req.body;
+    let data = readJSON(EXAM_MODE_FILE);
+    data[req.session.userId] = {
+        enabled: enabled !== undefined ? enabled : false,
+        targetMinutes: targetMinutes ? parseInt(targetMinutes) : 90
+    };
+    writeJSON(EXAM_MODE_FILE, data);
+    res.json({ success: true, message: "Exam Mode settings updated successfully." });
 });
 
 // --- HYDRATION API ROUTES ---
@@ -735,7 +772,8 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === req.session.userId && s.date === targetDate);
 
-    const totalTargetMinutes = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    let examData = getExamModeData(req.session.userId);
+    const totalTargetMinutes = examData.enabled ? examData.targetMinutes : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
