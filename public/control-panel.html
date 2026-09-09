@@ -19,7 +19,7 @@
 </head>
 <body class="bg-[#07090f] text-white min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
 
-    <!-- Sidebar Navigation (Cleaned) -->
+    <!-- Sidebar Navigation -->
     <aside class="w-full lg:w-72 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 shadow-2xl">
         <div>
             <div class="mb-8 flex justify-between items-center lg:block">
@@ -75,8 +75,6 @@
             </button>
         </div>
 
-        <!-- TAB CONTENT AREA (Horizontal Grid Layout) -->
-        
         <!-- 1. HABIT TAB -->
         <div id="content-habits" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
             <div class="glass-card p-6 rounded-3xl glow-red">
@@ -176,24 +174,7 @@
                         </button>
                     </form>
                 </div>
-
-                <!-- Global Pomodoro Configuration Card -->
-                <div class="glass-card p-6 rounded-3xl glow-indigo">
-                    <h3 class="text-base font-black uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
-                        <span>⏱️</span> Global Pomodoro Default Settings
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Default Focus Duration (Minutes)</label>
-                            <input type="number" id="globalPomoDefault" value="25" min="1" max="1440" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-indigo-500 outline-none transition">
-                        </div>
-                        <button onclick="saveGlobalPomoSettings()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-                            Save Global Pomodoro Default
-                        </button>
-                    </div>
-                </div>
             </div>
-
             <div class="glass-card p-6 rounded-3xl">
                 <h3 class="text-base font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
                 <div id="manageStudyList" class="space-y-3 max-h-72 overflow-y-auto pr-1">
@@ -232,17 +213,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- Mobile Logout Button -->
-        <div class="block lg:hidden pt-4 pb-8">
-            <button onclick="logoutAdmin()" class="w-full flex items-center justify-center gap-2 py-3.5 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 hover:text-red-400 font-bold rounded-2xl text-xs uppercase tracking-widest transition cursor-pointer shadow-xl">
-                <span>🔒</span> <span>Lock Control Panel</span>
-            </button>
-        </div>
     </main>
 
     <script>
-        // Tab Switcher Function
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('[id^="tab-"]').forEach(el => {
@@ -258,31 +231,22 @@
             if(tabName === 'hygiene') activeTab.className = "px-5 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition cursor-pointer bg-cyan-600 text-white shadow-lg shadow-cyan-600/30 shrink-0";
         }
 
-        // Global Pomodoro Settings Management
-        function saveGlobalPomoSettings() {
-            const mins = document.getElementById('globalPomoDefault').value;
-            localStorage.setItem('monster_default_pomo_mins', mins);
-            alert(`✅ Global Pomodoro default set to ${mins} minutes successfully!`);
-        }
-
-        // Set default date to tomorrow or today for habit planning
         window.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('habitStartDate');
             if (dateInput) {
                 const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate()); // Default to today/tomorrow as needed
                 dateInput.value = tomorrow.toISOString().split('T')[0];
             }
         });
 
-        // Session Verification
+        // Robust Session Verification
         fetch('/api/control-panel/session')
             .then(res => res.json())
             .then(data => {
                 if (!data.authenticated) {
                     window.location.href = 'index.html';
                 } else {
-                    document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email}`;
+                    document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email || 'Admin'}`;
                     loadControlData();
                 }
             })
@@ -295,87 +259,90 @@
             loadWorkouts();
             loadStudyCategories();
             loadHygieneTasks();
-
-            // Load saved Pomodoro setting
-            let savedMins = localStorage.getItem('monster_default_pomo_mins') || '25';
-            const inputField = document.getElementById('globalPomoDefault');
-            if(inputField) inputField.value = savedMins;
         }
 
         async function loadHabits() {
-            const res = await fetch('/api/habits');
-            const data = await res.json();
-            const container = document.getElementById('manageHabitsList');
-            if(data.success && data.habits.length > 0) {
-                container.innerHTML = data.habits.map(h => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
-                            <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[Start: ${h.startDate || '2026-09-10'}]</span> ${h.description || 'No description'}</p>
+            try {
+                const res = await fetch('/api/habits');
+                const data = await res.json();
+                const container = document.getElementById('manageHabitsList');
+                if(data.success && data.habits && data.habits.length > 0) {
+                    container.innerHTML = data.habits.map(h => `
+                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
+                                <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[Start: ${h.startDate || '2026-09-10'}]</span> ${h.description || 'No description'}</p>
+                            </div>
+                            <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
-                        <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No habits registered.</p>`;
-            }
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-zinc-500">No habits registered.</p>`;
+                }
+            } catch(e) { console.error("Error loading habits"); }
         }
 
         async function loadWorkouts() {
-            const res = await fetch('/api/workouts');
-            const data = await res.json();
-            const container = document.getElementById('manageWorkoutsList');
-            if(data.success && data.workouts.length > 0) {
-                container.innerHTML = data.workouts.map(w => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate">${w.name}</h4>
-                            <p class="text-[11px] text-zinc-400 truncate">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
+            try {
+                const res = await fetch('/api/workouts');
+                const data = await res.json();
+                const container = document.getElementById('manageWorkoutsList');
+                if(data.success && data.workouts && data.workouts.length > 0) {
+                    container.innerHTML = data.workouts.map(w => `
+                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-white truncate">${w.name}</h4>
+                                <p class="text-[11px] text-zinc-400 truncate">${w.category} | Sets: ${w.sets}, Reps: ${w.reps}</p>
+                            </div>
+                            <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
-                        <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No exercises registered.</p>`;
-            }
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-zinc-500">No exercises registered.</p>`;
+                }
+            } catch(e) {}
         }
 
         async function loadStudyCategories() {
-            const res = await fetch('/api/study/categories');
-            const data = await res.json();
-            const container = document.getElementById('manageStudyList');
-            if(data.success && data.categories.length > 0) {
-                container.innerHTML = data.categories.map(c => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
-                            <p class="text-[11px] text-zinc-400 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
+            try {
+                const res = await fetch('/api/study/categories');
+                const data = await res.json();
+                const container = document.getElementById('manageStudyList');
+                if(data.success && data.categories && data.categories.length > 0) {
+                    container.innerHTML = data.categories.map(c => `
+                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
+                                <p class="text-[11px] text-zinc-400 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
+                            </div>
+                            <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
-                        <button onclick="deleteStudyCategory('${c.id}')" class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No study categories registered.</p>`;
-            }
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-zinc-500">No study categories registered.</p>`;
+                }
+            } catch(e) {}
         }
 
         async function loadHygieneTasks() {
-            const res = await fetch('/api/hygiene');
-            const data = await res.json();
-            const container = document.getElementById('manageHygieneList');
-            if(data.success && data.tasks.length > 0) {
-                container.innerHTML = data.tasks.map(t => `
-                    <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate">${t.name}</h4>
-                            <p class="text-[11px] text-zinc-400 uppercase font-semibold truncate">Frequency: ${t.frequency}</p>
+            try {
+                const res = await fetch('/api/hygiene');
+                const data = await res.json();
+                const container = document.getElementById('manageHygieneList');
+                if(data.success && data.tasks && data.tasks.length > 0) {
+                    container.innerHTML = data.tasks.map(t => `
+                        <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-sm text-white truncate">${t.name}</h4>
+                                <p class="text-[11px] text-zinc-400 uppercase font-semibold truncate">Frequency: ${t.frequency}</p>
+                            </div>
+                            <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
-                        <button onclick="deleteHygieneTask('${t.id}')" class="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No hygiene tasks registered.</p>`;
-            }
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-zinc-500">No hygiene tasks registered.</p>`;
+                }
+            } catch(e) {}
         }
 
         // Form Submit Listeners
@@ -394,9 +361,6 @@
 
             if (res.ok) {
                 document.getElementById('createHabitForm').reset();
-                // Reset date to today
-                const dateInput = document.getElementById('habitStartDate');
-                if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
                 loadHabits();
             }
         });
@@ -433,7 +397,6 @@
 
             if (res.ok) {
                 document.getElementById('createStudyCatForm').reset();
-                document.getElementById('studyCatTarget').value = "120";
                 loadStudyCategories();
             }
         });
@@ -455,7 +418,6 @@
             }
         });
 
-        // Delete Handlers
         async function deleteHabit(id) {
             if(!confirm("Delete this habit?")) return;
             await fetch(`/api/habits/${id}`, { method: 'DELETE' });
