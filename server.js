@@ -105,6 +105,45 @@ function getHydrationData(userId) {
     return data[userId];
 }
 
+// --- HYDRATION STREAK HELPER ---
+function calculateHydrationStreak(userId) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+
+    let hydData = getHydrationData(userId);
+    let logs = hydData.logs || {};
+    let goal = hydData.goal || 3000;
+    
+    let sanctuary = getSanctuaryData(userId);
+    let streak = 0;
+    let d = new Date();
+
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+
+        // Sanctuary Protocol Freeze Check
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
+
+        let consumed = logs[dateStr] || 0;
+        if (consumed >= goal) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1);
+                continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
 // --- EXAM MODE HELPER (Supports Manual Custom Target Minutes) ---
 function getExamModeData(userId) {
     let data = readJSON(EXAM_MODE_FILE);
@@ -412,6 +451,7 @@ cron.schedule('0 22 * * *', async () => {
 
         let syncRes = runServerSyncEngine(userId, today);
         let workoutStreak = calculateWorkoutStreak(userId);
+        let hydrationStreak = calculateHydrationStreak(userId);
 
         let hydData = getHydrationData(userId);
         let consumed = hydData.logs[today] || 0;
@@ -421,7 +461,7 @@ cron.schedule('0 22 * * *', async () => {
                       `📅 *Date:* ${today}\n\n` +
                       `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
                       `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m\n` +
-                      `💧 *Hydration:* ${consumed} ml / ${hydData.goal} ml (${percent}%)\n` +
+                      `💧 *Hydration:* ${consumed} ml / ${hydData.goal} ml (${percent}%) [Streak: ${hydrationStreak} Days]\n` +
                       `🧼 *Hygiene:* Logged & Checked\n\n` +
                       `*"Rest well, Monster. No disturbances. Tomorrow we conquer again."* 🛡️`;
 
@@ -568,6 +608,7 @@ app.get('/api/hydration', requireAuth, (req, res) => {
 
     let consumed = hydData.logs[targetDate] || 0;
     let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
+    let hydrationStreak = calculateHydrationStreak(userId);
 
     res.json({
         success: true,
@@ -575,6 +616,7 @@ app.get('/api/hydration', requireAuth, (req, res) => {
         glassSize: hydData.glassSize,
         consumed,
         percent,
+        hydrationStreak,
         history: hydData.logs,
         serverDate: targetDate
     });
@@ -595,6 +637,7 @@ app.post('/api/hydration/drink', requireAuth, async (req, res) => {
     writeJSON(HYDRATION_FILE, dataAll);
 
     let percent = Math.min(Math.round((newTotal / hydData.goal) * 100), 100);
+    let hydrationStreak = calculateHydrationStreak(userId);
 
     if (percent >= 100) {
         let habits = readJSON(HABITS_FILE);
@@ -611,7 +654,7 @@ app.post('/api/hydration/drink', requireAuth, async (req, res) => {
         }
     }
 
-    res.json({ success: true, consumed: newTotal, percent, ...getUserXP(userId) });
+    res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...getUserXP(userId) });
 });
 
 app.post('/api/hydration/settings', requireAuth, (req, res) => {

@@ -34,7 +34,19 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
-        <!-- Bottom / Top Navigation Switcher (Today vs History matching your app screenshot UI) -->
+        <!-- Hydration Streak Badge/Card -->
+        <div class="bg-[#121520] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl animate-pulse">🔥</span>
+                <div>
+                    <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Hydration Streak</h4>
+                    <p id="hydrationStreakText" class="text-base font-black text-white">0 Days</p>
+                </div>
+            </div>
+            <span class="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Goal Met = Streak+</span>
+        </div>
+
+        <!-- Bottom / Top Navigation Switcher (Today vs History) -->
         <div class="grid grid-cols-2 gap-2 bg-[#121520] p-1.5 rounded-2xl border border-white/5">
             <button onclick="switchMainTab('today')" id="tabTodayBtn" class="py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20">
                 💧 Today
@@ -68,13 +80,13 @@
                 </div>
             </div>
 
-            <!-- DRINK BUTTON (Uses Glass Size configured securely via Control Panel) -->
+            <!-- DRINK BUTTON -->
             <button onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
                 + DRINK (<span id="glassSizeDisplay">250 ml</span>)
             </button>
         </div>
 
-        <!-- SECTION 2: HISTORY MATRIX (DAY, WEEK, MONTH, YEAR as shown in screenshot) -->
+        <!-- SECTION 2: HISTORY MATRIX -->
         <div id="viewHistory" class="hidden space-y-6">
             
             <!-- Day / Week / Month / Year Filter Pills -->
@@ -88,13 +100,11 @@
             <!-- History Main Card Container -->
             <div class="glass-card p-6 rounded-3xl space-y-6">
                 
-                <!-- Time Range Title Header -->
                 <div class="flex justify-between items-center text-zinc-400 text-xs font-black uppercase tracking-widest border-b border-white/5 pb-3">
                     <span id="historyRangeTitle" class="text-white font-extrabold text-sm">This Week</span>
                     <span>Unit (L)</span>
                 </div>
 
-                <!-- Average & Total Statistics Header -->
                 <div class="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
                     <div>
                         <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Average</p>
@@ -106,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Visual Bar Representation / Records Breakdown -->
                 <div class="space-y-3">
                     <h4 class="text-xs font-black uppercase tracking-wider text-zinc-400">Activity Breakdown</h4>
                     <div id="historyBarsContainer" class="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -165,6 +174,7 @@
                     document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
                     document.getElementById('progressBarFill').style.width = `${data.percent}%`;
                     document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
+                    document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
                 }
             } catch (err) {}
         }
