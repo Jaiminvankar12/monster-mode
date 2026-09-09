@@ -3,6 +3,7 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron');
 const { getServerToday, validateDateAccess } = require('./server/services/dateService');
 require('dotenv').config();
 
@@ -19,6 +20,7 @@ const STUDY_SESSIONS_FILE = path.join(__dirname, 'study_sessions.json');
 const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
 const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
 const NOTIFICATION_LOGS_FILE = path.join(__dirname, 'notification_logs.json');
+const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 
 // Application Global Start Date Constraint (10/9/2026)
 const MONSTER_LAUNCH_DATE = "2026-09-10";
@@ -79,6 +81,8 @@ function readJSON(file) {
                 { id: 'h6', userId: 'default', name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h7', userId: 'default', name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
+        } else if (file === USER_XP_FILE) {
+            initial = {};
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
     }
@@ -86,6 +90,27 @@ function readJSON(file) {
 }
 function writeJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// --- GAMIFICATION & XP SYSTEM ENGINE ---
+function addXP(userId, amount) {
+    let xpData = readJSON(USER_XP_FILE);
+    if (!xpData[userId]) {
+        xpData[userId] = { xp: 0, level: 1 };
+    }
+    xpData[userId].xp += amount;
+    
+    // Level up formula: every 500 XP = 1 Level
+    let calculatedLevel = Math.floor(xpData[userId].xp / 500) + 1;
+    xpData[userId].level = calculatedLevel;
+
+    writeJSON(USER_XP_FILE, xpData);
+    return xpData[userId];
+}
+
+function getUserXP(userId) {
+    let xpData = readJSON(USER_XP_FILE);
+    return xpData[userId] || { xp: 0, level: 1 };
 }
 
 // --- CENTRAL REUSABLE STREAK & STATUS ENGINE ---
@@ -265,30 +290,57 @@ function requireAuth(req, res, next) {
 
 console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date.");
 
+// --- AUTOMATED TELEGRAM CRON JOBS ---
+cron.schedule('0 7 * * *', async () => {
+    console.log("⏰ [Cron Job]: Triggering Morning Briefing...");
+    const users = readJSON(USERS_FILE);
+    for (let user of users) {
+        let userId = user.id;
+        let today = getServerToday();
+        let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId);
+        let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
+        let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
+        let totalStudyTarget = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+        let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
+
+        let message = `🌅 *MONSTER MODE — MORNING BRIEFING*\n` +
+                      `📅 *Date:* ${today}\n\n` +
+                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
+                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck.\n` +
+                      `📚 *Study Target:* ${studyHoursStr} deep-work.\n\n` +
+                      `*"Zero excuses. Absolute control. Dominate today!"* ⚡`;
+
+        await sendTelegramAlert(message, `morning_brief_${today}_${userId}`);
+    }
+}, { scheduled: true, timezone: "Asia/Kolkata" });
+
+cron.schedule('0 22 * * *', async () => {
+    console.log("🌙 [Cron Job]: Triggering Night Audit Report...");
+    const users = readJSON(USERS_FILE);
+    for (let user of users) {
+        let userId = user.id;
+        let today = getServerToday();
+        let syncRes = runServerSyncEngine(userId, today);
+        let workoutStreak = calculateWorkoutStreak(userId);
+
+        let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT*\n` +
+                      `📅 *Date:* ${today}\n\n` +
+                      `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
+                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m\n` +
+                      `🧼 *Hygiene:* Logged & Checked\n\n` +
+                      `*"Rest well, Monster. Tomorrow we conquer again."* 🛡️`;
+
+        await sendTelegramAlert(message, `night_audit_${today}_${userId}`);
+    }
+}, { scheduled: true, timezone: "Asia/Kolkata" });
+
 // --- HTML PAGE ROUTES ---
-app.get('/hygiene', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'hygiene.html'));
-});
-
-app.get('/study', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'study.html'));
-});
-
-app.get('/workout', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'workout.html'));
-});
-
-app.get('/tracker', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'tracker.html'));
-});
-
-app.get('/dashboard', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-
-app.get('/control-panel', requireAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'control-panel.html'));
-});
+app.get('/hygiene', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
+app.get('/study', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'study.html')); });
+app.get('/workout', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'workout.html')); });
+app.get('/tracker', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'tracker.html')); });
+app.get('/dashboard', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
+app.get('/control-panel', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
 
 // --- AUTH & CONTROL PANEL ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
@@ -323,7 +375,8 @@ app.post('/api/auth/logout', (req, res) => {
 
 app.get('/api/auth/session', (req, res) => {
     if (req.session && req.session.userId) {
-        res.json({ authenticated: true, email: req.session.email || "admin@monstermode.com" });
+        let xpInfo = getUserXP(req.session.userId);
+        res.json({ authenticated: true, email: req.session.email || "admin@monstermode.com", ...xpInfo });
     } else {
         res.status(401).json({ authenticated: false });
     }
@@ -354,6 +407,36 @@ app.get('/api/control-panel/session', (req, res) => {
     }
 });
 
+// --- AI MONSTER COACH & ROAST ENDPOINT ---
+app.get('/api/monster-coach', requireAuth, (req, res) => {
+    const userId = req.session.userId;
+    const today = getServerToday();
+    let syncRes = runServerSyncEngine(userId, today);
+    
+    let roastsAndMotivation = [
+        "Is that all you've got? The iron doesn't care about your excuses, Monster!",
+        "Mediocrity is a disease. Get back to work and conquer your daily targets!",
+        "An apex predator doesn't sleep while goals are pending. Push harder!",
+        "Your future self is watching you right now. Don't let him down.",
+        "Absolute discipline means executing even when you don't feel like it. Move!"
+    ];
+
+    let successQuotes = [
+        "Unstoppable force! You are dominating the reality matrix today.",
+        "Another day, another absolute slaughter of weakness. Keep grinding!",
+        "Elite performance detected. You are officially entering Beast Mode."
+    ];
+
+    let message = "";
+    if (syncRes.allWorkoutsDone && syncRes.studyDone) {
+        message = successQuotes[Math.floor(Math.random() * successQuotes.length)];
+    } else {
+        message = roastsAndMotivation[Math.floor(Math.random() * roastsAndMotivation.length)];
+    }
+
+    res.json({ success: true, coachMessage: message, xp: getUserXP(userId) });
+});
+
 // --- HABIT TRACKER API ---
 app.get('/api/habits', requireAuth, (req, res) => {
     const habits = readJSON(HABITS_FILE).filter(h => h.userId === req.session.userId);
@@ -366,7 +449,6 @@ app.get('/api/habits', requireAuth, (req, res) => {
     }
 
     const dateStatus = validateDateAccess(targetDate);
-
     const habitsWithStatus = habits.map(habit => {
         const targetLog = logs.find(l => l.habitId === habit.id && l.date === targetDate);
         const habitLogs = logs.filter(l => l.habitId === habit.id && l.completed);
@@ -377,7 +459,7 @@ app.get('/api/habits', requireAuth, (req, res) => {
             serverToday: today
         };
     });
-    res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus });
+    res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus, ...getUserXP(req.session.userId) });
 });
 
 app.post('/api/habits', requireAuth, (req, res) => {
@@ -430,15 +512,20 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(HABIT_LOGS_FILE, logs);
 
+    let updatedXP = getUserXP(req.session.userId);
+    if (completed) {
+        updatedXP = addXP(req.session.userId, 50);
+    }
+
     const newStatusSymbol = completed ? '✅' : '❌';
     let eventKey = `habit_${habitId}_${targetDate}_${completed}`;
     
     await sendTelegramAlert(
-        `🐲 *MONSTER MODE ON*\n🔥 *HABIT UPDATED*\nHabit:\n${habit.name}\nPrevious:\n${prevStatus}\nNew:\n${newStatusSymbol}\nSource:\nManual`,
+        `🐲 *MONSTER MODE ON*\n🔥 *HABIT UPDATED*\nHabit:\n${habit.name}\nPrevious:\n${prevStatus}\nNew:\n${newStatusSymbol}\n⭐ *XP Gained:* +50 (Level ${updatedXP.level})`,
         eventKey
     );
 
-    res.json({ success: true, message: "Habit status updated.", completed });
+    res.json({ success: true, message: "Habit status updated.", completed, ...updatedXP });
 });
 
 app.delete('/api/habits/:id', requireAuth, (req, res) => {
@@ -470,7 +557,7 @@ app.get('/api/workouts', requireAuth, (req, res) => {
     const syncResult = runServerSyncEngine(req.session.userId, targetDate);
     const currentStreak = calculateWorkoutStreak(req.session.userId);
 
-    res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, dateStatus });
+    res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, dateStatus, ...getUserXP(req.session.userId) });
 });
 
 app.post('/api/workouts', requireAuth, (req, res) => {
@@ -523,21 +610,23 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(WORKOUT_LOGS_FILE, logs);
 
+    let updatedXP = getUserXP(req.session.userId);
+    if (completed) {
+        updatedXP = addXP(req.session.userId, 100);
+    }
+
     const syncResult = runServerSyncEngine(req.session.userId, targetDate);
     const currentStreak = calculateWorkoutStreak(req.session.userId);
 
     if (syncResult.allWorkoutsDone) {
-        const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === req.session.userId);
-        let exercisesListStr = workouts.map(w => `• ${w.name} — ${w.sets} × ${w.reps}`).join('\n');
         let eventKey = `workout_done_${targetDate}_${req.session.userId}`;
-        
         await sendTelegramAlert(
-            `🐲 *MONSTER MODE ON*\n🏋️ *WORKOUT COMPLETED*\nWorkout:\nIron & Athlete Matrix (${targetDate})\nExercises:\n${exercisesListStr}\nStatus:\n✅ DONE\nWorkout Streak:\n🔥 ${currentStreak} Days`,
+            `🐲 *MONSTER MODE ON*\n🏋️ *WORKOUT MATRIX CONQUERED!*\n⭐ *XP Gained:* +100 (Level ${updatedXP.level})\nWorkout Streak: 🔥 ${currentStreak} Days`,
             eventKey
         );
     }
 
-    res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak });
+    res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
 // --- STUDY TRACKER API ---
@@ -587,6 +676,7 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
+    const studyStreak = calculateStreak(req.session.userId, 'habit');
 
     runServerSyncEngine(req.session.userId, targetDate);
 
@@ -598,8 +688,10 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
         totalStudiedMinutes,
         progressPercent,
         isDone,
+        studyStreak,
         serverDate: targetDate,
-        dateStatus
+        dateStatus,
+        ...getUserXP(req.session.userId)
     });
 });
 
@@ -629,27 +721,20 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
     sessions.push(newSession);
     writeJSON(STUDY_SESSIONS_FILE, sessions);
 
+    let xpGained = parseInt(durationMinutes) * 2;
+    let updatedXP = addXP(req.session.userId, xpGained);
+
     const syncResult = runServerSyncEngine(req.session.userId, targetDate);
 
     if (syncResult.studyDone) {
-        const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId);
-        const todaySessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === req.session.userId && s.date === targetDate);
-        let subjectsSummary = categories.map(c => {
-            let catMins = todaySessions.filter(s => s.categoryId === c.id).reduce((acc, s) => acc + s.durationMinutes, 0);
-            return `• ${c.name} — ${Math.floor(catMins / 60)}h ${catMins % 60}m`;
-        }).join('\n');
-
-        let totalTimeStr = `${Math.floor(syncResult.totalStudiedMinutes / 60)}h ${syncResult.totalStudiedMinutes % 60}m`;
-        let studyStreak = calculateStreak(req.session.userId, 'habit');
         let eventKey = `study_done_${targetDate}_${req.session.userId}`;
-
         await sendTelegramAlert(
-            `🐲 *MONSTER MODE ON*\n📚 *STUDY COMPLETED*\nToday:\n${totalTimeStr}\nSubjects:\n${subjectsSummary}\nStatus:\n✅ DONE\nStudy Streak:\n🔥 ${studyStreak} Days`,
+            `🐲 *MONSTER MODE ON*\n📚 *STUDY TARGET MET!*\n⭐ *XP Gained:* +${xpGained} (Level ${updatedXP.level})`,
             eventKey
         );
     }
 
-    res.json({ success: true, session: newSession, studyDone: syncResult.studyDone });
+    res.json({ success: true, session: newSession, studyDone: syncResult.studyDone, ...updatedXP });
 });
 
 app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
@@ -705,11 +790,11 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
         hygieneStreak,
         isSunday,
         serverDate: targetDate,
-        dateStatus
+        dateStatus,
+        ...getUserXP(userId)
     });
 });
 
-// Fixed: Endpoint changed from '/api/hygiene/tasks' to '/api/hygiene' to match the frontend fetch request
 app.post('/api/hygiene', requireAuth, (req, res) => {
     const { name, frequency } = req.body;
     if (!name) return res.status(400).json({ error: "Task name is required." });
@@ -757,21 +842,23 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(HYGIENE_LOGS_FILE, logs);
 
-    let hygieneStreak = calculateStreak(req.session.userId, 'hygiene');
-
+    let updatedXP = getUserXP(req.session.userId);
     if (completed) {
-        await sendTelegramAlert(`🧼 *HYGIENE CARE CONQUERED!*\nA grooming vector checked as done on ${targetDate}. 🔥 *Hygiene Streak:* ${hygieneStreak} Days.`);
+        updatedXP = addXP(req.session.userId, 40);
     }
 
-    res.json({ success: true, message: "Hygiene status updated.", hygieneStreak });
+    let hygieneStreak = calculateStreak(req.session.userId, 'hygiene');
+    if (completed) {
+        await sendTelegramAlert(`🧼 *HYGIENE CARE CONQUERED!*\n⭐ *XP Gained:* +40 (Level ${updatedXP.level})\n🔥 *Hygiene Streak:* ${hygieneStreak} Days.`);
+    }
+
+    res.json({ success: true, message: "Hygiene status updated.", hygieneStreak, ...updatedXP });
 });
 
 app.post('/api/telegram/trigger-sunday-hygiene', requireAuth, async (req, res) => {
     const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
     let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\nToday is Sunday! Complete your special grooming vectors:\n`;
-    tasks.forEach(t => {
-        message += `• ${t.name} ○ PENDING\n`;
-    });
+    tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
     message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
 
     await sendTelegramAlert(message);
@@ -780,4 +867,9 @@ app.post('/api/telegram/trigger-sunday-hygiene', requireAuth, async (req, res) =
 
 app.listen(PORT, () => {
     console.log(`🚀 MONSTER MODE Server running at http://localhost:${PORT}`);
+});
+// External Ping Route to Keep Server Alive & Trigger Cron Checks
+app.get('/api/cron/ping', (req, res) => {
+    console.log("⏰ [Cron Ping Received]: Keeping server awake and active.");
+    res.json({ success: true, message: "Monster Mode server is wide awake!" });
 });
