@@ -451,7 +451,7 @@
 
         // --- WORKOUTS MANAGEMENT ---
         // --- WORKOUTS MANAGEMENT ---
-        async function loadWorkouts() {
+    async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts');
                 const data = await res.json();
@@ -461,7 +461,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps} ${w.unit || 'Reps'}</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'}</span>
                             </div>
                             <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
@@ -484,7 +484,7 @@
             const res = await fetch('/api/workouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, sets, reps: value, unit, category, startDate: "2026-09-10" })
+                body: JSON.stringify({ name, sets, value, unit, category, startDate: "2026-09-10" }) // <--- 'value' ane 'unit' barabar pass thavu joiye
             });
             if (res.ok) {
                 nameInput.value = '';

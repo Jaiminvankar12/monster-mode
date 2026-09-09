@@ -744,7 +744,7 @@ app.get('/api/workouts', requireAuth, (req, res) => {
 });
 
 app.post('/api/workouts', requireAuth, (req, res) => {
-    const { name, sets, reps, category, startDate } = req.body;
+    const { name, sets, value, reps, unit, category, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Exercise name is required." });
     const workouts = readJSON(WORKOUTS_FILE);
     const newWorkout = {
@@ -752,7 +752,8 @@ app.post('/api/workouts', requireAuth, (req, res) => {
         userId: req.session.userId,
         name,
         sets: sets || 3,
-        reps: reps || 10,
+        value: value || reps || 10,  // Supports both value or reps
+        unit: unit || 'Reps',          // Ensures 'Mins' or 'Reps' is saved
         category: category || "Strength",
         startDate: startDate || MONSTER_LAUNCH_DATE,
         createdAt: new Date().toISOString()
