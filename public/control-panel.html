@@ -237,22 +237,22 @@
                 const tomorrow = new Date();
                 dateInput.value = tomorrow.toISOString().split('T')[0];
             }
-        });
 
-        // Robust Session Verification
-        fetch('/api/control-panel/session')
-            .then(res => res.json())
-            .then(data => {
-                if (!data.authenticated) {
+            // Session Verification Check
+            fetch('/api/control-panel/session')
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.authenticated) {
+                        window.location.href = 'index.html';
+                    } else {
+                        document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email || 'Admin'}`;
+                        loadControlData();
+                    }
+                })
+                .catch(() => {
                     window.location.href = 'index.html';
-                } else {
-                    document.getElementById('adminEmailDisplay').innerHTML = `🔒 ${data.email || 'Admin'}`;
-                    loadControlData();
-                }
-            })
-            .catch(() => {
-                window.location.href = 'index.html';
-            });
+                });
+        });
 
         async function loadControlData() {
             loadHabits();
@@ -264,6 +264,7 @@
         async function loadHabits() {
             try {
                 const res = await fetch('/api/habits');
+                if(res.status === 403 || res.status === 401) { return; }
                 const data = await res.json();
                 const container = document.getElementById('manageHabitsList');
                 if(data.success && data.habits && data.habits.length > 0) {
@@ -279,12 +280,13 @@
                 } else {
                     container.innerHTML = `<p class="text-xs text-zinc-500">No habits registered.</p>`;
                 }
-            } catch(e) { console.error("Error loading habits"); }
+            } catch(e) {}
         }
 
         async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts');
+                if(res.status === 403 || res.status === 401) { return; }
                 const data = await res.json();
                 const container = document.getElementById('manageWorkoutsList');
                 if(data.success && data.workouts && data.workouts.length > 0) {
@@ -306,6 +308,7 @@
         async function loadStudyCategories() {
             try {
                 const res = await fetch('/api/study/categories');
+                if(res.status === 403 || res.status === 401) { return; }
                 const data = await res.json();
                 const container = document.getElementById('manageStudyList');
                 if(data.success && data.categories && data.categories.length > 0) {
@@ -327,6 +330,7 @@
         async function loadHygieneTasks() {
             try {
                 const res = await fetch('/api/hygiene');
+                if(res.status === 403 || res.status === 401) { return; }
                 const data = await res.json();
                 const container = document.getElementById('manageHygieneList');
                 if(data.success && data.tasks && data.tasks.length > 0) {

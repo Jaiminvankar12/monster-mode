@@ -15,6 +15,20 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
 
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full glow-red space-y-4">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Workout matrix and iron tracking are currently in read-only planning preview.
+            </p>
+            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Immutable / Not Editable Yet
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -97,6 +111,14 @@
 
     <script>
         let currentSelectedDate = "";
+        const LAUNCH_DATE = "2026-09-10";
+
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
+        }
 
         async function fetchWorkouts(dateStr = "") {
             try {
@@ -104,6 +126,10 @@
                 if (dateStr) url += `?date=${dateStr}`;
 
                 const res = await fetch(url);
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
                 const data = await res.json();
                 if (data.success) {
                     currentSelectedDate = data.serverDate;
@@ -218,6 +244,10 @@
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = 'index.html';
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
         });
 
         fetchWorkouts();

@@ -17,7 +17,6 @@
             --theme-primary: #ef4444;
             --theme-glow: rgba(239, 68, 68, 0.15);
         }
-        /* Custom smooth scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #07090f; }
         ::-webkit-scrollbar-thumb { background: #1a1f30; border-radius: 4px; }
@@ -25,6 +24,20 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
+
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full dynamic-glow space-y-4">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Trackers and editing are currently in read-only planning preview.
+            </p>
+            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Immutable / Not Editable Yet
+            </div>
+        </div>
+    </div>
 
     <!-- Sidebar Navigation -->
     <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 lg:fixed lg:h-full z-50">
@@ -63,7 +76,7 @@
             </div>
         </header>
 
-        <!-- Focus of the Day (Custom Daily Goal #1 Mission) -->
+        <!-- Focus of the Day -->
         <div class="glass-card p-5 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
                 <span class="text-2xl">🎯</span>
@@ -77,7 +90,7 @@
             </button>
         </div>
 
-        <!-- Emergency "Panic Button" / Motivation Surge Mode Widget -->
+        <!-- Emergency "Panic Button" -->
         <div class="glass-card p-5 rounded-2xl mb-8 border-2 border-red-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow bg-red-600/5">
             <div class="flex items-center gap-3">
                 <span class="text-2xl animate-pulse">⚡</span>
@@ -91,7 +104,7 @@
             </button>
         </div>
 
-        <!-- Theme & Dynamic Accent Switcher -->
+        <!-- Theme Switcher -->
         <div class="glass-card p-4 sm:p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow">
             <div class="flex items-center gap-3">
                 <span class="text-xl">🎨</span>
@@ -108,7 +121,7 @@
             </div>
         </div>
 
-        <!-- AI Monster Coach / Roast & Motivation Widget -->
+        <!-- AI Monster Coach -->
         <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-red-500 dynamic-glow" id="coachCard">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-black tracking-widest text-red-400 uppercase flex items-center gap-2">
@@ -121,9 +134,9 @@
             </p>
         </div>
 
-        <!-- Top Analytics & Streak Cards -->
+        <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-2xl dynamic-glow border-l-4 border-l-red-500" id="statCard1">
+            <div class="glass-card p-6 rounded-2xl dynamic-glow border-l-4 border-l-red-500">
                 <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Total Active Vectors</span>
                 <div class="text-4xl font-black text-white mt-2" id="totalVectorsCount">0</div>
                 <p class="text-[11px] text-red-400 mt-1">Habits & Workouts Deployed</p>
@@ -144,7 +157,7 @@
             </div>
         </div>
 
-        <!-- Yearly Analytics Line Chart Section -->
+        <!-- Yearly Analytics Chart -->
         <div class="glass-card p-6 rounded-2xl mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white">📈 Yearly Performance Analytics (2026 Consistency)</h3>
@@ -155,7 +168,7 @@
             </div>
         </div>
 
-        <!-- Mobile Logout Button -->
+        <!-- Mobile Logout -->
         <div class="block lg:hidden pt-4 pb-8">
             <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
                 Log Out
@@ -165,8 +178,15 @@
 
     <script>
         let yearlyChartInstance = null;
+        const LAUNCH_DATE = "2026-09-10";
 
-        // Daily Mission (Focus of the Day) LocalStorage Management
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
+        }
+
         function saveDailyMission(val) {
             localStorage.setItem('monster_daily_mission', val);
         }
@@ -177,7 +197,6 @@
             alert("🎯 Today's Core Mission locked successfully!");
         }
 
-        // Web Audio API Beep Generator
         function playBeepSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -190,12 +209,9 @@
                 gainNode.connect(audioCtx.destination);
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 0.8);
-            } catch (e) {
-                console.log("Audio alert played");
-            }
+            } catch (e) {}
         }
 
-        // Emergency Surge Modal Logic
         function triggerEmergencySurge() {
             playBeepSound();
             let emergencyQuotes = [
@@ -241,13 +257,10 @@
             let cfg = colorMap[theme] || colorMap['red'];
             document.documentElement.style.setProperty('--theme-primary', cfg.primary);
             document.documentElement.style.setProperty('--theme-glow', cfg.glow);
-
-            document.querySelectorAll('.border-l-red-500').forEach(el => {
-                el.style.borderLeftColor = cfg.primary;
-            });
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
             applyTheme(savedTheme);
 
@@ -259,6 +272,10 @@
         async function loadDashboardData() {
             try {
                 const sessionRes = await fetch('/api/auth/session');
+                if(sessionRes.status === 401 || sessionRes.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
                 const sessionData = await sessionRes.json();
                 if (!sessionData.authenticated) {
                     window.location.href = 'index.html';
@@ -294,16 +311,16 @@
         async function loadMonsterCoach() {
             try {
                 const res = await fetch('/api/monster-coach');
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage}"`;
-                    if (data.xp) {
-                        document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`;
+                if(res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage}"`;
+                        if (data.xp) {
+                            document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`;
+                        }
                     }
                 }
-            } catch (err) {
-                console.error("Error loading Monster Coach:", err);
-            }
+            } catch (err) {}
         }
 
         function renderYearlyChart(currentStreak) {

@@ -100,7 +100,6 @@ function addXP(userId, amount) {
     }
     xpData[userId].xp += amount;
     
-    // Level up formula: every 500 XP = 1 Level
     let calculatedLevel = Math.floor(xpData[userId].xp / 500) + 1;
     xpData[userId].level = calculatedLevel;
 
@@ -115,6 +114,9 @@ function getUserXP(userId) {
 
 // --- CENTRAL REUSABLE STREAK & STATUS ENGINE ---
 function calculateWorkoutStreak(userId) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0; // Pre-launch planning mode: 0 streaks
+
     const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
     const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId);
     if (workouts.length === 0) return 0;
@@ -135,7 +137,6 @@ function calculateWorkoutStreak(userId) {
             streak++;
             d.setDate(d.getDate() - 1);
         } else {
-            let todayStr = getServerToday();
             if (streak === 0 && dateStr === todayStr) {
                 d.setDate(d.getDate() - 1);
                 continue;
@@ -147,6 +148,9 @@ function calculateWorkoutStreak(userId) {
 }
 
 function calculateStreak(userId, type) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0; // Pre-launch planning mode: 0 streaks
+
     if (type === 'workout') return calculateWorkoutStreak(userId);
     let d = new Date();
     let streak = 0;
@@ -174,7 +178,6 @@ function calculateStreak(userId, type) {
             streak++;
             d.setDate(d.getDate() - 1);
         } else {
-            let todayStr = getServerToday();
             if (streak === 0 && dateStr === todayStr) {
                 d.setDate(d.getDate() - 1);
                 continue;
@@ -192,7 +195,6 @@ function runServerSyncEngine(userId, targetDate) {
     let habits = readJSON(HABITS_FILE);
     let habitLogs = readJSON(HABIT_LOGS_FILE);
 
-    // 1. WORKOUT SYNC
     const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
     const workoutLogs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId);
     const workoutsWithStatus = workouts.map(w => {
@@ -225,7 +227,6 @@ function runServerSyncEngine(userId, targetDate) {
         }
     }
 
-    // 2. STUDY SYNC
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId && s.date === targetDate);
     
@@ -289,50 +290,6 @@ function requireAuth(req, res, next) {
 }
 
 console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date.");
-
-// --- AUTOMATED TELEGRAM CRON JOBS ---
-cron.schedule('0 7 * * *', async () => {
-    console.log("⏰ [Cron Job]: Triggering Morning Briefing...");
-    const users = readJSON(USERS_FILE);
-    for (let user of users) {
-        let userId = user.id;
-        let today = getServerToday();
-        let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId);
-        let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
-        let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
-        let totalStudyTarget = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-        let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
-
-        let message = `🌅 *MONSTER MODE — MORNING BRIEFING*\n` +
-                      `📅 *Date:* ${today}\n\n` +
-                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
-                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck.\n` +
-                      `📚 *Study Target:* ${studyHoursStr} deep-work.\n\n` +
-                      `*"Zero excuses. Absolute control. Dominate today!"* ⚡`;
-
-        await sendTelegramAlert(message, `morning_brief_${today}_${userId}`);
-    }
-}, { scheduled: true, timezone: "Asia/Kolkata" });
-
-cron.schedule('0 22 * * *', async () => {
-    console.log("🌙 [Cron Job]: Triggering Night Audit Report...");
-    const users = readJSON(USERS_FILE);
-    for (let user of users) {
-        let userId = user.id;
-        let today = getServerToday();
-        let syncRes = runServerSyncEngine(userId, today);
-        let workoutStreak = calculateWorkoutStreak(userId);
-
-        let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT*\n` +
-                      `📅 *Date:* ${today}\n\n` +
-                      `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
-                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m\n` +
-                      `🧼 *Hygiene:* Logged & Checked\n\n` +
-                      `*"Rest well, Monster. Tomorrow we conquer again."* 🛡️`;
-
-        await sendTelegramAlert(message, `night_audit_${today}_${userId}`);
-    }
-}, { scheduled: true, timezone: "Asia/Kolkata" });
 
 // --- HTML PAGE ROUTES ---
 app.get('/hygiene', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
@@ -444,10 +401,6 @@ app.get('/api/habits', requireAuth, (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
-    if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Trackers start from 10/9/2026." });
-    }
-
     const dateStatus = validateDateAccess(targetDate);
     const habitsWithStatus = habits.map(habit => {
         const targetLog = logs.find(l => l.habitId === habit.id && l.date === targetDate);
@@ -455,7 +408,7 @@ app.get('/api/habits', requireAuth, (req, res) => {
         return {
             ...habit,
             completedToday: targetLog ? targetLog.completed : false,
-            streak: habitLogs.length,
+            streak: targetDate < MONSTER_LAUNCH_DATE ? 0 : habitLogs.length,
             serverToday: today
         };
     });
@@ -490,12 +443,12 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     const targetDate = date || getServerToday();
 
     if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Cannot log before 10/9/2026." });
+        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Planning Mode active. Toggling locked until 10/9/2026." });
     }
 
     const dateStatus = validateDateAccess(targetDate);
     if (dateStatus === 'LOCKED') return res.status(403).json({ error: "🔒 LOCKED: Past records immutable." });
-    // Allow checking during planning mode preview if needed, or enforce strict check
+
     const habits = readJSON(HABITS_FILE);
     const habit = habits.find(h => h.id === habitId && h.userId === req.session.userId);
     if (!habit) return res.status(404).json({ error: "Habit not found." });
@@ -543,10 +496,6 @@ app.get('/api/workouts', requireAuth, (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
-    if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Trackers start from 10/9/2026." });
-    }
-
     const dateStatus = validateDateAccess(targetDate);
     const workoutsWithStatus = workouts.map(w => {
         const log = logs.find(l => l.workoutId === w.id && l.date === targetDate);
@@ -554,7 +503,7 @@ app.get('/api/workouts', requireAuth, (req, res) => {
     });
 
     const syncResult = runServerSyncEngine(req.session.userId, targetDate);
-    const currentStreak = calculateWorkoutStreak(req.session.userId);
+    const currentStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateWorkoutStreak(req.session.userId);
 
     res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, dateStatus, ...getUserXP(req.session.userId) });
 });
@@ -593,7 +542,7 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     const targetDate = date || getServerToday();
 
     if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Cannot log before 10/9/2026." });
+        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Planning Mode active. Toggling locked until 10/9/2026." });
     }
 
     const dateStatus = validateDateAccess(targetDate);
@@ -663,10 +612,6 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
-    if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Trackers start from 10/9/2026." });
-    }
-
     const dateStatus = validateDateAccess(targetDate);
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === req.session.userId && s.date === targetDate);
@@ -675,7 +620,7 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
-    const studyStreak = calculateStreak(req.session.userId, 'habit');
+    const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(req.session.userId, 'habit');
 
     runServerSyncEngine(req.session.userId, targetDate);
 
@@ -700,7 +645,7 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
     const targetDate = date || getServerToday();
 
     if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Cannot log study before 10/9/2026." });
+        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Planning Mode active. Logging locked until 10/9/2026." });
     }
 
     const dateStatus = validateDateAccess(targetDate);
@@ -759,10 +704,6 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
-    if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Trackers start from 10/9/2026." });
-    }
-
     const dateStatus = validateDateAccess(targetDate);
     let targetDateObj = new Date(targetDate);
     let isSunday = targetDateObj.getDay() === 0;
@@ -778,7 +719,7 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
 
     let applicableTasks = tasksWithStatus.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
     let allDone = applicableTasks.length > 0 && applicableTasks.every(t => t.completed);
-    let hygieneStreak = calculateStreak(userId, 'hygiene');
+    let hygieneStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(userId, 'hygiene');
 
     res.json({
         success: true,
@@ -824,7 +765,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     const targetDate = date || getServerToday();
 
     if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Cannot log hygiene before 10/9/2026." });
+        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Planning Mode active. Toggling locked until 10/9/2026." });
     }
 
     const dateStatus = validateDateAccess(targetDate);

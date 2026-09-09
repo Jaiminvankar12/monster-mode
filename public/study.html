@@ -15,6 +15,20 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white overflow-x-hidden">
 
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-blue-500/50 max-w-xl w-full glow-blue space-y-4">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
+            </p>
+            <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Immutable / Not Editable Yet
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -189,41 +203,49 @@
         let pomoTimer = null;
         let isPomoRunning = false;
         let isBreakMode = false;
+        const LAUNCH_DATE = "2026-09-10";
 
-        // Load global default from localStorage set by Control Panel
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
+        }
+
         let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
         let pomoDurationMinutes = savedDefaultMins;
         let pomoSecondsLeft = pomoDurationMinutes * 60;
 
-        // Initialize input value on load
         window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
             const inputField = document.getElementById('customPomoMinutes');
             if(inputField) inputField.value = pomoDurationMinutes;
             document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
             updatePomoDisplay();
         });
 
-        // Web Audio API Beep Generator
         function playBeepSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
                 gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 oscillator.start();
                 oscillator.stop(audioCtx.currentTime + 0.8);
-            } catch (e) {
-                console.log("Audio alert played");
-            }
+            } catch (e) {}
         }
 
         async function fetchStudyData() {
             try {
                 const res = await fetch('/api/study/sessions');
+                if(res.status === 401 || res.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
                 const data = await res.json();
                 if (data.success) {
                     categoriesData = data.categories;
@@ -250,9 +272,7 @@
                     renderSessions(data.sessions, data.categories);
                     populateSelects(data.categories);
                 }
-            } catch (err) {
-                console.error("Error fetching study data:", err);
-            }
+            } catch (err) {}
         }
 
         function formatMinutes(totalMins) {
@@ -317,7 +337,6 @@
             select2.innerHTML = optionsHtml;
         }
 
-        // Pomodoro Engine Functions
         function updatePomoDisplay() {
             let mins = Math.floor(pomoSecondsLeft / 60);
             let secs = pomoSecondsLeft % 60;
@@ -374,7 +393,6 @@
                         alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
                         completePomodoroSession();
 
-                        // Switch to Break Mode
                         isBreakMode = true;
                         pomoSecondsLeft = 5 * 60;
                         document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
@@ -432,9 +450,7 @@
                 } else {
                     alert("Error logging session: " + data.error);
                 }
-            } catch (err) {
-                console.error("Network error during auto-log:", err);
-            }
+            } catch (err) {}
         }
 
         document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {

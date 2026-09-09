@@ -24,9 +24,27 @@
             background-position: center;
             background-size: cover;
         }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
 </head>
 <body class="bg-[#07090f] text-white min-h-screen w-full flex items-center justify-center m-0 p-4 lg:p-0">
+
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full space-y-4 shadow-2xl">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. You can view planning previews, but official execution trackers unlock on launch day.
+            </p>
+            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Planning & Preview Active
+            </div>
+            <button onclick="dismissBanner()" class="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-wider text-xs rounded-xl transition cursor-pointer">
+                Proceed to Portal Preview
+            </button>
+        </div>
+    </div>
 
     <div class="flex w-full min-h-screen lg:h-full bg-[#07090f]">
         <!-- Left Side: Cinematic Background (Hidden on mobile) -->
@@ -49,7 +67,7 @@
                 <p id="panelSubtitle" class="text-xs text-slate-400 mt-1">Select your portal to enter command center.</p>
             </div>
 
-            <!-- Portal Switcher Tabs (Tracker Portal vs Admin Panel) -->
+            <!-- Portal Switcher Tabs -->
             <div class="flex bg-[#121520] p-1.5 rounded-xl border border-[#1e2336] mb-6">
                 <button type="button" id="tabTracker" onclick="switchPortal('tracker')" class="flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer">
                     🔥 Tracker Portal
@@ -83,8 +101,20 @@
     </div>
 
     <script>
-        let currentPortal = 'tracker'; // 'tracker' or 'admin'
+        let currentPortal = 'tracker';
         let isRegister = false;
+        const LAUNCH_DATE = "2026-09-10";
+
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
+        }
+
+        function dismissBanner() {
+            document.getElementById('prelaunchBanner').classList.add('hidden');
+        }
 
         function switchPortal(portal) {
             currentPortal = portal;
@@ -102,7 +132,7 @@
                 tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer";
                 tabTracker.className = "flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = "ENTER ADMIN PANEL";
-                emailInput.value = ""; // Admin email pre-fill removed for security
+                emailInput.value = "";
             }
         }
 
@@ -167,8 +197,12 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.add('hidden');
+                errDiv.classList.remove('hidden');
             }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
         });
     </script>
 </body>
