@@ -170,6 +170,7 @@
                             <select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm focus:border-red-500 outline-none">
                                 <option value="reps">Reps</option>
                                 <option value="mins">Mins</option>
+                                <option value="secs">Secs</option>
                             </select>
                         </div>
                     </div>
@@ -450,8 +451,7 @@
         }
 
         // --- WORKOUTS MANAGEMENT ---
-        // --- WORKOUTS MANAGEMENT ---
-    async function loadWorkouts() {
+        async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts');
                 const data = await res.json();
@@ -484,7 +484,7 @@
             const res = await fetch('/api/workouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, sets, value, unit, category, startDate: "2026-09-10" }) // <--- 'value' ane 'unit' barabar pass thavu joiye
+                body: JSON.stringify({ name, sets, value, unit, category, startDate: "2026-09-10" })
             });
             if (res.ok) {
                 nameInput.value = '';
