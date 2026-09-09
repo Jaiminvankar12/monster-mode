@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONSTER MODE — Hydration Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        body { background-color: #07090f; color: #f3f4f6; }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .water-glow { box-shadow: 0 0 50px rgba(59, 130, 246, 0.25); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-lg">💧</div>
+            <div>
+                <h1 class="text-sm font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-blue-400">HYDRATION</span></h1>
+                <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Fluid Matrix</p>
+            </div>
+        </div>
+        <nav class="flex items-center gap-4 text-xs font-bold uppercase tracking-wider">
+            <a href="dashboard.html" class="text-zinc-400 hover:text-white transition">Dashboard</a>
+            <a href="tracker.html" class="text-zinc-400 hover:text-white transition">Habits</a>
+            <a href="dashboard.html" class="text-blue-400 hover:underline">dashboard</a>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
+        
+        <!-- Bottom / Top Navigation Switcher (Today vs History matching your app screenshot UI) -->
+        <div class="grid grid-cols-2 gap-2 bg-[#121520] p-1.5 rounded-2xl border border-white/5">
+            <button onclick="switchMainTab('today')" id="tabTodayBtn" class="py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20">
+                💧 Today
+            </button>
+            <button onclick="switchMainTab('history')" id="tabHistoryBtn" class="py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                📊 History
+            </button>
+        </div>
+
+        <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
+        <div id="viewToday" class="flex flex-col items-center justify-center text-center py-4 space-y-6">
+            <div>
+                <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Daily Water Target</span>
+                <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-2">Today</h2>
+            </div>
+
+            <!-- Giant Water Drop -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center bg-blue-600/10 rounded-full border-2 border-blue-500/30 water-glow">
+                <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight">0 ml</span>
+                <span id="goalSubLabel" class="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-2">Goal: 3000 ml</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full glass-card p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between text-xs font-extrabold uppercase">
+                    <span id="percentLabel" class="text-blue-400">0% Progress</span>
+                    <span id="remainingLabel" class="text-zinc-400">3000 ml Left</span>
+                </div>
+                <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
+                    <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <!-- DRINK BUTTON (Uses Glass Size configured securely via Control Panel) -->
+            <button onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
+                + DRINK (<span id="glassSizeDisplay">250 ml</span>)
+            </button>
+        </div>
+
+        <!-- SECTION 2: HISTORY MATRIX (DAY, WEEK, MONTH, YEAR as shown in screenshot) -->
+        <div id="viewHistory" class="hidden space-y-6">
+            
+            <!-- Day / Week / Month / Year Filter Pills -->
+            <div class="flex bg-[#121520] p-1.5 rounded-2xl border border-white/5 gap-1 text-center">
+                <button onclick="setHistoryFilter('day')" id="filterDay" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Day</button>
+                <button onclick="setHistoryFilter('week')" id="filterWeek" class="flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Week</button>
+                <button onclick="setHistoryFilter('month')" id="filterMonth" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Month</button>
+                <button onclick="setHistoryFilter('year')" id="filterYear" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Year</button>
+            </div>
+
+            <!-- History Main Card Container -->
+            <div class="glass-card p-6 rounded-3xl space-y-6">
+                
+                <!-- Time Range Title Header -->
+                <div class="flex justify-between items-center text-zinc-400 text-xs font-black uppercase tracking-widest border-b border-white/5 pb-3">
+                    <span id="historyRangeTitle" class="text-white font-extrabold text-sm">This Week</span>
+                    <span>Unit (L)</span>
+                </div>
+
+                <!-- Average & Total Statistics Header -->
+                <div class="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
+                    <div>
+                        <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Average</p>
+                        <h3 id="historyAvgStat" class="text-2xl font-black text-white mt-1">0.00 L</h3>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Total</p>
+                        <h3 id="historyTotalStat" class="text-2xl font-black text-blue-400 mt-1">0.00 L</h3>
+                    </div>
+                </div>
+
+                <!-- Visual Bar Representation / Records Breakdown -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-zinc-400">Activity Breakdown</h4>
+                    <div id="historyBarsContainer" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <p class="text-xs text-zinc-500 text-center py-6">No records found for this period.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let currentGoal = 3000;
+        let currentGlass = 250;
+        let hydrationHistoryLogs = {};
+
+        function switchMainTab(tab) {
+            if (tab === 'today') {
+                document.getElementById('viewToday').classList.remove('hidden');
+                document.getElementById('viewHistory').classList.add('hidden');
+                document.getElementById('tabTodayBtn').className = "py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20";
+                document.getElementById('tabHistoryBtn').className = "py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            } else {
+                document.getElementById('viewToday').classList.add('hidden');
+                document.getElementById('viewHistory').classList.remove('hidden');
+                document.getElementById('tabHistoryBtn').className = "py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20";
+                document.getElementById('tabTodayBtn').className = "py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                setHistoryFilter('week');
+            }
+        }
+
+        function setHistoryFilter(filter) {
+            ['day', 'week', 'month', 'year'].forEach(f => {
+                document.getElementById(`filter${f.charAt(0).toUpperCase() + f.slice(1)}`).className = "flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            });
+            document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).className = "flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            
+            const titles = { day: 'Today', week: 'This Week', month: 'This Month', year: 'This Year' };
+            document.getElementById('historyRangeTitle').innerText = titles[filter];
+            calculateHistoryStats(filter);
+        }
+
+        async function fetchHydrationData() {
+            try {
+                const res = await fetch('/api/hydration');
+                const data = await res.json();
+                if (data.success) {
+                    currentGoal = data.goal;
+                    currentGlass = data.glassSize;
+                    hydrationHistoryLogs = data.history || {};
+
+                    document.getElementById('consumedLabel').innerText = `${data.consumed} ml`;
+                    document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
+                    document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
+                    document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
+                    document.getElementById('progressBarFill').style.width = `${data.percent}%`;
+                    document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
+                }
+            } catch (err) {}
+        }
+
+        async function addDrink() {
+            try {
+                const res = await fetch('/api/hydration/drink', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    fetchHydrationData();
+                }
+            } catch (err) {}
+        }
+
+        function calculateHistoryStats(filter) {
+            const container = document.getElementById('historyBarsContainer');
+            const dates = Object.keys(hydrationHistoryLogs).sort().reverse();
+
+            if (dates.length === 0) {
+                document.getElementById('historyAvgStat').innerText = `0.00 L`;
+                document.getElementById('historyTotalStat').innerText = `0.00 L`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No historical records available.</p>`;
+                return;
+            }
+
+            let totalMl = 0;
+            dates.forEach(d => totalMl += hydrationHistoryLogs[d]);
+            let avgMl = Math.round(totalMl / dates.length);
+
+            document.getElementById('historyAvgStat').innerText = `${(avgMl / 1000).toFixed(2)} L`;
+            document.getElementById('historyTotalStat').innerText = `${(totalMl / 1000).toFixed(2)} L`;
+
+            container.innerHTML = dates.map(date => {
+                let ml = hydrationHistoryLogs[date];
+                let liters = (ml / 1000).toFixed(2);
+                let achieved = ml >= currentGoal;
+                return `
+                    <div class="bg-[#0c0e15] border border-white/5 p-3 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">${achieved ? '✅' : '💧'}</span>
+                            <span class="text-xs font-extrabold text-white">${date}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-black text-blue-400">${liters} L</span>
+                            <span class="text-[10px] text-zinc-500 block">Goal: ${(currentGoal/1000).toFixed(1)}L</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        fetchHydrationData();
+    </script>
+</body>
+</html>
