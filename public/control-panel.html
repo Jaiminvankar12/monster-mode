@@ -9,10 +9,9 @@
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .red-glow-tab { background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%); box-shadow: 0 0 20px rgba(245, 59, 59, 0.4); }
         
-        /* Top-Right Inline Status Notification Animation Container */
         #inlineStatusNotification {
             position: fixed;
             top: 24px;
@@ -113,11 +112,25 @@
                 <form id="createHabitForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label>
-                        <input type="text" id="habitName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Deep Work / Morning Routine">
+                        <input type="text" id="habitName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Wake Up Early / Cold Shower">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category / Tag</label>
-                        <input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Health / Discipline">
+                        <input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Personal Discipline">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tracking Metric (Reps / Mins)</label>
+                            <select id="habitMetricType" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
+                                <option value="reps">Reps (Count)</option>
+                                <option value="mins">Mins (Time)</option>
+                                <option value="none">None / Daily Check</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Value</label>
+                            <input type="number" id="habitTargetValue" value="1" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., 10 or 30">
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Rule / Description</label>
@@ -132,7 +145,7 @@
                     </button>
                 </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[560px]">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
                     <span>📋</span> Active Habit Registry
                 </h3>
@@ -321,7 +334,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${h.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-10'}</span>
+                                <span class="text-[10px] text-red-400 uppercase tracking-widest">${h.metricType ? h.metricType.toUpperCase() : 'DAILY'} : ${h.targetValue || 1} | Start: ${h.startDate || '2026-09-10'}</span>
                             </div>
                             <button onclick="deleteHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
@@ -337,6 +350,8 @@
             const nameInput = document.getElementById('habitName');
             const name = nameInput.value;
             const category = document.getElementById('habitCategory').value || 'General';
+            const metricType = document.getElementById('habitMetricType').value;
+            const targetValue = document.getElementById('habitTargetValue').value;
             const description = document.getElementById('habitDesc').value;
             const startDate = document.getElementById('habitStartDate').value || "2026-09-10";
 
@@ -344,7 +359,7 @@
                 const res = await fetch('/api/habits', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, category, description, startDate })
+                    body: JSON.stringify({ name, category, metricType, targetValue, description, startDate })
                 });
                 const data = await res.json();
                 if (res.ok) {
