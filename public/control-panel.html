@@ -118,20 +118,6 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category / Tag</label>
                         <input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Personal Discipline">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tracking Metric</label>
-                            <select id="habitMetricType" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
-                                <option value="reps">Reps (Count)</option>
-                                <option value="mins">Mins (Time)</option>
-                                <option value="none">None / Daily Check</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Value</label>
-                            <input type="number" id="habitTargetValue" value="1" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., 10 or 30">
-                        </div>
-                    </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Rule / Description</label>
                         <input type="text" id="habitDesc" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Zero distractions allowed">
@@ -145,7 +131,7 @@
                     </button>
                 </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[560px]">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
                     <span>📋</span> Active Habit Registry
                 </h3>
@@ -162,16 +148,23 @@
                 <form id="createWorkoutForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exercise Name</label>
-                        <input type="text" id="workoutName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Bench Press / Squats">
+                        <input type="text" id="workoutName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Bench Press / Planks">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
                             <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reps</label>
-                            <input type="number" id="workoutReps" value="10" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
+                            <input type="number" id="workoutValue" value="10" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label>
+                            <select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm focus:border-red-500 outline-none">
+                                <option value="reps">Reps</option>
+                                <option value="mins">Mins</option>
+                            </select>
                         </div>
                     </div>
                     <div>
@@ -334,7 +327,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${h.name}</h4>
-                                <span class="text-[10px] text-red-400 uppercase tracking-widest">${h.metricType ? h.metricType.toUpperCase() : 'DAILY'} : ${h.targetValue || 1} | Start: ${h.startDate || '2026-09-10'}</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-10'}</span>
                             </div>
                             <button onclick="deleteHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
@@ -350,8 +343,6 @@
             const nameInput = document.getElementById('habitName');
             const name = nameInput.value;
             const category = document.getElementById('habitCategory').value || 'General';
-            const metricType = document.getElementById('habitMetricType').value;
-            const targetValue = document.getElementById('habitTargetValue').value;
             const description = document.getElementById('habitDesc').value;
             const startDate = document.getElementById('habitStartDate').value || "2026-09-10";
 
@@ -359,7 +350,7 @@
                 const res = await fetch('/api/habits', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, category, metricType, targetValue, description, startDate })
+                    body: JSON.stringify({ name, category, description, startDate })
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -401,7 +392,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.reps} Reps</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps} ${w.unit || 'Reps'}</span>
                             </div>
                             <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
@@ -417,13 +408,14 @@
             const nameInput = document.getElementById('workoutName');
             const name = nameInput.value;
             const sets = document.getElementById('workoutSets').value;
-            const reps = document.getElementById('workoutReps').value;
+            const value = document.getElementById('workoutValue').value;
+            const unit = document.getElementById('workoutUnit').value;
             const category = document.getElementById('workoutCategory').value;
 
             const res = await fetch('/api/workouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, sets, reps, category, startDate: "2026-09-10" })
+                body: JSON.stringify({ name, sets, reps: value, unit, category, startDate: "2026-09-10" })
             });
             if (res.ok) {
                 nameInput.value = '';
