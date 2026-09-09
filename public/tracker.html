@@ -28,7 +28,7 @@
         </div>
         <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
             <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
-            
+            <a href="control-panel.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Control Panel</a>
             <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
         </nav>
     </header>
@@ -36,12 +36,20 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8">
         
-        <!-- Page Title -->
+        <!-- Page Title & Habit Streak Summary Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
                 <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">🔥 Core Engine</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Daily Discipline Tracker</h2>
                 <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date (Asia/Kolkata): Loading...</p>
+            </div>
+            <!-- Habit Streak Badge Component -->
+            <div class="glass-card px-5 py-3 rounded-2xl border border-amber-500/30 flex items-center gap-3 bg-amber-500/5 whitespace-nowrap w-full sm:w-auto justify-center sm:justify-start">
+                <span class="text-2xl">🔥</span>
+                <div>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Habit Streak</span>
+                    <span id="habitStreakLabel" class="text-lg font-black text-amber-400 tracking-wider">0 Days</span>
+                </div>
             </div>
         </div>
 
@@ -64,7 +72,7 @@
             </div>
         </div>
 
-        <!-- Habits Status Grid (Read-only status view, managed from control panel) -->
+        <!-- Habits Status Grid -->
         <div id="habitsContainer" class="grid gap-4">
             <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
         </div>
@@ -89,6 +97,9 @@
                     document.getElementById('serverDateDisplay').innerText = `Server Date (Asia/Kolkata): ${data.serverDate}`;
                     document.getElementById('activeDateLabel').innerText = dateInput.value;
                     
+                    // Update Habit Streak Display
+                    document.getElementById('habitStreakLabel').innerText = `${data.habitStreak || data.currentStreak || 0} Days`;
+
                     updateLockBanner(data.dateStatus || 'UNLOCKED');
                     renderHabits(data.habits, data.dateStatus);
                 }
@@ -136,7 +147,7 @@
             }
 
             const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
-            const startDateStr = '2026-09-10'; // Fixed Start Date as requested
+            const startDateStr = '2026-09-10';
             const startDateObj = new Date(startDateStr);
             const todayServer = new Date();
             const diffTime = Math.abs(todayServer - startDateObj);
