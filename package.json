@@ -15,6 +15,7 @@
     "express": "^4.22.2",
     "express-session": "^1.19.0",
     "mongoose": "^9.9.5",
+    "node-cron": "^4.6.0",
     "pg": "^8.23.0"
   }
 }

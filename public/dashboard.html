@@ -11,7 +11,11 @@
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
-        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        .dynamic-glow { box-shadow: 0 0 30px var(--theme-glow, rgba(239, 68, 68, 0.15)); }
+        :root {
+            --theme-primary: #ef4444;
+            --theme-glow: rgba(239, 68, 68, 0.15);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -53,9 +57,39 @@
             </div>
         </header>
 
+        <!-- Theme & Dynamic Accent Switcher -->
+        <div class="glass-card p-4 sm:p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">🎨</span>
+                <div>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-white">System Accent Theme</h3>
+                    <p class="text-[10px] text-zinc-400">Choose your operational HUD glow color.</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="setAccentTheme('red')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 transition cursor-pointer">🔴 Cyber Red</button>
+                <button onclick="setAccentTheme('blue')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40 hover:bg-blue-500/30 transition cursor-pointer">🔵 Neon Blue</button>
+                <button onclick="setAccentTheme('emerald')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition cursor-pointer">🟢 Matrix Green</button>
+                <button onclick="setAccentTheme('cyan')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 hover:bg-cyan-500/30 transition cursor-pointer">🧼 Cyber Cyan</button>
+            </div>
+        </div>
+
+        <!-- AI Monster Coach / Roast & Motivation Widget -->
+        <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-red-500 dynamic-glow" id="coachCard">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-black tracking-widest text-red-400 uppercase flex items-center gap-2">
+                    <span>🤖</span> AI Monster Coach Telemetry
+                </span>
+                <span id="monsterLevelBadge" class="text-[10px] bg-red-500/20 text-red-300 px-3 py-1 rounded-full font-extrabold uppercase">Level 1 Apex</span>
+            </div>
+            <p id="monsterCoachMessage" class="text-sm sm:text-base font-extrabold text-white tracking-wide italic">
+                "Connecting to neural discipline matrix... Fetching roast..."
+            </p>
+        </div>
+
         <!-- Top Analytics & Streak Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-2xl glow-red border-l-4 border-l-red-500">
+            <div class="glass-card p-6 rounded-2xl dynamic-glow border-l-4 border-l-red-500" id="statCard1">
                 <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Total Active Vectors</span>
                 <div class="text-4xl font-black text-white mt-2" id="totalVectorsCount">0</div>
                 <p class="text-[11px] text-red-400 mt-1">Habits & Workouts Deployed</p>
@@ -98,6 +132,32 @@
     <script>
         let yearlyChartInstance = null;
 
+        function setAccentTheme(theme) {
+            localStorage.setItem('monster_accent_theme', theme);
+            applyTheme(theme);
+        }
+
+        function applyTheme(theme) {
+            let colorMap = {
+                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
+                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
+                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
+                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' }
+            };
+            let cfg = colorMap[theme] || colorMap['red'];
+            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
+            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
+
+            document.querySelectorAll('.border-l-red-500').forEach(el => {
+                el.style.borderLeftColor = cfg.primary;
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
+            applyTheme(savedTheme);
+        });
+
         async function loadDashboardData() {
             try {
                 const sessionRes = await fetch('/api/auth/session');
@@ -127,8 +187,24 @@
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
 
                 renderYearlyChart(streak);
+                loadMonsterCoach();
             } catch (err) {
                 console.error("Error loading dashboard data:", err);
+            }
+        }
+
+        async function loadMonsterCoach() {
+            try {
+                const res = await fetch('/api/monster-coach');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage}"`;
+                    if (data.xp) {
+                        document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`;
+                    }
+                }
+            } catch (err) {
+                console.error("Error loading Monster Coach:", err);
             }
         }
 
