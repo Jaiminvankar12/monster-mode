@@ -96,6 +96,10 @@
                         <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Rule / Description</label>
                         <input type="text" id="habitDesc" placeholder="e.g., Zero distractions allowed" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
                     </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Execution Start Date (Planning Mode)</label>
+                        <input type="date" id="habitStartDate" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-red-500 outline-none transition">
+                    </div>
                     <button type="submit" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-red-600/25 transition cursor-pointer">
                         Deploy Habit Vector
                     </button>
@@ -217,7 +221,7 @@
                         </select>
                     </div>
                     <button type="submit" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-cyan-600/25 transition cursor-pointer">
-                        Deploy Hygiene Vector
+                        Deploy Hygiene Protocol
                     </button>
                 </form>
             </div>
@@ -261,6 +265,16 @@
             alert(`✅ Global Pomodoro default set to ${mins} minutes successfully!`);
         }
 
+        // Set default date to tomorrow or today for habit planning
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('habitStartDate');
+            if (dateInput) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate()); // Default to today/tomorrow as needed
+                dateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+        });
+
         // Session Verification
         fetch('/api/control-panel/session')
             .then(res => res.json())
@@ -297,7 +311,7 @@
                     <div class="flex items-center justify-between bg-[#05070b] border border-white/5 p-3 rounded-2xl gap-2">
                         <div class="min-w-0">
                             <h4 class="font-bold text-sm text-white truncate">${h.name}</h4>
-                            <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[${h.category || 'General'}]</span> ${h.description || 'No description'}</p>
+                            <p class="text-[11px] text-zinc-400 truncate"><span class="text-red-400 font-bold">[Start: ${h.startDate || '2026-09-10'}]</span> ${h.description || 'No description'}</p>
                         </div>
                         <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                     </div>
@@ -370,15 +384,19 @@
             const name = document.getElementById('habitName').value;
             const category = document.getElementById('habitCategory').value || 'General';
             const description = document.getElementById('habitDesc').value;
+            const startDate = document.getElementById('habitStartDate').value || "2026-09-10";
 
             const res = await fetch('/api/habits', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, category, description, startDate: "2026-09-10" })
+                body: JSON.stringify({ name, category, description, startDate })
             });
 
             if (res.ok) {
                 document.getElementById('createHabitForm').reset();
+                // Reset date to today
+                const dateInput = document.getElementById('habitStartDate');
+                if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
                 loadHabits();
             }
         });
@@ -452,7 +470,7 @@
 
         async function deleteStudyCategory(id) {
             if(!confirm("Delete this study category?")) return;
-            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' >> 0 });
+            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
             loadStudyCategories();
         }
 
