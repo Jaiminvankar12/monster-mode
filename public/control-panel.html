@@ -450,6 +450,7 @@
         }
 
         // --- WORKOUTS MANAGEMENT ---
+        // --- WORKOUTS MANAGEMENT ---
         async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts');
@@ -462,7 +463,7 @@
                                 <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
                                 <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps} ${w.unit || 'Reps'}</span>
                             </div>
-                            <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                            <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
                     `).join('');
                 } else {
