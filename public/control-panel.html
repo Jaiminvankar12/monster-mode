@@ -87,23 +87,25 @@
 
         <!-- Horizontal Hub Navigation Tabs -->
         <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5">
-            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[140px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🔥 Habit Vectors
+            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[120px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                🔥 Habits
             </button>
-            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🏋️ Iron Matrix
+            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                🏋️ Workouts
             </button>
-            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 📚 Study Core
             </button>
-            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🧼 Hygiene Protocols
+            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                🧼 Hygiene
+            </button>
+            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                💧 Hydration
             </button>
         </div>
 
         <!-- TAB 1: HABIT VECTORS -->
         <div id="sectionHabits" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Add Habit Form -->
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
                     <span>➕</span> Add Habit Vector
@@ -130,8 +132,6 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Active Habit Registry -->
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
                     <span>📋</span> Active Habit Registry
@@ -233,10 +233,41 @@
             </div>
         </div>
 
+        <!-- TAB 5: HYDRATION & GLASS CONFIG -->
+        <div id="sectionHydration" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2">
+                    <span>💧</span> Configure Water Intake & Glass Size
+                </h3>
+                <form id="updateHydrationForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Default Glass Size (Volume per click)</label>
+                        <select id="configGlassSize" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
+                            <option value="150">150 ml</option>
+                            <option value="250">250 ml</option>
+                            <option value="350">350 ml</option>
+                            <option value="500">500 ml</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Daily Target Goal (ml)</label>
+                        <input type="number" id="configGoal" value="3000" step="250" min="1000" max="6000" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
+                        Save Hydration Config
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4 animate-bounce">🌊</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Matrix Control</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass serving size directly from this secure admin panel.</p>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        // Session Verification
         async function verifyAdminSession() {
             try {
                 const res = await fetch('/api/control-panel/session');
@@ -251,26 +282,25 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'hydration'].forEach(t => {
                 document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
-                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[140px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[120px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
             document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
-            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[140px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[120px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            
+            if (tab === 'hydration') loadHydrationConfig();
         }
 
-        // --- INLINE ANIMATED STATUS MESSAGE TOAST ---
         function showStatusMessage(message, type = 'success') {
             const host = document.getElementById('inlineStatusNotification');
             host.innerHTML = '';
-
             const icon = type === 'success' ? '✓' : '🗑';
             const toastClass = type === 'success' ? 'success' : 'error';
 
             const toast = document.createElement('div');
             toast.className = `status-toast ${toastClass}`;
             toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-            
             host.appendChild(toast);
 
             setTimeout(() => { toast.classList.add('show'); }, 10);
@@ -490,6 +520,39 @@
                 loadHygiene();
             }
         }
+
+        // --- HYDRATION CONFIG MANAGEMENT ---
+        async function loadHydrationConfig() {
+            try {
+                const res = await fetch('/api/hydration');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('configGlassSize').value = data.glassSize || 250;
+                    document.getElementById('configGoal').value = data.goal || 3000;
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('updateHydrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const glassSize = document.getElementById('configGlassSize').value;
+            const goal = document.getElementById('configGoal').value;
+
+            try {
+                const res = await fetch('/api/hydration/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ glassSize, goal })
+                });
+                if (res.ok) {
+                    showStatusMessage("Hydration config updated successfully", 'success');
+                } else {
+                    showStatusMessage("Failed to update hydration settings", 'error');
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
+            }
+        });
 
         async function adminLogout() {
             await fetch('/api/control-panel/logout', { method: 'POST' });

@@ -19,6 +19,7 @@ const STUDY_CATEGORIES_FILE = path.join(__dirname, 'study_categories.json');
 const STUDY_SESSIONS_FILE = path.join(__dirname, 'study_sessions.json');
 const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
 const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
+const HYDRATION_FILE = path.join(__dirname, 'hydration_data.json');
 const NOTIFICATION_LOGS_FILE = path.join(__dirname, 'notification_logs.json');
 const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 
@@ -81,7 +82,7 @@ function readJSON(file) {
                 { id: 'h6', userId: 'default', name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h7', userId: 'default', name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
-        } else if (file === USER_XP_FILE) {
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE) {
             initial = {};
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
@@ -90,6 +91,16 @@ function readJSON(file) {
 }
 function writeJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// --- HYDRATION HELPER ---
+function getHydrationData(userId) {
+    let data = readJSON(HYDRATION_FILE);
+    if (!data[userId]) {
+        data[userId] = { goal: 3000, glassSize: 250, logs: {} };
+        writeJSON(HYDRATION_FILE, data);
+    }
+    return data[userId];
 }
 
 // --- GAMIFICATION & XP SYSTEM ENGINE ---
@@ -115,7 +126,7 @@ function getUserXP(userId) {
 // --- CENTRAL REUSABLE STREAK & STATUS ENGINE ---
 function calculateWorkoutStreak(userId) {
     let todayStr = getServerToday();
-    if (todayStr < MONSTER_LAUNCH_DATE) return 0; // Pre-launch planning mode: 0 streaks
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
     const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
     const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId);
@@ -149,7 +160,7 @@ function calculateWorkoutStreak(userId) {
 
 function calculateStreak(userId, type) {
     let todayStr = getServerToday();
-    if (todayStr < MONSTER_LAUNCH_DATE) return 0; // Pre-launch planning mode: 0 streaks
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
     if (type === 'workout') return calculateWorkoutStreak(userId);
     let d = new Date();
@@ -291,7 +302,75 @@ function requireAuth(req, res, next) {
 
 console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date.");
 
+// --- AUTOMATED TELEGRAM CRON JOBS (Optimized Timings) ---
+
+// 1. Sunday Morning Hygiene Reminder: Every Sunday at 8:00 AM
+cron.schedule('0 8 * * 0', async () => {
+    console.log("⏰ [Cron Job]: Triggering Sunday Morning Hygiene Command...");
+    const users = readJSON(USERS_FILE);
+    for (let user of users) {
+        let userId = user.id;
+        const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
+        let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\nToday is Sunday! Complete your special grooming vectors:\n`;
+        tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
+        message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
+
+        await sendTelegramAlert(message, `sunday_hygiene_${getServerToday()}_${userId}`);
+    }
+}, { scheduled: true, timezone: "Asia/Kolkata" });
+
+// 2. Morning Briefing & Audit: Every Mon-Sat at 8:00 AM
+cron.schedule('0 8 * * 1-6', async () => {
+    console.log("⏰ [Cron Job]: Triggering Morning Briefing & Audit...");
+    const users = readJSON(USERS_FILE);
+    for (let user of users) {
+        let userId = user.id;
+        let today = getServerToday();
+        let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId);
+        let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId);
+        let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId);
+        let totalStudyTarget = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+        let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
+
+        let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
+                      `📅 *Date:* ${today}\n\n` +
+                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
+                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck.\n` +
+                      `📚 *Study Target:* ${studyHoursStr} deep-work.\n\n` +
+                      `*"Zero excuses. Absolute control. Dominate today!"* ⚡`;
+
+        await sendTelegramAlert(message, `morning_brief_${today}_${userId}`);
+    }
+}, { scheduled: true, timezone: "Asia/Kolkata" });
+
+// 3. Night Audit & Hydration Summary Report: Every day at 10:00 PM (22:00)
+cron.schedule('0 22 * * *', async () => {
+    console.log("🌙 [Cron Job]: Triggering 10 PM Night Audit & Hydration Report...");
+    const users = readJSON(USERS_FILE);
+    for (let user of users) {
+        let userId = user.id;
+        let today = getServerToday();
+        let syncRes = runServerSyncEngine(userId, today);
+        let workoutStreak = calculateWorkoutStreak(userId);
+
+        let hydData = getHydrationData(userId);
+        let consumed = hydData.logs[today] || 0;
+        let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
+
+        let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
+                      `📅 *Date:* ${today}\n\n` +
+                      `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
+                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m\n` +
+                      `💧 *Hydration:* ${consumed} ml / ${hydData.goal} ml (${percent}%)\n` +
+                      `🧼 *Hygiene:* Logged & Checked\n\n` +
+                      `*"Rest well, Monster. No disturbances. Tomorrow we conquer again."* 🛡️`;
+
+        await sendTelegramAlert(message, `night_audit_${today}_${userId}`);
+    }
+}, { scheduled: true, timezone: "Asia/Kolkata" });
+
 // --- HTML PAGE ROUTES ---
+app.get('/hydration', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hydration.html')); });
 app.get('/hygiene', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
 app.get('/study', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'study.html')); });
 app.get('/workout', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'workout.html')); });
@@ -364,34 +443,74 @@ app.get('/api/control-panel/session', (req, res) => {
     }
 });
 
-// --- AI MONSTER COACH & ROAST ENDPOINT ---
-app.get('/api/monster-coach', requireAuth, (req, res) => {
+// --- HYDRATION API ROUTES ---
+app.get('/api/hydration', requireAuth, (req, res) => {
     const userId = req.session.userId;
     const today = getServerToday();
-    let syncRes = runServerSyncEngine(userId, today);
-    
-    let roastsAndMotivation = [
-        "Is that all you've got? The iron doesn't care about your excuses, Monster!",
-        "Mediocrity is a disease. Get back to work and conquer your daily targets!",
-        "An apex predator doesn't sleep while goals are pending. Push harder!",
-        "Your future self is watching you right now. Don't let him down.",
-        "Absolute discipline means executing even when you don't feel like it. Move!"
-    ];
+    const targetDate = req.query.date || today;
+    let hydData = getHydrationData(userId);
 
-    let successQuotes = [
-        "Unstoppable force! You are dominating the reality matrix today.",
-        "Another day, another absolute slaughter of weakness. Keep grinding!",
-        "Elite performance detected. You are officially entering Beast Mode."
-    ];
+    let consumed = hydData.logs[targetDate] || 0;
+    let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
 
-    let message = "";
-    if (syncRes.allWorkoutsDone && syncRes.studyDone) {
-        message = successQuotes[Math.floor(Math.random() * successQuotes.length)];
-    } else {
-        message = roastsAndMotivation[Math.floor(Math.random() * roastsAndMotivation.length)];
+    res.json({
+        success: true,
+        goal: hydData.goal,
+        glassSize: hydData.glassSize,
+        consumed,
+        percent,
+        history: hydData.logs,
+        serverDate: targetDate
+    });
+});
+
+app.post('/api/hydration/drink', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+    const today = getServerToday();
+    let hydData = getHydrationData(userId);
+
+    let current = hydData.logs[today] || 0;
+    let added = hydData.glassSize;
+    let newTotal = current + added;
+    hydData.logs[today] = newTotal;
+
+    let dataAll = readJSON(HYDRATION_FILE);
+    dataAll[userId] = hydData;
+    writeJSON(HYDRATION_FILE, dataAll);
+
+    let percent = Math.min(Math.round((newTotal / hydData.goal) * 100), 100);
+
+    if (percent >= 100) {
+        let habits = readJSON(HABITS_FILE);
+        let habitLogs = readJSON(HABIT_LOGS_FILE);
+        let waterHabit = habits.find(h => h.userId === userId && h.name.toLowerCase().includes('water'));
+        if (waterHabit) {
+            let logIndex = habitLogs.findIndex(l => l.habitId === waterHabit.id && l.date === today);
+            if (logIndex > -1) {
+                habitLogs[logIndex].completed = true;
+            } else {
+                habitLogs.push({ id: Date.now().toString(), userId, habitId: waterHabit.id, date: today, completed: true });
+            }
+            writeJSON(HABIT_LOGS_FILE, habitLogs);
+        }
     }
 
-    res.json({ success: true, coachMessage: message, xp: getUserXP(userId) });
+    res.json({ success: true, consumed: newTotal, percent, ...getUserXP(userId) });
+});
+
+app.post('/api/hydration/settings', requireAuth, (req, res) => {
+    const userId = req.session.userId;
+    const { goal, glassSize } = req.body;
+    let hydData = getHydrationData(userId);
+
+    if (goal) hydData.goal = parseInt(goal);
+    if (glassSize) hydData.glassSize = parseInt(glassSize);
+
+    let dataAll = readJSON(HYDRATION_FILE);
+    dataAll[userId] = hydData;
+    writeJSON(HYDRATION_FILE, dataAll);
+
+    res.json({ success: true, message: "Hydration settings updated." });
 });
 
 // --- HABIT TRACKER API ---
@@ -806,6 +925,7 @@ app.post('/api/telegram/trigger-sunday-hygiene', requireAuth, async (req, res) =
 app.listen(PORT, () => {
     console.log(`🚀 MONSTER MODE Server running at http://localhost:${PORT}`);
 });
+
 // External Ping Route to Keep Server Alive & Trigger Cron Checks
 app.get('/api/cron/ping', (req, res) => {
     console.log("⏰ [Cron Ping Received]: Keeping server awake and active.");
