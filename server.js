@@ -568,7 +568,13 @@ app.get('/api/notes-reminders', requireAuth, (req, res) => {
 });
 
 app.post('/api/notes-reminders', requireAuth, (req, res) => {
-    const { title, description, isReminder, date, time } = req.body;
+    const { title, description, isReminder, date, time, actionPassword } = req.body;
+    
+    // --- SECURITY GATE FOR ADD ---
+    if (actionPassword !== "monster*jay@8116") {
+        return res.status(403).json({ error: "❌ Incorrect ADD Password! (Required: monster*jay@8116)" });
+    }
+
     if (!title) return res.status(400).json({ error: "Title is required." });
 
     let data = readJSON(NOTES_REMINDERS_FILE);
@@ -605,6 +611,13 @@ app.post('/api/notes-reminders/:id/toggle', requireAuth, async (req, res) => {
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
+    const { actionPassword } = req.body;
+    
+    // --- SECURITY GATE FOR DELETE ---
+    if (actionPassword !== "monster*jay@1050") {
+        return res.status(403).json({ error: "❌ Incorrect DELETE Password! (Required: monster*jay@1050)" });
+    }
+
     let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
 
