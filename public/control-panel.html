@@ -69,7 +69,6 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <a href="dashboard.html" class="text-xs font-bold text-slate-300 hover:text-white uppercase tracking-wider transition">📊 Dashboard</a>
             <button onclick="adminLogout()" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition cursor-pointer">
                 Log Out
             </button>
@@ -900,8 +899,15 @@
         });
 
         async function adminLogout() {
-            await fetch('/api/control-panel/logout', { method: 'POST' });
-            window.location.href = 'index.html';
+            try {
+                await fetch('/api/control-panel/logout', { method: 'POST' });
+                showStatusMessage("🛡️ Admin Logged Out Successfully", "success");
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } catch (err) {
+                window.location.href = 'index.html';
+            }
         }
 
         // Initial Loads
