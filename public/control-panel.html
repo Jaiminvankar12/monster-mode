@@ -83,7 +83,7 @@
             <p class="text-xs text-slate-400 mt-1">Select a vector tab below to deploy, edit, and manage entries.</p>
         </div>
 
-        <!-- GLOBAL SYSTEM SECURITY LOCK (Placed Right Below Master Command Header) -->
+        <!-- GLOBAL SYSTEM SECURITY LOCK -->
         <div class="glass-card p-6 rounded-2xl border border-red-500/35 mb-8">
             <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2">🔐 Global System Security Lock</h3>
             <p class="text-xs text-zinc-400 mb-4">Freeze or unfreeze all execution vectors across portals using Master Admin password.</p>
@@ -151,8 +151,8 @@
                         <input type="text" id="habitDesc" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Zero distractions allowed">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date (Planning Mode)</label>
-                        <input type="date" id="habitStartDate" value="2026-09-10" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                        <input type="date" id="habitStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" id="habitSubmitBtn" class="flex-1 py-4 red-glow-tab hover:opacity-95 text-white font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer mt-2">
@@ -206,6 +206,10 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label>
                         <input type="text" id="workoutCategory" value="Strength" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                        <input type="date" id="workoutStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
+                    </div>
                     <div class="flex gap-2">
                         <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
                             Deploy Workout
@@ -237,6 +241,10 @@
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
                         <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                        <input type="date" id="studyStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
@@ -272,6 +280,10 @@
                             <option value="daily">Daily Routine</option>
                             <option value="sunday">Sunday Special Grooming</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                        <input type="date" id="hygieneStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" id="hygieneSubmitBtn" class="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">
@@ -612,7 +624,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${h.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-10'}</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-11'}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editHabit(${JSON.stringify(h)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -631,7 +643,7 @@
             document.getElementById('habitName').value = h.name;
             document.getElementById('habitCategory').value = h.category || '';
             document.getElementById('habitDesc').value = h.description || '';
-            document.getElementById('habitStartDate').value = h.startDate || '2026-09-10';
+            document.getElementById('habitStartDate').value = h.startDate || '2026-09-11';
             
             document.getElementById('habitFormTitle').innerHTML = '<span>✏️</span> Edit Habit Vector';
             document.getElementById('habitSubmitBtn').innerText = 'Update Habit Vector';
@@ -641,7 +653,7 @@
         function resetHabitForm() {
             document.getElementById('editHabitId').value = '';
             document.getElementById('createHabitForm').reset();
-            document.getElementById('habitStartDate').value = '2026-09-10';
+            document.getElementById('habitStartDate').value = '2026-09-11';
             document.getElementById('habitFormTitle').innerHTML = '<span>➕</span> Add Habit Vector';
             document.getElementById('habitSubmitBtn').innerText = 'Deploy Habit Vector';
             document.getElementById('habitCancelBtn').classList.add('hidden');
@@ -653,7 +665,7 @@
             const name = document.getElementById('habitName').value;
             const category = document.getElementById('habitCategory').value || 'General';
             const description = document.getElementById('habitDesc').value;
-            const startDate = document.getElementById('habitStartDate').value || "2026-09-10";
+            const startDate = document.getElementById('habitStartDate').value || "2026-09-11";
 
             try {
                 let res, data;
@@ -717,7 +729,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'}</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'} | Start: ${w.startDate || '2026-09-11'}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editWorkout(${JSON.stringify(w)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -738,6 +750,7 @@
             document.getElementById('workoutValue').value = w.value || w.reps || 10;
             document.getElementById('workoutUnit').value = w.unit || 'reps';
             document.getElementById('workoutCategory').value = w.category || 'Strength';
+            document.getElementById('workoutStartDate').value = w.startDate || '2026-09-11';
 
             document.getElementById('workoutFormTitle').innerText = '🏋️ Edit Exercise Vector';
             document.getElementById('workoutSubmitBtn').innerText = 'Update Workout';
@@ -747,6 +760,7 @@
         function resetWorkoutForm() {
             document.getElementById('editWorkoutId').value = '';
             document.getElementById('createWorkoutForm').reset();
+            document.getElementById('workoutStartDate').value = '2026-09-11';
             document.getElementById('workoutFormTitle').innerText = '🏋️ Deploy Exercise Vector';
             document.getElementById('workoutSubmitBtn').innerText = 'Deploy Workout';
             document.getElementById('workoutCancelBtn').classList.add('hidden');
@@ -760,6 +774,7 @@
             const value = document.getElementById('workoutValue').value;
             const unit = document.getElementById('workoutUnit').value;
             const category = document.getElementById('workoutCategory').value;
+            const startDate = document.getElementById('workoutStartDate').value || "2026-09-11";
 
             try {
                 let res, data;
@@ -767,7 +782,7 @@
                     res = await fetch(`/api/workouts/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category })
+                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -781,7 +796,7 @@
                     res = await fetch('/api/workouts', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category, startDate: "2026-09-10" })
+                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -816,7 +831,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
-                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day</span>
+                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editStudy(${JSON.stringify(c)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -834,6 +849,7 @@
             document.getElementById('editStudyId').value = c.id;
             document.getElementById('studyName').value = c.name;
             document.getElementById('studyTarget').value = c.dailyTargetMinutes || 120;
+            document.getElementById('studyStartDate').value = c.startDate || '2026-09-11';
 
             document.getElementById('studyFormTitle').innerText = '📚 Edit Study Subject';
             document.getElementById('studySubmitBtn').innerText = 'Update Study Subject';
@@ -844,6 +860,7 @@
             document.getElementById('editStudyId').value = '';
             document.getElementById('createStudyForm').reset();
             document.getElementById('studyTarget').value = 120;
+            document.getElementById('studyStartDate').value = '2026-09-11';
             document.getElementById('studyFormTitle').innerText = '📚 Create Study Subject';
             document.getElementById('studySubmitBtn').innerText = 'Deploy Study Vector';
             document.getElementById('studyCancelBtn').classList.add('hidden');
@@ -854,6 +871,7 @@
             const editId = document.getElementById('editStudyId').value;
             const name = document.getElementById('studyName').value;
             const dailyTargetMinutes = document.getElementById('studyTarget').value;
+            const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
 
             try {
                 let res, data;
@@ -861,7 +879,7 @@
                     res = await fetch(`/api/study/categories/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -875,7 +893,7 @@
                     res = await fetch('/api/study/categories', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate: "2026-09-10" })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -910,7 +928,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${t.name}</h4>
-                                <span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span>
+                                <span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency} | Start: ${t.startDate || '2026-09-11'}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editHygiene(${JSON.stringify(t)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -928,6 +946,7 @@
             document.getElementById('editHygieneId').value = t.id;
             document.getElementById('hygieneName').value = t.name;
             document.getElementById('hygieneFreq').value = t.frequency || 'daily';
+            document.getElementById('hygieneStartDate').value = t.startDate || '2026-09-11';
 
             document.getElementById('hygieneFormTitle').innerText = '🧼 Edit Grooming Task';
             document.getElementById('hygieneSubmitBtn').innerText = 'Update Hygiene Task';
@@ -937,6 +956,7 @@
         function resetHygieneForm() {
             document.getElementById('editHygieneId').value = '';
             document.getElementById('createHygieneForm').reset();
+            document.getElementById('hygieneStartDate').value = '2026-09-11';
             document.getElementById('hygieneFormTitle').innerText = '🧼 Add Grooming Task';
             document.getElementById('hygieneSubmitBtn').innerText = 'Deploy Hygiene Task';
             document.getElementById('hygieneCancelBtn').classList.add('hidden');
@@ -947,6 +967,7 @@
             const editId = document.getElementById('editHygieneId').value;
             const name = document.getElementById('hygieneName').value;
             const frequency = document.getElementById('hygieneFreq').value;
+            const startDate = document.getElementById('hygieneStartDate').value || "2026-09-11";
 
             try {
                 let res, data;
@@ -954,7 +975,7 @@
                     res = await fetch(`/api/hygiene/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency })
+                        body: JSON.stringify({ name, frequency, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -968,7 +989,7 @@
                     res = await fetch('/api/hygiene', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency, startDate: "2026-09-10" })
+                        body: JSON.stringify({ name, frequency, startDate })
                     });
                     data = await res.json();
                     if (res.ok) {

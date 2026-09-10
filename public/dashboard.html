@@ -71,6 +71,10 @@
             <div>
                 <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">System Command Center</h2>
                 <p class="text-xs text-slate-400 mt-1">Operational matrix active. Real-time analytics and performance overview.</p>
+                <!-- Current Date and Day Display -->
+                <div id="currentDateDayDisplay" class="text-xs font-extrabold text-amber-400 mt-2 flex items-center gap-2">
+                    <span>📅</span> <span>Loading Date & Day...</span>
+                </div>
             </div>
             <div id="userEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 whitespace-nowrap">
                 Verifying Session...
@@ -202,6 +206,16 @@
             if (banner) banner.classList.add('hidden');
         }
 
+        function displayCurrentDateAndDay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', options);
+            const container = document.getElementById('currentDateDayDisplay');
+            if (container) {
+                container.innerHTML = `<span>📅</span> <span>Operational Baseline: ${formattedDate}</span>`;
+            }
+        }
+
         function saveDailyMission(val) {
             localStorage.setItem('monster_daily_mission', val);
         }
@@ -276,6 +290,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             checkPreLaunchLock();
+            displayCurrentDateAndDay();
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
             applyTheme(savedTheme);
 
@@ -443,4 +458,4 @@
         verifyGlobalSystemLock();
     </script>
 </body>
-</html> 
+</html>

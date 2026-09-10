@@ -15,7 +15,7 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
 
-    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <!-- Pre-Launch Banner Hidden for Full Management Access -->
     <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
         <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full glow-red space-y-4">
             <span class="text-4xl">🔒</span>
@@ -89,7 +89,7 @@
             <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
         </div>
 
-        <!-- VIEW-ONLY NOTES & REMINDERS SECTION (No Streaks, No Progress Bars) -->
+        <!-- VIEW-ONLY NOTES & REMINDERS SECTION -->
         <div class="pt-6 border-t border-white/5">
             <div class="mb-4 flex items-center justify-between">
                 <div>
@@ -108,16 +108,11 @@
 
     <script>
         let currentSelectedDate = "";
-        // Locked strictly to official launch date September 11, 2026
         const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
-            } else {
-                document.getElementById('prelaunchBanner').classList.add('hidden');
-            }
+            const banner = document.getElementById('prelaunchBanner');
+            if (banner) banner.classList.add('hidden');
         }
 
         async function fetchHabits(dateStr = "") {
@@ -143,7 +138,7 @@
                     document.getElementById('habitStreakLabel').innerText = `${data.habitStreak || data.currentStreak || 0} Days`;
 
                     updateLockBanner(data.dateStatus || 'UNLOCKED');
-                    renderHabits(data.habits, data.dateStatus);
+                    renderHabits(data.habits, dateInput.value);
                 }
             } catch (err) {
                 console.error("Error fetching habits:", err);
@@ -215,29 +210,30 @@
             }
         }
 
-        function renderHabits(habits, dateStatus) {
+        function renderHabits(habits, viewingDate) {
             const container = document.getElementById('habitsContainer');
             if (habits.length === 0) {
                 container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No habits deployed in the system.</p><p class="text-red-500/70 text-xs mt-1">Please add habits from your Control Panel.</p></div>`;
                 return;
             }
 
-            const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
-
             container.innerHTML = habits.map(h => {
                 const startDateStr = h.startDate || '2026-09-11';
+                const isNotStarted = viewingDate < startDateStr;
+
                 return `
                     <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
                         <div class="space-y-1.5 min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Start: ${startDateStr}</span>
                                 <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">🔥 Streak: ${h.streak || 0} Days</span>
+                                ${isNotStarted ? '<span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-lg font-black uppercase tracking-widest animate-pulse">⏳ Execution Not Started Yet</span>' : ''}
                             </div>
                             <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${h.name}</h3>
                             <p class="text-xs text-zinc-400 font-medium truncate">${h.description || 'No specific rules defined.'}</p>
                         </div>
                         <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
-                            <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                            <button ${isNotStarted ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isNotStarted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
                                 ${h.completedToday ? '✓ Complete' : '○ Pending'}
                             </button>
                         </div>
@@ -274,59 +270,6 @@
             fetchHabits();
             fetchTrackerNotes();
         });
-
-        async function verifyGlobalSystemLock() {
-            try {
-                const res = await fetch('/api/system-lock');
-                const data = await res.json();
-                if (data.locked) {
-                    let overlay = document.getElementById('globalSystemLockOverlay');
-                    if (!overlay) {
-                        overlay = document.createElement('div');
-                        overlay.id = 'globalSystemLockOverlay';
-                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
-                        overlay.innerHTML = `
-                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
-                                <span class="text-4xl">🔐</span>
-                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
-                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
-                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
-                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
-                                    Authorize & Unlock
-                                </button>
-                            </div>
-                        `;
-                        document.body.appendChild(overlay);
-                    }
-                }
-            } catch (err) {}
-        }
-
-        async function unlockSystemGlobal() {
-            const adminPassword = document.getElementById('globalUnlockPass').value;
-            try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: false, adminPassword })
-                });
-                if (res.ok) {
-                    const overlay = document.getElementById('globalSystemLockOverlay');
-                    if (overlay) overlay.remove();
-                    location.reload();
-                } else {
-                    alert("🔒 Incorrect Admin Password!");
-                }
-            } catch (err) {
-                alert("Authentication error.");
-            }
-        }
-
-        verifyGlobalSystemLock();
-        function checkPreLaunchLock() {
-    const banner = document.getElementById('prelaunchBanner');
-    if (banner) banner.classList.add('hidden');
-}
     </script>
 </body>
 </html>
