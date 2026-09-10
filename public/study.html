@@ -1,512 +1,563 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MONSTER MODE ON — Deep-Work Study Tracker</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-        <style>
-            * { font-family: 'Outfit', sans-serif; }
-            body { background-color: #07090f; color: #f3f4f6; }
-            .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
-            .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
-        </style>
-    </head>
-    <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white overflow-x-hidden">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONSTER MODE ON — Deep-Work Study Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        body { background-color: #07090f; color: #f3f4f6; }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white overflow-x-hidden">
 
-        <!-- Pre-Launch / Locked Notice Banner Overlay -->
-        <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
-            <div class="glass-card p-8 rounded-3xl border-2 border-blue-500/50 max-w-xl w-full glow-blue space-y-4">
-                <span class="text-4xl">🔒</span>
-                <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
-                <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                    Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
-                </p>
-                <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
-                    Status: Immutable / Not Editable Yet
+    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass-card p-8 rounded-3xl border-2 border-blue-500/50 max-w-xl w-full glow-blue space-y-4">
+            <span class="text-4xl">🔒</span>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
+            </p>
+            <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+                Status: Immutable / Not Editable Yet
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
+        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-lg">📚</div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-blue-400">ACADEMY</span></h1>
+                    <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Deep-Work & Future Building</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
+            <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
+            <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8">
+        
+        <!-- Header & Target Overview -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <div>
+                <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">🧠 Deep Work Matrix</span>
+                <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Academic & Skill Command</h2>
+                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
+            </div>
+            <!-- Target vs Progress Summary Badge with Study Streak -->
+            <div class="glass-card px-6 py-4 rounded-2xl border border-blue-500/30 flex items-center gap-4 glow-blue bg-blue-500/5 w-full md:w-auto justify-around md:justify-start">
+                <div>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Daily Target</span>
+                    <span id="targetTimeLabel" class="text-base sm:text-lg font-black text-blue-400 tracking-wider">0h 00m</span>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Studied</span>
+                    <span id="studiedTimeLabel" class="text-base sm:text-lg font-black text-emerald-400 tracking-wider">0h 00m</span>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Study Streak</span>
+                    <span id="studyStreakLabel" class="text-base sm:text-lg font-black text-amber-400 tracking-wider">🔥 0 Days</span>
                 </div>
             </div>
         </div>
 
-        <!-- Top Navigation -->
-        <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
-            <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-lg">📚</div>
-                    <div>
-                        <h1 class="text-sm sm:text-base font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-blue-400">ACADEMY</span></h1>
-                        <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Deep-Work & Future Building</p>
-                    </div>
-                </div>
+        <!-- Pomodoro Focus Timer Matrix -->
+        <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-blue-500 glow-blue">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
+                    <span>⏱️</span> Pomodoro Deep Work Focus Engine
+                </span>
+                <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Focus Mode (25m)</span>
             </div>
-            <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
-                <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
-                <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
-            </nav>
-        </header>
-
-        <!-- Main Container -->
-        <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8">
             
-            <!-- Header & Target Overview -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                <div>
-                    <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">🧠 Deep Work Matrix</span>
-                    <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Academic & Skill Command</h2>
-                    <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <!-- Clock Display -->
+                <div class="text-5xl sm:text-6xl font-black text-white tracking-wider font-mono" id="pomoTimerDisplay">
+                    25:00
                 </div>
-                <!-- Target vs Progress Summary Badge with Study Streak -->
-                <div class="glass-card px-6 py-4 rounded-2xl border border-blue-500/30 flex items-center gap-4 glow-blue bg-blue-500/5 w-full md:w-auto justify-around md:justify-start">
-                    <div>
-                        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Daily Target</span>
-                        <span id="targetTimeLabel" class="text-base sm:text-lg font-black text-blue-400 tracking-wider">0h 00m</span>
+
+                <!-- Controls & Custom Minute Input -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                    <div class="flex items-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Mins:</span>
+                        <input type="number" id="customPomoMinutes" value="25" min="1" max="1440" onchange="setCustomPomoDuration(this.value)" class="bg-transparent text-white text-xs font-black w-16 outline-none text-center">
                     </div>
-                    <div class="h-8 w-[1px] bg-white/10"></div>
-                    <div>
-                        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Studied</span>
-                        <span id="studiedTimeLabel" class="text-base sm:text-lg font-black text-emerald-400 tracking-wider">0h 00m</span>
-                    </div>
-                    <div class="h-8 w-[1px] bg-white/10"></div>
-                    <div>
-                        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Study Streak</span>
-                        <span id="studyStreakLabel" class="text-base sm:text-lg font-black text-amber-400 tracking-wider">🔥 0 Days</span>
-                    </div>
+                    <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto">
+                        <option value="">Select Subject for Pomo</option>
+                    </select>
+                    <button onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
+                        Start Focus
+                    </button>
+                    <button onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                        Reset
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Pomodoro Focus Timer Matrix -->
-            <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-blue-500 glow-blue">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
-                        <span>⏱️</span> Pomodoro Deep Work Focus Engine
-                    </span>
-                    <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Focus Mode (25m)</span>
+        <!-- Progress Bar & Status Section -->
+        <div class="glass-card p-6 rounded-2xl mb-8 space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Today's Academic Progress</span>
+                <span id="progressPercentText" class="text-xs font-black text-blue-400">0%</span>
+            </div>
+            <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
+                <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-emerald-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-2">
+                <div id="studyStatusBadge" class="px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-400 border border-white/5">
+                    Loading Status...
                 </div>
-                
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <!-- Clock Display -->
-                    <div class="text-5xl sm:text-6xl font-black text-white tracking-wider font-mono" id="pomoTimerDisplay">
-                        25:00
-                    </div>
+                <div class="text-xs text-zinc-500 font-semibold" id="sessionCountText">0 Sessions Logged</div>
+            </div>
+        </div>
 
-                    <!-- Controls & Custom Minute Input -->
-                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <div class="flex items-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto">
-                            <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Mins:</span>
-                            <input type="number" id="customPomoMinutes" value="25" min="1" max="1440" onchange="setCustomPomoDuration(this.value)" class="bg-transparent text-white text-xs font-black w-16 outline-none text-center">
+        <!-- Grid Layout: Add Category & Log Session / View Sessions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Manage Categories & Log Session -->
+            <div class="space-y-6">
+                <!-- Add Category Form -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4">📂 Create Study Subject</h3>
+                    <form id="createCategoryForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject / Category Name</label>
+                            <input type="text" id="categoryName" required placeholder="e.g., Web Dev : P68 / DSA" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
                         </div>
-                        <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto">
-                            <option value="">Select Subject for Pomo</option>
-                        </select>
-                        <button onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
-                            Start Focus
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
+                            <input type="number" id="categoryTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
+                            Add Category
                         </button>
-                        <button onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                            Reset
+                    </form>
+                </div>
+
+                <!-- Log Study Session Form -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
+                    <form id="logSessionForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Select Subject</label>
+                            <select id="sessionCategorySelect" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                                <option value="">Loading categories...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Topic / Chapter</label>
+                            <input type="text" id="sessionTopic" required placeholder="e.g., Arrays & HashMaps" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Duration (Minutes)</label>
+                            <input type="number" id="sessionDuration" required value="45" min="5" step="5" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition cursor-pointer">
+                            Record Study Time
                         </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Column: Active Subjects & Today's Logged Sessions -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Subject Categories List -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
+                    <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <p class="text-xs text-zinc-500">Loading categories...</p>
+                    </div>
+                </div>
+
+                <!-- Today's Logged Sessions -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📖 Today's Study Sessions</h3>
+                    <div id="sessionsList" class="space-y-3">
+                        <p class="text-xs text-zinc-500">No study sessions recorded for today.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Progress Bar & Status Section -->
-            <div class="glass-card p-6 rounded-2xl mb-8 space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Today's Academic Progress</span>
-                    <span id="progressPercentText" class="text-xs font-black text-blue-400">0%</span>
-                </div>
-                <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
-                    <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-emerald-500 h-full w-0 transition-all duration-500"></div>
-                </div>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-2">
-                    <div id="studyStatusBadge" class="px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-400 border border-white/5">
-                        Loading Status...
-                    </div>
-                    <div class="text-xs text-zinc-500 font-semibold" id="sessionCountText">0 Sessions Logged</div>
-                </div>
-            </div>
+        </div>
+    </main>
 
-            <!-- Grid Layout: Add Category & Log Session / View Sessions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <!-- Left Column: Manage Categories & Log Session -->
-                <div class="space-y-6">
-                    <!-- Add Category Form -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4">📂 Create Study Subject</h3>
-                        <form id="createCategoryForm" class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject / Category Name</label>
-                                <input type="text" id="categoryName" required placeholder="e.g., Web Dev : P68 / DSA" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
-                                <input type="number" id="categoryTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                            </div>
-                            <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
-                                Add Category
-                            </button>
-                        </form>
-                    </div>
+    <script>
+        let categoriesData = [];
+        let pomoTimer = null;
+        let isPomoRunning = false;
+        let isBreakMode = false;
+        const LAUNCH_DATE = "2026-09-11";
 
-                    <!-- Log Study Session Form -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
-                        <form id="logSessionForm" class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Select Subject</label>
-                                <select id="sessionCategorySelect" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                                    <option value="">Loading categories...</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Topic / Chapter</label>
-                                <input type="text" id="sessionTopic" required placeholder="e.g., Arrays & HashMaps" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Duration (Minutes)</label>
-                                <input type="number" id="sessionDuration" required value="45" min="5" step="5" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                            </div>
-                            <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition cursor-pointer">
-                                Record Study Time
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Right Column: Active Subjects & Today's Logged Sessions -->
-                <div class="lg:col-span-2 space-y-6">
-                    <!-- Subject Categories List -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
-                        <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <p class="text-xs text-zinc-500">Loading categories...</p>
-                        </div>
-                    </div>
-
-                    <!-- Today's Logged Sessions -->
-                    <div class="glass-card p-6 rounded-2xl">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📖 Today's Study Sessions</h3>
-                        <div id="sessionsList" class="space-y-3">
-                            <p class="text-xs text-zinc-500">No study sessions recorded for today.</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-        <script>
-            let categoriesData = [];
-            let pomoTimer = null;
-            let isPomoRunning = false;
-            let isBreakMode = false;
-            const LAUNCH_DATE = "2026-09-10";
-
-            function checkPreLaunchLock() {
-                const todayStr = new Date().toISOString().split('T')[0];
-                if (todayStr < LAUNCH_DATE) {
-                    document.getElementById('prelaunchBanner').classList.remove('hidden');
-                }
+        function checkPreLaunchLock() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            } else {
+                document.getElementById('prelaunchBanner').classList.add('hidden');
             }
+        }
 
-            let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-            let pomoDurationMinutes = savedDefaultMins;
-            let pomoSecondsLeft = pomoDurationMinutes * 60;
+        let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
+        let pomoDurationMinutes = savedDefaultMins;
+        let pomoSecondsLeft = pomoDurationMinutes * 60;
 
-            window.addEventListener('DOMContentLoaded', () => {
-                checkPreLaunchLock();
-                const inputField = document.getElementById('customPomoMinutes');
-                if(inputField) inputField.value = pomoDurationMinutes;
-                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                updatePomoDisplay();
-            });
+        window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
+            const inputField = document.getElementById('customPomoMinutes');
+            if(inputField) inputField.value = pomoDurationMinutes;
+            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
+            updatePomoDisplay();
+        });
 
-            function playBeepSound() {
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
-                    oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.8);
-                } catch (e) {}
-            }
+        function playBeepSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.8);
+            } catch (e) {}
+        }
 
-            async function fetchStudyData() {
-                try {
-                    const res = await fetch('/api/study/sessions');
-                    if(res.status === 401 || res.status === 403) {
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                    const data = await res.json();
-                    if (data.success) {
-                        categoriesData = data.categories;
-                        document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate}`;
-                        
-                        document.getElementById('targetTimeLabel').innerText = formatMinutes(data.totalTargetMinutes);
-                        document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes);
-                        document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
-                        
-                        document.getElementById('progressPercentText').innerText = `${data.progressPercent}%`;
-                        document.getElementById('progressBarFill').style.width = `${data.progressPercent}%`;
-                        document.getElementById('sessionCountText').innerText = `${data.sessions.length} Sessions Logged`;
-
-                        const badge = document.getElementById('studyStatusBadge');
-                        if (data.isDone) {
-                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                            badge.innerText = "✅ STATUS: DONE (TARGET MET)";
-                        } else {
-                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
-                            badge.innerText = "⏳ STATUS: IN PROGRESS";
-                        }
-
-                        renderCategories(data.categories);
-                        renderSessions(data.sessions, data.categories);
-                        populateSelects(data.categories);
-                    }
-                } catch (err) {}
-            }
-
-            function formatMinutes(totalMins) {
-                const h = Math.floor(totalMins / 60);
-                const m = totalMins % 60;
-                return `${h}h ${m < 10 ? '0' : ''}${m}m`;
-            }
-
-            function renderCategories(categories) {
-                const container = document.getElementById('categoriesList');
-                if (categories.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No categories created yet.</p>`;
+        async function fetchStudyData() {
+            try {
+                const res = await fetch('/api/study/sessions');
+                if(res.status === 401 || res.status === 403) {
+                    window.location.href = 'index.html';
                     return;
                 }
-                container.innerHTML = categories.map(c => `
+                const data = await res.json();
+                if (data.success) {
+                    categoriesData = data.categories;
+                    document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate}`;
+                    
+                    document.getElementById('targetTimeLabel').innerText = formatMinutes(data.totalTargetMinutes);
+                    document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes);
+                    document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
+                    
+                    document.getElementById('progressPercentText').innerText = `${data.progressPercent}%`;
+                    document.getElementById('progressBarFill').style.width = `${data.progressPercent}%`;
+                    document.getElementById('sessionCountText').innerText = `${data.sessions.length} Sessions Logged`;
+
+                    const badge = document.getElementById('studyStatusBadge');
+                    if (data.isDone) {
+                        badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                        badge.innerText = "✅ STATUS: DONE (TARGET MET)";
+                    } else {
+                        badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
+                        badge.innerText = "⏳ STATUS: IN PROGRESS";
+                    }
+
+                    renderCategories(data.categories);
+                    renderSessions(data.sessions, data.categories);
+                    populateSelects(data.categories);
+                }
+            } catch (err) {}
+        }
+
+        function formatMinutes(totalMins) {
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            return `${h}h ${m < 10 ? '0' : ''}${m}m`;
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById('categoriesList');
+            if (categories.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500">No categories created yet.</p>`;
+                return;
+            }
+            container.innerHTML = categories.map(c => `
+                <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
+                        <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
+                    </div>
+                    <button onclick="deleteCategory('${c.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function renderSessions(sessions, categories) {
+            const container = document.getElementById('sessionsList');
+            if (sessions.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500">No study sessions recorded for today.</p>`;
+                return;
+            }
+            container.innerHTML = sessions.map(s => {
+                const cat = categories.find(c => c.id === s.categoryId);
+                return `
                     <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
                         <div class="min-w-0">
-                            <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
-                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
+                            <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
+                            <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
+                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes</p>
                         </div>
-                        <button onclick="deleteCategory('${c.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Delete</button>
+                        <button onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
                     </div>
-                `).join('');
+                `;
+            }).join('');
+        }
+
+        function populateSelects(categories) {
+            const select1 = document.getElementById('sessionCategorySelect');
+            const select2 = document.getElementById('pomoCategorySelect');
+
+            if (categories.length === 0) {
+                select1.innerHTML = `<option value="">Create a category first</option>`;
+                select2.innerHTML = `<option value="">Create a category first</option>`;
+                return;
             }
 
-            function renderSessions(sessions, categories) {
-                const container = document.getElementById('sessionsList');
-                if (sessions.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-zinc-500">No sessions recorded yet today.</p>`;
-                    return;
-                }
-                container.innerHTML = sessions.map(s => {
-                    const cat = categories.find(c => c.id === s.categoryId);
-                    return `
-                        <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
-                            <div class="min-w-0">
-                                <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
-                                <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
-                                <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes</p>
-                            </div>
-                            <button onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
-                        </div>
-                    `;
-                }).join('');
+            const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
+                <option value="${c.id}">${c.name} (${c.dailyTargetMinutes}m target)</option>
+            `).join('');
+
+            select1.innerHTML = optionsHtml;
+            select2.innerHTML = optionsHtml;
+        }
+
+        function updatePomoDisplay() {
+            let mins = Math.floor(pomoSecondsLeft / 60);
+            let secs = pomoSecondsLeft % 60;
+            document.getElementById('pomoTimerDisplay').innerText = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function setCustomPomoDuration(val) {
+            if (isPomoRunning) {
+                alert("Please pause or reset the active timer before changing duration.");
+                return;
             }
+            let mins = parseInt(val);
+            if (isNaN(mins) || mins < 1) mins = 25;
+            pomoDurationMinutes = mins;
+            pomoSecondsLeft = pomoDurationMinutes * 60;
+            isBreakMode = false;
+            updatePomoDisplay();
+            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
+            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
+        }
 
-            function populateSelects(categories) {
-                const select1 = document.getElementById('sessionCategorySelect');
-                const select2 = document.getElementById('pomoCategorySelect');
-
-                if (categories.length === 0) {
-                    select1.innerHTML = `<option value="">Create a category first</option>`;
-                    select2.innerHTML = `<option value="">Create a category first</option>`;
-                    return;
-                }
-
-                const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
-                    <option value="${c.id}">${c.name} (${c.dailyTargetMinutes}m target)</option>
-                `).join('');
-
-                select1.innerHTML = optionsHtml;
-                select2.innerHTML = optionsHtml;
-            }
-
-            function updatePomoDisplay() {
-                let mins = Math.floor(pomoSecondsLeft / 60);
-                let secs = pomoSecondsLeft % 60;
-                document.getElementById('pomoTimerDisplay').innerText = 
-                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            }
-
-            function setCustomPomoDuration(val) {
-                if (isPomoRunning) {
-                    alert("Please pause or reset the active timer before changing duration.");
-                    return;
-                }
-                let mins = parseInt(val);
-                if (isNaN(mins) || mins < 1) mins = 25;
-                pomoDurationMinutes = mins;
-                pomoSecondsLeft = pomoDurationMinutes * 60;
-                isBreakMode = false;
-                updatePomoDisplay();
-                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-            }
-
-            function startPomodoro() {
-                if (isPomoRunning) {
-                    clearInterval(pomoTimer);
-                    isPomoRunning = false;
-                    document.getElementById('pomoStartBtn').innerText = isBreakMode ? "Resume Break" : "Resume Focus";
-                    document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', isBreakMode ? 'bg-emerald-600' : 'bg-blue-600');
-                    return;
-                }
-
-                if (!isBreakMode) {
-                    const categoryId = document.getElementById('pomoCategorySelect').value;
-                    if (!categoryId) {
-                        alert("Please select a study subject for the Pomodoro session!");
-                        return;
-                    }
-                }
-
-                isPomoRunning = true;
-                document.getElementById('pomoStartBtn').innerText = "Pause";
-                document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
-
-                pomoTimer = setInterval(() => {
-                    if (pomoSecondsLeft > 0) {
-                        pomoSecondsLeft--;
-                        updatePomoDisplay();
-                    } else {
-                        clearInterval(pomoTimer);
-                        isPomoRunning = false;
-                        playBeepSound();
-
-                        if (!isBreakMode) {
-                            alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
-                            completePomodoroSession();
-
-                            isBreakMode = true;
-                            pomoSecondsLeft = 5 * 60;
-                            document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
-                            document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                            document.getElementById('pomoStartBtn').innerText = "Start Break";
-                            document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-emerald-600');
-                            updatePomoDisplay();
-                        } else {
-                            alert(`⚡ Break Over! Get back to the focus zone.`);
-                            isBreakMode = false;
-                            let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-                            pomoDurationMinutes = defaultMins;
-                            pomoSecondsLeft = pomoDurationMinutes * 60;
-                            document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
-                            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                            document.getElementById('pomoStartBtn').innerText = "Start Focus";
-                            document.getElementById('pomoStartBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
-                            updatePomoDisplay();
-                        }
-                    }
-                }, 1000);
-            }
-
-            function resetPomodoro() {
+        function startPomodoro() {
+            if (isPomoRunning) {
                 clearInterval(pomoTimer);
                 isPomoRunning = false;
-                isBreakMode = false;
-                let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-                pomoDurationMinutes = defaultMins;
-                pomoSecondsLeft = pomoDurationMinutes * 60;
-                document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
-                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                updatePomoDisplay();
-                document.getElementById('pomoStartBtn').innerText = "Start Focus";
-                document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
+                document.getElementById('pomoStartBtn').innerText = isBreakMode ? "Resume Break" : "Resume Focus";
+                document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', isBreakMode ? 'bg-emerald-600' : 'bg-blue-600');
+                return;
             }
 
-            async function completePomodoroSession() {
+            if (!isBreakMode) {
                 const categoryId = document.getElementById('pomoCategorySelect').value;
-                try {
-                    const res = await fetch('/api/study/sessions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            categoryId: categoryId,
-                            topic: `Deep Work Focus (${pomoDurationMinutes}m)`,
-                            durationMinutes: pomoDurationMinutes
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        fetchStudyData();
-                    } else {
-                        alert("Error logging session: " + data.error);
-                    }
-                } catch (err) {}
+                if (!categoryId) {
+                    alert("Please select a study subject for the Pomodoro session!");
+                    return;
+                }
             }
 
-            document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = document.getElementById('categoryName').value;
-                const dailyTargetMinutes = document.getElementById('categoryTarget').value;
+            isPomoRunning = true;
+            document.getElementById('pomoStartBtn').innerText = "Pause";
+            document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
 
-                const res = await fetch('/api/study/categories', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, dailyTargetMinutes })
-                });
-                if (res.ok) {
-                    document.getElementById('createCategoryForm').reset();
-                    document.getElementById('categoryTarget').value = "120";
-                    fetchStudyData();
+            pomoTimer = setInterval(() => {
+                if (pomoSecondsLeft > 0) {
+                    pomoSecondsLeft--;
+                    updatePomoDisplay();
+                } else {
+                    clearInterval(pomoTimer);
+                    isPomoRunning = false;
+                    playBeepSound();
+
+                    if (!isBreakMode) {
+                        alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
+                        completePomodoroSession();
+
+                        isBreakMode = true;
+                        pomoSecondsLeft = 5 * 60;
+                        document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
+                        document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                        document.getElementById('pomoStartBtn').innerText = "Start Break";
+                        document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-emerald-600');
+                        updatePomoDisplay();
+                    } else {
+                        alert(`⚡ Break Over! Get back to the focus zone.`);
+                        isBreakMode = false;
+                        let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
+                        pomoDurationMinutes = defaultMins;
+                        pomoSecondsLeft = pomoDurationMinutes * 60;
+                        document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
+                        document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
+                        document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                        document.getElementById('pomoStartBtn').innerText = "Start Focus";
+                        document.getElementById('pomoStartBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
+                        updatePomoDisplay();
+                    }
                 }
-            });
+            }, 1000);
+        }
 
-            document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const categoryId = document.getElementById('sessionCategorySelect').value;
-                const topic = document.getElementById('sessionTopic').value;
-                const durationMinutes = document.getElementById('sessionDuration').value;
+        function resetPomodoro() {
+            clearInterval(pomoTimer);
+            isPomoRunning = false;
+            isBreakMode = false;
+            let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
+            pomoDurationMinutes = defaultMins;
+            pomoSecondsLeft = pomoDurationMinutes * 60;
+            document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
+            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
+            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
+            updatePomoDisplay();
+            document.getElementById('pomoStartBtn').innerText = "Start Focus";
+            document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
+        }
 
+        async function completePomodoroSession() {
+            const categoryId = document.getElementById('pomoCategorySelect').value;
+            try {
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId, topic, durationMinutes })
+                    body: JSON.stringify({
+                        categoryId: categoryId,
+                        topic: `Deep Work Focus (${pomoDurationMinutes}m)`,
+                        durationMinutes: pomoDurationMinutes
+                    })
                 });
                 const data = await res.json();
-                if (res.ok) {
-                    document.getElementById('logSessionForm').reset();
-                    document.getElementById('sessionDuration').value = "45";
+                if (data.success) {
                     fetchStudyData();
                 } else {
-                    alert(data.error || "Failed to log session.");
+                    alert("Error logging session: " + data.error);
                 }
-            });
+            } catch (err) {}
+        }
 
-            async function deleteCategory(id) {
-                if (!confirm("Delete this category?")) return;
-                await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
+        document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('categoryName').value;
+            const dailyTargetMinutes = document.getElementById('categoryTarget').value;
+
+            const res = await fetch('/api/study/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, dailyTargetMinutes })
+            });
+            if (res.ok) {
+                document.getElementById('createCategoryForm').reset();
+                document.getElementById('categoryTarget').value = "120";
                 fetchStudyData();
             }
+        });
 
-            async function deleteSession(id) {
-                if (!confirm("Delete this session?")) return;
-                await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
-                fetchStudyData();
-            }
+        document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const categoryId = document.getElementById('sessionCategorySelect').value;
+            const topic = document.getElementById('sessionTopic').value;
+            const durationMinutes = document.getElementById('sessionDuration').value;
 
-            document.getElementById('logoutBtn').addEventListener('click', async () => {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.href = 'index.html';
+            const res = await fetch('/api/study/sessions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId, topic, durationMinutes })
             });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('logSessionForm').reset();
+                document.getElementById('sessionDuration').value = "45";
+                fetchStudyData();
+            } else {
+                alert(data.error || "Failed to log session.");
+            }
+        });
 
+        async function deleteCategory(id) {
+            if (!confirm("Delete this category?")) return;
+            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
             fetchStudyData();
-        </script>
-    </body>
-    </html>
+        }
+
+        async function deleteSession(id) {
+            if (!confirm("Delete this session?")) return;
+            await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
+            fetchStudyData();
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+        });
+
+        fetchStudyData();
+
+        async function verifyGlobalSystemLock() {
+            try {
+                const res = await fetch('/api/system-lock');
+                const data = await res.json();
+                if (data.locked) {
+                    let overlay = document.getElementById('globalSystemLockOverlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'globalSystemLockOverlay';
+                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
+                        overlay.innerHTML = `
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
+                                <span class="text-4xl">🔐</span>
+                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
+                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
+                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
+                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
+                                    Authorize & Unlock
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(overlay);
+                    }
+                }
+            } catch (err) {}
+        }
+
+        async function unlockSystemGlobal() {
+            const adminPassword = document.getElementById('globalUnlockPass').value;
+            try {
+                const res = await fetch('/api/system-lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locked: false, adminPassword })
+                });
+                if (res.ok) {
+                    const overlay = document.getElementById('globalSystemLockOverlay');
+                    if (overlay) overlay.remove();
+                    location.reload();
+                } else {
+                    alert("🔒 Incorrect Admin Password!");
+                }
+            } catch (err) {
+                alert("Authentication error.");
+            }
+        }
+
+        verifyGlobalSystemLock();
+    </script>
+</body>
+</html>

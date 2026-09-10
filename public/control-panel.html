@@ -69,6 +69,9 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
+            <a href="dashboard.html" class="text-xs font-bold text-slate-400 hover:text-white bg-white/5 border border-white/10 px-4 py-2 rounded-xl uppercase tracking-wider transition">
+                ← Dashboard
+            </a>
             <button onclick="adminLogout()" class="text-xs font-bold text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl uppercase tracking-wider transition cursor-pointer">
                 Log Out
             </button>
@@ -84,7 +87,7 @@
         </div>
 
         <!-- Horizontal Hub Navigation Tabs -->
-        <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5">
+        <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5 overflow-x-auto">
             <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🔥 Habits
             </button>
@@ -96,6 +99,9 @@
             </button>
             <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🧼 Hygiene
+            </button>
+            <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                📌 Notes & Reminders
             </button>
             <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 💧 Hydration
@@ -155,7 +161,7 @@
             </div>
         </div>
 
-        <!-- TAB 2: WORKOUTS (IRON MATRIX) -->
+        <!-- TAB 2: WORKOUTS -->
         <div id="sectionWorkouts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 id="workoutFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6">🏋️ Deploy Exercise Vector</h3>
@@ -272,7 +278,54 @@
             </div>
         </div>
 
-        <!-- TAB 5: HYDRATION & GLASS CONFIG -->
+        <!-- TAB 5: NOTES & REMINDERS -->
+        <div id="sectionNotes" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
+                    <span>📌</span> Create Note or Telegram Reminder
+                </h3>
+                <form id="createNoteForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Title / Task</label>
+                        <input type="text" id="noteTitle" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="e.g., Review Server Architecture">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description / Details</label>
+                        <textarea id="noteDesc" rows="2" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Optional details..."></textarea>
+                    </div>
+                    <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-3 rounded-xl">
+                        <div>
+                            <label class="block text-xs font-bold text-white uppercase tracking-wider cursor-pointer">Set Timer / Reminder</label>
+                            <span class="text-[9px] text-slate-400">Triggers timed Telegram alert</span>
+                        </div>
+                        <input type="checkbox" id="panelIsReminder" onchange="togglePanelTimerFields()" class="w-5 h-5 rounded-lg accent-amber-500 cursor-pointer">
+                    </div>
+                    <div id="panelTimerFieldsContainer" class="hidden space-y-3 pt-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Date</label>
+                            <input type="date" id="panelReminderDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exact Time</label>
+                            <input type="time" id="panelReminderTime" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
+                        Deploy Note / Reminder
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+                    <span>📋</span> Active Notes & Reminders
+                </h3>
+                <div id="notesListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading entries...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: HYDRATION -->
         <div id="sectionHydration" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2">
@@ -304,7 +357,7 @@
             </div>
         </div>
 
-        <!-- TAB 6: EXAM MODE CONFIGURATION -->
+        <!-- TAB 7: EXAM MODE CONFIGURATION -->
         <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
@@ -334,7 +387,7 @@
             </div>
         </div>
 
-        <!-- TAB 7: SANCTUARY PROTOCOL -->
+        <!-- TAB 8: SANCTUARY PROTOCOL -->
         <div id="sectionSanctuary" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6 flex items-center gap-2">
@@ -364,7 +417,7 @@
             </div>
         </div>
 
-        <!-- TAB 8: LANDING PAGE BACKGROUND CONFIG -->
+        <!-- TAB 9: LANDING PAGE BACKGROUND CONFIG -->
         <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
@@ -404,13 +457,14 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'hydration', 'examMode', 'sanctuary', 'landingBg'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg'].forEach(t => {
                 document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
                 document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
             document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
             document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             
+            if (tab === 'notes') loadNotesReminders();
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
@@ -433,6 +487,75 @@
                 toast.classList.remove('show');
                 setTimeout(() => { toast.remove(); }, 350);
             }, 2500);
+        }
+
+        // --- NOTES & REMINDERS MANAGEMENT ---
+        function togglePanelTimerFields() {
+            const isChecked = document.getElementById('panelIsReminder').checked;
+            const container = document.getElementById('panelTimerFieldsContainer');
+            if (isChecked) {
+                container.classList.remove('hidden');
+                document.getElementById('panelReminderDate').value = new Date().toISOString().split('T')[0];
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        async function loadNotesReminders() {
+            try {
+                const res = await fetch('/api/notes-reminders');
+                const data = await res.json();
+                const container = document.getElementById('notesListContainer');
+                if (data.success && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => `
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
+                                    ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
+                            </div>
+                            <button onclick="deleteNoteItem('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('createNoteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('noteTitle').value;
+            const description = document.getElementById('noteDesc').value;
+            const isReminder = document.getElementById('panelIsReminder').checked;
+            const date = document.getElementById('panelReminderDate').value;
+            const time = document.getElementById('panelReminderTime').value;
+
+            try {
+                const res = await fetch('/api/notes-reminders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description, isReminder, date, time })
+                });
+                if (res.ok) {
+                    showStatusMessage("Note/Reminder deployed successfully!", "success");
+                    document.getElementById('createNoteForm').reset();
+                    togglePanelTimerFields();
+                    loadNotesReminders();
+                }
+            } catch (err) {}
+        });
+
+        async function deleteNoteItem(id) {
+            try {
+                const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showStatusMessage("Entry deleted.", "error");
+                    loadNotesReminders();
+                }
+            } catch (err) {}
         }
 
         // --- LANDING BG CONFIG MANAGEMENT ---
@@ -480,7 +603,7 @@
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editHabit(${JSON.stringify(h)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
+                                <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -555,7 +678,7 @@
             }
         });
 
-        async function deleteHabit(id, habitName) {
+        async function deleteHabit(id) {
             try {
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
                 const data = await res.json();
@@ -585,7 +708,7 @@
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editWorkout(${JSON.stringify(w)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
+                                <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -661,7 +784,7 @@
             }
         });
 
-        async function deleteWorkout(id, name) {
+        async function deleteWorkout(id) {
             const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 showStatusMessage(`Workout deleted`, 'error');
@@ -684,7 +807,7 @@
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editStudy(${JSON.stringify(c)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
+                                <button onclick="deleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -755,7 +878,7 @@
             }
         });
 
-        async function deleteStudy(id, name) {
+        async function deleteStudy(id) {
             const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 showStatusMessage(`Study category deleted`, 'error');
@@ -778,7 +901,7 @@
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editHygiene(${JSON.stringify(t)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteHygiene('${t.id}', '${t.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
+                                <button onclick="deleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -848,7 +971,7 @@
             }
         });
 
-        async function deleteHygiene(id, name) {
+        async function deleteHygiene(id) {
             const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 showStatusMessage(`Hygiene task deleted`, 'error');
