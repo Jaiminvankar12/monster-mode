@@ -28,6 +28,15 @@ const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 // Application Global Start Date Constraint (10/9/2026)
 const MONSTER_LAUNCH_DATE = "2026-09-10";
 
+// --- MONSTER DAY CALCULATOR HELPER ---
+function getMonsterDay(targetDateStr) {
+    let launch = new Date(MONSTER_LAUNCH_DATE);
+    let target = new Date(targetDateStr || getServerToday());
+    let diffTime = target - launch;
+    let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays > 0 ? diffDays : 1;
+}
+
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "8757598599:AAELpH-bZszToGyRkndX8eVNFS65T9VzbIE";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "5315516366"; 
@@ -95,13 +104,13 @@ function writeJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// --- HYDRATION HELPER (UNIVERSAL SAFE FALLBACK) ---
+// --- HYDRATION HELPER ---
 function getHydrationData(userId) {
     let data = readJSON(HYDRATION_FILE);
     if (!data[userId]) {
         let keys = Object.keys(data);
         if (keys.length > 0) {
-            userId = keys[0]; // Fallback to existing saved hydration data
+            userId = keys[0];
         } else {
             data[userId] = { goal: 3000, glassSize: 250, logs: {} };
             writeJSON(HYDRATION_FILE, data);
@@ -127,7 +136,6 @@ function calculateHydrationStreak(userId) {
         let dateStr = d.toISOString().split('T')[0];
         if (dateStr < MONSTER_LAUNCH_DATE) break;
 
-        // Sanctuary Protocol Freeze Check
         if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
             streak++;
             d.setDate(d.getDate() - 1);
@@ -256,6 +264,8 @@ function calculateStreak(userId, type) {
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
     if (type === 'workout') return calculateWorkoutStreak(userId);
+    if (type === 'hydration') return calculateHydrationStreak(userId);
+
     let sanctuary = getSanctuaryData(userId);
     let d = new Date();
     let streak = 0;
@@ -283,6 +293,13 @@ function calculateStreak(userId, type) {
                     return l ? l.completed : false;
                 });
             }
+        } else if (type === 'study') {
+            const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId || s.userId === 'default' || !s.userId);
+            const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
+            let targetMins = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+            let daySessions = sessions.filter(s => s.date === dateStr);
+            let studiedMins = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
+            dayPassed = targetMins > 0 && studiedMins >= targetMins;
         }
 
         if (dayPassed) {
@@ -339,7 +356,7 @@ function runServerSyncEngine(userId, targetDate) {
     }
 
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
-    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId || s.userId === 'default' || !s.userId && s.date === targetDate);
+    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => (s.userId === userId || s.userId === 'default' || !s.userId) && s.date === targetDate);
     
     let examData = getExamModeData(userId);
     let totalTargetMinutes = 0;
@@ -409,72 +426,109 @@ function requireAuth(req, res, next) {
 
 console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date.");
 
-// --- AUTOMATED TELEGRAM CRON JOBS ---
+// --- AUTOMATED TELEGRAM CRON JOBS (DAILY 7-DAYS-A-WEEK OPTIMIZED) ---
+
+// 1. Sunday Morning Hygiene Reminder: Every Sunday at 8:00 AM
 cron.schedule('0 8 * * 0', async () => {
+    console.log("⏰ [Cron Job]: Triggering Sunday Morning Hygiene Command...");
     const users = readJSON(USERS_FILE);
+    let today = getServerToday();
+    let monsterDay = getMonsterDay(today);
+
     for (let user of users) {
         let userId = user.id;
         const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
-        let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\nToday is Sunday! Complete your special grooming vectors:\n`;
+        let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\nToday is Sunday! Complete your special grooming vectors:\n`;
         tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
         message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
-        await sendTelegramAlert(message, `sunday_hygiene_${getServerToday()}_${userId}`);
+
+        await sendTelegramAlert(message, `sunday_hygiene_${today}_${userId}`);
     }
 }, { scheduled: true, timezone: "Asia/Kolkata" });
 
-cron.schedule('0 8 * * 1-6', async () => {
+// 2. Morning Briefing & Audit: Every Single Day at 8:00 AM (Mon-Sun NO OFF DAYS)
+cron.schedule('0 8 * * *', async () => {
+    console.log("⏰ [Cron Job]: Triggering Daily Morning Briefing & Audit...");
     const users = readJSON(USERS_FILE);
+    let today = getServerToday();
+    let monsterDay = getMonsterDay(today); // <--- Calculated Monster Day
+
     for (let user of users) {
         let userId = user.id;
-        let today = getServerToday();
         let sanctuary = getSanctuaryData(userId);
-        if (sanctuary.enabled) continue;
+        if (sanctuary.enabled) {
+            console.log(`🛡️ [Sanctuary Active]: Skipping morning brief for user ${userId}.`);
+            continue;
+        }
 
         let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId || h.userId === 'default' || !h.userId);
         let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId || w.userId === 'default' || !w.userId);
         let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
+        
         let examData = getExamModeData(userId);
         let totalStudyTarget = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
         let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
 
-        let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
-                      `📅 *Date:* ${today}\n\n` +
-                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
-                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck.\n` +
-                      `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''}.\n\n` +
-                      `*"Zero excuses. Absolute control. Dominate today!"* ⚡`;
+        let hydData = getHydrationData(userId);
+        let hydrationStreak = calculateHydrationStreak(userId);
+        let workoutStreak = calculateWorkoutStreak(userId);
+        let studyStreak = calculateStreak(userId, 'study');
 
-        await sendTelegramAlert(message, `morning_brief_${today}_${userId}`);
+        let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
+                      `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
+                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
+                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck (Streak: 🔥 ${workoutStreak} Days).\n` +
+                      `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''} (Streak: 🔥 ${studyStreak} Days).\n` +
+                      `💧 *Hydration Goal:* ${hydData.goal} ml [Streak: 🔥 ${hydrationStreak} Days].\n\n` +
+                      `*"Zero excuses. Absolute control. Dominate today, every single day!"* ⚡`;
+
+        await sendTelegramAlert(message, `morning_brief_daily_${today}_${userId}`);
     }
 }, { scheduled: true, timezone: "Asia/Kolkata" });
 
+// 3. Night Audit & Summary Report: Every day at 10:00 PM (22:00)
 cron.schedule('0 22 * * *', async () => {
+    console.log("🌙 [Cron Job]: Triggering 10 PM Night Audit & Summary Report...");
     const users = readJSON(USERS_FILE);
+    let today = getServerToday();
+    let monsterDay = getMonsterDay(today); // <--- Calculated Monster Day
+
     for (let user of users) {
         let userId = user.id;
-        let today = getServerToday();
         let sanctuary = getSanctuaryData(userId);
         
         if (sanctuary.enabled) {
-            await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_${userId}`);
+            await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_${userId}`);
             continue;
         }
 
         let syncRes = runServerSyncEngine(userId, today);
         let workoutStreak = calculateWorkoutStreak(userId);
         let hydrationStreak = calculateHydrationStreak(userId);
+        let studyStreak = calculateStreak(userId, 'study');
+
+        let habitLogs = readJSON(HABIT_LOGS_FILE).filter(l => (l.userId === userId || l.userId === 'default' || !l.userId) && l.completed);
+        let totalHabitStreak = calculateStreak(userId, 'habit');
 
         let hydData = getHydrationData(userId);
         let consumed = hydData.logs[today] || 0;
         let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
+        let isHydrationDone = percent >= 100;
+
+        let workoutStatus = syncRes.allWorkoutsDone ? `✅ CONQUERED` : `⏳ PENDING`;
+        let studyStatus = syncRes.studyDone ? `✅ CONQUERED` : `⏳ PENDING`;
+        let hydrationStatus = isHydrationDone ? `✅ CONQUERED` : `💧 ${consumed} ml / ${hydData.goal} ml (${percent}%)`;
 
         let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
-                      `📅 *Date:* ${today}\n\n` +
-                      `🏋️ *Workouts:* ${syncRes.allWorkoutsDone ? '✅ CONQUERED' : '⏳ PENDING'} (Streak: ${workoutStreak} Days)\n` +
-                      `📚 *Study:* ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m\n` +
-                      `💧 *Hydration:* ${consumed} ml / ${hydData.goal} ml (${percent}%) [Streak: ${hydrationStreak} Days]\n` +
-                      `🧼 *Hygiene:* Logged & Checked\n\n` +
-                      `*"Rest well, Monster. No disturbances. Tomorrow we conquer again."* 🛡️`;
+                      `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
+                      `🏋️ *Workouts:* ${workoutStatus} (Streak: 🔥 ${workoutStreak} Days)\n` +
+                      `📚 *Study:* ${studyStatus} — ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m (Streak: 🔥 ${studyStreak} Days)\n` +
+                      `💧 *Hydration:* ${hydrationStatus} [Streak: 🔥 ${hydrationStreak} Days]\n` +
+                      `🔥 *Habits Streak:* ${totalHabitStreak} Days Active\n` +
+                      `🧼 *Hygiene:* Checked & Logged\n\n` +
+                      (syncRes.allWorkoutsDone && syncRes.studyDone && isHydrationDone ? 
+                        `*"Absolute dominance today. All vectors achieved with zero flaws. Rest well, Apex Predator."* 👑🐉` :
+                        `*"Review your gaps. Tomorrow we eliminate all weaknesses. Rest and prepare."* ⚡`);
 
         await sendTelegramAlert(message, `night_audit_${today}_${userId}`);
     }
@@ -595,7 +649,7 @@ app.post('/api/sanctuary', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Sanctuary Protocol status updated.", ...data[userId] });
 });
 
-// --- HYDRATION API ROUTES (SAFE UNIVERSAL FALLBACK) ---
+// --- HYDRATION API ROUTES ---
 app.get('/api/hydration', requireAuth, (req, res) => {
     const userId = req.session.userId;
     const today = getServerToday();
@@ -668,7 +722,7 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
     res.json({ success: true, message: "Hydration settings updated." });
 });
 
-// --- HABIT TRACKER API (SAFE UNIVERSAL FALLBACK) ---
+// --- HABIT TRACKER API ---
 app.get('/api/habits', requireAuth, (req, res) => {
     const habits = readJSON(HABITS_FILE).filter(h => h.userId === req.session.userId || h.userId === 'default' || !h.userId);
     const logs = readJSON(HABIT_LOGS_FILE).filter(l => l.userId === req.session.userId || l.userId === 'default' || !l.userId);
@@ -764,7 +818,7 @@ app.delete('/api/habits/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Habit deleted." });
 });
 
-// --- WORKOUT TRACKER API (SAFE UNIVERSAL FALLBACK) ---
+// --- WORKOUT TRACKER API ---
 app.get('/api/workouts', requireAuth, (req, res) => {
     const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === req.session.userId || w.userId === 'default' || !w.userId);
     const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === req.session.userId || l.userId === 'default' || !l.userId);
@@ -854,7 +908,7 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
-// --- STUDY TRACKER API (SAFE UNIVERSAL FALLBACK) ---
+// --- STUDY TRACKER API ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId || c.userId === 'default' || !c.userId);
     res.json({ success: true, categories });
@@ -913,7 +967,7 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
-    const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(req.session.userId, 'habit');
+    const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(req.session.userId, 'study');
 
     runServerSyncEngine(req.session.userId, targetDate);
 
@@ -969,7 +1023,7 @@ app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Session deleted." });
 });
 
-// --- HYGIENE TRACKER API (SAFE UNIVERSAL FALLBACK) ---
+// --- HYGIENE TRACKER API ---
 app.get('/api/hygiene', requireAuth, (req, res) => {
     const userId = req.session.userId;
     const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.userId === userId || t.userId === 'default' || !t.userId);
