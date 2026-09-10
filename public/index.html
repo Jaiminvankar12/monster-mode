@@ -17,9 +17,6 @@
             box-shadow: 0 0 15px rgba(245, 59, 59, 0.4);
         }
         .hero-bg {
-            background-image: linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
-                    linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
-                    url('https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg');
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
@@ -86,35 +83,30 @@
     <script>
         let currentPortal = 'tracker';
         let isRegister = false;
-        // Locked strictly to official launch date September 11, 2026
         const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
             const todayStr = new Date().toISOString().split('T')[0];
             if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
-            } else {
-                document.getElementById('prelaunchBanner').classList.add('hidden');
+                const banner = document.getElementById('prelaunchBanner');
+                if (banner) banner.classList.remove('hidden');
             }
-        }
-
-        function dismissBanner() {
-            document.getElementById('prelaunchBanner').classList.add('hidden');
         }
 
         async function loadDynamicLandingBg() {
             try {
                 const res = await fetch('/api/landing-bg');
                 const data = await res.json();
-                if (data.success && data.url) {
-                    const heroDiv = document.getElementById('heroBgContainer');
-                    if (heroDiv) {
-                        heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
-                                                linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
-                                                url('${data.url}')`;
-                    }
+                const heroDiv = document.getElementById('heroBgContainer');
+                if (heroDiv) {
+                    let bgUrl = (data.success && data.url) ? data.url : 'https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg';
+                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
+                                                   linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
+                                                   url('${bgUrl}')`;
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Failed to load background", err);
+            }
         }
 
         function switchPortal(portal) {
@@ -203,13 +195,8 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.remove('hidden');
+                errDiv.classList.add('hidden');
             }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            checkPreLaunchLock();
-            loadDynamicLandingBg();
         });
 
         async function verifyGlobalSystemLock() {
@@ -259,21 +246,11 @@
             }
         }
 
-        verifyGlobalSystemLock();
-            async function initDynamicBackground() {
-        try {
-            const res = await fetch('/api/landing-bg');
-            const data = await res.json();
-            if (data.success && data.url) {
-                document.body.style.backgroundImage = `linear-gradient(rgba(7,9,15,0.7), rgba(7,9,15,0.85)), url('${data.url}')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center';
-            }
-        } catch (err) {
-            console.error("Background sync error:", err);
-        }
-    }
-    window.addEventListener('DOMContentLoaded', initDynamicBackground);
+        window.addEventListener('DOMContentLoaded', () => {
+            checkPreLaunchLock();
+            loadDynamicLandingBg();
+            verifyGlobalSystemLock();
+        });
     </script>
 </body>
 </html>
