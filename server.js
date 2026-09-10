@@ -28,7 +28,7 @@ const LANDING_BG_FILE = path.join(__dirname, 'landing_bg.json');
 const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
 const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 
-// Application Global Start Date Constraint (11/9/2026)
+// Application Global Start Date Constraint (September 11, 2026)
 const MONSTER_LAUNCH_DATE = "2026-09-11";
 const MASTER_USER_ID = "admin_master_user";
 
@@ -335,7 +335,7 @@ function calculateStreak(userId = MASTER_USER_ID, type) {
     return streak;
 }
 
-// Centralized Server-Side Sync Service (SAFEGUARDED AGAINST DUPLICATE AUTO-HABITS)
+// Centralized Server-Side Sync Service
 function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
 
@@ -438,7 +438,7 @@ function requireAuth(req, res, next) {
     return next();
 }
 
-console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date. Bulletproof Data Persistence Active.");
+console.log("🔥 MONSTER MODE: Locked to September 11, 2026 Launch Date. Bulletproof Data Persistence Active.");
 
 // --- SYSTEM LOCK API ROUTES ---
 app.get('/api/system-lock', requireAuth, (req, res) => {
@@ -1189,7 +1189,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     let index = logs.findIndex(l => l.taskId === taskId && l.date === targetDate);
     if (index > -1) {
         logs[index].completed = completed;
-    } else {MONSTER_LAUNCH_DATE
+    } else {
         logs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, taskId, date: targetDate, completed });
     }
     writeJSON(HYGIENE_LOGS_FILE, logs);
