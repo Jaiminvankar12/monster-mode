@@ -25,7 +25,7 @@
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
 
-    <!-- Pre-Launch / Locked Notice Banner Overlay -->
+    <!-- Pre-Launch Banner Hidden for Full Management Access -->
     <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
         <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full dynamic-glow space-y-4">
             <span class="text-4xl">🔒</span>
@@ -195,16 +195,11 @@
 
     <script>
         let yearlyChartInstance = null;
-        // Updated to today's date so pre-launch banner is unlocked for testing/launch readiness
         const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
-            } else {
-                document.getElementById('prelaunchBanner').classList.add('hidden');
-            }
+            const banner = document.getElementById('prelaunchBanner');
+            if (banner) banner.classList.add('hidden');
         }
 
         function saveDailyMission(val) {
