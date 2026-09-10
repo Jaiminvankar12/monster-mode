@@ -1,25 +1,5 @@
 [
   {
-    "id": "1726051200000",
-    "userId": "admin_master_user",
-    "name": "Read 5 pages Daily",
-    "category": "General",
-    "description": "",
-    "activeDays": [
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-      "Sun"
-    ],
-    "startDate": "2026-09-11",
-    "endDate": "",
-    "status": "active",
-    "createdAt": "2026-09-10T11:13:41.459Z"
-  },
-  {
     "id": "1789038832800",
     "userId": "admin_master_user",
     "trackerId": "habit_1789038832803",
