@@ -11,6 +11,19 @@
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .water-glow { box-shadow: 0 0 50px rgba(59, 130, 246, 0.25); }
+        .water-drop-container {
+            position: relative;
+            overflow: hidden;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .liquid-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(6, 182, 212, 0.7) 100%);
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
@@ -62,10 +75,16 @@
                 <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-2">Today</h2>
             </div>
 
-            <!-- Giant Water Drop -->
-            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center bg-blue-600/10 rounded-full border-2 border-blue-500/30 water-glow">
-                <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight">0 ml</span>
-                <span id="goalSubLabel" class="text-xs text-zinc-400 font-bold uppercase tracking-widest mt-2">Goal: 3000 ml</span>
+            <!-- Giant Water Drop with Fluid Fill Animation -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center rounded-full border-2 border-blue-500/30 water-glow water-drop-container">
+                <!-- Liquid Fill Animation Layer -->
+                <div id="liquidFill" class="liquid-wave" style="height: 0%;"></div>
+
+                <!-- Labels -->
+                <div class="z-10 flex flex-col items-center justify-center">
+                    <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-md">0 ml</span>
+                    <span id="goalSubLabel" class="text-xs text-zinc-300 font-bold uppercase tracking-widest mt-2 drop-shadow">Goal: 3000 ml</span>
+                </div>
             </div>
 
             <!-- Progress Bar -->
@@ -172,6 +191,10 @@
                     document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
                     document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
                     document.getElementById('progressBarFill').style.width = `${data.percent}%`;
+                    
+                    // Liquid Fill Wave Animation Height Update
+                    document.getElementById('liquidFill').style.height = `${data.percent}%`;
+
                     document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
                     document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
                 }
