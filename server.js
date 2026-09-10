@@ -568,13 +568,7 @@ app.get('/api/notes-reminders', requireAuth, (req, res) => {
 });
 
 app.post('/api/notes-reminders', requireAuth, (req, res) => {
-    const { title, description, isReminder, date, time, actionPassword } = req.body;
-    
-    // --- SECURITY GATE FOR ADD ---
-    if (actionPassword !== "monster*jay@8116") {
-        return res.status(403).json({ error: "❌ Incorrect ADD Password! (Required: monster*jay@8116)" });
-    }
-
+    const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
 
     let data = readJSON(NOTES_REMINDERS_FILE);
@@ -611,13 +605,6 @@ app.post('/api/notes-reminders/:id/toggle', requireAuth, async (req, res) => {
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
-    const { actionPassword } = req.body;
-    
-    // --- SECURITY GATE FOR DELETE ---
-    if (actionPassword !== "monster*jay@1050") {
-        return res.status(403).json({ error: "❌ Incorrect DELETE Password! (Required: monster*jay@1050)" });
-    }
-
     let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
 
@@ -812,7 +799,7 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
-// --- STUDY TRACKER API WITH END DATE SUPPORT ---
+// --- STUDY TRACKER API WITH DUPLICATE PREVENTION ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
@@ -822,10 +809,17 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
     const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required." });
     const categories = readJSON(STUDY_CATEGORIES_FILE);
+    
+    // Prevent duplicate subject creation (case-insensitive check)
+    let existing = categories.find(c => c.name.toLowerCase() === name.trim().toLowerCase());
+    if (existing) {
+        return res.status(400).json({ error: "❌ Study subject with this name already exists!" });
+    }
+
     const newCat = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
-        name,
+        name: name.trim(),
         dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120,
         startDate: startDate || MONSTER_LAUNCH_DATE,
         endDate: endDate || "",
@@ -842,7 +836,7 @@ app.put('/api/study/categories/:id', requireAuth, (req, res) => {
     if (index === -1) return res.status(404).json({ error: "Category not found." });
 
     const { name, dailyTargetMinutes, startDate, endDate } = req.body;
-    categories[index].name = name || categories[index].name;
+    categories[index].name = name ? name.trim() : categories[index].name;
     categories[index].dailyTargetMinutes = dailyTargetMinutes !== undefined ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes;
     categories[index].startDate = startDate || categories[index].startDate;
     categories[index].endDate = endDate !== undefined ? endDate : categories[index].endDate;
