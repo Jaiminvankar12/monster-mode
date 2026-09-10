@@ -415,7 +415,6 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
 });
 
 // --- NOTES & REMINDERS API ---
-a// --- NOTES & REMINDERS API ---
 app.get('/api/notes-reminders', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) {
@@ -428,10 +427,8 @@ app.get('/api/notes-reminders', requireAuth, (req, res) => {
 app.post('/api/notes-reminders', requireAuth, (req, res) => {
     const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
-
     let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
-
     const newItem = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
@@ -444,7 +441,6 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
         notifiedToday: false,
         createdAt: new Date().toISOString()
     };
-
     data[MASTER_USER_ID].push(newItem);
     writeJSON(NOTES_REMINDERS_FILE, data);
     res.json({ success: true, item: newItem });
@@ -453,10 +449,8 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
-
     const index = data[MASTER_USER_ID].findIndex(i => i.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Item not found." });
-
     data[MASTER_USER_ID].splice(index, 1);
     writeJSON(NOTES_REMINDERS_FILE, data);
     res.json({ success: true, message: "Item deleted successfully." });
