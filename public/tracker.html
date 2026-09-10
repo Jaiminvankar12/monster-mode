@@ -21,7 +21,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Habit tracking and execution vectors are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Habit tracking and execution vectors are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -47,10 +47,10 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8">
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 space-y-8">
         
         <!-- Page Title & Habit Streak Summary Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">🔥 Core Engine</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Daily Discipline Tracker</h2>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- Date Carousel Navigation Bar -->
-        <div class="glass-card glow-red p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="glass-card glow-red p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
                 <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
                 <div class="text-center px-2">
@@ -88,16 +88,34 @@
         <div id="habitsContainer" class="grid gap-4">
             <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
         </div>
+
+        <!-- VIEW-ONLY NOTES & REMINDERS SECTION (No Streaks, No Progress Bars) -->
+        <div class="pt-6 border-t border-white/5">
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                        <span>📌</span> Notes & Reminders (View Matrix)
+                    </h3>
+                    <p class="text-xs text-zinc-400 mt-0.5">Managed from Control Panel. Ticking tasks triggers instant Telegram alerts.</p>
+                </div>
+            </div>
+            <div id="trackerNotesContainer" class="grid gap-3">
+                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-xs font-medium">Loading notes and reminders...</div>
+            </div>
+        </div>
+
     </main>
 
     <script>
         let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-10";
+        const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
             const todayStr = new Date().toISOString().split('T')[0];
             if (todayStr < LAUNCH_DATE) {
                 document.getElementById('prelaunchBanner').classList.remove('hidden');
+            } else {
+                document.getElementById('prelaunchBanner').classList.add('hidden');
             }
         }
 
@@ -129,6 +147,40 @@
             } catch (err) {
                 console.error("Error fetching habits:", err);
             }
+        }
+
+        async function fetchTrackerNotes() {
+            try {
+                const res = await fetch('/api/notes-reminders');
+                const data = await res.json();
+                const container = document.getElementById('trackerNotesContainer');
+                
+                if (data.success && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => `
+                        <div class="glass-card p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div class="flex items-start gap-3 min-w-0">
+                                <input type="checkbox" ${item.completed ? 'checked' : ''} onclick="toggleTrackerNote('${item.id}')" class="w-5 h-5 mt-0.5 rounded-lg accent-amber-500 cursor-pointer shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h4 class="font-extrabold text-sm text-white truncate ${item.completed ? 'line-through opacity-50' : ''}">${item.title}</h4>
+                                        ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+                                    </div>
+                                    <p class="text-xs text-zinc-400 mt-1 truncate ${item.completed ? 'line-through opacity-50' : ''}">${item.description || ''}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-xs font-medium">No notes or reminders deployed yet.</div>`;
+                }
+            } catch (err) {}
+        }
+
+        async function toggleTrackerNote(id) {
+            try {
+                await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST' });
+                fetchTrackerNotes();
+            } catch (err) {}
         }
 
         function shiftDate(days) {
@@ -172,7 +224,7 @@
             const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
 
             container.innerHTML = habits.map(h => {
-                const startDateStr = h.startDate || '2026-09-10';
+                const startDateStr = h.startDate || '2026-09-11';
                 return `
                     <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
                         <div class="space-y-1.5 min-w-0">
@@ -218,9 +270,58 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             checkPreLaunchLock();
+            fetchHabits();
+            fetchTrackerNotes();
         });
 
-        fetchHabits();
+        async function verifyGlobalSystemLock() {
+            try {
+                const res = await fetch('/api/system-lock');
+                const data = await res.json();
+                if (data.locked) {
+                    let overlay = document.getElementById('globalSystemLockOverlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'globalSystemLockOverlay';
+                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
+                        overlay.innerHTML = `
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
+                                <span class="text-4xl">🔐</span>
+                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
+                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
+                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
+                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
+                                    Authorize & Unlock
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(overlay);
+                    }
+                }
+            } catch (err) {}
+        }
+
+        async function unlockSystemGlobal() {
+            const adminPassword = document.getElementById('globalUnlockPass').value;
+            try {
+                const res = await fetch('/api/system-lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locked: false, adminPassword })
+                });
+                if (res.ok) {
+                    const overlay = document.getElementById('globalSystemLockOverlay');
+                    if (overlay) overlay.remove();
+                    location.reload();
+                } else {
+                    alert("🔒 Incorrect Admin Password!");
+                }
+            } catch (err) {
+                alert("Authentication error.");
+            }
+        }
+
+        verifyGlobalSystemLock();
     </script>
 </body>
 </html>

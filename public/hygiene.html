@@ -21,7 +21,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-cyan-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 10, 2026</strong>. Hygiene and grooming protocols are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Hygiene and grooming protocols are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -123,12 +123,14 @@
 
     <script>
         let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-10";
+        const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
             const todayStr = new Date().toISOString().split('T')[0];
             if (todayStr < LAUNCH_DATE) {
                 document.getElementById('prelaunchBanner').classList.remove('hidden');
+            } else {
+                document.getElementById('prelaunchBanner').classList.add('hidden');
             }
         }
 
@@ -231,6 +233,55 @@
         });
 
         fetchHygieneData();
+
+        async function verifyGlobalSystemLock() {
+            try {
+                const res = await fetch('/api/system-lock');
+                const data = await res.json();
+                if (data.locked) {
+                    let overlay = document.getElementById('globalSystemLockOverlay');
+                    if (!overlay) {
+                        overlay = document.createElement('div');
+                        overlay.id = 'globalSystemLockOverlay';
+                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
+                        overlay.innerHTML = `
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
+                                <span class="text-4xl">🔐</span>
+                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
+                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
+                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
+                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
+                                    Authorize & Unlock
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(overlay);
+                    }
+                }
+            } catch (err) {}
+        }
+
+        async function unlockSystemGlobal() {
+            const adminPassword = document.getElementById('globalUnlockPass').value;
+            try {
+                const res = await fetch('/api/system-lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ locked: false, adminPassword })
+                });
+                if (res.ok) {
+                    const overlay = document.getElementById('globalSystemLockOverlay');
+                    if (overlay) overlay.remove();
+                    location.reload();
+                } else {
+                    alert("🔒 Incorrect Admin Password!");
+                }
+            } catch (err) {
+                alert("Authentication error.");
+            }
+        }
+
+        verifyGlobalSystemLock();
     </script>
 </body>
 </html>
