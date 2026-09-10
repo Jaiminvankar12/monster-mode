@@ -24,6 +24,7 @@ const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
 const SANCTUARY_FILE = path.join(__dirname, 'sanctuary_mode.json');
 const NOTIFICATION_LOGS_FILE = path.join(__dirname, 'notification_logs.json');
 const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
+const LANDING_BG_FILE = path.join(__dirname, 'landing_bg.json');
 
 // Application Global Start Date Constraint (10/9/2026)
 const MONSTER_LAUNCH_DATE = "2026-09-10";
@@ -94,7 +95,7 @@ function readJSON(file) {
                 { id: 'h6', userId: MASTER_USER_ID, name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h7', userId: MASTER_USER_ID, name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
-        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE) {
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE) {
             initial = {};
             if (file === HYDRATION_FILE) {
                 initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
@@ -104,6 +105,10 @@ function readJSON(file) {
                 initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
             } else if (file === USER_XP_FILE) {
                 initial[MASTER_USER_ID] = { xp: 0, level: 1 };
+            } else if (file === LANDING_BG_FILE) {
+                initial = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
+                fs.writeFileSync(file, JSON.stringify(initial, null, 2));
+                return initial;
             }
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
@@ -112,6 +117,15 @@ function readJSON(file) {
 }
 function writeJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// --- LANDING BG HELPER ---
+function getLandingBg() {
+    if (!fs.existsSync(LANDING_BG_FILE)) {
+        let defaultBg = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
+        fs.writeFileSync(LANDING_BG_FILE, JSON.stringify(defaultBg, null, 2));
+    }
+    return JSON.parse(fs.readFileSync(LANDING_BG_FILE, 'utf8'));
 }
 
 // --- HYDRATION HELPER ---
@@ -404,14 +418,27 @@ app.use(session({
 }));
 
 function requireAuth(req, res, next) {
-    // FORCE ALL REQUESTS TO MASTER USER TO ELIMINATE ANY DATA DELETION OR SESSION LOSS ISSUES
     req.session.userId = MASTER_USER_ID;
     return next();
 }
 
 console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date. Bulletproof Data Persistence Active.");
 
-// --- AUTOMATED TELEGRAM CRON JOBS (DAILY 7-DAYS-A-WEEK OPTIMIZED) ---
+// --- LANDING PAGE BACKGROUND CONFIG API ---
+app.get('/api/landing-bg', (req, res) => {
+    let bg = getLandingBg();
+    res.json({ success: true, ...bg });
+});
+
+app.post('/api/control-panel/landing-bg', requireAuth, (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "Image URL is required." });
+    let bg = { url };
+    fs.writeFileSync(LANDING_BG_FILE, JSON.stringify(bg, null, 2));
+    res.json({ success: true, message: "Landing background updated successfully." });
+});
+
+// --- AUTOMATED TELEGRAM CRON JOBS ---
 cron.schedule('0 8 * * 0', async () => {
     console.log("⏰ [Cron Job]: Triggering Sunday Morning Hygiene Command...");
     let today = getServerToday();

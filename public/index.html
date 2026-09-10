@@ -48,7 +48,7 @@
 
     <div class="flex w-full min-h-screen lg:h-full bg-[#07090f]">
         <!-- Left Side: Cinematic Background (Hidden on mobile) -->
-        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-16 pl-16 hero-bg">
+        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-16 pl-16 hero-bg" id="heroBgContainer">
             <div class="z-10 max-w-xl">
                 <h1 class="text-6xl font-black tracking-tight uppercase leading-[1.05] mb-4 text-white drop-shadow-md">
                     BECOME A<br>MONSTER.<br>DOMINATE REALITY.
@@ -114,6 +114,21 @@
 
         function dismissBanner() {
             document.getElementById('prelaunchBanner').classList.add('hidden');
+        }
+
+        async function loadDynamicLandingBg() {
+            try {
+                const res = await fetch('/api/landing-bg');
+                const data = await res.json();
+                if (data.success && data.url) {
+                    const heroDiv = document.getElementById('heroBgContainer');
+                    if (heroDiv) {
+                        heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
+                                                        linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
+                                                        url('${data.url}')`;
+                    }
+                }
+            } catch (err) {}
         }
 
         function switchPortal(portal) {
@@ -209,6 +224,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             checkPreLaunchLock();
+            loadDynamicLandingBg();
         });
     </script>
 </body>
