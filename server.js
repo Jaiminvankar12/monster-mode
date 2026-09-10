@@ -88,15 +88,7 @@ function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
         if (file === HYGIENE_TASKS_FILE) {
-            initial = [
-                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h4', userId: MASTER_USER_ID, name: '🧔 Mustache & Beard', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h5', userId: MASTER_USER_ID, name: '✨ Tan Care', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h6', userId: MASTER_USER_ID, name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h7', userId: MASTER_USER_ID, name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
-            ];
+            initial = [];
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
             if (file === HYDRATION_FILE) {
@@ -335,7 +327,7 @@ function calculateStreak(userId = MASTER_USER_ID, type) {
     return streak;
 }
 
-// Centralized Server-Side Sync Service (REMOVED auto-creation of default habits)
+// Centralized Server-Side Sync Service (Cleaned of all default auto-creation)
 function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
 
@@ -785,13 +777,11 @@ app.put('/api/habits/:id', requireAuth, (req, res) => {
     if (index === -1) return res.status(404).json({ error: "Habit not found." });
 
     const { name, category, description, startDate } = req.body;
-    habits[index] = {
-        ...habits[index],
-        name: name || habits[index].name,
-        category: category || habits[index].category,
-        description: description !== undefined ? description : habits[index].description,
-        startDate: startDate || habits[index].startDate
-    };
+    habits[index].name = name || habits[index].name;
+    habits[index].category = category !== undefined ? category : habits[index].category;
+    habits[index].description = description !== undefined ? description : habits[index].description;
+    habits[index].startDate = startDate || habits[index].startDate;
+
     writeJSON(HABITS_FILE, habits);
     res.json({ success: true, message: "Habit updated successfully.", habit: habits[index] });
 });
@@ -875,15 +865,14 @@ app.put('/api/workouts/:id', requireAuth, (req, res) => {
     const index = workouts.findIndex(w => w.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Workout not found." });
 
-    const { name, sets, value, unit, category } = req.body;
-    workouts[index] = {
-        ...workouts[index],
-        name: name || workouts[index].name,
-        sets: sets || workouts[index].sets,
-        value: value || workouts[index].value,
-        unit: unit || workouts[index].unit,
-        category: category || workouts[index].category
-    };
+    const { name, sets, value, unit, category, startDate } = req.body;
+    workouts[index].name = name || workouts[index].name;
+    workouts[index].sets = sets !== undefined ? sets : workouts[index].sets;
+    workouts[index].value = value !== undefined ? value : workouts[index].value;
+    workouts[index].unit = unit || workouts[index].unit;
+    workouts[index].category = category || workouts[index].category;
+    workouts[index].startDate = startDate || workouts[index].startDate;
+
     writeJSON(WORKOUTS_FILE, workouts);
     res.json({ success: true, message: "Workout updated successfully.", workout: workouts[index] });
 });
@@ -950,12 +939,11 @@ app.put('/api/study/categories/:id', requireAuth, (req, res) => {
     const index = categories.findIndex(c => c.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Category not found." });
 
-    const { name, dailyTargetMinutes } = req.body;
-    categories[index] = {
-        ...categories[index],
-        name: name || categories[index].name,
-        dailyTargetMinutes: dailyTargetMinutes ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes
-    };
+    const { name, dailyTargetMinutes, startDate } = req.body;
+    categories[index].name = name || categories[index].name;
+    categories[index].dailyTargetMinutes = dailyTargetMinutes !== undefined ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes;
+    categories[index].startDate = startDate || categories[index].startDate;
+
     writeJSON(STUDY_CATEGORIES_FILE, categories);
     res.json({ success: true, message: "Study category updated successfully.", category: categories[index] });
 });
@@ -1093,12 +1081,11 @@ app.put('/api/hygiene/:id', requireAuth, (req, res) => {
     const index = tasks.findIndex(t => t.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Task not found." });
 
-    const { name, frequency } = req.body;
-    tasks[index] = {
-        ...tasks[index],
-        name: name || tasks[index].name,
-        frequency: frequency || tasks[index].frequency
-    };
+    const { name, frequency, startDate } = req.body;
+    tasks[index].name = name || tasks[index].name;
+    tasks[index].frequency = frequency !== undefined ? frequency : tasks[index].frequency;
+    tasks[index].startDate = startDate || tasks[index].startDate;
+
     writeJSON(HYGIENE_TASKS_FILE, tasks);
     res.json({ success: true, message: "Hygiene task updated successfully.", task: tasks[index] });
 });
