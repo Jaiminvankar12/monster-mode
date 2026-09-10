@@ -55,6 +55,7 @@
                 <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
                 <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
                 <a href="hygiene.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🧼 Hygiene Tracker</a>
+                <a href="hydration.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">💧 Hydration Matrix</a>
             </nav>
         </div>
         <div class="hidden lg:block pt-6">
@@ -134,8 +135,8 @@
             </p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Stats Cards (Including Hydration Matrix Widget) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="glass-card p-6 rounded-2xl dynamic-glow border-l-4 border-l-red-500">
                 <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Total Active Vectors</span>
                 <div class="text-4xl font-black text-white mt-2" id="totalVectorsCount">0</div>
@@ -147,6 +148,22 @@
                     <span>🔥</span> <span id="currentStreakDisplay">0 Days</span>
                 </div>
                 <p class="text-[11px] text-amber-500 mt-1">Consecutive Discipline Active</p>
+            </div>
+            <!-- HYDRATION MATRIX DASHBOARD WIDGET -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Hydration Status</span>
+                        <span id="dashWaterStreak" class="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-black uppercase">Streak: 0D</span>
+                    </div>
+                    <div class="text-2xl font-black text-white mt-1" id="dashWaterConsumed">0 / 3000 ml</div>
+                    <div class="w-full bg-zinc-900 rounded-full h-1.5 mt-2 overflow-hidden">
+                        <div id="dashWaterBar" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+                <a href="hydration.html" class="mt-3 block text-center text-[10px] font-black uppercase tracking-wider text-blue-400 hover:underline">
+                    Open Hydration Matrix →
+                </a>
             </div>
             <div class="glass-card p-6 rounded-2xl border-l-4 border-l-emerald-500">
                 <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Yearly Progress (2026)</span>
@@ -283,12 +300,14 @@
                 }
                 document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
 
-                const [habitsRes, workoutsRes] = await Promise.all([
+                const [habitsRes, workoutsRes, hydrationRes] = await Promise.all([
                     fetch('/api/habits'),
-                    fetch('/api/workouts')
+                    fetch('/api/workouts'),
+                    fetch('/api/hydration')
                 ]);
                 const habitsData = await habitsRes.json();
                 const workoutsData = await workoutsRes.json();
+                const hydrationData = await hydrationRes.json();
 
                 let habits = habitsData.success ? habitsData.habits : [];
                 let workouts = workoutsData.success ? workoutsData.workouts : [];
@@ -297,6 +316,18 @@
                 document.getElementById('totalVectorsCount').innerText = habits.length + workouts.length;
                 document.getElementById('currentStreakDisplay').innerText = `${streak} Days`;
                 
+                // Hydration Widget Data Binding
+                if (hydrationData.success) {
+                    const consumed = hydrationData.consumed || 0;
+                    const goal = hydrationData.goal || 3000;
+                    const percent = hydrationData.percent || 0;
+                    const hydStreak = hydrationData.hydrationStreak || 0;
+
+                    document.getElementById('dashWaterConsumed').innerText = `${consumed} / ${goal} ml`;
+                    document.getElementById('dashWaterBar').style.width = `${percent}%`;
+                    document.getElementById('dashWaterStreak').innerText = `Streak: ${hydStreak}D`;
+                }
+
                 let yearlyPct = Math.min(Math.round((streak / 365) * 100), 100);
                 document.getElementById('yearlyProgressText').innerText = `${yearlyPct}%`;
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
