@@ -21,6 +21,14 @@
         ::-webkit-scrollbar-track { background: #07090f; }
         ::-webkit-scrollbar-thumb { background: #1a1f30; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #2a324a; }
+        :root {
+        --accent-primary: #ef4444; /* Default Red */
+        --accent-glow: rgba(239, 68, 68, 0.15);
+    }
+    .dynamic-accent { color: var(--accent-primary) !important; }
+    .dynamic-bg { background-color: var(--accent-primary) !important; }
+    .dynamic-border { border-color: var(--accent-primary) !important; }
+    .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">

@@ -11,6 +11,14 @@
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
         .glow-cyan { box-shadow: 0 0 30px rgba(6, 182, 212, 0.15); }
+        :root {
+        --accent-primary: #ef4444; /* Default Red */
+        --accent-glow: rgba(239, 68, 68, 0.15);
+    }
+    .dynamic-accent { color: var(--accent-primary) !important; }
+    .dynamic-bg { background-color: var(--accent-primary) !important; }
+    .dynamic-border { border-color: var(--accent-primary) !important; }
+    .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-cyan-500 selection:text-white overflow-x-hidden">

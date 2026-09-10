@@ -10,7 +10,7 @@
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .red-glow-tab { background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%); box-shadow: 0 0 20px rgba(245, 59, 59, 0.4); }
+        .red-glow-tab { background: linear-gradient(180deg, var(--theme-primary, #ff4d4d) 0%, var(--theme-primary, #f53b3b) 100%); box-shadow: 0 0 20px var(--theme-glow, rgba(245, 59, 59, 0.4)); }
         
         #inlineStatusNotification {
             position: fixed;
@@ -51,6 +51,10 @@
             border: 1px solid rgba(239, 68, 68, 0.4);
             color: #f87171;
             box-shadow: 0 0 25px rgba(239, 68, 68, 0.2);
+        }
+        :root {
+            --theme-primary: #ef4444; 
+            --theme-glow: rgba(239, 68, 68, 0.15);
         }
     </style>
 </head>

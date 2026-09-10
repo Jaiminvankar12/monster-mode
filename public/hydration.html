@@ -24,6 +24,14 @@
             background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(6, 182, 212, 0.7) 100%);
             transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        :root {
+        --accent-primary: #ef4444; /* Default Red */
+        --accent-glow: rgba(239, 68, 68, 0.15);
+    }
+    .dynamic-accent { color: var(--accent-primary) !important; }
+    .dynamic-bg { background-color: var(--accent-primary) !important; }
+    .dynamic-border { border-color: var(--accent-primary) !important; }
+    .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
