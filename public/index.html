@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🐲 MONSTER MODE ON</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { font-family: 'Outfit', sans-serif; }
         .red-glow-btn {
             background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%);
-            box-shadow: 0 0 25px rgba(245, 59, 59, 0.5);    
+            box-shadow: 0 0 25px rgba(245, 59, 59, 0.4);    
+            transition: all 0.3s ease;
+        }
+        .red-glow-btn:hover {
+            box-shadow: 0 0 35px rgba(245, 59, 59, 0.7);
+            transform: translateY(-1px);
         }
         .red-glow-tab {
             background: linear-gradient(180deg, #ff4d4d 0%, #f53b3b 100%);
@@ -20,61 +25,80 @@
             background-repeat: no-repeat;
             background-position: center;
             background-size: cover;
+            transition: background-image 0.5s ease-in-out;
         }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { 
+            background: linear-gradient(135deg, rgba(18, 22, 34, 0.8) 0%, rgba(10, 13, 20, 0.9) 100%); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
-<body class="bg-[#07090f] text-white min-h-screen w-full flex items-center justify-center m-0 p-4 lg:p-0">
+<body class="bg-[#07090f] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">
 
-    <div class="flex w-full min-h-screen lg:h-full bg-[#07090f]">
+    <div class="flex w-full min-h-screen bg-[#07090f]">
         <!-- Left Side: Cinematic Background (Hidden on mobile) -->
-        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-16 pl-16 hero-bg" id="heroBgContainer">
+        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 hero-bg" id="heroBgContainer">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#07090f] via-[#07090f]/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#07090f]/30 to-[#07090f]"></div>
             <div class="z-10 max-w-xl">
-                <h1 class="text-6xl font-black tracking-tight uppercase leading-[1.05] mb-4 text-white drop-shadow-md">
+                <span class="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 font-extrabold text-[10px] tracking-widest uppercase mb-4 inline-block">
+                    ⚡ Apex Predator System
+                </span>
+                <h1 class="text-6xl font-black tracking-tight uppercase leading-[1.05] mb-4 text-white drop-shadow-lg">
                     BECOME A<br>MONSTER.<br>DOMINATE REALITY.
                 </h1>
-                <p class="text-slate-300 font-semibold text-sm tracking-widest uppercase drop-shadow">
+                <p class="text-slate-300 font-semibold text-xs tracking-widest uppercase drop-shadow">
                     Pure discipline. Zero excuses. Absolute control.
                 </p>
             </div>
         </div>
 
         <!-- Right Side: Authentication Panel -->
-        <div class="w-full lg:w-[40%] flex flex-col justify-center px-4 sm:px-12 lg:px-16 py-10 bg-[#07090f] m-auto">
+        <div class="w-full lg:w-[40%] flex flex-col justify-center px-6 sm:px-14 lg:px-20 py-12 bg-[#07090f] m-auto">
             
-            <div class="mb-6">
-                <h2 id="panelTitle" class="text-2xl font-black uppercase tracking-wider text-white">MONSTER MODE ON</h2>
-                <p id="panelSubtitle" class="text-xs text-slate-400 mt-1">Select your portal to enter command center.</p>
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xl">🐉</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-red-500">Secure Gateway</span>
+                </div>
+                <h2 id="panelTitle" class="text-3xl font-black uppercase tracking-tight text-white">MONSTER MODE ON</h2>
+                <p id="panelSubtitle" class="text-xs text-slate-400 mt-1.5">Select your portal to enter command center.</p>
             </div>
 
             <!-- Portal Switcher Tabs -->
-            <div class="flex bg-[#121520] p-1.5 rounded-xl border border-[#1e2336] mb-6">
-                <button type="button" id="tabTracker" onclick="switchPortal('tracker')" class="flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer">
+            <div class="flex bg-[#121520] p-1.5 rounded-2xl border border-white/5 mb-8 shadow-inner">
+                <button type="button" id="tabTracker" onclick="switchPortal('tracker')" class="flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer">
                     🔥 Tracker Portal
                 </button>
-                <button type="button" id="tabAdmin" onclick="switchPortal('admin')" class="flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer">
+                <button type="button" id="tabAdmin" onclick="switchPortal('admin')" class="flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer">
                     🛡️ Admin Panel
                 </button>
             </div>
 
             <!-- Auth Form -->
-            <form id="authForm">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">EMAIL ADDRESS</label>
-                <input type="email" id="email" class="w-full bg-[#121520] border border-[#1e2336] rounded-xl px-4 py-3.5 text-white text-sm mb-4 focus:outline-none focus:border-red-500 transition" placeholder="monster@domain.com" required>
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">EMAIL ADDRESS</label>
+                    <input type="email" id="email" class="w-full bg-[#121520] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner" placeholder="monster@domain.com" required>
+                </div>
 
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">PASSWORD</label>
-                <input type="password" id="password" class="w-full bg-[#121520] border border-[#1e2336] rounded-xl px-4 py-3.5 text-white text-sm mb-6 focus:outline-none focus:border-red-500 transition" placeholder="••••••••••••" required>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">PASSWORD</label>
+                    <input type="password" id="password" class="w-full bg-[#121520] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner" placeholder="••••••••••••" required>
+                </div>
 
-                <div id="errorMessage" class="text-red-500 text-xs mb-3 hidden bg-red-500/10 p-2.5 rounded-lg border border-red-500/20"></div>
-                <div id="successMessage" class="text-emerald-400 text-xs mb-3 hidden bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20 font-bold uppercase tracking-wider text-center"></div>
+                <div id="errorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold"></div>
+                <div id="successMessage" class="text-emerald-400 text-xs hidden bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/30 font-black uppercase tracking-wider text-center shadow-lg shadow-emerald-500/10"></div>
 
-                <button type="submit" id="submitBtn" class="w-full py-4 red-glow-btn hover:opacity-90 text-white font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                <button type="submit" id="submitBtn" class="w-full py-4 mt-2 red-glow-btn text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
                     ENTER TRACKER PORTAL
                 </button>
             </form>
 
-            <div class="mt-8 text-center">
-                <p id="toggleText" class="text-xs text-slate-400">Don't have an account? <a href="#" id="toggleMode" onclick="toggleRegister(event)" class="text-white font-bold hover:underline">Initialize Account</a></p>
+            <div class="mt-8 text-center border-t border-white/5 pt-6">
+                <p id="toggleText" class="text-xs text-slate-400">Don't have an account? <a href="#" id="toggleMode" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Initialize Account</a></p>
             </div>
 
         </div>
@@ -100,8 +124,8 @@
                 const heroDiv = document.getElementById('heroBgContainer');
                 if (heroDiv) {
                     let bgUrl = (data.success && data.url) ? data.url : 'https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg';
-                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(7,9,15,0.3) 0%, rgba(7,9,15,0.75) 70%, #07090f 100%), 
-                                                   linear-gradient(90deg, rgba(7,9,15,0.2) 40%, rgba(7,9,15,0.92) 85%, #07090f 100%), 
+                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(7,9,15,0.4) 0%, rgba(7,9,15,0.8) 75%, #07090f 100%), 
+                                                   linear-gradient(90deg, rgba(7,9,15,0.3) 30%, rgba(7,9,15,0.9) 85%, #07090f 100%), 
                                                    url('${bgUrl}')`;
                 }
             } catch (err) {
@@ -117,13 +141,13 @@
             const emailInput = document.getElementById('email');
 
             if (portal === 'tracker') {
-                tabTracker.className = "flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer";
-                tabAdmin.className = "flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
+                tabTracker.className = "flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer";
+                tabAdmin.className = "flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = isRegister ? "REGISTER & INITIALIZE" : "ENTER TRACKER PORTAL";
                 emailInput.value = "";
             } else {
-                tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-bold rounded-lg text-xs uppercase flex items-center justify-center gap-2 transition cursor-pointer";
-                tabTracker.className = "flex-1 py-3 text-slate-400 font-medium rounded-lg text-xs uppercase hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
+                tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer";
+                tabTracker.className = "flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = "ENTER ADMIN PANEL";
                 emailInput.value = "";
             }
@@ -139,11 +163,11 @@
             if (isRegister) {
                 title.textContent = "INITIALIZE ACCOUNT";
                 submitBtn.textContent = currentPortal === 'tracker' ? "REGISTER & INITIALIZE" : "ENTER ADMIN PANEL";
-                toggleText.innerHTML = `Already initialized? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline">Enter Portal</a>`;
+                toggleText.innerHTML = `Already initialized? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Enter Portal</a>`;
             } else {
                 title.textContent = "MONSTER MODE ON";
                 submitBtn.textContent = currentPortal === 'tracker' ? "ENTER TRACKER PORTAL" : "ENTER ADMIN PANEL";
-                toggleText.innerHTML = `Don't have an account? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline">Initialize Account</a>`;
+                toggleText.innerHTML = `Don't have an account? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Initialize Account</a>`;
             }
         }
 
@@ -208,7 +232,7 @@
                     if (!overlay) {
                         overlay = document.createElement('div');
                         overlay.id = 'globalSystemLockOverlay';
-                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
+                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center backdrop-blur-xl";
                         overlay.innerHTML = `
                             <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
                                 <span class="text-4xl">🔐</span>

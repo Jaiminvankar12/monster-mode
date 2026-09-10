@@ -129,9 +129,6 @@
             <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🛡️ Sanctuary
             </button>
-            <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🖼️ Landing BG
-            </button>
             <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🎨 Theme Matrix
             </button>
@@ -449,35 +446,7 @@
             </div>
         </div>
 
-        <!-- TAB 9: LANDING PAGE BACKGROUND CONFIG -->
-        <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
-                    <span>🖼️</span> Manage Index Page Cinematic Background
-                </h3>
-                    <form id="updateLandingBgForm" class="space-y-4">
-    <div>
-        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Select Image File or Direct URL</label>
-        <input type="file" id="bgFileInput" accept="image/*" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none cursor-pointer">
-    </div>
-    <div class="text-center text-xs text-slate-500">OR</div>
-    <div>
-        <input type="url" id="bgUrlInput" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="https://i.pinimg.com/...jpg">
-    </div>
-    <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
-        Update Landing Background
-    </button>
-</form>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">⚡</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Dynamic Visual Matrix</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Instantly change the cinematic background image of your main login portal directly from this control panel.</p>
-            </div>
-        </div>
-
-        <!-- TAB 10: THEME MATRIX -->
+        <!-- TAB 9: THEME MATRIX -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
                 <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
@@ -495,7 +464,7 @@
                         <span class="w-6 h-6 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span> Matrix Green
                     </button>
                     <button onclick="setPanelTheme('cyan')" class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/50"></span> Cyber Cyan
+                        <span class="w-6 h-6 rounded-full bg-cyan-500 shadow-lg shadow-emerald-500/50"></span> Cyber Cyan
                     </button>
                 </div>
             </div>
@@ -523,7 +492,7 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'theme'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'theme'].forEach(t => {
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
@@ -538,7 +507,6 @@
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
-            if (tab === 'landingBg') loadLandingBgConfig();
         }
 
         function setPanelTheme(theme) {
@@ -650,36 +618,6 @@
                 }
             } catch (err) {}
         }
-
-        // --- LANDING BG CONFIG MANAGEMENT ---
-        async function loadLandingBgConfig() {
-            try {
-                const res = await fetch('/api/landing-bg');
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('bgUrlInput').value = data.url || "";
-                }
-            } catch (err) {}
-        }
-
-        document.getElementById('updateLandingBgForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = document.getElementById('bgUrlInput').value;
-            try {
-                const res = await fetch('/api/control-panel/landing-bg', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                if (res.ok) {
-                    showStatusMessage("Landing background updated successfully!", "success");
-                } else {
-                    showStatusMessage("Failed to update background", "error");
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", "error");
-            }
-        });
 
         // --- HABITS MANAGEMENT ---
         async function loadHabits() {
