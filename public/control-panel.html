@@ -157,15 +157,37 @@
                 <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">📚 Create Study Subject</h3>
                 <form id="createStudyForm" class="space-y-4">
                     <input type="hidden" id="editStudyId">
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label><input type="text" id="studyName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label><input type="number" id="studyTarget" value="120" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline</label><input type="date" id="studyEndDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
-                    <button type="submit" id="studySubmitBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Deploy Subject</button>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
+                        <input type="text" id="studyName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="e.g., Web Dev / DSA">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
+                        <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                        <input type="date" id="studyStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
+                        <input type="date" id="studyEndDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none">
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
+                            Deploy Study Vector
+                        </button>
+                        <button type="button" id="studyCancelBtn" onclick="resetStudyForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                            Cancel
+                        </button>
+                    </div>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Study Subjects</h3>
-                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Study Categories</h3>
+                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
+                </div>
             </div>
         </div>
 
@@ -480,7 +502,7 @@
                 if (data.success && data.categories.length > 0) {
                     container.innerHTML = data.categories.map(c => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${c.name}</h4><span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day</span></div>
+                            <div><h4 class="font-extrabold text-sm text-white">${c.name}</h4><span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span></div>
                             <button onclick="deleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                         </div>
                     `).join('');
@@ -492,9 +514,10 @@
             e.preventDefault();
             const name = document.getElementById('studyName').value;
             const dailyTargetMinutes = document.getElementById('studyTarget').value;
+            const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
             const endDate = document.getElementById('studyEndDate').value;
             try {
-                const res = await fetch('/api/study/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate: "2026-09-11", endDate }) });
+                const res = await fetch('/api/study/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate }) });
                 const data = await res.json();
                 if (res.ok) { showStatusMessage("Subject added!", "success"); document.getElementById('createStudyForm').reset(); loadStudy(); }
                 else { alert("❌ " + data.error); }
