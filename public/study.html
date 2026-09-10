@@ -559,6 +559,10 @@
         }
 
         verifyGlobalSystemLock();
+        function checkPreLaunchLock() {
+    const banner = document.getElementById('prelaunchBanner');
+    if (banner) banner.classList.add('hidden');
+}
     </script>
 </body>
 </html>
