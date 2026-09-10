@@ -260,22 +260,20 @@
         }
 
         verifyGlobalSystemLock();
-        async function loadLandingBackground() {
-    try {
-        const res = await fetch('/api/landing-bg');
-        const data = await res.json();
-        if (data.success && data.url) {
-            // Ahiya index page na body athva background container par image apply thai chhe
-            document.body.style.backgroundImage = `linear-gradient(rgba(7,9,15,0.7), rgba(7,9,15,0.85)), url('${data.url}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundAttachment = 'fixed';
+            async function initDynamicBackground() {
+        try {
+            const res = await fetch('/api/landing-bg');
+            const data = await res.json();
+            if (data.success && data.url) {
+                document.body.style.backgroundImage = `linear-gradient(rgba(7,9,15,0.7), rgba(7,9,15,0.85)), url('${data.url}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+            }
+        } catch (err) {
+            console.error("Background sync error:", err);
         }
-    } catch (err) {
-        console.error("Failed to load landing background:", err);
     }
-}
-window.addEventListener('DOMContentLoaded', loadLandingBackground);
+    window.addEventListener('DOMContentLoaded', initDynamicBackground);
     </script>
 </body>
 </html>
