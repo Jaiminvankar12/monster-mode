@@ -130,7 +130,7 @@
                 🛡️ Sanctuary
             </button>
             <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🎨 Theme Matrix
+                🎨 Theme Matrix (25)
             </button>
         </div>
 
@@ -228,7 +228,7 @@
             </div>
         </div>
 
-        <!-- TAB 3: STUDY CORE WITH DEADLINE / END DATE -->
+        <!-- TAB 3: STUDY CORE WITH DEADLINE FIELD -->
         <div id="sectionStudy" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">📚 Create Study Subject</h3>
@@ -410,7 +410,7 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">📝</span>
+                <span class="text-5xl mb-4 animate-bounce">📝</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams.</p>
             </div>
@@ -440,38 +440,101 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">🛌</span>
+                <span class="text-5xl mb-4 animate-bounce">🛌</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🌿 Sanctuary Safe-Haven</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, streaks are fully preserved.</p>
             </div>
         </div>
 
-        <!-- TAB 9: THEME MATRIX -->
+        <!-- TAB 9: THEME MATRIX (25 ELITE COLOR THEMES) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
                 <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
-                    <span>🎨</span> System Global Accent Theme Matrix
+                    <span>🎨</span> System Global Accent Theme Matrix (25 Colors)
                 </h3>
                 <p class="text-xs text-slate-400">Select and deploy operational HUD glow color across all user terminals.</p>
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <button onclick="setPanelTheme('red')" class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></span> Cyber Red
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 max-h-[380px] overflow-y-auto pr-1">
+                    <button onclick="setPanelTheme('red')" class="p-3 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-red-500 shrink-0"></span> Cyber Red
                     </button>
-                    <button onclick="setPanelTheme('blue')" class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></span> Neon Blue
+                    <button onclick="setPanelTheme('blue')" class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-blue-500 shrink-0"></span> Neon Blue
                     </button>
-                    <button onclick="setPanelTheme('emerald')" class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span> Matrix Green
+                    <button onclick="setPanelTheme('emerald')" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-emerald-500 shrink-0"></span> Matrix Green
                     </button>
-                    <button onclick="setPanelTheme('cyan')" class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-cyan-500 shadow-lg shadow-emerald-500/50"></span> Cyber Cyan
+                    <button onclick="setPanelTheme('cyan')" class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-cyan-500 shrink-0"></span> Cyber Cyan
+                    </button>
+                    <button onclick="setPanelTheme('amber')" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-500 shrink-0"></span> Golden Amber
+                    </button>
+                    <button onclick="setPanelTheme('crimson')" class="p-3 rounded-xl bg-rose-700/10 border border-rose-700/30 hover:bg-rose-700/20 text-rose-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-rose-700 shrink-0"></span> Blood Crimson
+                    </button>
+                    <button onclick="setPanelTheme('purple')" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 text-purple-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-purple-500 shrink-0"></span> Royal Purple
+                    </button>
+                    <button onclick="setPanelTheme('indigo')" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-indigo-500 shrink-0"></span> Electric Indigo
+                    </button>
+                    <button onclick="setPanelTheme('lime')" class="p-3 rounded-xl bg-lime-500/10 border border-lime-500/30 hover:bg-lime-500/20 text-lime-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-lime-500 shrink-0"></span> Toxic Lime
+                    </button>
+                    <button onclick="setPanelTheme('teal')" class="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 text-teal-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-teal-500 shrink-0"></span> Deep Teal
+                    </button>
+                    <button onclick="setPanelTheme('orange')" class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-orange-500 shrink-0"></span> Solar Orange
+                    </button>
+                    <button onclick="setPanelTheme('pink')" class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-pink-500 shrink-0"></span> Hot Pink
+                    </button>
+                    <button onclick="setPanelTheme('slate')" class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 hover:bg-slate-400/20 text-slate-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-slate-400 shrink-0"></span> Slate Steel
+                    </button>
+                    <button onclick="setPanelTheme('violet')" class="p-3 rounded-xl bg-violet-600/10 border border-violet-600/30 hover:bg-violet-600/20 text-violet-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-violet-600 shrink-0"></span> Cyber Violet
+                    </button>
+                    <button onclick="setPanelTheme('neonemerald')" class="p-3 rounded-xl bg-emerald-400/10 border border-emerald-400/30 hover:bg-emerald-400/20 text-emerald-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-emerald-400 shrink-0"></span> Neon Emerald
+                    </button>
+                    <button onclick="setPanelTheme('yellow')" class="p-3 rounded-xl bg-yellow-400/10 border border-yellow-400/30 hover:bg-yellow-400/20 text-yellow-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-yellow-400 shrink-0"></span> Laser Yellow
+                    </button>
+                    <button onclick="setPanelTheme('rose')" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-rose-500 shrink-0"></span> Deep Rose
+                    </button>
+                    <button onclick="setPanelTheme('sky')" class="p-3 rounded-xl bg-sky-400/10 border border-sky-400/30 hover:bg-sky-400/20 text-sky-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-sky-400 shrink-0"></span> Quantum Sky
+                    </button>
+                    <button onclick="setPanelTheme('fuchsia')" class="p-3 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 hover:bg-fuchsia-500/20 text-fuchsia-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-fuchsia-500 shrink-0"></span> Plasma Fuchsia
+                    </button>
+                    <button onclick="setPanelTheme('acid')" class="p-3 rounded-xl bg-green-400/10 border border-green-400/30 hover:bg-green-400/20 text-green-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-green-400 shrink-0"></span> Acid Green
+                    </button>
+                    <button onclick="setPanelTheme('mystic')" class="p-3 rounded-xl bg-zinc-500/10 border border-zinc-500/30 hover:bg-zinc-500/20 text-zinc-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-zinc-400 shrink-0"></span> Mystic Slate
+                    </button>
+                    <button onclick="setPanelTheme('gold')" class="p-3 rounded-xl bg-amber-300/10 border border-amber-300/30 hover:bg-amber-300/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-300 shrink-0"></span> Solar Gold
+                    </button>
+                    <button onclick="setPanelTheme('cyberlime')" class="p-3 rounded-xl bg-emerald-300/10 border border-emerald-300/30 hover:bg-emerald-300/20 text-emerald-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-emerald-300 shrink-0"></span> Cyber Lime
+                    </button>
+                    <button onclick="setPanelTheme('neonamber')" class="p-3 rounded-xl bg-amber-600/10 border border-amber-600/30 hover:bg-amber-600/20 text-amber-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-600 shrink-0"></span> Neon Amber
+                    </button>
+                    <button onclick="setPanelTheme('midnight')" class="p-3 rounded-xl bg-blue-900/10 border border-blue-900/30 hover:bg-blue-900/20 text-blue-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-blue-800 shrink-0"></span> Midnight Blue
                     </button>
                 </div>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-5xl mb-4 animate-bounce">🎨</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">HUD Color Synchronization</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Instantly alters the core accent theme across all connected UI nodes and command centers.</p>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">25-Tone HUD Matrix</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Select any of the 25 elite themes to instantly synchronize glow and accent colors across all terminals.</p>
             </div>
         </div>
 
@@ -520,7 +583,28 @@
                 red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
                 blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
                 emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
-                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' }
+                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' },
+                amber: { primary: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)' },
+                crimson: { primary: '#e11d48', glow: 'rgba(225, 29, 72, 0.15)' },
+                purple: { primary: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)' },
+                indigo: { primary: '#6366f1', glow: 'rgba(99, 102, 241, 0.15)' },
+                lime: { primary: '#84cc16', glow: 'rgba(132, 204, 22, 0.15)' },
+                teal: { primary: '#14b8a6', glow: 'rgba(20, 184, 166, 0.15)' },
+                orange: { primary: '#f97316', glow: 'rgba(249, 115, 22, 0.15)' },
+                pink: { primary: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)' },
+                slate: { primary: '#94a3b8', glow: 'rgba(148, 163, 184, 0.15)' },
+                violet: { primary: '#7c3aed', glow: 'rgba(124, 58, 237, 0.15)' },
+                neonemerald: { primary: '#34d399', glow: 'rgba(52, 211, 153, 0.15)' },
+                yellow: { primary: '#facc15', glow: 'rgba(250, 204, 21, 0.15)' },
+                rose: { primary: '#f43f5e', glow: 'rgba(244, 63, 94, 0.15)' },
+                sky: { primary: '#38bdf8', glow: 'rgba(56, 189, 248, 0.15)' },
+                fuchsia: { primary: '#d946ef', glow: 'rgba(217, 70, 239, 0.15)' },
+                acid: { primary: '#4ade80', glow: 'rgba(74, 222, 128, 0.15)' },
+                mystic: { primary: '#a1a1aa', glow: 'rgba(161, 161, 170, 0.15)' },
+                gold: { primary: '#fde047', glow: 'rgba(253, 224, 71, 0.15)' },
+                cyberlime: { primary: '#6ee7b7', glow: 'rgba(110, 231, 183, 0.15)' },
+                neonamber: { primary: '#d97706', glow: 'rgba(217, 119, 6, 0.15)' },
+                midnight: { primary: '#1e40af', glow: 'rgba(30, 64, 175, 0.15)' }
             };
             let cfg = colorMap[theme] || colorMap['red'];
             document.documentElement.style.setProperty('--theme-primary', cfg.primary);
@@ -714,7 +798,7 @@
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (res.ok) {
-                    showStatusMessage(`Habit deleted successfully`, 'success');
+                    showStatusMessage(`Habit deleted successfully`, 'error');
                     loadHabits();
                 } else {
                     showStatusMessage(data.error || "Failed to delete habit", 'error');
@@ -744,7 +828,7 @@
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No workouts deployed yet.</p>`;
+                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No workouts deployed yet.</p>`;
                 }
             } catch (err) {}
         }
@@ -824,7 +908,7 @@
             }
         }
 
-        // --- STUDY MANAGEMENT ---
+        // --- STUDY MANAGEMENT WITH DEADLINE SUPPORT ---
         async function loadStudy() {
             try {
                 const res = await fetch('/api/study/categories');
