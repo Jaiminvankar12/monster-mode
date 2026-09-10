@@ -1,16 +1,1 @@
-[
-  {
-    "id": "h1",
-    "userId": "admin_master_user",
-    "name": "🧴 Hair Care",
-    "frequency": "daily",
-    "startDate": "2026-09-11"
-  },
-  {
-    "id": "h2",
-    "userId": "admin_master_user",
-    "name": "🧼 Face Care",
-    "frequency": "daily",
-    "startDate": "2026-09-11"
-  }
-]
+[]
