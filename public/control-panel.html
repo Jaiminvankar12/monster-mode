@@ -646,36 +646,39 @@
             }
         }
 
-       async function loadNotesReminders() {
-    try {
-        const res = await fetch('/api/notes-reminders');
-        const data = await res.json();
-        const container = document.getElementById('notesListContainer');
-        
-        // Check if items array exists and has entries
-        if (data.success && data.items && data.items.length > 0) {
-            container.innerHTML = data.items.map(item => `
-                <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
-                            ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+        async function loadNotesReminders() {
+            try {
+                const res = await fetch('/api/notes-reminders');
+                const data = await res.json();
+                const container = document.getElementById('notesListContainer');
+                
+                if (data.success && data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => `
+                        <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
+                                    ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
+                            </div>
+                            <button onclick="deleteNoteItem('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
-                    </div>
-                    <button onclick="deleteNoteItem('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                </div>
-            `).join('');
-        } else {
-            container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+                }
+            } catch (err) {
+                console.error("Error loading notes:", err);
+            }
         }
-    } catch (err) {
-        console.error("Error loading notes:", err);
-    }
-}
 
         document.getElementById('createNoteForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const actionPassword = prompt("🔐 Enter ADD Password (monster*jay@8116):");
+            if (!actionPassword) return;
+
             const title = document.getElementById('noteTitle').value;
             const description = document.getElementById('noteDesc').value;
             const isReminder = document.getElementById('panelIsReminder').checked;
@@ -686,25 +689,44 @@
                 const res = await fetch('/api/notes-reminders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, description, isReminder, date, time })
+                    body: JSON.stringify({ title, description, isReminder, date, time, actionPassword })
                 });
+                const data = await res.json();
                 if (res.ok) {
                     showStatusMessage("Note/Reminder deployed successfully!", "success");
                     document.getElementById('createNoteForm').reset();
                     togglePanelTimerFields();
                     loadNotesReminders();
+                } else {
+                    showStatusMessage(data.error || "Failed to deploy note", "error");
+                    alert("❌ " + (data.error || "Failed to deploy note"));
                 }
-            } catch (err) {}
+            } catch (err) {
+                showStatusMessage("Server connection error", "error");
+            }
         });
 
         async function deleteNoteItem(id) {
+            const actionPassword = prompt("🗑️ Enter DELETE Password (monster*jay@1050):");
+            if (!actionPassword) return;
+
             try {
-                const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
+                const res = await fetch(`/api/notes-reminders/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionPassword })
+                });
+                const data = await res.json();
                 if (res.ok) {
                     showStatusMessage("Entry deleted.", "error");
                     loadNotesReminders();
+                } else {
+                    showStatusMessage(data.error || "Failed to delete item", "error");
+                    alert("❌ " + (data.error || "Failed to delete item"));
                 }
-            } catch (err) {}
+            } catch (err) {
+                showStatusMessage("Server connection error", "error");
+            }
         }
 
         // --- HABITS MANAGEMENT ---
@@ -761,13 +783,16 @@
             const description = document.getElementById('habitDesc').value;
             const startDate = document.getElementById('habitStartDate').value || "2026-09-11";
 
+            const actionPassword = prompt(editId ? "🔐 Enter EDIT Password (monster*jay@0249):" : "🔐 Enter ADD Password (monster*jay@8116):");
+            if (!actionPassword) return;
+
             try {
                 let res, data;
                 if (editId) {
                     res = await fetch(`/api/habits/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, category, description, startDate })
+                        body: JSON.stringify({ name, category, description, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -776,12 +801,13 @@
                         loadHabits();
                     } else {
                         showStatusMessage(data.error || "Failed to edit habit", 'error');
+                        alert("❌ " + data.error);
                     }
                 } else {
                     res = await fetch('/api/habits', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, category, description, startDate })
+                        body: JSON.stringify({ name, category, description, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -790,6 +816,7 @@
                         loadHabits();
                     } else {
                         showStatusMessage(data.error || "Failed to add habit", 'error');
+                        alert("❌ " + data.error);
                     }
                 }
             } catch (err) {
@@ -798,14 +825,22 @@
         });
 
         async function deleteHabit(id) {
+            const actionPassword = prompt("🗑️ Enter DELETE Password (monster*jay@1050):");
+            if (!actionPassword) return;
+
             try {
-                const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+                const res = await fetch(`/api/habits/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionPassword })
+                });
                 const data = await res.json();
                 if (res.ok) {
                     showStatusMessage(`Habit deleted successfully`, 'error');
                     loadHabits();
                 } else {
                     showStatusMessage(data.error || "Failed to delete habit", 'error');
+                    alert("❌ " + data.error);
                 }
             } catch (err) {
                 showStatusMessage("Server connection error", 'error');
@@ -868,13 +903,16 @@
             const category = document.getElementById('workoutCategory').value;
             const startDate = "2026-09-11";
 
+            const actionPassword = prompt(editId ? "🔐 Enter EDIT Password (monster*jay@0249):" : "🔐 Enter ADD Password (monster*jay@8116):");
+            if (!actionPassword) return;
+
             try {
                 let res, data;
                 if (editId) {
                     res = await fetch(`/api/workouts/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
+                        body: JSON.stringify({ name, sets, value, unit, category, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -883,12 +921,13 @@
                         loadWorkouts();
                     } else {
                         showStatusMessage(data.error || "Failed to edit workout", 'error');
+                        alert("❌ " + data.error);
                     }
                 } else {
                     res = await fetch('/api/workouts', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
+                        body: JSON.stringify({ name, sets, value, unit, category, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -897,6 +936,7 @@
                         loadWorkouts();
                     } else {
                         showStatusMessage(data.error || "Failed to add workout", 'error');
+                        alert("❌ " + data.error);
                     }
                 }
             } catch (err) {
@@ -905,10 +945,25 @@
         });
 
         async function deleteWorkout(id) {
-            const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Workout deleted`, 'error');
-                loadWorkouts();
+            const actionPassword = prompt("🗑️ Enter DELETE Password (monster*jay@1050):");
+            if (!actionPassword) return;
+
+            try {
+                const res = await fetch(`/api/workouts/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionPassword })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showStatusMessage(`Workout deleted`, 'error');
+                    loadWorkouts();
+                } else {
+                    showStatusMessage(data.error || "Failed to delete workout", 'error');
+                    alert("❌ " + data.error);
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
             }
         }
 
@@ -968,13 +1023,16 @@
             const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
             const endDate = document.getElementById('studyEndDate').value || "";
 
+            const actionPassword = prompt(editId ? "🔐 Enter EDIT Password (monster*jay@0249):" : "🔐 Enter ADD Password (monster*jay@8116):");
+            if (!actionPassword) return;
+
             try {
                 let res, data;
                 if (editId) {
                     res = await fetch(`/api/study/categories/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -983,12 +1041,13 @@
                         loadStudy();
                     } else {
                         showStatusMessage(data.error || "Failed to edit study category", 'error');
+                        alert("❌ " + data.error);
                     }
                 } else {
                     res = await fetch('/api/study/categories', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -997,6 +1056,7 @@
                         loadStudy();
                     } else {
                         showStatusMessage(data.error || "Failed to add study category", 'error');
+                        alert("❌ " + data.error);
                     }
                 }
             } catch (err) {
@@ -1005,10 +1065,25 @@
         });
 
         async function deleteStudy(id) {
-            const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Study category deleted`, 'error');
-                loadStudy();
+            const actionPassword = prompt("🗑️ Enter DELETE Password (monster*jay@1050):");
+            if (!actionPassword) return;
+
+            try {
+                const res = await fetch(`/api/study/categories/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionPassword })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showStatusMessage(`Study category deleted`, 'error');
+                    loadStudy();
+                } else {
+                    showStatusMessage(data.error || "Failed to delete category", 'error');
+                    alert("❌ " + data.error);
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
             }
         }
 
@@ -1064,13 +1139,16 @@
             const frequency = document.getElementById('hygieneFreq').value;
             const startDate = document.getElementById('hygieneStartDate').value || "2026-09-11";
 
+            const actionPassword = prompt(editId ? "🔐 Enter EDIT Password (monster*jay@0249):" : "🔐 Enter ADD Password (monster*jay@8116):");
+            if (!actionPassword) return;
+
             try {
                 let res, data;
                 if (editId) {
                     res = await fetch(`/api/hygiene/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency, startDate })
+                        body: JSON.stringify({ name, frequency, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -1079,12 +1157,13 @@
                         loadHygiene();
                     } else {
                         showStatusMessage(data.error || "Failed to edit hygiene task", 'error');
+                        alert("❌ " + data.error);
                     }
                 } else {
                     res = await fetch('/api/hygiene', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency, startDate })
+                        body: JSON.stringify({ name, frequency, startDate, actionPassword })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -1093,6 +1172,7 @@
                         loadHygiene();
                     } else {
                         showStatusMessage(data.error || "Failed to add hygiene task", 'error');
+                        alert("❌ " + data.error);
                     }
                 }
             } catch (err) {
@@ -1101,10 +1181,25 @@
         });
 
         async function deleteHygiene(id) {
-            const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Hygiene task deleted`, 'error');
-                loadHygiene();
+            const actionPassword = prompt("🗑️ Enter DELETE Password (monster*jay@1050):");
+            if (!actionPassword) return;
+
+            try {
+                const res = await fetch(`/api/hygiene/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionPassword })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showStatusMessage(`Hygiene task deleted`, 'error');
+                    loadHygiene();
+                } else {
+                    showStatusMessage(data.error || "Failed to delete task", 'error');
+                    alert("❌ " + data.error);
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", 'error');
             }
         }
 
