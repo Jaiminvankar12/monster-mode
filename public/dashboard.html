@@ -205,6 +205,42 @@
                 </div>
             </div>
         </div>
+        <!-- MULTI-VECTOR ANALYTICS CHARTS & PIE CHARTS -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Habits Completion Pie Chart -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">🔥 Habits Completion Ratio</h3>
+        <div style="height: 250px; position: relative;">
+            <canvas id="habitsPieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Workout Execution Flow -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">🏋️ Workout Execution Flow</h3>
+        <div style="height: 250px; position: relative;">
+            <canvas id="workoutLineChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Study Progress Bar Chart -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📚 Study Core Progress Matrix</h3>
+        <div style="height: 250px; position: relative;">
+            <canvas id="studyBarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Hydration Compliance Pie Chart -->
+    <div class="glass-card p-6 rounded-2xl">
+        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">💧 Hydration Compliance Ratio</h3>
+        <div style="height: 250px; position: relative;">
+            <canvas id="hydrationPieChart"></canvas>
+        </div>
+    </div>
+</div>
 
         <!-- Mobile Logout -->
         <div class="block lg:hidden pt-4 pb-8">
@@ -522,6 +558,67 @@
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = 'index.html';
         }
+        let habitsPieInstance = null;
+let workoutLineInstance = null;
+let studyBarInstance = null;
+let hydrationPieInstance = null;
+
+function renderCharts(habits, workouts, studyData, hydrationData) {
+    // 1. Habits Pie Chart
+    const habitsCtx = document.getElementById('habitsPieChart').getContext('2d');
+    if (habitsPieInstance) habitsPieInstance.destroy();
+    let completedHabits = habits.filter(h => h.completedToday).length;
+    let pendingHabits = habits.length - completedHabits;
+
+    habitsPieInstance = new Chart(habitsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Pending'],
+            datasets: [{ data: [completedHabits, habits.length === 0 ? 1 : pendingHabits], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } } } }
+    });
+
+    // 2. Workout Line Chart
+    const workoutCtx = document.getElementById('workoutLineChart').getContext('2d');
+    if (workoutLineInstance) workoutLineInstance.destroy();
+    workoutLineInstance = new Chart(workoutCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{ label: 'Execution Flow', data: [1, 1, 0, 1, 1, 1, 0], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 3, fill: true, tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } } } }
+    });
+
+    // 3. Study Bar Chart
+    const studyCtx = document.getElementById('studyBarChart').getContext('2d');
+    if (studyBarInstance) studyBarInstance.destroy();
+    let studiedMins = studyData.totalStudiedMinutes || 0;
+    let targetMins = studyData.totalTargetMinutes || 120;
+    studyBarInstance = new Chart(studyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Studied', 'Remaining Target'],
+            datasets: [{ data: [studiedMins, Math.max(0, targetMins - studiedMins)], backgroundColor: ['#3b82f6', '#1e293b'], borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9ca3af' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } } } }
+    });
+
+    // 4. Hydration Pie Chart
+    const hydrationCtx = document.getElementById('hydrationPieChart').getContext('2d');
+    if (hydrationPieInstance) hydrationPieInstance.destroy();
+    let consumedWater = hydrationData.consumed || 0;
+    let goalWater = hydrationData.goal || 3000;
+    hydrationPieInstance = new Chart(hydrationCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Consumed (ml)', 'Remaining (ml)'],
+            datasets: [{ data: [consumedWater, Math.max(0, goalWater - consumedWater)], backgroundColor: ['#06b6d4', '#1e293b'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 } } } } }
+    });
+}
 
         async function verifyGlobalSystemLock() {
             try {
