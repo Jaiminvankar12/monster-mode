@@ -163,6 +163,7 @@
         let currentGoal = 3000;
         let currentGlass = 250;
         let hydrationHistoryLogs = {};
+        // Locked strictly to launch date September 11, 2026
         const LAUNCH_DATE = "2026-09-11";
 
         function checkPreLaunchLock() {
@@ -290,7 +291,7 @@
                                 <span class="text-4xl">🔐</span>
                                 <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
                                 <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
-                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="v-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
+                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
                                 <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
                                     Authorize & Unlock
                                 </button>
