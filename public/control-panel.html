@@ -1117,12 +1117,15 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
+                    showStatusMessage(data.message, 'success');
                     alert("⚡ " + data.message);
                     location.reload();
                 } else {
+                    showStatusMessage(data.error || "Failed to update lock status.", 'error');
                     alert("❌ " + (data.error || "Failed to update lock status."));
                 }
             } catch (err) {
+                showStatusMessage("Connection error with backend server.", 'error');
                 alert("Connection error with backend server.");
             }
         }
