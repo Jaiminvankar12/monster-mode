@@ -106,6 +106,9 @@
             <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🛡️ Sanctuary
             </button>
+            <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                🖼️ Landing BG
+            </button>
         </div>
 
         <!-- TAB 1: HABIT VECTORS -->
@@ -301,7 +304,7 @@
             </div>
         </div>
 
-        <!-- TAB 6: EXAM MODE CONFIGURATION (MANUAL MINUTES) -->
+        <!-- TAB 6: EXAM MODE CONFIGURATION -->
         <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
@@ -317,7 +320,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exam Mode Target (Manual Minutes)</label>
-                        <input type="number" id="examModeTarget" min="15" step="15" value="90" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Enter custom minutes (e.g., 75, 90, 100)">
+                        <input type="number" id="examModeTarget" min="15" step="15" value="90" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Enter custom minutes">
                     </div>
                     <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
                         Save Exam Mode Config
@@ -327,11 +330,11 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-5xl mb-4 animate-pulse">📝</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams to avoid burnout.</p>
+                <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams.</p>
             </div>
         </div>
 
-        <!-- TAB 7: SANCTUARY PROTOCOL (EMERGENCY RECOVERY) -->
+        <!-- TAB 7: SANCTUARY PROTOCOL -->
         <div id="sectionSanctuary" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6 flex items-center gap-2">
@@ -341,13 +344,13 @@
                     <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-4 rounded-xl">
                         <div>
                             <label class="block text-xs font-black text-white uppercase tracking-wider">Enable Sanctuary Mode</label>
-                            <span class="text-[10px] text-slate-400">Freezes streaks and targets during medical emergency or burnout</span>
+                            <span class="text-[10px] text-slate-400">Freezes streaks during medical emergency</span>
                         </div>
                         <input type="checkbox" id="sanctuaryEnabled" class="w-6 h-6 rounded-lg accent-purple-500 cursor-pointer">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reason / Note</label>
-                        <input type="text" id="sanctuaryReason" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-purple-500 outline-none" placeholder="e.g., Severe fever / Family emergency">
+                        <input type="text" id="sanctuaryReason" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-purple-500 outline-none" placeholder="e.g., Severe fever">
                     </div>
                     <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/30">
                         Update Sanctuary Status
@@ -357,7 +360,30 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-5xl mb-4 animate-pulse">🛌</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🌿 Sanctuary Safe-Haven</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, your streaks are fully preserved with zero penalty until you are ready to resume.</p>
+                <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, streaks are fully preserved.</p>
+            </div>
+        </div>
+
+        <!-- TAB 8: LANDING PAGE BACKGROUND CONFIG -->
+        <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
+                    <span>🖼️</span> Manage Index Page Cinematic Background
+                </h3>
+                <form id="updateLandingBgForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Image URL (Pinterest / Direct Link)</label>
+                        <input type="url" id="bgUrlInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="https://i.pinimg.com/...jpg">
+                    </div>
+                    <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
+                        Update Landing Background
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4 animate-pulse">⚡</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Dynamic Visual Matrix</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Instantly change the cinematic background image of your main login portal directly from this control panel.</p>
             </div>
         </div>
 
@@ -378,7 +404,7 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'hydration', 'examMode', 'sanctuary'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'hydration', 'examMode', 'sanctuary', 'landingBg'].forEach(t => {
                 document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
                 document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
@@ -388,6 +414,7 @@
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
+            if (tab === 'landingBg') loadLandingBgConfig();
         }
 
         function showStatusMessage(message, type = 'success') {
@@ -407,6 +434,36 @@
                 setTimeout(() => { toast.remove(); }, 350);
             }, 2500);
         }
+
+        // --- LANDING BG CONFIG MANAGEMENT ---
+        async function loadLandingBgConfig() {
+            try {
+                const res = await fetch('/api/landing-bg');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('bgUrlInput').value = data.url || "";
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('updateLandingBgForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('bgUrlInput').value;
+            try {
+                const res = await fetch('/api/control-panel/landing-bg', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                if (res.ok) {
+                    showStatusMessage("Landing background updated successfully!", "success");
+                } else {
+                    showStatusMessage("Failed to update background", "error");
+                }
+            } catch (err) {
+                showStatusMessage("Server connection error", "error");
+            }
+        });
 
         // --- HABITS MANAGEMENT ---
         async function loadHabits() {
