@@ -210,10 +210,7 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label>
                         <input type="text" id="workoutCategory" value="Strength" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                        <input type="date" id="workoutStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
-                    </div>
+                    <!-- Global Start Date Applied (11 Sept 2026) -->
                     <div class="flex gap-2">
                         <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
                             Deploy Workout
@@ -735,7 +732,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'} | Start: ${w.startDate || '2026-09-11'}</span>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'} | Global Start: 2026-09-11</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editWorkout(${JSON.stringify(w)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -756,7 +753,6 @@
             document.getElementById('workoutValue').value = w.value || w.reps || 10;
             document.getElementById('workoutUnit').value = w.unit || 'reps';
             document.getElementById('workoutCategory').value = w.category || 'Strength';
-            document.getElementById('workoutStartDate').value = w.startDate || '2026-09-11';
 
             document.getElementById('workoutFormTitle').innerText = '🏋️ Edit Exercise Vector';
             document.getElementById('workoutSubmitBtn').innerText = 'Update Workout';
@@ -766,7 +762,6 @@
         function resetWorkoutForm() {
             document.getElementById('editWorkoutId').value = '';
             document.getElementById('createWorkoutForm').reset();
-            document.getElementById('workoutStartDate').value = '2026-09-11';
             document.getElementById('workoutFormTitle').innerText = '🏋️ Deploy Exercise Vector';
             document.getElementById('workoutSubmitBtn').innerText = 'Deploy Workout';
             document.getElementById('workoutCancelBtn').classList.add('hidden');
@@ -780,7 +775,7 @@
             const value = document.getElementById('workoutValue').value;
             const unit = document.getElementById('workoutUnit').value;
             const category = document.getElementById('workoutCategory').value;
-            const startDate = document.getElementById('workoutStartDate').value || "2026-09-11";
+            const startDate = "2026-09-11"; // Enforced Global Launch Date
 
             try {
                 let res, data;
