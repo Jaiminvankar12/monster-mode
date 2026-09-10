@@ -1,13 +1,1 @@
-[
-  {
-    "id": "w1",
-    "userId": "admin_master_user",
-    "name": "Push-ups",
-    "sets": 3,
-    "value": 20,
-    "unit": "Reps",
-    "category": "Strength",
-    "startDate": "2026-09-11",
-    "createdAt": "2026-09-10T11:13:41.450Z"
-  }
-]
+[]

@@ -210,7 +210,6 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label>
                         <input type="text" id="workoutCategory" value="Strength" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
                     </div>
-                    <!-- Global Start Date Applied (11 Sept 2026) -->
                     <div class="flex gap-2">
                         <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
                             Deploy Workout
@@ -407,7 +406,7 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">📝</span>
+                <span class="text-5xl mb-4 animate-bounce">📝</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams.</p>
             </div>
@@ -437,7 +436,7 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">🛌</span>
+                <span class="text-5xl mb-4 animate-bounce">🛌</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🌿 Sanctuary Safe-Haven</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, streaks are fully preserved.</p>
             </div>
@@ -706,12 +705,13 @@
             }
         });
 
+        // FIXED DELETE HABIT ENDPOINT TO MATCH SERVER ROUTE
         async function deleteHabit(id) {
             try {
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (res.ok) {
-                    showStatusMessage(`Habit deleted`, 'error');
+                    showStatusMessage(`Habit deleted successfully`, 'error');
                     loadHabits();
                 } else {
                     showStatusMessage(data.error || "Failed to delete habit", 'error');
@@ -775,7 +775,7 @@
             const value = document.getElementById('workoutValue').value;
             const unit = document.getElementById('workoutUnit').value;
             const category = document.getElementById('workoutCategory').value;
-            const startDate = "2026-09-11"; // Enforced Global Launch Date
+            const startDate = "2026-09-11";
 
             try {
                 let res, data;
