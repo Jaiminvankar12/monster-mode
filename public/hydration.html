@@ -285,31 +285,14 @@
         });
 
         async function verifyGlobalSystemLock() {
-            try {
-                const res = await fetch('/api/system-lock');
-                const data = await res.json();
-                if (data.locked) {
-                    let overlay = document.getElementById('globalSystemLockOverlay');
-                    if (!overlay) {
-                        overlay = document.createElement('div');
-                        overlay.id = 'globalSystemLockOverlay';
-                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
-                        overlay.innerHTML = `
-                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
-                                <span class="text-4xl">🔐</span>
-                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
-                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
-                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
-                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
-                                    Authorize & Unlock
-                                </button>
-                            </div>
-                        `;
-                        document.body.appendChild(overlay);
-                    }
-                }
-            } catch (err) {}
+    try {
+        const res = await fetch('/api/system-lock');
+        const data = await res.json();
+        if (data.locked) {
+            window.location.href = 'index.html';
         }
+    } catch (err) {}
+}
 
         async function unlockSystemGlobal() {
             const adminPassword = document.getElementById('globalUnlockPass').value;
