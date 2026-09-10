@@ -83,22 +83,16 @@ async function sendTelegramAlert(message, eventKey = null) {
     }
 }
 
-// Helper JSON storage functions with Full Auto-Recovery for Render Cloud
+// Helper JSON storage functions with Clean State and Auto-Recovery
 function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
         if (file === HABITS_FILE) {
-            initial = [
-                { id: '1726051200000', userId: MASTER_USER_ID, name: 'Read 5 pages Daily', category: 'General', description: '', activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], startDate: MONSTER_LAUNCH_DATE, endDate: "", status: "active", createdAt: new Date().toISOString() }
-            ];
+            initial = []; // Clean empty default so user can add custom habits without unwanted duplicates
         } else if (file === WORKOUTS_FILE) {
-            initial = [
-                { id: 'w1', userId: MASTER_USER_ID, name: 'Push-ups', sets: 3, value: 20, unit: 'Reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }
-            ];
+            initial = [];
         } else if (file === STUDY_CATEGORIES_FILE) {
-            initial = [
-                { id: 's1', userId: MASTER_USER_ID, name: 'Web Development / BCA', dailyTargetMinutes: 120, startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }
-            ];
+            initial = [];
         } else if (file === HYGIENE_TASKS_FILE) {
             initial = [
                 { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
@@ -121,24 +115,6 @@ function readJSON(file) {
     try {
         let content = fs.readFileSync(file, 'utf8');
         let parsed = JSON.parse(content);
-
-        // Auto-recovery safety net if arrays become empty after Render restart
-        if (file === HABITS_FILE && Array.isArray(parsed) && parsed.length === 0) {
-            parsed = [{ id: '1726051200000', userId: MASTER_USER_ID, name: 'Read 5 pages Daily', category: 'General', description: '', activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], startDate: MONSTER_LAUNCH_DATE, endDate: "", status: "active", createdAt: new Date().toISOString() }];
-            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
-        } else if (file === WORKOUTS_FILE && Array.isArray(parsed) && parsed.length === 0) {
-            parsed = [{ id: 'w1', userId: MASTER_USER_ID, name: 'Push-ups', sets: 3, value: 20, unit: 'Reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }];
-            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
-        } else if (file === STUDY_CATEGORIES_FILE && Array.isArray(parsed) && parsed.length === 0) {
-            parsed = [{ id: 's1', userId: MASTER_USER_ID, name: 'Web Development / BCA', dailyTargetMinutes: 120, startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }];
-            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
-        } else if (file === HYGIENE_TASKS_FILE && Array.isArray(parsed) && parsed.length === 0) {
-            parsed = [
-                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
-            ];
-            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
-        }
         return parsed;
     } catch (err) {
         return file.includes('_file.json') || file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') ? {} : [];
@@ -359,7 +335,7 @@ function calculateStreak(userId = MASTER_USER_ID, type) {
     return streak;
 }
 
-// Centralized Server-Side Sync Service (Cleaned of all default auto-creation)
+// Centralized Server-Side Sync Service
 function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
 
@@ -444,120 +420,6 @@ app.post('/api/control-panel/landing-bg', requireAuth, (req, res) => {
     fs.writeFileSync(LANDING_BG_FILE, JSON.stringify(bg, null, 2));
     res.json({ success: true, message: "Landing background updated successfully." });
 });
-
-// --- NOTES & REMINDERS CRON JOB (TIMED ALERTS) ---
-cron.schedule('* * * * *', async () => {
-    let data = readJSON(NOTES_REMINDERS_FILE);
-    if (!data[MASTER_USER_ID]) return;
-
-    let now = new Date();
-    let todayStr = getServerToday();
-    let hours = String(now.getHours()).padStart(2, '0');
-    let minutes = String(now.getMinutes()).padStart(2, '0');
-    let currentTimeStr = `${hours}:${minutes}`;
-
-    let updated = false;
-    data[MASTER_USER_ID].forEach(item => {
-        if (item.isReminder && item.time && !item.completed && !item.notifiedToday) {
-            if (item.date === todayStr && item.time === currentTimeStr) {
-                let alertMsg = `⏰ *MONSTER REMINDER ALERT*\n\n📌 *Task:* ${item.title}\n📝 *Note:* ${item.description || 'No description'}\n⚡ *Time:* ${item.time}\n\n"Execute immediately, Apex Predator." 🚀`;
-                sendTelegramAlert(alertMsg, `reminder_${item.id}_${todayStr}_${currentTimeStr}`);
-                item.notifiedToday = true;
-                updated = true;
-            }
-        }
-    });
-
-    if (updated) {
-        writeJSON(NOTES_REMINDERS_FILE, data);
-    }
-}, { scheduled: true, timezone: "Asia/Kolkata" });
-
-// --- AUTOMATED TELEGRAM CRON JOBS ---
-cron.schedule('0 8 * * 0', async () => {
-    console.log("⏰ [Cron Job]: Triggering Sunday Morning Hygiene Command...");
-    let today = getServerToday();
-    let monsterDay = getMonsterDay(today);
-    const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
-    let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\nToday is Sunday! Complete your special grooming vectors:\n`;
-    tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
-    message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
-    await sendTelegramAlert(message, `sunday_hygiene_${today}_master`);
-}, { scheduled: true, timezone: "Asia/Kolkata" });
-
-cron.schedule('0 8 * * *', async () => {
-    console.log("⏰ [Cron Job]: Triggering Daily Morning Briefing & Audit...");
-    let today = getServerToday();
-    let monsterDay = getMonsterDay(today);
-    let sanctuary = getSanctuaryData(MASTER_USER_ID);
-    if (sanctuary.enabled) {
-        console.log(`🛡️ [Sanctuary Active]: Skipping morning brief.`);
-        return;
-    }
-
-    let habits = readJSON(HABITS_FILE);
-    let workouts = readJSON(WORKOUTS_FILE);
-    let categories = readJSON(STUDY_CATEGORIES_FILE);
-    let examData = getExamModeData(MASTER_USER_ID);
-    let totalStudyTarget = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-    let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
-
-    let hydData = getHydrationData(MASTER_USER_ID);
-    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
-    let workoutStreak = calculateWorkoutStreak(MASTER_USER_ID);
-    let studyStreak = calculateStreak(MASTER_USER_ID, 'study');
-
-    let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
-                  `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
-                  `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
-                  `🏋️ *Workouts Today:* ${workouts.length} exercises on deck (Streak: 🔥 ${workoutStreak} Days).\n` +
-                  `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''} (Streak: 🔥 ${studyStreak} Days).\n` +
-                  `💧 *Hydration Goal:* ${hydData.goal} ml [Streak: 🔥 ${hydrationStreak} Days].\n\n` +
-                  `*"Zero excuses. Absolute control. Dominate today, every single day!"* ⚡`;
-
-    await sendTelegramAlert(message, `morning_brief_daily_${today}_master`);
-}, { scheduled: true, timezone: "Asia/Kolkata" });
-
-cron.schedule('0 22 * * *', async () => {
-    console.log("🌙 [Cron Job]: Triggering 10 PM Night Audit & Summary Report...");
-    let today = getServerToday();
-    let monsterDay = getMonsterDay(today);
-    let sanctuary = getSanctuaryData(MASTER_USER_ID);
-    
-    if (sanctuary.enabled) {
-        await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_master`);
-        return;
-    }
-
-    let syncRes = runServerSyncEngine(MASTER_USER_ID, today);
-    let workoutStreak = calculateWorkoutStreak(MASTER_USER_ID);
-    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
-    let studyStreak = calculateStreak(MASTER_USER_ID, 'study');
-
-    let totalHabitStreak = calculateStreak(MASTER_USER_ID, 'habit');
-
-    let hydData = getHydrationData(MASTER_USER_ID);
-    let consumed = hydData.logs[today] || 0;
-    let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
-    let isHydrationDone = percent >= 100;
-
-    let workoutStatus = syncRes.allWorkoutsDone ? `✅ CONQUERED` : `⏳ PENDING`;
-    let studyStatus = syncRes.studyDone ? `✅ CONQUERED` : `⏳ PENDING`;
-    let hydrationStatus = isHydrationDone ? `✅ CONQUERED` : `💧 ${consumed} ml / ${hydData.goal} ml (${percent}%)`;
-
-    let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
-                  `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
-                  `🏋️ *Workouts:* ${workoutStatus} (Streak: 🔥 ${workoutStreak} Days)\n` +
-                  `📚 *Study:* ${studyStatus} — ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m (Streak: 🔥 ${studyStreak} Days)\n` +
-                  `💧 *Hydration:* ${hydrationStatus} [Streak: 🔥 ${hydrationStreak} Days]\n` +
-                  `🔥 *Habits Streak:* ${totalHabitStreak} Days Active\n` +
-                  `🧼 *Hygiene:* Checked & Logged\n\n` +
-                  (syncRes.allWorkoutsDone && syncRes.studyDone && isHydrationDone ? 
-                    `*"Absolute dominance today. All vectors achieved with zero flaws. Rest well, Apex Predator."* 👑🐉` :
-                    `*"Review your gaps. Tomorrow we eliminate all weaknesses. Rest and prepare."* ⚡`);
-
-    await sendTelegramAlert(message, `night_audit_${today}_master`);
-}, { scheduled: true, timezone: "Asia/Kolkata" });
 
 // --- HTML PAGE ROUTES ---
 app.get('/hydration', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hydration.html')); });
@@ -739,12 +601,6 @@ app.post('/api/notes-reminders/:id/toggle', requireAuth, async (req, res) => {
 
     item.completed = !item.completed;
     writeJSON(NOTES_REMINDERS_FILE, data);
-
-    if (item.completed && (!item.isReminder || !item.time)) {
-        let alertMsg = `✅ *MONSTER TASK COMPLETED*\n\n📌 *Title:* ${item.title}\n📝 *Details:* ${item.description || 'None'}\n\n"Executed with absolute precision." 🔥`;
-        await sendTelegramAlert(alertMsg, `task_done_${item.id}_${Date.now()}`);
-    }
-
     res.json({ success: true, completed: item.completed });
 });
 
@@ -1156,9 +1012,4 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 MONSTER MODE Server running at http://localhost:${PORT}`);
-});
-
-app.get('/api/cron/ping', (req, res) => {
-    console.log("PING RECEIVED FROM CRON-JOB.ORG");
-    res.json({ success: true, message: "Monster Mode server is wide awake!" });
 });
