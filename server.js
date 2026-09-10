@@ -83,36 +83,68 @@ async function sendTelegramAlert(message, eventKey = null) {
     }
 }
 
-// Helper JSON storage functions
+// Helper JSON storage functions with Full Auto-Recovery for Render Cloud
 function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
-        if (file === HYGIENE_TASKS_FILE) {
-            initial = [];
+        if (file === HABITS_FILE) {
+            initial = [
+                { id: '1726051200000', userId: MASTER_USER_ID, name: 'Read 5 pages Daily', category: 'General', description: '', activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], startDate: MONSTER_LAUNCH_DATE, endDate: "", status: "active", createdAt: new Date().toISOString() }
+            ];
+        } else if (file === WORKOUTS_FILE) {
+            initial = [
+                { id: 'w1', userId: MASTER_USER_ID, name: 'Push-ups', sets: 3, value: 20, unit: 'Reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }
+            ];
+        } else if (file === STUDY_CATEGORIES_FILE) {
+            initial = [
+                { id: 's1', userId: MASTER_USER_ID, name: 'Web Development / BCA', dailyTargetMinutes: 120, startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }
+            ];
+        } else if (file === HYGIENE_TASKS_FILE) {
+            initial = [
+                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
+            ];
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
-            if (file === HYDRATION_FILE) {
-                initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
-            } else if (file === EXAM_MODE_FILE) {
-                initial[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
-            } else if (file === SANCTUARY_FILE) {
-                initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
-            } else if (file === USER_XP_FILE) {
-                initial[MASTER_USER_ID] = { xp: 0, level: 1 };
-            } else if (file === LANDING_BG_FILE) {
-                initial = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
-                fs.writeFileSync(file, JSON.stringify(initial, null, 2));
-                return initial;
-            } else if (file === NOTES_REMINDERS_FILE) {
-                initial = { [MASTER_USER_ID]: [] };
-            } else if (file === SYSTEM_LOCK_FILE) {
-                initial = { locked: false, lockedAt: null };
-            }
+            if (file === HYDRATION_FILE) initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
+            if (file === EXAM_MODE_FILE) initial[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
+            if (file === SANCTUARY_FILE) initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
+            if (file === USER_XP_FILE) initial[MASTER_USER_ID] = { xp: 0, level: 1 };
+            if (file === LANDING_BG_FILE) initial = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
+            if (file === NOTES_REMINDERS_FILE) initial = { [MASTER_USER_ID]: [] };
+            if (file === SYSTEM_LOCK_FILE) initial = { locked: false, lockedAt: null };
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
     }
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+
+    try {
+        let content = fs.readFileSync(file, 'utf8');
+        let parsed = JSON.parse(content);
+
+        // Auto-recovery safety net if arrays become empty after Render restart
+        if (file === HABITS_FILE && Array.isArray(parsed) && parsed.length === 0) {
+            parsed = [{ id: '1726051200000', userId: MASTER_USER_ID, name: 'Read 5 pages Daily', category: 'General', description: '', activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], startDate: MONSTER_LAUNCH_DATE, endDate: "", status: "active", createdAt: new Date().toISOString() }];
+            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
+        } else if (file === WORKOUTS_FILE && Array.isArray(parsed) && parsed.length === 0) {
+            parsed = [{ id: 'w1', userId: MASTER_USER_ID, name: 'Push-ups', sets: 3, value: 20, unit: 'Reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }];
+            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
+        } else if (file === STUDY_CATEGORIES_FILE && Array.isArray(parsed) && parsed.length === 0) {
+            parsed = [{ id: 's1', userId: MASTER_USER_ID, name: 'Web Development / BCA', dailyTargetMinutes: 120, startDate: MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() }];
+            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
+        } else if (file === HYGIENE_TASKS_FILE && Array.isArray(parsed) && parsed.length === 0) {
+            parsed = [
+                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
+            ];
+            fs.writeFileSync(file, JSON.stringify(parsed, null, 2));
+        }
+        return parsed;
+    } catch (err) {
+        return file.includes('_file.json') || file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') ? {} : [];
+    }
 }
+
 function writeJSON(file, data) {
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
