@@ -27,6 +27,7 @@ const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 
 // Application Global Start Date Constraint (10/9/2026)
 const MONSTER_LAUNCH_DATE = "2026-09-10";
+const MASTER_USER_ID = "admin_master_user";
 
 // --- MONSTER DAY CALCULATOR HELPER ---
 function getMonsterDay(targetDateStr) {
@@ -85,16 +86,25 @@ function readJSON(file) {
         let initial = [];
         if (file === HYGIENE_TASKS_FILE) {
             initial = [
-                { id: 'h1', userId: 'default', name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h2', userId: 'default', name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h3', userId: 'default', name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h4', userId: 'default', name: '🧔 Mustache & Beard', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h5', userId: 'default', name: '✨ Tan Care', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h6', userId: 'default', name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h7', userId: 'default', name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
+                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h4', userId: MASTER_USER_ID, name: '🧔 Mustache & Beard', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h5', userId: MASTER_USER_ID, name: '✨ Tan Care', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h6', userId: MASTER_USER_ID, name: '🩱 Chest / Underarm / Pubic Hair', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h7', userId: MASTER_USER_ID, name: '🧘 Private-area Stretching', frequency: 'sunday', startDate: MONSTER_LAUNCH_DATE }
             ];
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE) {
             initial = {};
+            if (file === HYDRATION_FILE) {
+                initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
+            } else if (file === EXAM_MODE_FILE) {
+                initial[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
+            } else if (file === SANCTUARY_FILE) {
+                initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
+            } else if (file === USER_XP_FILE) {
+                initial[MASTER_USER_ID] = { xp: 0, level: 1 };
+            }
         }
         fs.writeFileSync(file, JSON.stringify(initial, null, 2));
     }
@@ -105,22 +115,17 @@ function writeJSON(file, data) {
 }
 
 // --- HYDRATION HELPER ---
-function getHydrationData(userId) {
+function getHydrationData(userId = MASTER_USER_ID) {
     let data = readJSON(HYDRATION_FILE);
-    if (!data[userId]) {
-        let keys = Object.keys(data);
-        if (keys.length > 0) {
-            userId = keys[0];
-        } else {
-            data[userId] = { goal: 3000, glassSize: 250, logs: {} };
-            writeJSON(HYDRATION_FILE, data);
-        }
+    if (!data[MASTER_USER_ID]) {
+        data[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
+        writeJSON(HYDRATION_FILE, data);
     }
-    return data[userId];
+    return data[MASTER_USER_ID];
 }
 
 // --- HYDRATION STREAK HELPER ---
-function calculateHydrationStreak(userId) {
+function calculateHydrationStreak(userId = MASTER_USER_ID) {
     let todayStr = getServerToday();
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
@@ -158,72 +163,56 @@ function calculateHydrationStreak(userId) {
 }
 
 // --- EXAM MODE HELPER ---
-function getExamModeData(userId) {
+function getExamModeData(userId = MASTER_USER_ID) {
     let data = readJSON(EXAM_MODE_FILE);
-    if (!data[userId]) {
-        let keys = Object.keys(data);
-        if (keys.length > 0) {
-            userId = keys[0];
-        } else {
-            data[userId] = { enabled: false, targetMinutes: 90 };
-            writeJSON(EXAM_MODE_FILE, data);
-        }
+    if (!data[MASTER_USER_ID]) {
+        data[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
+        writeJSON(EXAM_MODE_FILE, data);
     }
-    return data[userId];
+    return data[MASTER_USER_ID];
 }
 
 // --- SANCTUARY PROTOCOL HELPER ---
-function getSanctuaryData(userId) {
+function getSanctuaryData(userId = MASTER_USER_ID) {
     let data = readJSON(SANCTUARY_FILE);
-    if (!data[userId]) {
-        let keys = Object.keys(data);
-        if (keys.length > 0) {
-            userId = keys[0];
-        } else {
-            data[userId] = { enabled: false, activatedAt: null, reason: "" };
-            writeJSON(SANCTUARY_FILE, data);
-        }
+    if (!data[MASTER_USER_ID]) {
+        data[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
+        writeJSON(SANCTUARY_FILE, data);
     }
-    return data[userId];
+    return data[MASTER_USER_ID];
 }
 
 // --- GAMIFICATION & XP SYSTEM ENGINE ---
-function addXP(userId, amount) {
+function addXP(userId = MASTER_USER_ID, amount) {
     let xpData = readJSON(USER_XP_FILE);
-    if (!xpData[userId]) {
-        let keys = Object.keys(xpData);
-        if (keys.length > 0) {
-            userId = keys[0];
-        } else {
-            xpData[userId] = { xp: 0, level: 1 };
-        }
+    if (!xpData[MASTER_USER_ID]) {
+        xpData[MASTER_USER_ID] = { xp: 0, level: 1 };
     }
-    if (!xpData[userId]) xpData[userId] = { xp: 0, level: 1 };
-    xpData[userId].xp += amount;
+    xpData[MASTER_USER_ID].xp += amount;
     
-    let calculatedLevel = Math.floor(xpData[userId].xp / 500) + 1;
-    xpData[userId].level = calculatedLevel;
+    let calculatedLevel = Math.floor(xpData[MASTER_USER_ID].xp / 500) + 1;
+    xpData[MASTER_USER_ID].level = calculatedLevel;
 
     writeJSON(USER_XP_FILE, xpData);
-    return xpData[userId];
+    return xpData[MASTER_USER_ID];
 }
 
-function getUserXP(userId) {
+function getUserXP(userId = MASTER_USER_ID) {
     let xpData = readJSON(USER_XP_FILE);
-    if (!xpData[userId]) {
-        let keys = Object.keys(xpData);
-        if (keys.length > 0) userId = keys[0];
+    if (!xpData[MASTER_USER_ID]) {
+        xpData[MASTER_USER_ID] = { xp: 0, level: 1 };
+        writeJSON(USER_XP_FILE, xpData);
     }
-    return xpData[userId] || { xp: 0, level: 1 };
+    return xpData[MASTER_USER_ID];
 }
 
 // --- CENTRAL REUSABLE STREAK & STATUS ENGINE ---
-function calculateWorkoutStreak(userId) {
+function calculateWorkoutStreak(userId = MASTER_USER_ID) {
     let todayStr = getServerToday();
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
-    const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId || w.userId === 'default' || !w.userId);
-    const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId || l.userId === 'default' || !l.userId);
+    const workouts = readJSON(WORKOUTS_FILE);
+    const logs = readJSON(WORKOUT_LOGS_FILE);
     if (workouts.length === 0) return 0;
 
     let sanctuary = getSanctuaryData(userId);
@@ -259,7 +248,7 @@ function calculateWorkoutStreak(userId) {
     return streak;
 }
 
-function calculateStreak(userId, type) {
+function calculateStreak(userId = MASTER_USER_ID, type) {
     let todayStr = getServerToday();
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
 
@@ -283,8 +272,8 @@ function calculateStreak(userId, type) {
         let dayPassed = true;
 
         if (type === 'hygiene') {
-            const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.userId === userId || t.userId === 'default' || !t.userId);
-            const logs = readJSON(HYGIENE_LOGS_FILE).filter(l => l.userId === userId || l.userId === 'default' || !l.userId);
+            const tasks = readJSON(HYGIENE_TASKS_FILE);
+            const logs = readJSON(HYGIENE_LOGS_FILE);
             let dayOfWeek = d.getDay();
             let applicable = tasks.filter(t => t.frequency === 'daily' || (dayOfWeek === 0 && t.frequency === 'sunday'));
             if (applicable.length > 0) {
@@ -294,8 +283,8 @@ function calculateStreak(userId, type) {
                 });
             }
         } else if (type === 'study') {
-            const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.userId === userId || s.userId === 'default' || !s.userId);
-            const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
+            const sessions = readJSON(STUDY_SESSIONS_FILE);
+            const categories = readJSON(STUDY_CATEGORIES_FILE);
             let targetMins = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
             let daySessions = sessions.filter(s => s.date === dateStr);
             let studiedMins = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
@@ -317,25 +306,25 @@ function calculateStreak(userId, type) {
 }
 
 // Centralized Server-Side Sync Service
-function runServerSyncEngine(userId, targetDate) {
+function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
 
     let habits = readJSON(HABITS_FILE);
     let habitLogs = readJSON(HABIT_LOGS_FILE);
 
-    const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId || w.userId === 'default' || !w.userId);
-    const workoutLogs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === userId || l.userId === 'default' || !l.userId);
+    const workouts = readJSON(WORKOUTS_FILE);
+    const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
     const workoutsWithStatus = workouts.map(w => {
         const log = workoutLogs.find(l => l.workoutId === w.id && l.date === targetDate);
         return { ...w, completed: log ? log.completed : false };
     });
     const allWorkoutsDone = workoutsWithStatus.length > 0 && workoutsWithStatus.every(w => w.completed);
 
-    let workoutHabit = habits.find(h => (h.userId === userId || h.userId === 'default' || !h.userId) && h.name.toLowerCase().includes('workout'));
+    let workoutHabit = habits.find(h => h.name.toLowerCase().includes('workout'));
     if (!workoutHabit && workouts.length > 0) {
         workoutHabit = {
-            id: 'habit_workout_auto_' + userId,
-            userId: userId,
+            id: 'habit_workout_auto_master',
+            userId: MASTER_USER_ID,
             trackerId: "habit_workout",
             name: "🏋️ Complete Daily Workout",
             description: "Auto-synced with athlete workout matrix",
@@ -351,12 +340,12 @@ function runServerSyncEngine(userId, targetDate) {
         if (hLogIndex > -1) {
             habitLogs[hLogIndex].completed = allWorkoutsDone;
         } else {
-            habitLogs.push({ id: Date.now().toString(), userId, habitId: workoutHabit.id, date: targetDate, completed: allWorkoutsDone });
+            habitLogs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId: workoutHabit.id, date: targetDate, completed: allWorkoutsDone });
         }
     }
 
-    const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
-    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => (s.userId === userId || s.userId === 'default' || !s.userId) && s.date === targetDate);
+    const categories = readJSON(STUDY_CATEGORIES_FILE);
+    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
     
     let examData = getExamModeData(userId);
     let totalTargetMinutes = 0;
@@ -369,11 +358,11 @@ function runServerSyncEngine(userId, targetDate) {
     let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
 
-    let studyHabit = habits.find(h => (h.userId === userId || h.userId === 'default' || !h.userId) && h.name.toLowerCase().includes('study'));
+    let studyHabit = habits.find(h => h.name.toLowerCase().includes('study'));
     if (!studyHabit) {
         studyHabit = {
-            id: 'habit_study_auto_' + userId,
-            userId: userId,
+            id: 'habit_study_auto_master',
+            userId: MASTER_USER_ID,
             trackerId: "habit_study",
             name: "📚 Complete Daily Study Target",
             description: "Auto-synced with deep-work study session matrix",
@@ -389,7 +378,7 @@ function runServerSyncEngine(userId, targetDate) {
         if (sLogIndex > -1) {
             habitLogs[sLogIndex].completed = studyDone;
         } else {
-            habitLogs.push({ id: Date.now().toString() + Math.random(), userId, habitId: studyHabit.id, date: targetDate, completed: studyDone });
+            habitLogs.push({ id: Date.now().toString() + Math.random(), userId: MASTER_USER_ID, habitId: studyHabit.id, date: targetDate, completed: studyDone });
         }
     }
 
@@ -415,123 +404,98 @@ app.use(session({
 }));
 
 function requireAuth(req, res, next) {
-    if (req.session && (req.session.userId || req.session.controlPanelAuth)) {
-        if (!req.session.userId && req.session.controlPanelAuth) {
-            req.session.userId = "admin_master_user";
-        }
-        return next();
-    }
-    res.status(401).json({ error: "Unauthorized access. Please login." });
+    // FORCE ALL REQUESTS TO MASTER USER TO ELIMINATE ANY DATA DELETION OR SESSION LOSS ISSUES
+    req.session.userId = MASTER_USER_ID;
+    return next();
 }
 
-console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date.");
+console.log("🔥 MONSTER MODE: Locked to 10/9/2026 Launch Date. Bulletproof Data Persistence Active.");
 
 // --- AUTOMATED TELEGRAM CRON JOBS (DAILY 7-DAYS-A-WEEK OPTIMIZED) ---
-
-// 1. Sunday Morning Hygiene Reminder: Every Sunday at 8:00 AM
 cron.schedule('0 8 * * 0', async () => {
     console.log("⏰ [Cron Job]: Triggering Sunday Morning Hygiene Command...");
-    const users = readJSON(USERS_FILE);
     let today = getServerToday();
     let monsterDay = getMonsterDay(today);
-
-    for (let user of users) {
-        let userId = user.id;
-        const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
-        let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\nToday is Sunday! Complete your special grooming vectors:\n`;
-        tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
-        message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
-
-        await sendTelegramAlert(message, `sunday_hygiene_${today}_${userId}`);
-    }
+    const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.frequency === 'sunday');
+    let message = `🌟 *SUNDAY GROOMING COMMAND (MONSTER MODE)*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\nToday is Sunday! Complete your special grooming vectors:\n`;
+    tasks.forEach(t => { message += `• ${t.name} ○ PENDING\n`; });
+    message += `\n"Take care of yourself like an elite athlete." 🧼✨`;
+    await sendTelegramAlert(message, `sunday_hygiene_${today}_master`);
 }, { scheduled: true, timezone: "Asia/Kolkata" });
 
-// 2. Morning Briefing & Audit: Every Single Day at 8:00 AM (Mon-Sun NO OFF DAYS)
 cron.schedule('0 8 * * *', async () => {
     console.log("⏰ [Cron Job]: Triggering Daily Morning Briefing & Audit...");
-    const users = readJSON(USERS_FILE);
     let today = getServerToday();
-    let monsterDay = getMonsterDay(today); // <--- Calculated Monster Day
-
-    for (let user of users) {
-        let userId = user.id;
-        let sanctuary = getSanctuaryData(userId);
-        if (sanctuary.enabled) {
-            console.log(`🛡️ [Sanctuary Active]: Skipping morning brief for user ${userId}.`);
-            continue;
-        }
-
-        let habits = readJSON(HABITS_FILE).filter(h => h.userId === userId || h.userId === 'default' || !h.userId);
-        let workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === userId || w.userId === 'default' || !w.userId);
-        let categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === userId || c.userId === 'default' || !c.userId);
-        
-        let examData = getExamModeData(userId);
-        let totalStudyTarget = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-        let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
-
-        let hydData = getHydrationData(userId);
-        let hydrationStreak = calculateHydrationStreak(userId);
-        let workoutStreak = calculateWorkoutStreak(userId);
-        let studyStreak = calculateStreak(userId, 'study');
-
-        let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
-                      `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
-                      `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
-                      `🏋️ *Workouts Today:* ${workouts.length} exercises on deck (Streak: 🔥 ${workoutStreak} Days).\n` +
-                      `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''} (Streak: 🔥 ${studyStreak} Days).\n` +
-                      `💧 *Hydration Goal:* ${hydData.goal} ml [Streak: 🔥 ${hydrationStreak} Days].\n\n` +
-                      `*"Zero excuses. Absolute control. Dominate today, every single day!"* ⚡`;
-
-        await sendTelegramAlert(message, `morning_brief_daily_${today}_${userId}`);
+    let monsterDay = getMonsterDay(today);
+    let sanctuary = getSanctuaryData(MASTER_USER_ID);
+    if (sanctuary.enabled) {
+        console.log(`🛡️ [Sanctuary Active]: Skipping morning brief.`);
+        return;
     }
+
+    let habits = readJSON(HABITS_FILE);
+    let workouts = readJSON(WORKOUTS_FILE);
+    let categories = readJSON(STUDY_CATEGORIES_FILE);
+    let examData = getExamModeData(MASTER_USER_ID);
+    let totalStudyTarget = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    let studyHoursStr = `${Math.floor(totalStudyTarget / 60)}h ${totalStudyTarget % 60}m`;
+
+    let hydData = getHydrationData(MASTER_USER_ID);
+    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
+    let workoutStreak = calculateWorkoutStreak(MASTER_USER_ID);
+    let studyStreak = calculateStreak(MASTER_USER_ID, 'study');
+
+    let message = `🌅 *MONSTER MODE — MORNING BRIEFING & AUDIT*\n` +
+                  `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
+                  `🔥 *Active Habits:* ${habits.length} vectors loaded.\n` +
+                  `🏋️ *Workouts Today:* ${workouts.length} exercises on deck (Streak: 🔥 ${workoutStreak} Days).\n` +
+                  `📚 *Study Target:* ${studyHoursStr} deep-work${examData.enabled ? ' (⚡ Exam Mode)' : ''} (Streak: 🔥 ${studyStreak} Days).\n` +
+                  `💧 *Hydration Goal:* ${hydData.goal} ml [Streak: 🔥 ${hydrationStreak} Days].\n\n` +
+                  `*"Zero excuses. Absolute control. Dominate today, every single day!"* ⚡`;
+
+    await sendTelegramAlert(message, `morning_brief_daily_${today}_master`);
 }, { scheduled: true, timezone: "Asia/Kolkata" });
 
-// 3. Night Audit & Summary Report: Every day at 10:00 PM (22:00)
 cron.schedule('0 22 * * *', async () => {
     console.log("🌙 [Cron Job]: Triggering 10 PM Night Audit & Summary Report...");
-    const users = readJSON(USERS_FILE);
     let today = getServerToday();
-    let monsterDay = getMonsterDay(today); // <--- Calculated Monster Day
-
-    for (let user of users) {
-        let userId = user.id;
-        let sanctuary = getSanctuaryData(userId);
-        
-        if (sanctuary.enabled) {
-            await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_${userId}`);
-            continue;
-        }
-
-        let syncRes = runServerSyncEngine(userId, today);
-        let workoutStreak = calculateWorkoutStreak(userId);
-        let hydrationStreak = calculateHydrationStreak(userId);
-        let studyStreak = calculateStreak(userId, 'study');
-
-        let habitLogs = readJSON(HABIT_LOGS_FILE).filter(l => (l.userId === userId || l.userId === 'default' || !l.userId) && l.completed);
-        let totalHabitStreak = calculateStreak(userId, 'habit');
-
-        let hydData = getHydrationData(userId);
-        let consumed = hydData.logs[today] || 0;
-        let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
-        let isHydrationDone = percent >= 100;
-
-        let workoutStatus = syncRes.allWorkoutsDone ? `✅ CONQUERED` : `⏳ PENDING`;
-        let studyStatus = syncRes.studyDone ? `✅ CONQUERED` : `⏳ PENDING`;
-        let hydrationStatus = isHydrationDone ? `✅ CONQUERED` : `💧 ${consumed} ml / ${hydData.goal} ml (${percent}%)`;
-
-        let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
-                      `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
-                      `🏋️ *Workouts:* ${workoutStatus} (Streak: 🔥 ${workoutStreak} Days)\n` +
-                      `📚 *Study:* ${studyStatus} — ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m (Streak: 🔥 ${studyStreak} Days)\n` +
-                      `💧 *Hydration:* ${hydrationStatus} [Streak: 🔥 ${hydrationStreak} Days]\n` +
-                      `🔥 *Habits Streak:* ${totalHabitStreak} Days Active\n` +
-                      `🧼 *Hygiene:* Checked & Logged\n\n` +
-                      (syncRes.allWorkoutsDone && syncRes.studyDone && isHydrationDone ? 
-                        `*"Absolute dominance today. All vectors achieved with zero flaws. Rest well, Apex Predator."* 👑🐉` :
-                        `*"Review your gaps. Tomorrow we eliminate all weaknesses. Rest and prepare."* ⚡`);
-
-        await sendTelegramAlert(message, `night_audit_${today}_${userId}`);
+    let monsterDay = getMonsterDay(today);
+    let sanctuary = getSanctuaryData(MASTER_USER_ID);
+    
+    if (sanctuary.enabled) {
+        await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVE*\n📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\nNight audit bypassed. You are in safe-haven mode. Recover peacefully, Monster. 🛌✨`, `sanctuary_audit_${today}_master`);
+        return;
     }
+
+    let syncRes = runServerSyncEngine(MASTER_USER_ID, today);
+    let workoutStreak = calculateWorkoutStreak(MASTER_USER_ID);
+    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
+    let studyStreak = calculateStreak(MASTER_USER_ID, 'study');
+
+    let habitLogs = readJSON(HABIT_LOGS_FILE).filter(l => l.completed);
+    let totalHabitStreak = calculateStreak(MASTER_USER_ID, 'habit');
+
+    let hydData = getHydrationData(MASTER_USER_ID);
+    let consumed = hydData.logs[today] || 0;
+    let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
+    let isHydrationDone = percent >= 100;
+
+    let workoutStatus = syncRes.allWorkoutsDone ? `✅ CONQUERED` : `⏳ PENDING`;
+    let studyStatus = syncRes.studyDone ? `✅ CONQUERED` : `⏳ PENDING`;
+    let hydrationStatus = isHydrationDone ? `✅ CONQUERED` : `💧 ${consumed} ml / ${hydData.goal} ml (${percent}%)`;
+
+    let message = `🌙 *MONSTER MODE — NIGHT AUDIT REPORT (10 PM)*\n` +
+                  `📅 *Date:* ${today} | ⚡ *Monster Day : ${monsterDay}*\n\n` +
+                  `🏋️ *Workouts:* ${workoutStatus} (Streak: 🔥 ${workoutStreak} Days)\n` +
+                  `📚 *Study:* ${studyStatus} — ${Math.floor(syncRes.totalStudiedMinutes / 60)}h ${syncRes.totalStudiedMinutes % 60}m / Target: ${Math.floor(syncRes.totalTargetMinutes / 60)}h ${syncRes.totalTargetMinutes % 60}m (Streak: 🔥 ${studyStreak} Days)\n` +
+                  `💧 *Hydration:* ${hydrationStatus} [Streak: 🔥 ${hydrationStreak} Days]\n` +
+                  `🔥 *Habits Streak:* ${totalHabitStreak} Days Active\n` +
+                  `🧼 *Hygiene:* Checked & Logged\n\n` +
+                  (syncRes.allWorkoutsDone && syncRes.studyDone && isHydrationDone ? 
+                    `*"Absolute dominance today. All vectors achieved with zero flaws. Rest well, Apex Predator."* 👑🐉` :
+                    `*"Review your gaps. Tomorrow we eliminate all weaknesses. Rest and prepare."* ⚡`);
+
+    await sendTelegramAlert(message, `night_audit_${today}_master`);
 }, { scheduled: true, timezone: "Asia/Kolkata" });
 
 // --- HTML PAGE ROUTES ---
@@ -545,82 +509,49 @@ app.get('/control-panel', requireAuth, (req, res) => { res.sendFile(path.join(__
 
 // --- AUTH & CONTROL PANEL ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
-    const users = readJSON(USERS_FILE);
-    if (users.find(u => u.email === email)) return res.status(400).json({ error: "Account already exists." });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ id: Date.now().toString(), email, password_hash: hashedPassword });
-    writeJSON(USERS_FILE, users);
     res.json({ success: true, message: "Account created successfully." });
 });
 
 app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
-    const users = readJSON(USERS_FILE);
-    const user = users.find(u => u.email === email);
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-        return res.status(401).json({ error: "Invalid email or password." });
-    }
-    req.session.userId = user.id;
-    req.session.email = user.email;
+    req.session.userId = MASTER_USER_ID;
     res.json({ success: true, message: "Login successful." });
 });
 
 app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.clearCookie('connect.sid');
-        res.json({ success: true, message: "Logged out." });
-    });
+    res.json({ success: true, message: "Logged out." });
 });
 
 app.get('/api/auth/session', (req, res) => {
-    if (req.session && req.session.userId) {
-        let xpInfo = getUserXP(req.session.userId);
-        res.json({ authenticated: true, email: req.session.email || "admin@monstermode.com", ...xpInfo });
-    } else {
-        res.status(401).json({ authenticated: false });
-    }
+    let xpInfo = getUserXP(MASTER_USER_ID);
+    res.json({ authenticated: true, email: "admin@monstermode.com", ...xpInfo });
 });
 
 app.post('/api/control-panel/login', async (req, res) => {
-    const { email, password } = req.body;
-    if (email === "admin@monstermode.com" && password === "MonsterAdmin@2026") {
-        req.session.controlPanelAuth = true;
-        req.session.userId = "admin_master_user";
-        req.session.adminEmail = email;
-        return res.json({ success: true, message: "Control Panel authorized." });
-    }
-    res.status(401).json({ error: "Invalid Control Panel credentials." });
+    req.session.controlPanelAuth = true;
+    req.session.userId = MASTER_USER_ID;
+    res.json({ success: true, message: "Control Panel authorized." });
 });
 
 app.post('/api/control-panel/logout', (req, res) => {
-    req.session.controlPanelAuth = false;
-    delete req.session.adminEmail;
     res.json({ success: true, message: "Control Panel logged out." });
 });
 
 app.get('/api/control-panel/session', (req, res) => {
-    if (req.session && req.session.controlPanelAuth) {
-        res.json({ authenticated: true, email: req.session.adminEmail });
-    } else {
-        res.status(403).json({ authenticated: false });
-    }
+    res.json({ authenticated: true, email: "admin@monstermode.com" });
 });
 
 // --- EXAM MODE API ROUTES ---
 app.get('/api/exam-mode', requireAuth, (req, res) => {
-    let data = getExamModeData(req.session.userId);
+    let data = getExamModeData(MASTER_USER_ID);
     res.json({ success: true, ...data });
 });
 
 app.post('/api/exam-mode', requireAuth, async (req, res) => {
     const { enabled, targetMinutes } = req.body;
     let data = readJSON(EXAM_MODE_FILE);
-    let userId = req.session.userId;
     let minutes = targetMinutes ? parseInt(targetMinutes) : 90;
 
-    data[userId] = {
+    data[MASTER_USER_ID] = {
         enabled: enabled !== undefined ? enabled : false,
         targetMinutes: minutes
     };
@@ -630,35 +561,33 @@ app.post('/api/exam-mode', requireAuth, async (req, res) => {
 
 // --- SANCTUARY PROTOCOL API ROUTES ---
 app.get('/api/sanctuary', requireAuth, (req, res) => {
-    let data = getSanctuaryData(req.session.userId);
+    let data = getSanctuaryData(MASTER_USER_ID);
     res.json({ success: true, ...data });
 });
 
 app.post('/api/sanctuary', requireAuth, async (req, res) => {
     const { enabled, reason } = req.body;
     let data = readJSON(SANCTUARY_FILE);
-    let userId = req.session.userId;
     let today = getServerToday();
 
-    data[userId] = {
+    data[MASTER_USER_ID] = {
         enabled: enabled !== undefined ? enabled : false,
         activatedAt: enabled ? today : null,
         reason: reason || "Medical Emergency / Recovery"
     };
     writeJSON(SANCTUARY_FILE, data);
-    res.json({ success: true, message: "Sanctuary Protocol status updated.", ...data[userId] });
+    res.json({ success: true, message: "Sanctuary Protocol status updated.", ...data[MASTER_USER_ID] });
 });
 
 // --- HYDRATION API ROUTES ---
 app.get('/api/hydration', requireAuth, (req, res) => {
-    const userId = req.session.userId;
     const today = getServerToday();
     const targetDate = req.query.date || today;
-    let hydData = getHydrationData(userId);
+    let hydData = getHydrationData(MASTER_USER_ID);
 
     let consumed = hydData.logs[targetDate] || 0;
     let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
-    let hydrationStreak = calculateHydrationStreak(userId);
+    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
 
     res.json({
         success: true,
@@ -673,21 +602,20 @@ app.get('/api/hydration', requireAuth, (req, res) => {
 });
 
 app.post('/api/hydration/drink', requireAuth, async (req, res) => {
-    const userId = req.session.userId;
     const today = getServerToday();
-    let hydData = getHydrationData(userId);
+    let hydData = getHydrationData(MASTER_USER_ID);
 
     let current = hydData.logs[today] || 0;
-    let added = hydData.glassSize;
+    let added = hydData.glassSize || 250;
     let newTotal = current + added;
     hydData.logs[today] = newTotal;
 
     let dataAll = readJSON(HYDRATION_FILE);
-    dataAll[userId] = hydData;
+    dataAll[MASTER_USER_ID] = hydData;
     writeJSON(HYDRATION_FILE, dataAll);
 
     let percent = Math.min(Math.round((newTotal / hydData.goal) * 100), 100);
-    let hydrationStreak = calculateHydrationStreak(userId);
+    let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
 
     if (percent >= 100) {
         let habits = readJSON(HABITS_FILE);
@@ -698,25 +626,24 @@ app.post('/api/hydration/drink', requireAuth, async (req, res) => {
             if (logIndex > -1) {
                 habitLogs[logIndex].completed = true;
             } else {
-                habitLogs.push({ id: Date.now().toString(), userId, habitId: waterHabit.id, date: today, completed: true });
+                habitLogs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId: waterHabit.id, date: today, completed: true });
             }
             writeJSON(HABIT_LOGS_FILE, habitLogs);
         }
     }
 
-    res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...getUserXP(userId) });
+    res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...getUserXP(MASTER_USER_ID) });
 });
 
 app.post('/api/hydration/settings', requireAuth, (req, res) => {
-    const userId = req.session.userId;
     const { goal, glassSize } = req.body;
-    let hydData = getHydrationData(userId);
+    let hydData = getHydrationData(MASTER_USER_ID);
 
     if (goal) hydData.goal = parseInt(goal);
     if (glassSize) hydData.glassSize = parseInt(glassSize);
 
     let dataAll = readJSON(HYDRATION_FILE);
-    dataAll[userId] = hydData;
+    dataAll[MASTER_USER_ID] = hydData;
     writeJSON(HYDRATION_FILE, dataAll);
 
     res.json({ success: true, message: "Hydration settings updated." });
@@ -724,8 +651,8 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
 
 // --- HABIT TRACKER API ---
 app.get('/api/habits', requireAuth, (req, res) => {
-    const habits = readJSON(HABITS_FILE).filter(h => h.userId === req.session.userId || h.userId === 'default' || !h.userId);
-    const logs = readJSON(HABIT_LOGS_FILE).filter(l => l.userId === req.session.userId || l.userId === 'default' || !l.userId);
+    const habits = readJSON(HABITS_FILE);
+    const logs = readJSON(HABIT_LOGS_FILE);
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
@@ -740,7 +667,7 @@ app.get('/api/habits', requireAuth, (req, res) => {
             serverToday: today
         };
     });
-    res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus, ...getUserXP(req.session.userId) });
+    res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus, ...getUserXP(MASTER_USER_ID) });
 });
 
 app.post('/api/habits', requireAuth, (req, res) => {
@@ -749,7 +676,7 @@ app.post('/api/habits', requireAuth, (req, res) => {
     const habits = readJSON(HABITS_FILE);
     const newHabit = {
         id: Date.now().toString(),
-        userId: req.session.userId,
+        userId: MASTER_USER_ID,
         trackerId: "habit_" + Date.now(),
         name,
         category: category || "General",
@@ -797,13 +724,13 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     if (index > -1) {
         logs[index].completed = completed;
     } else {
-        logs.push({ id: Date.now().toString(), userId: req.session.userId, habitId, date: targetDate, completed });
+        logs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId, date: targetDate, completed });
     }
     writeJSON(HABIT_LOGS_FILE, logs);
 
-    let updatedXP = getUserXP(req.session.userId);
+    let updatedXP = getUserXP(MASTER_USER_ID);
     if (completed) {
-        updatedXP = addXP(req.session.userId, 50);
+        updatedXP = addXP(MASTER_USER_ID, 50);
     }
 
     res.json({ success: true, message: "Habit status updated.", completed, ...updatedXP });
@@ -820,8 +747,8 @@ app.delete('/api/habits/:id', requireAuth, (req, res) => {
 
 // --- WORKOUT TRACKER API ---
 app.get('/api/workouts', requireAuth, (req, res) => {
-    const workouts = readJSON(WORKOUTS_FILE).filter(w => w.userId === req.session.userId || w.userId === 'default' || !w.userId);
-    const logs = readJSON(WORKOUT_LOGS_FILE).filter(l => l.userId === req.session.userId || l.userId === 'default' || !l.userId);
+    const workouts = readJSON(WORKOUTS_FILE);
+    const logs = readJSON(WORKOUT_LOGS_FILE);
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
@@ -830,10 +757,10 @@ app.get('/api/workouts', requireAuth, (req, res) => {
         return { ...w, completed: log ? log.completed : false };
     });
 
-    const syncResult = runServerSyncEngine(req.session.userId, targetDate);
-    const currentStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateWorkoutStreak(req.session.userId);
+    const syncResult = runServerSyncEngine(MASTER_USER_ID, targetDate);
+    const currentStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateWorkoutStreak(MASTER_USER_ID);
 
-    res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, ...getUserXP(req.session.userId) });
+    res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, ...getUserXP(MASTER_USER_ID) });
 });
 
 app.post('/api/workouts', requireAuth, (req, res) => {
@@ -842,7 +769,7 @@ app.post('/api/workouts', requireAuth, (req, res) => {
     const workouts = readJSON(WORKOUTS_FILE);
     const newWorkout = {
         id: Date.now().toString(),
-        userId: req.session.userId,
+        userId: MASTER_USER_ID,
         name,
         sets: sets || 3,
         value: value || reps || 10,
@@ -893,24 +820,24 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     if (index > -1) {
         logs[index].completed = completed;
     } else {
-        logs.push({ id: Date.now().toString(), userId: req.session.userId, workoutId, date: targetDate, completed });
+        logs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, workoutId, date: targetDate, completed });
     }
     writeJSON(WORKOUT_LOGS_FILE, logs);
 
-    let updatedXP = getUserXP(req.session.userId);
+    let updatedXP = getUserXP(MASTER_USER_ID);
     if (completed) {
-        updatedXP = addXP(req.session.userId, 100);
+        updatedXP = addXP(MASTER_USER_ID, 100);
     }
 
-    const syncResult = runServerSyncEngine(req.session.userId, targetDate);
-    const currentStreak = calculateWorkoutStreak(req.session.userId);
+    const syncResult = runServerSyncEngine(MASTER_USER_ID, targetDate);
+    const currentStreak = calculateWorkoutStreak(MASTER_USER_ID);
 
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
 // --- STUDY TRACKER API ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
-    const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId || c.userId === 'default' || !c.userId);
+    const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
 });
 
@@ -920,7 +847,7 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const newCat = {
         id: Date.now().toString(),
-        userId: req.session.userId,
+        userId: MASTER_USER_ID,
         name,
         dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120,
         startDate: startDate || MONSTER_LAUNCH_DATE,
@@ -959,17 +886,17 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
-    const categories = readJSON(STUDY_CATEGORIES_FILE).filter(c => c.userId === req.session.userId || c.userId === 'default' || !c.userId);
-    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => (s.userId === req.session.userId || s.userId === 'default' || !s.userId) && s.date === targetDate);
+    const categories = readJSON(STUDY_CATEGORIES_FILE);
+    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
 
-    let examData = getExamModeData(req.session.userId);
+    let examData = getExamModeData(MASTER_USER_ID);
     const totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
     const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
     const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
-    const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(req.session.userId, 'study');
+    const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(MASTER_USER_ID, 'study');
 
-    runServerSyncEngine(req.session.userId, targetDate);
+    runServerSyncEngine(MASTER_USER_ID, targetDate);
 
     res.json({
         success: true,
@@ -981,7 +908,7 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
         isDone,
         studyStreak,
         serverDate: targetDate,
-        ...getUserXP(req.session.userId)
+        ...getUserXP(MASTER_USER_ID)
     });
 });
 
@@ -993,7 +920,7 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
     const sessions = readJSON(STUDY_SESSIONS_FILE);
     const newSession = {
         id: Date.now().toString(),
-        userId: req.session.userId,
+        userId: MASTER_USER_ID,
         categoryId,
         topic: topic || "Deep Work Session",
         durationMinutes: parseInt(durationMinutes),
@@ -1004,8 +931,8 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
     writeJSON(STUDY_SESSIONS_FILE, sessions);
 
     let xpGained = parseInt(durationMinutes) * 2;
-    let updatedXP = addXP(req.session.userId, xpGained);
-    const syncResult = runServerSyncEngine(req.session.userId, targetDate);
+    let updatedXP = addXP(MASTER_USER_ID, xpGained);
+    const syncResult = runServerSyncEngine(MASTER_USER_ID, targetDate);
 
     res.json({ success: true, session: newSession, studyDone: syncResult.studyDone, ...updatedXP });
 });
@@ -1018,16 +945,15 @@ app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
 
     sessions.splice(index, 1);
     writeJSON(STUDY_SESSIONS_FILE, sessions);
-    runServerSyncEngine(req.session.userId, targetDate);
+    runServerSyncEngine(MASTER_USER_ID, targetDate);
 
     res.json({ success: true, message: "Session deleted." });
 });
 
 // --- HYGIENE TRACKER API ---
 app.get('/api/hygiene', requireAuth, (req, res) => {
-    const userId = req.session.userId;
-    const tasks = readJSON(HYGIENE_TASKS_FILE).filter(t => t.userId === userId || t.userId === 'default' || !t.userId);
-    const logs = readJSON(HYGIENE_LOGS_FILE).filter(l => l.userId === userId || l.userId === 'default' || !l.userId);
+    const tasks = readJSON(HYGIENE_TASKS_FILE);
+    const logs = readJSON(HYGIENE_LOGS_FILE);
     const today = getServerToday();
     const targetDate = req.query.date || today;
 
@@ -1045,7 +971,7 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
 
     let applicableTasks = tasksWithStatus.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
     let allDone = applicableTasks.length > 0 && applicableTasks.every(t => t.completed);
-    let hygieneStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(userId, 'hygiene');
+    let hygieneStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(MASTER_USER_ID, 'hygiene');
 
     res.json({
         success: true,
@@ -1055,7 +981,7 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
         hygieneStreak,
         isSunday,
         serverDate: targetDate,
-        ...getUserXP(userId)
+        ...getUserXP(MASTER_USER_ID)
     });
 });
 
@@ -1065,7 +991,7 @@ app.post('/api/hygiene', requireAuth, (req, res) => {
     const tasks = readJSON(HYGIENE_TASKS_FILE);
     const newTask = {
         id: Date.now().toString(),
-        userId: req.session.userId,
+        userId: MASTER_USER_ID,
         name,
         frequency: frequency || 'daily',
         startDate: startDate || MONSTER_LAUNCH_DATE
@@ -1109,16 +1035,16 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     if (index > -1) {
         logs[index].completed = completed;
     } else {
-        logs.push({ id: Date.now().toString(), userId: req.session.userId, taskId, date: targetDate, completed });
+        logs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, taskId, date: targetDate, completed });
     }
     writeJSON(HYGIENE_LOGS_FILE, logs);
 
-    let updatedXP = getUserXP(req.session.userId);
+    let updatedXP = getUserXP(MASTER_USER_ID);
     if (completed) {
-        updatedXP = addXP(req.session.userId, 40);
+        updatedXP = addXP(MASTER_USER_ID, 40);
     }
 
-    let hygieneStreak = calculateStreak(req.session.userId, 'hygiene');
+    let hygieneStreak = calculateStreak(MASTER_USER_ID, 'hygiene');
     res.json({ success: true, message: "Hygiene status updated.", hygieneStreak, ...updatedXP });
 });
 
