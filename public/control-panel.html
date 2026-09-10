@@ -60,10 +60,8 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
 
-    <!-- Top-Right Floating Notification Host -->
     <div id="inlineStatusNotification"></div>
 
-    <!-- Top Navigation Bar -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <span class="text-2xl animate-pulse">🐉</span>
@@ -79,7 +77,6 @@
         </div>
     </header>
 
-    <!-- Main Command Center Area -->
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8">
         
         <div class="mb-6">
@@ -87,7 +84,6 @@
             <p class="text-xs text-slate-400 mt-1">Select a vector tab below to deploy, edit, and manage entries.</p>
         </div>
 
-        <!-- GLOBAL SYSTEM SECURITY LOCK -->
         <div class="glass-card p-6 rounded-2xl border border-red-500/35 mb-8">
             <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2">🔐 Global System Security Lock</h3>
             <p class="text-xs text-zinc-400 mb-4">Freeze or unfreeze all execution vectors across portals using Master Admin password.</p>
@@ -103,439 +99,196 @@
             </div>
         </div>
 
-        <!-- Horizontal Hub Navigation Tabs -->
         <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5 overflow-x-auto">
-            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🔥 Habits
-            </button>
-            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🏋️ Workouts
-            </button>
-            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                📚 Study Core
-            </button>
-            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🧼 Hygiene
-            </button>
-            <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                📌 Notes
-            </button>
-            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                💧 Hydration
-            </button>
-            <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                ⚡ Exam Mode
-            </button>
-            <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🛡️ Sanctuary
-            </button>
-            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                🎨 Theme Matrix (25)
-            </button>
+            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🔥 Habits</button>
+            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🏋️ Workouts</button>
+            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📚 Study Core</button>
+            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🧼 Hygiene</button>
+            <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📌 Notes</button>
+            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">💧 Hydration</button>
+            <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam Mode</button>
+            <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
+            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Theme Matrix (25)</button>
         </div>
 
-        <!-- TAB 1: HABIT VECTORS -->
+        <!-- TAB 1: HABITS -->
         <div id="sectionHabits" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="habitFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2">
-                    <span>➕</span> Add Habit Vector
-                </h3>
+                <h3 id="habitFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>➕</span> Add Habit Vector</h3>
                 <form id="createHabitForm" class="space-y-4">
                     <input type="hidden" id="editHabitId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label>
-                        <input type="text" id="habitName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Wake Up Early / Cold Shower">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category / Tag</label>
-                        <input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Personal Discipline">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Rule / Description</label>
-                        <input type="text" id="habitDesc" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition" placeholder="e.g., Zero distractions allowed">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                        <input type="date" id="habitStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition">
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="habitSubmitBtn" class="flex-1 py-4 red-glow-tab hover:opacity-95 text-white font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer mt-2">
-                            Deploy Habit Vector
-                        </button>
-                        <button type="button" id="habitCancelBtn" onclick="resetHabitForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer mt-2">
-                            Cancel
-                        </button>
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label><input type="text" id="habitName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label><input type="text" id="habitCategory" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description</label><input type="text" id="habitDesc" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-red-500 transition"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Date</label><input type="date" id="habitStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm"></div>
+                    <button type="submit" id="habitSubmitBtn" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Deploy Habit</button>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
-                    <span>📋</span> Active Habit Registry
-                </h3>
-                <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading habits...</p>
-                </div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Habits</h3>
+                <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
             </div>
         </div>
 
         <!-- TAB 2: WORKOUTS -->
         <div id="sectionWorkouts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="workoutFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6">🏋️ Deploy Exercise Vector</h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6">🏋️ Deploy Workout</h3>
                 <form id="createWorkoutForm" class="space-y-4">
                     <input type="hidden" id="editWorkoutId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exercise Name</label>
-                        <input type="text" id="workoutName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Bench Press / Planks">
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Name</label><input type="text" id="workoutName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
                     <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
-                            <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
-                            <input type="number" id="workoutValue" value="10" min="1" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label>
-                            <select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm focus:border-red-500 outline-none">
-                                <option value="reps">Reps</option>
-                                <option value="mins">Mins</option>
-                                <option value="secs">Secs</option>
-                            </select>
-                        </div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label><input type="number" id="workoutSets" value="3" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label><input type="number" id="workoutValue" value="10" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label><select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none"><option value="reps">Reps</option><option value="mins">Mins</option></select></div>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label>
-                        <input type="text" id="workoutCategory" value="Strength" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none">
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
-                            Deploy Workout
-                        </button>
-                        <button type="button" id="workoutCancelBtn" onclick="resetWorkoutForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                            Cancel
-                        </button>
-                    </div>
+                    <button type="submit" id="workoutSubmitBtn" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Deploy Workout</button>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Workout Matrix</h3>
-                <div id="workoutsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading workouts...</p>
-                </div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Workouts</h3>
+                <div id="workoutsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
             </div>
         </div>
 
-        <!-- TAB 3: STUDY CORE WITH DEADLINE FIELD -->
+        <!-- TAB 3: STUDY CORE -->
         <div id="sectionStudy" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">📚 Create Study Subject</h3>
                 <form id="createStudyForm" class="space-y-4">
                     <input type="hidden" id="editStudyId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
-                        <input type="text" id="studyName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none" placeholder="e.g., Web Dev / DSA">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
-                        <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                        <input type="date" id="studyStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
-                        <input type="date" id="studyEndDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none" placeholder="Select deadline">
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
-                            Deploy Study Vector
-                        </button>
-                        <button type="button" id="studyCancelBtn" onclick="resetStudyForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                            Cancel
-                        </button>
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label><input type="text" id="studyName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label><input type="number" id="studyTarget" value="120" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline</label><input type="date" id="studyEndDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <button type="submit" id="studySubmitBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Deploy Subject</button>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Study Categories</h3>
-                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
-                </div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Study Subjects</h3>
+                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
             </div>
         </div>
 
-        <!-- TAB 4: HYGIENE PROTOCOLS -->
+        <!-- TAB 4: HYGIENE -->
         <div id="sectionHygiene" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="hygieneFormTitle" class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-6">🧼 Add Grooming Task</h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-6">🧼 Add Grooming Task</h3>
                 <form id="createHygieneForm" class="space-y-4">
                     <input type="hidden" id="editHygieneId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Name</label>
-                        <input type="text" id="hygieneName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none" placeholder="e.g., Skin Care">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Frequency</label>
-                        <select id="hygieneFreq" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none">
-                            <option value="daily">Daily Routine</option>
-                            <option value="sunday">Sunday Special Grooming</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                        <input type="date" id="hygieneStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyan-500 outline-none">
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="hygieneSubmitBtn" class="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">
-                            Deploy Hygiene Task
-                        </button>
-                        <button type="button" id="hygieneCancelBtn" onclick="resetHygieneForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                            Cancel
-                        </button>
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Name</label><input type="text" id="hygieneName" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Frequency</label><select id="hygieneFreq" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"><option value="daily">Daily Routine</option><option value="sunday">Sunday Special</option></select></div>
+                    <button type="submit" id="hygieneSubmitBtn" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">Deploy Task</button>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Hygiene Protocols</h3>
-                <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading hygiene tasks...</p>
-                </div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6">📋 Active Hygiene Tasks</h3>
+                <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
             </div>
         </div>
 
         <!-- TAB 5: NOTES & REMINDERS -->
         <div id="sectionNotes" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
-                    <span>📌</span> Create Note or Telegram Reminder
-                </h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2"><span>📌</span> Create Note or Telegram Reminder</h3>
                 <form id="createNoteForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Title / Task</label>
-                        <input type="text" id="noteTitle" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="e.g., Review Server Architecture">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description / Details</label>
-                        <textarea id="noteDesc" rows="2" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Optional details..."></textarea>
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Title / Task</label><input type="text" id="noteTitle" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="e.g., Review Server Architecture"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description / Details</label><textarea id="noteDesc" rows="2" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="Optional details..."></textarea></div>
                     <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-3 rounded-xl">
-                        <div>
-                            <label class="block text-xs font-bold text-white uppercase tracking-wider cursor-pointer">Set Timer / Reminder</label>
-                            <span class="text-[9px] text-slate-400">Triggers timed Telegram alert</span>
-                        </div>
+                        <div><label class="block text-xs font-bold text-white uppercase tracking-wider cursor-pointer">Set Timer / Reminder</label><span class="text-[9px] text-slate-400">Triggers timed Telegram alert</span></div>
                         <input type="checkbox" id="panelIsReminder" onchange="togglePanelTimerFields()" class="w-5 h-5 rounded-lg accent-amber-500 cursor-pointer">
                     </div>
                     <div id="panelTimerFieldsContainer" class="hidden space-y-3 pt-2">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Date</label>
-                            <input type="date" id="panelReminderDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exact Time</label>
-                            <input type="time" id="panelReminderTime" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none">
-                        </div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Date</label><input type="date" id="panelReminderDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exact Time</label><input type="time" id="panelReminderTime" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
                     </div>
-                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
-                        Deploy Note / Reminder
-                    </button>
+                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Deploy Note / Reminder</button>
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
-                    <span>📋</span> Active Notes & Reminders
-                </h3>
-                <div id="notesListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading entries...</p>
-                </div>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Notes & Reminders</h3>
+                <div id="notesListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading entries...</p></div>
             </div>
         </div>
 
         <!-- TAB 6: HYDRATION -->
         <div id="sectionHydration" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2">
-                    <span>💧</span> Configure Water Intake & Glass Size
-                </h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">💧 Configure Hydration</h3>
                 <form id="updateHydrationForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Default Glass Size (Volume per click)</label>
-                        <select id="configGlassSize" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
-                            <option value="150">150 ml</option>
-                            <option value="250">250 ml</option>
-                            <option value="350">350 ml</option>
-                            <option value="500">500 ml</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Daily Target Goal (ml)</label>
-                        <input type="number" id="configGoal" value="3000" step="250" min="1000" max="6000" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
-                    </div>
-                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
-                        Save Hydration Config
-                    </button>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Glass Size (ml)</label><select id="configGlassSize" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"><option value="150">150 ml</option><option value="250">250 ml</option><option value="350">350 ml</option><option value="500">500 ml</option></select></div>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Goal (ml)</label><input type="number" id="configGoal" value="3000" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Save Hydration Config</button>
                 </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">🌊</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Matrix Control</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass serving size directly from this secure admin panel.</p>
-            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🌊</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Control</h3><p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass size.</p></div>
         </div>
 
-        <!-- TAB 7: EXAM MODE CONFIGURATION -->
+        <!-- TAB 7: EXAM MODE -->
         <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2">
-                    <span>⚡</span> Configure Exam Mode (Study Override)
-                </h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6">⚡ Configure Exam Mode</h3>
                 <form id="updateExamModeForm" class="space-y-4">
                     <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-4 rounded-xl">
-                        <div>
-                            <label class="block text-xs font-black text-white uppercase tracking-wider">Enable Exam Mode</label>
-                            <span class="text-[10px] text-slate-400">Reduces daily study target to manual custom minutes</span>
-                        </div>
+                        <div><label class="block text-xs font-black text-white uppercase tracking-wider">Enable Exam Mode</label></div>
                         <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exam Mode Target (Manual Minutes)</label>
-                        <input type="number" id="examModeTarget" min="15" step="15" value="90" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-amber-500 outline-none" placeholder="Enter custom minutes">
-                    </div>
-                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">
-                        Save Exam Mode Config
-                    </button>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label><input type="number" id="examModeTarget" value="90" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
+                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Save Exam Mode</button>
                 </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">📝</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams.</p>
-            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">📝</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Exam Mode Matrix</h3></div>
         </div>
 
-        <!-- TAB 8: SANCTUARY PROTOCOL -->
+        <!-- TAB 8: SANCTUARY -->
         <div id="sectionSanctuary" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6 flex items-center gap-2">
-                    <span>🛡️</span> Sanctuary Protocol (Emergency Safe-Haven)
-                </h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6">🛡️ Sanctuary Protocol</h3>
                 <form id="updateSanctuaryForm" class="space-y-4">
                     <div class="flex items-center justify-between bg-[#0c0e15] border border-white/10 p-4 rounded-xl">
-                        <div>
-                            <label class="block text-xs font-black text-white uppercase tracking-wider">Enable Sanctuary Mode</label>
-                            <span class="text-[10px] text-slate-400">Freezes streaks during medical emergency</span>
-                        </div>
+                        <div><label class="block text-xs font-black text-white uppercase tracking-wider">Enable Sanctuary</label></div>
                         <input type="checkbox" id="sanctuaryEnabled" class="w-6 h-6 rounded-lg accent-purple-500 cursor-pointer">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reason / Note</label>
-                        <input type="text" id="sanctuaryReason" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-purple-500 outline-none" placeholder="e.g., Severe fever">
-                    </div>
-                    <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/30">
-                        Update Sanctuary Status
-                    </button>
+                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reason</label><input type="text" id="sanctuaryReason" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="e.g., Severe fever"></div>
+                    <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/30">Update Sanctuary</button>
                 </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">🛌</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🌿 Sanctuary Safe-Haven</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, streaks are fully preserved.</p>
-            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🛌</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Sanctuary Safe-Haven</h3></div>
         </div>
 
-        <!-- TAB 9: THEME MATRIX (25 ELITE COLOR THEMES) -->
+        <!-- TAB 9: THEME MATRIX (FULL 25 ELITE COLORS) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
-                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
-                    <span>🎨</span> System Global Accent Theme Matrix (25 Colors)
-                </h3>
-                <p class="text-xs text-slate-400">Select and deploy operational HUD glow color across all user terminals.</p>
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Theme Matrix (25 Elite Colors)</h3>
+                <p class="text-xs text-slate-400">Select and deploy operational HUD glow color across all terminals.</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 max-h-[380px] overflow-y-auto pr-1">
-                    <button onclick="setPanelTheme('red')" class="p-3 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-red-500 shrink-0"></span> Cyber Red
-                    </button>
-                    <button onclick="setPanelTheme('blue')" class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-blue-500 shrink-0"></span> Neon Blue
-                    </button>
-                    <button onclick="setPanelTheme('emerald')" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-emerald-500 shrink-0"></span> Matrix Green
-                    </button>
-                    <button onclick="setPanelTheme('cyan')" class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-cyan-500 shrink-0"></span> Cyber Cyan
-                    </button>
-                    <button onclick="setPanelTheme('amber')" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-amber-500 shrink-0"></span> Golden Amber
-                    </button>
-                    <button onclick="setPanelTheme('crimson')" class="p-3 rounded-xl bg-rose-700/10 border border-rose-700/30 hover:bg-rose-700/20 text-rose-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-rose-700 shrink-0"></span> Blood Crimson
-                    </button>
-                    <button onclick="setPanelTheme('purple')" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 text-purple-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-purple-500 shrink-0"></span> Royal Purple
-                    </button>
-                    <button onclick="setPanelTheme('indigo')" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-indigo-500 shrink-0"></span> Electric Indigo
-                    </button>
-                    <button onclick="setPanelTheme('lime')" class="p-3 rounded-xl bg-lime-500/10 border border-lime-500/30 hover:bg-lime-500/20 text-lime-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-lime-500 shrink-0"></span> Toxic Lime
-                    </button>
-                    <button onclick="setPanelTheme('teal')" class="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 text-teal-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-teal-500 shrink-0"></span> Deep Teal
-                    </button>
-                    <button onclick="setPanelTheme('orange')" class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-orange-500 shrink-0"></span> Solar Orange
-                    </button>
-                    <button onclick="setPanelTheme('pink')" class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-pink-500 shrink-0"></span> Hot Pink
-                    </button>
-                    <button onclick="setPanelTheme('slate')" class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 hover:bg-slate-400/20 text-slate-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-slate-400 shrink-0"></span> Slate Steel
-                    </button>
-                    <button onclick="setPanelTheme('violet')" class="p-3 rounded-xl bg-violet-600/10 border border-violet-600/30 hover:bg-violet-600/20 text-violet-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-violet-600 shrink-0"></span> Cyber Violet
-                    </button>
-                    <button onclick="setPanelTheme('neonemerald')" class="p-3 rounded-xl bg-emerald-400/10 border border-emerald-400/30 hover:bg-emerald-400/20 text-emerald-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-emerald-400 shrink-0"></span> Neon Emerald
-                    </button>
-                    <button onclick="setPanelTheme('yellow')" class="p-3 rounded-xl bg-yellow-400/10 border border-yellow-400/30 hover:bg-yellow-400/20 text-yellow-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-yellow-400 shrink-0"></span> Laser Yellow
-                    </button>
-                    <button onclick="setPanelTheme('rose')" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-rose-500 shrink-0"></span> Deep Rose
-                    </button>
-                    <button onclick="setPanelTheme('sky')" class="p-3 rounded-xl bg-sky-400/10 border border-sky-400/30 hover:bg-sky-400/20 text-sky-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-sky-400 shrink-0"></span> Quantum Sky
-                    </button>
-                    <button onclick="setPanelTheme('fuchsia')" class="p-3 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 hover:bg-fuchsia-500/20 text-fuchsia-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-fuchsia-500 shrink-0"></span> Plasma Fuchsia
-                    </button>
-                    <button onclick="setPanelTheme('acid')" class="p-3 rounded-xl bg-green-400/10 border border-green-400/30 hover:bg-green-400/20 text-green-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-green-400 shrink-0"></span> Acid Green
-                    </button>
-                    <button onclick="setPanelTheme('mystic')" class="p-3 rounded-xl bg-zinc-500/10 border border-zinc-500/30 hover:bg-zinc-500/20 text-zinc-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-zinc-400 shrink-0"></span> Mystic Slate
-                    </button>
-                    <button onclick="setPanelTheme('gold')" class="p-3 rounded-xl bg-amber-300/10 border border-amber-300/30 hover:bg-amber-300/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-amber-300 shrink-0"></span> Solar Gold
-                    </button>
-                    <button onclick="setPanelTheme('cyberlime')" class="p-3 rounded-xl bg-emerald-300/10 border border-emerald-300/30 hover:bg-emerald-300/20 text-emerald-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-emerald-300 shrink-0"></span> Cyber Lime
-                    </button>
-                    <button onclick="setPanelTheme('neonamber')" class="p-3 rounded-xl bg-amber-600/10 border border-amber-600/30 hover:bg-amber-600/20 text-amber-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-amber-600 shrink-0"></span> Neon Amber
-                    </button>
-                    <button onclick="setPanelTheme('midnight')" class="p-3 rounded-xl bg-blue-900/10 border border-blue-900/30 hover:bg-blue-900/20 text-blue-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full bg-blue-800 shrink-0"></span> Midnight Blue
-                    </button>
+                    <button onclick="setPanelTheme('red')" class="p-3 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-red-500 shrink-0"></span> Cyber Red</button>
+                    <button onclick="setPanelTheme('blue')" class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-blue-500 shrink-0"></span> Neon Blue</button>
+                    <button onclick="setPanelTheme('emerald')" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-emerald-500 shrink-0"></span> Matrix Green</button>
+                    <button onclick="setPanelTheme('cyan')" class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-cyan-500 shrink-0"></span> Cyber Cyan</button>
+                    <button onclick="setPanelTheme('amber')" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-amber-500 shrink-0"></span> Golden Amber</button>
+                    <button onclick="setPanelTheme('crimson')" class="p-3 rounded-xl bg-rose-700/10 border border-rose-700/30 hover:bg-rose-700/20 text-rose-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-rose-700 shrink-0"></span> Blood Crimson</button>
+                    <button onclick="setPanelTheme('purple')" class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 text-purple-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-purple-500 shrink-0"></span> Royal Purple</button>
+                    <button onclick="setPanelTheme('indigo')" class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-indigo-500 shrink-0"></span> Electric Indigo</button>
+                    <button onclick="setPanelTheme('lime')" class="p-3 rounded-xl bg-lime-500/10 border border-lime-500/30 hover:bg-lime-500/20 text-lime-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-lime-500 shrink-0"></span> Toxic Lime</button>
+                    <button onclick="setPanelTheme('teal')" class="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 text-teal-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-teal-500 shrink-0"></span> Deep Teal</button>
+                    <button onclick="setPanelTheme('orange')" class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-orange-500 shrink-0"></span> Solar Orange</button>
+                    <button onclick="setPanelTheme('pink')" class="p-3 rounded-xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-pink-500 shrink-0"></span> Hot Pink</button>
+                    <button onclick="setPanelTheme('slate')" class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 hover:bg-slate-400/20 text-slate-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-slate-400 shrink-0"></span> Slate Steel</button>
+                    <button onclick="setPanelTheme('violet')" class="p-3 rounded-xl bg-violet-600/10 border border-violet-600/30 hover:bg-violet-600/20 text-violet-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-violet-600 shrink-0"></span> Cyber Violet</button>
+                    <button onclick="setPanelTheme('neonemerald')" class="p-3 rounded-xl bg-emerald-400/10 border border-emerald-400/30 hover:bg-emerald-400/20 text-emerald-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-emerald-400 shrink-0"></span> Neon Emerald</button>
+                    <button onclick="setPanelTheme('yellow')" class="p-3 rounded-xl bg-yellow-400/10 border border-yellow-400/30 hover:bg-yellow-400/20 text-yellow-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-yellow-400 shrink-0"></span> Laser Yellow</button>
+                    <button onclick="setPanelTheme('rose')" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-rose-500 shrink-0"></span> Deep Rose</button>
+                    <button onclick="setPanelTheme('sky')" class="p-3 rounded-xl bg-sky-400/10 border border-sky-400/30 hover:bg-sky-400/20 text-sky-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-sky-400 shrink-0"></span> Quantum Sky</button>
+                    <button onclick="setPanelTheme('fuchsia')" class="p-3 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 hover:bg-fuchsia-500/20 text-fuchsia-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-fuchsia-500 shrink-0"></span> Plasma Fuchsia</button>
+                    <button onclick="setPanelTheme('acid')" class="p-3 rounded-xl bg-green-400/10 border border-green-400/30 hover:bg-green-400/20 text-green-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-green-400 shrink-0"></span> Acid Green</button>
+                    <button onclick="setPanelTheme('mystic')" class="p-3 rounded-xl bg-zinc-500/10 border border-zinc-500/30 hover:bg-zinc-500/20 text-zinc-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-zinc-400 shrink-0"></span> Mystic Slate</button>
+                    <button onclick="setPanelTheme('gold')" class="p-3 rounded-xl bg-amber-300/10 border border-amber-300/30 hover:bg-amber-300/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-amber-300 shrink-0"></span> Solar Gold</button>
+                    <button onclick="setPanelTheme('cyberlime')" class="p-3 rounded-xl bg-emerald-300/10 border border-emerald-300/30 hover:bg-emerald-300/20 text-emerald-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-emerald-300 shrink-0"></span> Cyber Lime</button>
+                    <button onclick="setPanelTheme('neonamber')" class="p-3 rounded-xl bg-amber-600/10 border border-amber-600/30 hover:bg-amber-600/20 text-amber-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-amber-600 shrink-0"></span> Neon Amber</button>
+                    <button onclick="setPanelTheme('midnight')" class="p-3 rounded-xl bg-blue-900/10 border border-blue-900/30 hover:bg-blue-900/20 text-blue-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-blue-800 shrink-0"></span> Midnight Blue</button>
                 </div>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">🎨</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">25-Tone HUD Matrix</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Select any of the 25 elite themes to instantly synchronize glow and accent colors across all terminals.</p>
-            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🎨</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">25-Tone HUD Matrix</h3></div>
         </div>
 
     </main>
@@ -545,12 +298,8 @@
             try {
                 const res = await fetch('/api/control-panel/session');
                 const data = await res.json();
-                if (!data.authenticated) {
-                    window.location.href = 'index.html';
-                }
-            } catch (err) {
-                window.location.href = 'index.html';
-            }
+                if (!data.authenticated) window.location.href = 'index.html';
+            } catch (err) { window.location.href = 'index.html'; }
         }
         verifyAdminSession();
 
@@ -574,67 +323,21 @@
 
         function setPanelTheme(theme) {
             localStorage.setItem('monster_accent_theme', theme);
-            applyGlobalTheme(theme);
-            showStatusMessage(`System Accent Theme updated to ${theme.toUpperCase()}`, 'success');
+            showStatusMessage(`Theme updated to ${theme.toUpperCase()}`, 'success');
         }
-
-        function applyGlobalTheme(theme) {
-            let colorMap = {
-                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
-                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
-                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
-                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' },
-                amber: { primary: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)' },
-                crimson: { primary: '#e11d48', glow: 'rgba(225, 29, 72, 0.15)' },
-                purple: { primary: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)' },
-                indigo: { primary: '#6366f1', glow: 'rgba(99, 102, 241, 0.15)' },
-                lime: { primary: '#84cc16', glow: 'rgba(132, 204, 22, 0.15)' },
-                teal: { primary: '#14b8a6', glow: 'rgba(20, 184, 166, 0.15)' },
-                orange: { primary: '#f97316', glow: 'rgba(249, 115, 22, 0.15)' },
-                pink: { primary: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)' },
-                slate: { primary: '#94a3b8', glow: 'rgba(148, 163, 184, 0.15)' },
-                violet: { primary: '#7c3aed', glow: 'rgba(124, 58, 237, 0.15)' },
-                neonemerald: { primary: '#34d399', glow: 'rgba(52, 211, 153, 0.15)' },
-                yellow: { primary: '#facc15', glow: 'rgba(250, 204, 21, 0.15)' },
-                rose: { primary: '#f43f5e', glow: 'rgba(244, 63, 94, 0.15)' },
-                sky: { primary: '#38bdf8', glow: 'rgba(56, 189, 248, 0.15)' },
-                fuchsia: { primary: '#d946ef', glow: 'rgba(217, 70, 239, 0.15)' },
-                acid: { primary: '#4ade80', glow: 'rgba(74, 222, 128, 0.15)' },
-                mystic: { primary: '#a1a1aa', glow: 'rgba(161, 161, 170, 0.15)' },
-                gold: { primary: '#fde047', glow: 'rgba(253, 224, 71, 0.15)' },
-                cyberlime: { primary: '#6ee7b7', glow: 'rgba(110, 231, 183, 0.15)' },
-                neonamber: { primary: '#d97706', glow: 'rgba(217, 119, 6, 0.15)' },
-                midnight: { primary: '#1e40af', glow: 'rgba(30, 64, 175, 0.15)' }
-            };
-            let cfg = colorMap[theme] || colorMap['red'];
-            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
-            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
-            applyGlobalTheme(savedTheme);
-        });
 
         function showStatusMessage(message, type = 'success') {
             const host = document.getElementById('inlineStatusNotification');
             host.innerHTML = '';
             const icon = type === 'success' ? '✓' : '🗑';
-            const toastClass = type === 'success' ? 'success' : 'error';
-
             const toast = document.createElement('div');
-            toast.className = `status-toast ${toastClass}`;
+            toast.className = `status-toast ${type === 'success' ? 'success' : 'error'}`;
             toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
             host.appendChild(toast);
-
-            setTimeout(() => { toast.classList.add('show'); }, 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => { toast.remove(); }, 350);
-            }, 2500);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 2500);
         }
 
-        // --- NOTES & REMINDERS MANAGEMENT ---
         function togglePanelTimerFields() {
             const isChecked = document.getElementById('panelIsReminder').checked;
             const container = document.getElementById('panelTimerFieldsContainer');
@@ -651,7 +354,6 @@
                 const res = await fetch('/api/notes-reminders');
                 const data = await res.json();
                 const container = document.getElementById('notesListContainer');
-                
                 if (data.success && data.items && data.items.length > 0) {
                     container.innerHTML = data.items.map(item => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
@@ -668,9 +370,7 @@
                 } else {
                     container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
                 }
-            } catch (err) {
-                console.error("Error loading notes:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         document.getElementById('createNoteForm').addEventListener('submit', async (e) => {
@@ -687,36 +387,25 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title, description, isReminder, date, time })
                 });
-                const data = await res.json();
                 if (res.ok) {
-                    showStatusMessage("Note/Reminder deployed successfully!", "success");
+                    showStatusMessage("Note deployed successfully!", "success");
                     document.getElementById('createNoteForm').reset();
                     togglePanelTimerFields();
                     loadNotesReminders();
-                } else {
-                    showStatusMessage(data.error || "Failed to deploy note", "error");
                 }
-            } catch (err) {
-                showStatusMessage("Server connection error", "error");
-            }
+            } catch (err) { showStatusMessage("Connection error", "error"); }
         });
 
         async function deleteNoteItem(id) {
             try {
                 const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
-                const data = await res.json();
                 if (res.ok) {
                     showStatusMessage("Entry deleted.", "error");
                     loadNotesReminders();
-                } else {
-                    showStatusMessage(data.error || "Failed to delete item", "error");
                 }
-            } catch (err) {
-                showStatusMessage("Server connection error", "error");
-            }
+            } catch (err) { showStatusMessage("Connection error", "error"); }
         }
 
-        // --- HABITS MANAGEMENT ---
         async function loadHabits() {
             try {
                 const res = await fetch('/api/habits');
@@ -725,103 +414,31 @@
                 if (data.success && data.habits.length > 0) {
                     container.innerHTML = data.habits.map(h => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white">${h.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-11'}</span>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick='editHabit(${JSON.stringify(h)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
-                            </div>
+                            <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-11'}</span></div>
+                            <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
                     `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`;
-                }
+                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`; }
             } catch (err) {}
-        }
-
-        function editHabit(h) {
-            document.getElementById('editHabitId').value = h.id;
-            document.getElementById('habitName').value = h.name;
-            document.getElementById('habitCategory').value = h.category || '';
-            document.getElementById('habitDesc').value = h.description || '';
-            document.getElementById('habitStartDate').value = h.startDate || '2026-09-11';
-            
-            document.getElementById('habitFormTitle').innerHTML = '<span>✏️</span> Edit Habit Vector';
-            document.getElementById('habitSubmitBtn').innerText = 'Update Habit Vector';
-            document.getElementById('habitCancelBtn').classList.remove('hidden');
-        }
-
-        function resetHabitForm() {
-            document.getElementById('editHabitId').value = '';
-            document.getElementById('createHabitForm').reset();
-            document.getElementById('habitStartDate').value = '2026-09-11';
-            document.getElementById('habitFormTitle').innerHTML = '<span>➕</span> Add Habit Vector';
-            document.getElementById('habitSubmitBtn').innerText = 'Deploy Habit Vector';
-            document.getElementById('habitCancelBtn').classList.add('hidden');
         }
 
         document.getElementById('createHabitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const editId = document.getElementById('editHabitId').value;
             const name = document.getElementById('habitName').value;
             const category = document.getElementById('habitCategory').value || 'General';
             const description = document.getElementById('habitDesc').value;
             const startDate = document.getElementById('habitStartDate').value || "2026-09-11";
-
             try {
-                let res, data;
-                if (editId) {
-                    res = await fetch(`/api/habits/${editId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, category, description, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`Habit edited successfully`, 'success');
-                        resetHabitForm();
-                        loadHabits();
-                    } else {
-                        showStatusMessage(data.error || "Failed to edit habit", 'error');
-                    }
-                } else {
-                    res = await fetch('/api/habits', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, category, description, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`${name} added successfully`, 'success');
-                        resetHabitForm();
-                        loadHabits();
-                    } else {
-                        showStatusMessage(data.error || "Failed to add habit", 'error');
-                    }
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/habits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate }) });
+                if (res.ok) { showStatusMessage("Habit added!", "success"); document.getElementById('createHabitForm').reset(); loadHabits(); }
+            } catch (err) {}
         });
 
         async function deleteHabit(id) {
-            try {
-                const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (res.ok) {
-                    showStatusMessage(`Habit deleted successfully`, 'error');
-                    loadHabits();
-                } else {
-                    showStatusMessage(data.error || "Failed to delete habit", 'error');
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+            const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+            if (res.ok) { showStatusMessage("Habit deleted", "error"); loadHabits(); }
         }
 
-        // --- WORKOUTS MANAGEMENT ---
         async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts');
@@ -830,98 +447,31 @@
                 if (data.success && data.workouts.length > 0) {
                     container.innerHTML = data.workouts.map(w => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white">${w.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || w.reps || 10} ${w.unit || 'Reps'} | Global Start: 2026-09-11</span>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick='editWorkout(${JSON.stringify(w)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
-                            </div>
+                            <div><h4 class="font-extrabold text-sm text-white">${w.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || 10} ${w.unit || 'reps'}</span></div>
+                            <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                         </div>
                     `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No workouts deployed yet.</p>`;
-                }
+                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No workouts found.</p>`; }
             } catch (err) {}
-        }
-
-        function editWorkout(w) {
-            document.getElementById('editWorkoutId').value = w.id;
-            document.getElementById('workoutName').value = w.name;
-            document.getElementById('workoutSets').value = w.sets || 3;
-            document.getElementById('workoutValue').value = w.value || w.reps || 10;
-            document.getElementById('workoutUnit').value = w.unit || 'reps';
-            document.getElementById('workoutCategory').value = w.category || 'Strength';
-
-            document.getElementById('workoutFormTitle').innerText = '🏋️ Edit Exercise Vector';
-            document.getElementById('workoutSubmitBtn').innerText = 'Update Workout';
-            document.getElementById('workoutCancelBtn').classList.remove('hidden');
-        }
-
-        function resetWorkoutForm() {
-            document.getElementById('editWorkoutId').value = '';
-            document.getElementById('createWorkoutForm').reset();
-            document.getElementById('workoutFormTitle').innerText = '🏋️ Deploy Exercise Vector';
-            document.getElementById('workoutSubmitBtn').innerText = 'Deploy Workout';
-            document.getElementById('workoutCancelBtn').classList.add('hidden');
         }
 
         document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const editId = document.getElementById('editWorkoutId').value;
             const name = document.getElementById('workoutName').value;
             const sets = document.getElementById('workoutSets').value;
             const value = document.getElementById('workoutValue').value;
             const unit = document.getElementById('workoutUnit').value;
-            const category = document.getElementById('workoutCategory').value;
-            const startDate = "2026-09-11";
-
             try {
-                let res, data;
-                if (editId) {
-                    res = await fetch(`/api/workouts/${editId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`Workout edited successfully`, 'success');
-                        resetWorkoutForm();
-                        loadWorkouts();
-                    } else {
-                        showStatusMessage(data.error || "Failed to edit workout", 'error');
-                    }
-                } else {
-                    res = await fetch('/api/workouts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, sets, value, unit, category, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`${name} added successfully`, 'success');
-                        resetWorkoutForm();
-                        loadWorkouts();
-                    } else {
-                        showStatusMessage(data.error || "Failed to add workout", 'error');
-                    }
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/workouts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11" }) });
+                if (res.ok) { showStatusMessage("Workout added!", "success"); document.getElementById('createWorkoutForm').reset(); loadWorkouts(); }
+            } catch (err) {}
         });
 
         async function deleteWorkout(id) {
             const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Workout deleted`, 'error');
-                loadWorkouts();
-            }
+            if (res.ok) { showStatusMessage("Workout deleted", "error"); loadWorkouts(); }
         }
 
-        // --- STUDY MANAGEMENT WITH DEADLINE SUPPORT ---
         async function loadStudy() {
             try {
                 const res = await fetch('/api/study/categories');
@@ -930,98 +480,32 @@
                 if (data.success && data.categories.length > 0) {
                     container.innerHTML = data.categories.map(c => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
-                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick='editStudy(${JSON.stringify(c)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
-                            </div>
+                            <div><h4 class="font-extrabold text-sm text-white">${c.name}</h4><span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day</span></div>
+                            <button onclick="deleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                         </div>
                     `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study categories created yet.</p>`;
-                }
+                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study subjects found.</p>`; }
             } catch (err) {}
-        }
-
-        function editStudy(c) {
-            document.getElementById('editStudyId').value = c.id;
-            document.getElementById('studyName').value = c.name;
-            document.getElementById('studyTarget').value = c.dailyTargetMinutes || 120;
-            document.getElementById('studyStartDate').value = c.startDate || '2026-09-11';
-            document.getElementById('studyEndDate').value = c.endDate || '';
-
-            document.getElementById('studyFormTitle').innerText = '📚 Edit Study Subject';
-            document.getElementById('studySubmitBtn').innerText = 'Update Study Subject';
-            document.getElementById('studyCancelBtn').classList.remove('hidden');
-        }
-
-        function resetStudyForm() {
-            document.getElementById('editStudyId').value = '';
-            document.getElementById('createStudyForm').reset();
-            document.getElementById('studyTarget').value = 120;
-            document.getElementById('studyStartDate').value = '2026-09-11';
-            document.getElementById('studyEndDate').value = '';
-            document.getElementById('studyFormTitle').innerText = '📚 Create Study Subject';
-            document.getElementById('studySubmitBtn').innerText = 'Deploy Study Vector';
-            document.getElementById('studyCancelBtn').classList.add('hidden');
         }
 
         document.getElementById('createStudyForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const editId = document.getElementById('editStudyId').value;
             const name = document.getElementById('studyName').value;
             const dailyTargetMinutes = document.getElementById('studyTarget').value;
-            const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
-            const endDate = document.getElementById('studyEndDate').value || "";
-
+            const endDate = document.getElementById('studyEndDate').value;
             try {
-                let res, data;
-                if (editId) {
-                    res = await fetch(`/api/study/categories/${editId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`Study subject edited successfully`, 'success');
-                        resetStudyForm();
-                        loadStudy();
-                    } else {
-                        showStatusMessage(data.error || "Failed to edit study category", 'error');
-                    }
-                } else {
-                    res = await fetch('/api/study/categories', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`${name} added successfully`, 'success');
-                        resetStudyForm();
-                        loadStudy();
-                    } else {
-                        showStatusMessage(data.error || "Failed to add study category", 'error');
-                    }
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/study/categories', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate: "2026-09-11", endDate }) });
+                const data = await res.json();
+                if (res.ok) { showStatusMessage("Subject added!", "success"); document.getElementById('createStudyForm').reset(); loadStudy(); }
+                else { alert("❌ " + data.error); }
+            } catch (err) {}
         });
 
         async function deleteStudy(id) {
             const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Study category deleted`, 'error');
-                loadStudy();
-            }
+            if (res.ok) { showStatusMessage("Subject deleted", "error"); loadStudy(); }
         }
 
-        // --- HYGIENE MANAGEMENT ---
         async function loadHygiene() {
             try {
                 const res = await fetch('/api/hygiene');
@@ -1030,94 +514,29 @@
                 if (data.success && data.tasks.length > 0) {
                     container.innerHTML = data.tasks.map(t => `
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white">${t.name}</h4>
-                                <span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency} | Start: ${t.startDate || '2026-09-11'}</span>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick='editHygiene(${JSON.stringify(t)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
-                                <button onclick="deleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Delete</button>
-                            </div>
+                            <div><h4 class="font-extrabold text-sm text-white">${t.name}</h4><span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span></div>
+                            <button onclick="deleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                         </div>
                     `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`;
-                }
+                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`; }
             } catch (err) {}
-        }
-
-        function editHygiene(t) {
-            document.getElementById('editHygieneId').value = t.id;
-            document.getElementById('hygieneName').value = t.name;
-            document.getElementById('hygieneFreq').value = t.frequency || 'daily';
-            document.getElementById('hygieneStartDate').value = t.startDate || '2026-09-11';
-
-            document.getElementById('hygieneFormTitle').innerText = '🧼 Edit Grooming Task';
-            document.getElementById('hygieneSubmitBtn').innerText = 'Update Hygiene Task';
-            document.getElementById('hygieneCancelBtn').classList.remove('hidden');
-        }
-
-        function resetHygieneForm() {
-            document.getElementById('editHygieneId').value = '';
-            document.getElementById('createHygieneForm').reset();
-            document.getElementById('hygieneStartDate').value = '2026-09-11';
-            document.getElementById('hygieneFormTitle').innerText = '🧼 Add Grooming Task';
-            document.getElementById('hygieneSubmitBtn').innerText = 'Deploy Hygiene Task';
-            document.getElementById('hygieneCancelBtn').classList.add('hidden');
         }
 
         document.getElementById('createHygieneForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const editId = document.getElementById('editHygieneId').value;
             const name = document.getElementById('hygieneName').value;
             const frequency = document.getElementById('hygieneFreq').value;
-            const startDate = document.getElementById('hygieneStartDate').value || "2026-09-11";
-
             try {
-                let res, data;
-                if (editId) {
-                    res = await fetch(`/api/hygiene/${editId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`Hygiene task edited successfully`, 'success');
-                        resetHygieneForm();
-                        loadHygiene();
-                    } else {
-                        showStatusMessage(data.error || "Failed to edit hygiene task", 'error');
-                    }
-                } else {
-                    res = await fetch('/api/hygiene', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, frequency, startDate })
-                    });
-                    data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage(`${name} added successfully`, 'success');
-                        resetHygieneForm();
-                        loadHygiene();
-                    } else {
-                        showStatusMessage(data.error || "Failed to add hygiene task", 'error');
-                    }
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/hygiene', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11" }) });
+                if (res.ok) { showStatusMessage("Hygiene task added!", "success"); document.getElementById('createHygieneForm').reset(); loadHygiene(); }
+            } catch (err) {}
         });
 
         async function deleteHygiene(id) {
             const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                showStatusMessage(`Hygiene task deleted`, 'error');
-                loadHygiene();
-            }
+            if (res.ok) { showStatusMessage("Task deleted", "error"); loadHygiene(); }
         }
 
-        // --- HYDRATION CONFIG MANAGEMENT ---
         async function loadHydrationConfig() {
             try {
                 const res = await fetch('/api/hydration');
@@ -1133,24 +552,12 @@
             e.preventDefault();
             const glassSize = document.getElementById('configGlassSize').value;
             const goal = document.getElementById('configGoal').value;
-
             try {
-                const res = await fetch('/api/hydration/settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ glassSize, goal })
-                });
-                if (res.ok) {
-                    showStatusMessage("Hydration config updated successfully", 'success');
-                } else {
-                    showStatusMessage("Failed to update hydration settings", 'error');
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal }) });
+                if (res.ok) showStatusMessage("Hydration updated!", "success");
+            } catch (err) {}
         });
 
-        // --- EXAM MODE CONFIG MANAGEMENT ---
         async function loadExamModeConfig() {
             try {
                 const res = await fetch('/api/exam-mode');
@@ -1166,24 +573,12 @@
             e.preventDefault();
             const enabled = document.getElementById('examModeEnabled').checked;
             const targetMinutes = document.getElementById('examModeTarget').value;
-
             try {
-                const res = await fetch('/api/exam-mode', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enabled, targetMinutes })
-                });
-                if (res.ok) {
-                    showStatusMessage("Exam Mode updated successfully", 'success');
-                } else {
-                    showStatusMessage("Failed to update Exam Mode", 'error');
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes }) });
+                if (res.ok) showStatusMessage("Exam mode updated!", "success");
+            } catch (err) {}
         });
 
-        // --- SANCTUARY PROTOCOL CONFIG MANAGEMENT ---
         async function loadSanctuaryConfig() {
             try {
                 const res = await fetch('/api/sanctuary');
@@ -1199,67 +594,27 @@
             e.preventDefault();
             const enabled = document.getElementById('sanctuaryEnabled').checked;
             const reason = document.getElementById('sanctuaryReason').value;
-
             try {
-                const res = await fetch('/api/sanctuary', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enabled, reason })
-                });
-                if (res.ok) {
-                    showStatusMessage("Sanctuary Protocol updated successfully", 'success');
-                } else {
-                    showStatusMessage("Failed to update Sanctuary Protocol", 'error');
-                }
-            } catch (err) {
-                showStatusMessage("Server connection error", 'error');
-            }
+                const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason }) });
+                if (res.ok) showStatusMessage("Sanctuary updated!", "success");
+            } catch (err) {}
         });
 
         async function adminLogout() {
-            try {
-                await fetch('/api/control-panel/logout', { method: 'POST' });
-                showStatusMessage("🛡️ Admin Logged Out Successfully", "success");
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            } catch (err) {
-                window.location.href = 'index.html';
-            }
+            await fetch('/api/control-panel/logout', { method: 'POST' });
+            window.location.href = 'index.html';
         }
 
         async function toggleSystemLock(shouldLock) {
             const adminPassword = document.getElementById('adminLockPassword').value;
-            if (!adminPassword) {
-                alert("Please enter the Master Admin Password!");
-                return;
-            }
-            try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: shouldLock, adminPassword })
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    showStatusMessage(data.message, 'success');
-                    alert("⚡ " + data.message);
-                    location.reload();
-                } else {
-                    showStatusMessage(data.error || "Failed to update lock status.", 'error');
-                    alert("❌ " + (data.error || "Failed to update lock status."));
-                }
-            } catch (err) {
-                showStatusMessage("Connection error with backend server.", 'error');
-                alert("Connection error with backend server.");
-            }
+            if (!adminPassword) { alert("Enter Master Admin Password!"); return; }
+            const res = await fetch('/api/system-lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ locked: shouldLock, adminPassword }) });
+            const data = await res.json();
+            if (res.ok) { alert("⚡ " + data.message); location.reload(); }
+            else { alert("❌ " + data.error); }
         }
 
-        // Initial Loads
-        loadHabits();
-        loadWorkouts();
-        loadStudy();
-        loadHygiene();
+        loadHabits(); loadWorkouts(); loadStudy(); loadHygiene();
     </script>
 </body>
 </html>
