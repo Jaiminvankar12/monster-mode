@@ -10,7 +10,6 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const USERS_FILE = path.join(__dirname, 'users.json');
 const HABITS_FILE = path.join(__dirname, 'habits.json');
 const HABIT_LOGS_FILE = path.join(__dirname, 'habit_logs.json');
 const WORKOUTS_FILE = path.join(__dirname, 'workouts.json');
@@ -31,44 +30,10 @@ const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const MONSTER_LAUNCH_DATE = "2026-09-11";
 const MASTER_USER_ID = "admin_master_user";
 
-function getMonsterDay(targetDateStr) {
-    let launch = new Date(MONSTER_LAUNCH_DATE);
-    let target = new Date(targetDateStr || getServerToday());
-    let diffTime = target - launch;
-    let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays > 0 ? diffDays : 1;
-}
-
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "8757598599:AAELpH-bZszToGyRkndX8eVNFS65T9VzbIE";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "5315516366"; 
-
-async function sendTelegramAlert(message, eventKey = null) {
-    if (eventKey) {
-        let notifs = readJSON(NOTIFICATION_LOGS_FILE);
-        if (notifs.includes(eventKey)) return;
-        notifs.push(eventKey);
-        writeJSON(NOTIFICATION_LOGS_FILE, notifs);
-    }
-    if (!TELEGRAM_CHAT_ID) return;
-    try {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' })
-        });
-    } catch (err) {}
-}
-
 function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
-        if (file === HABITS_FILE) {
-            initial = [];
-        } else if (file === WORKOUTS_FILE) {
-            initial = [];
-        } else if (file === STUDY_CATEGORIES_FILE) {
-            initial = [];
-        } else if (file === HYGIENE_TASKS_FILE) {
+        if (file === HYGIENE_TASKS_FILE) {
             initial = [
                 { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
                 { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
@@ -88,9 +53,16 @@ function readJSON(file) {
     }
     try {
         let content = fs.readFileSync(file, 'utf8');
-        return JSON.parse(content);
+        let parsed = JSON.parse(content);
+        // Robust auto-fix for notes_reminders.json if it is saved as an array [] instead of object
+        if (file === NOTES_REMINDERS_FILE && Array.isArray(parsed)) {
+            let converted = { [MASTER_USER_ID]: parsed };
+            fs.writeFileSync(file, JSON.stringify(converted, null, 2));
+            return converted;
+        }
+        return parsed;
     } catch (err) {
-        return file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') ? {} : [];
+        return file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') || file.includes('notes_reminders.json') ? { [MASTER_USER_ID]: [] } : [];
     }
 }
 
@@ -414,21 +386,20 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
     res.json({ success: true, message: "Hydration settings updated." });
 });
 
-// --- NOTES & REMINDERS API ---
+// --- NOTES & REMINDERS API (Fixed for object/array auto-recovery) ---
 app.get('/api/notes-reminders', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
-    if (!data[MASTER_USER_ID]) {
-        data[MASTER_USER_ID] = [];
-        writeJSON(NOTES_REMINDERS_FILE, data);
-    }
-    res.json({ success: true, items: data[MASTER_USER_ID], ...getUserXP(MASTER_USER_ID) });
+    let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
+    res.json({ success: true, items, ...getUserXP(MASTER_USER_ID) });
 });
 
 app.post('/api/notes-reminders', requireAuth, (req, res) => {
     const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
+    
     let data = readJSON(NOTES_REMINDERS_FILE);
-    if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
+    let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
+
     const newItem = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
@@ -441,18 +412,21 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
         notifiedToday: false,
         createdAt: new Date().toISOString()
     };
-    data[MASTER_USER_ID].push(newItem);
-    writeJSON(NOTES_REMINDERS_FILE, data);
+
+    items.push(newItem);
+    writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items });
     res.json({ success: true, item: newItem });
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
-    if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
-    const index = data[MASTER_USER_ID].findIndex(i => i.id === req.params.id);
+    let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
+
+    const index = items.findIndex(i => i.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Item not found." });
-    data[MASTER_USER_ID].splice(index, 1);
-    writeJSON(NOTES_REMINDERS_FILE, data);
+
+    items.splice(index, 1);
+    writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items });
     res.json({ success: true, message: "Item deleted successfully." });
 });
 
@@ -527,9 +501,7 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(HABIT_LOGS_FILE, logs);
     let updatedXP = getUserXP(MASTER_USER_ID);
-    if (completed) {
-        updatedXP = addXP(MASTER_USER_ID, 50);
-    }
+    if (completed) updatedXP = addXP(MASTER_USER_ID, 50);
     res.json({ success: true, message: "Habit status updated.", completed, ...updatedXP });
 });
 
@@ -614,15 +586,13 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(WORKOUT_LOGS_FILE, logs);
     let updatedXP = getUserXP(MASTER_USER_ID);
-    if (completed) {
-        updatedXP = addXP(MASTER_USER_ID, 100);
-    }
+    if (completed) updatedXP = addXP(MASTER_USER_ID, 100);
     const syncResult = runServerSyncEngine(MASTER_USER_ID, targetDate);
     const currentStreak = calculateWorkoutStreak(MASTER_USER_ID);
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
-// --- STUDY TRACKER API WITH DUPLICATE PREVENTION ---
+// --- STUDY TRACKER API ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
@@ -814,9 +784,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     }
     writeJSON(HYGIENE_LOGS_FILE, logs);
     let updatedXP = getUserXP(MASTER_USER_ID);
-    if (completed) {
-        updatedXP = addXP(MASTER_USER_ID, 40);
-    }
+    if (completed) updatedXP = addXP(MASTER_USER_ID, 40);
     let hygieneStreak = calculateStreak(MASTER_USER_ID, 'hygiene');
     res.json({ success: true, message: "Hygiene status updated.", hygieneStreak, ...updatedXP });
 });
