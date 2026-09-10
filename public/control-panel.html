@@ -114,7 +114,7 @@
                 🧼 Hygiene
             </button>
             <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                📌 Notes & Reminders
+                📌 Notes
             </button>
             <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 💧 Hydration
@@ -127,6 +127,9 @@
             </button>
             <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 🖼️ Landing BG
+            </button>
+            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                🎨 Theme Matrix
             </button>
         </div>
 
@@ -465,6 +468,35 @@
             </div>
         </div>
 
+        <!-- TAB 10: THEME MATRIX -->
+        <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2">
+                    <span>🎨</span> System Global Accent Theme Matrix
+                </h3>
+                <p class="text-xs text-slate-400">Select and deploy operational HUD glow color across all user terminals.</p>
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <button onclick="setPanelTheme('red')" class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></span> Cyber Red
+                    </button>
+                    <button onclick="setPanelTheme('blue')" class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></span> Neon Blue
+                    </button>
+                    <button onclick="setPanelTheme('emerald')" class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></span> Matrix Green
+                    </button>
+                    <button onclick="setPanelTheme('cyan')" class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-xs transition cursor-pointer flex flex-col items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/50"></span> Cyber Cyan
+                    </button>
+                </div>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4 animate-bounce">🎨</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">HUD Color Synchronization</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Instantly alters the core accent theme across all connected UI nodes and command centers.</p>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -482,12 +514,16 @@
         verifyAdminSession();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg'].forEach(t => {
-                document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
-                document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'theme'].forEach(t => {
+                const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (sec) sec.classList.add('hidden');
+                if (btn) btn.className = "flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
-            document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
-            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            const targetSec = document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            const targetBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetBtn) targetBtn.className = "flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             
             if (tab === 'notes') loadNotesReminders();
             if (tab === 'hydration') loadHydrationConfig();
@@ -495,6 +531,29 @@
             if (tab === 'sanctuary') loadSanctuaryConfig();
             if (tab === 'landingBg') loadLandingBgConfig();
         }
+
+        function setPanelTheme(theme) {
+            localStorage.setItem('monster_accent_theme', theme);
+            applyGlobalTheme(theme);
+            showStatusMessage(`System Accent Theme updated to ${theme.toUpperCase()}`, 'success');
+        }
+
+        function applyGlobalTheme(theme) {
+            let colorMap = {
+                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
+                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
+                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
+                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' }
+            };
+            let cfg = colorMap[theme] || colorMap['red'];
+            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
+            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
+            applyGlobalTheme(savedTheme);
+        });
 
         function showStatusMessage(message, type = 'success') {
             const host = document.getElementById('inlineStatusNotification');
