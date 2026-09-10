@@ -1020,6 +1020,87 @@
                 loadStudy();
             }
         }
+        // --- NOTES & REMINDERS MANAGEMENT ---
+function togglePanelTimerFields() {
+    const isChecked = document.getElementById('panelIsReminder').checked;
+    const container = document.getElementById('panelTimerFieldsContainer');
+    if (isChecked) {
+        container.classList.remove('hidden');
+        document.getElementById('panelReminderDate').value = new Date().toISOString().split('T')[0];
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+async function loadNotesReminders() {
+    try {
+        const res = await fetch('/api/notes-reminders');
+        const data = await res.json();
+        const container = document.getElementById('notesListContainer');
+        
+        if (data.success && data.items && data.items.length > 0) {
+            container.innerHTML = data.items.map(item => `
+                <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
+                            ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
+                    </div>
+                    <button onclick="deleteNoteItem('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+        }
+    } catch (err) {
+        console.error("Error loading notes:", err);
+    }
+}
+
+document.getElementById('createNoteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('noteTitle').value;
+    const description = document.getElementById('noteDesc').value;
+    const isReminder = document.getElementById('panelIsReminder').checked;
+    const date = document.getElementById('panelReminderDate').value;
+    const time = document.getElementById('panelReminderTime').value;
+
+    try {
+        const res = await fetch('/api/notes-reminders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description, isReminder, date, time })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showStatusMessage("Note/Reminder deployed successfully!", "success");
+            document.getElementById('createNoteForm').reset();
+            togglePanelTimerFields();
+            loadNotesReminders();
+        } else {
+            showStatusMessage(data.error || "Failed to deploy note", "error");
+        }
+    } catch (err) {
+        showStatusMessage("Server connection error", "error");
+    }
+});
+
+async function deleteNoteItem(id) {
+    try {
+        const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+            showStatusMessage("Entry deleted.", "error");
+            loadNotesReminders();
+        } else {
+            showStatusMessage(data.error || "Failed to delete item", "error");
+        }
+    } catch (err) {
+        showStatusMessage("Server connection error", "error");
+    }
+}
 
         // --- HYGIENE MANAGEMENT ---
         async function loadHygiene() {
