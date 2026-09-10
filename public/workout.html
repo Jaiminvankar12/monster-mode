@@ -9,16 +9,8 @@
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
-        :root {
-        --accent-primary: #ef4444; /* Default Red */
-        --accent-glow: rgba(239, 68, 68, 0.15);
-    }
-    .dynamic-accent { color: var(--accent-primary) !important; }
-    .dynamic-bg { background-color: var(--accent-primary) !important; }
-    .dynamic-border { border-color: var(--accent-primary) !important; }
-    .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -29,7 +21,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Workout matrix and iron tracking are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Workout matrix is currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -48,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
+        <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end">
             <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
             <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
         </nav>
@@ -60,9 +52,9 @@
         <!-- Page Title & Streak Badge Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Athlete Performance</span>
+                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Global Launch: 11 Sept 2026</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Iron & Muscle Matrix</h2>
-                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date (Asia/Kolkata): Loading...</p>
+                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
             </div>
             <!-- Streak Badge Component -->
             <div class="glass-card px-5 py-3 rounded-2xl border border-amber-500/30 flex items-center gap-3 bg-amber-500/5 whitespace-nowrap w-full sm:w-auto justify-center sm:justify-start">
@@ -106,7 +98,7 @@
                 </span>
                 <span id="telegramBotStatus" class="text-[10px] bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full font-bold uppercase">Live Sync Active</span>
             </div>
-            <p id="telegramBotLog" class="text-xs text-zinc-300 font-mono">Executing toggle triggers phone alerts via @jaymin_monster_bot...</p>
+            <p id="telegramBotLog" class="text-xs text-zinc-300 font-mono">Executing toggle triggers secure phone telemetry alerts...</p>
         </div>
 
         <!-- Workouts List Grid -->
@@ -117,15 +109,7 @@
 
     <script>
         let currentSelectedDate = "";
-        // Locked strictly to official launch date September 11, 2026
-        const LAUNCH_DATE = "2026-09-11";
-
-        function checkPreLaunchLock() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
-            }
-        }
+        const MONSTER_LAUNCH_DATE = "2026-09-11";
 
         async function fetchWorkouts(dateStr = "") {
             try {
@@ -144,16 +128,15 @@
                     if (!dateInput.value) {
                         dateInput.value = data.serverDate;
                     }
-                    document.getElementById('serverDateDisplay').innerText = `Server Date (Asia/Kolkata): ${data.serverDate}`;
+                    document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate}`;
                     document.getElementById('activeDateLabel').innerText = dateInput.value;
-                    
                     document.getElementById('workoutStreakLabel').innerText = `${data.currentStreak || 0} Days`;
 
-                    updateStatusBanner(data.dateStatus, data.allDone);
-                    renderWorkouts(data.workouts, data.dateStatus);
+                    updateStatusBanner(data.dateStatus, data.allDone, dateInput.value);
+                    renderWorkouts(data.workouts, data.dateStatus, dateInput.value);
 
                     const quoteBanner = document.getElementById('quoteBanner');
-                    if (data.allDone) {
+                    if (data.allDone && dateInput.value >= MONSTER_LAUNCH_DATE) {
                         quoteBanner.classList.remove('hidden');
                     } else {
                         quoteBanner.classList.add('hidden');
@@ -181,14 +164,17 @@
             }
         }
 
-        function updateStatusBanner(status, allDone) {
+        function updateStatusBanner(status, allDone, targetDate) {
             const badge = document.getElementById('workoutStatusBadge');
-            if (status === 'LOCKED') {
+            if (targetDate < MONSTER_LAUNCH_DATE) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
+            } else if (status === 'LOCKED') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
             } else if (status === 'FUTURE') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
             } else if (allDone) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "⚡ ALL WORKOUTS CONQUERED";
@@ -198,14 +184,14 @@
             }
         }
 
-        function renderWorkouts(workouts, dateStatus) {
+        function renderWorkouts(workouts, dateStatus, targetDate) {
             const container = document.getElementById('workoutsContainer');
             if (workouts.length === 0) {
                 container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the system.</p><p class="text-red-500/70 text-xs mt-1">Please add workouts from your Control Panel.</p></div>`;
                 return;
             }
 
-            const isLockedOrFuture = dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
+            const isLockedOrPreLaunch = targetDate < MONSTER_LAUNCH_DATE || dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
 
             container.innerHTML = workouts.map(w => `
                 <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
@@ -213,12 +199,12 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">${w.category || 'Strength'}</span>
                             <span class="text-[10px] bg-white/5 text-zinc-300 border border-white/5 px-2.5 py-1 rounded-lg font-bold uppercase tracking-widest">Sets: ${w.sets}</span>
-                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Reps: ${w.reps}</span>
+                            <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg font-extrabold uppercase tracking-widest">Reps: ${w.value || w.reps || 10} ${w.unit || 'Reps'}</span>
                         </div>
                         <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${w.name}</h3>
                     </div>
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
-                        <button ${isLockedOrFuture ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrFuture ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                        <button ${isLockedOrPreLaunch ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrPreLaunch ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
                             ${w.completed ? '✓ Done' : '○ Pending'}
                         </button>
                     </div>
@@ -229,6 +215,10 @@
         async function toggleWorkout(id, completed) {
             try {
                 const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+                if (targetDate < MONSTER_LAUNCH_DATE) {
+                    alert("🔒 PRE-LAUNCH: Planning Mode active. Toggles are locked.");
+                    return;
+                }
                 const res = await fetch(`/api/workouts/${id}/toggle`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -236,11 +226,11 @@
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    alert(data.error || "Action rejected by system lock.");
+                    alert(data.error || "Action rejected by system rules.");
                 } else {
                     document.getElementById('telegramBotStatus').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold uppercase";
                     document.getElementById('telegramBotStatus').innerText = "ALERT DISPATCHED TO PHONE";
-                    document.getElementById('telegramBotLog').innerText = `🚀 Telegram message sent to @jaymin_monster_bot with current streak count!`;
+                    document.getElementById('telegramBotLog').innerText = `🚀 Telegram telemetry alert delivered successfully!`;
                 }
                 fetchWorkouts(targetDate);
             } catch (err) {
@@ -254,63 +244,13 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            checkPreLaunchLock();
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < MONSTER_LAUNCH_DATE) {
+                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            }
         });
 
         fetchWorkouts();
-
-        async function verifyGlobalSystemLock() {
-            try {
-                const res = await fetch('/api/system-lock');
-                const data = await res.json();
-                if (data.locked) {
-                    let overlay = document.getElementById('globalSystemLockOverlay');
-                    if (!overlay) {
-                        overlay = document.createElement('div');
-                        overlay.id = 'globalSystemLockOverlay';
-                        overlay.className = "fixed inset-0 bg-[#07090f]/98 z-[99999] flex flex-col items-center justify-center p-6 text-center";
-                        overlay.innerHTML = `
-                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full space-y-4">
-                                <span class="text-4xl">🔐</span>
-                                <h2 class="text-xl font-black uppercase tracking-wider text-red-500">System Securely Locked</h2>
-                                <p class="text-xs text-slate-300">All execution vectors are frozen by Master Admin. Enter password to authorize access.</p>
-                                <input type="password" id="globalUnlockPass" placeholder="Enter Master Admin Password" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:border-red-500 outline-none text-center">
-                                <button onclick="unlockSystemGlobal()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30">
-                                    Authorize & Unlock
-                                </button>
-                            </div>
-                        `;
-                        document.body.appendChild(overlay);
-                    }
-                }
-            } catch (err) {}
-        }
-
-        async function unlockSystemGlobal() {
-            const adminPassword = document.getElementById('globalUnlockPass').value;
-            try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: false, adminPassword })
-                });
-                if (res.ok) {
-                    const overlay = document.getElementById('globalSystemLockOverlay');
-                    if (overlay) overlay.remove();
-                    location.reload();
-                } else {
-                    alert("🔒 Incorrect Admin Password!");
-                }
-            } catch (err) {
-                alert("Authentication error.");
-            }
-        }
-
-        verifyGlobalSystemLock();
-        function checkPreLaunchLock() {
-    const banner = document.getElementById('prelaunchBanner');
-    if (banner) banner.classList.add('hidden');
-}
     </script>
 </body>
 </html>
