@@ -439,6 +439,20 @@
                 <p class="text-xs text-slate-400 max-w-xs">Instantly change the cinematic background image of your main login portal directly from this control panel.</p>
             </div>
         </div>
+        <div class="glass-card p-6 rounded-2xl border border-red-500/35 mt-6">
+    <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2">🔐 Global System Security Lock</h3>
+    <p class="text-xs text-zinc-400 mb-4">Freeze or unfreeze all execution vectors across portals using Master Admin password.</p>
+    
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+        <input type="password" id="adminLockPassword" placeholder="Enter Master Admin Password" class="w-full sm:w-64 bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:border-red-500 outline-none">
+        <button onclick="toggleSystemLock(true)" class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-red-600/30">
+            🔒 Lock System
+        </button>
+        <button onclick="toggleSystemLock(false)" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-emerald-600/30">
+            🔓 Unlock System
+        </button>
+    </div>
+</div>
 
     </main>
 
@@ -1089,6 +1103,29 @@
                 window.location.href = 'index.html';
             }
         }
+        async function toggleSystemLock(shouldLock) {
+        const adminPassword = document.getElementById('adminLockPassword').value;
+        if (!adminPassword) {
+            alert("Please enter the Master Admin Password!");
+            return;
+        }
+        try {
+            const res = await fetch('/api/system-lock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ locked: shouldLock, adminPassword })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert("⚡ " + data.message);
+                location.reload();
+            } else {
+                alert("❌ " + (data.error || "Failed to update lock status."));
+            }
+        } catch (err) {
+            alert("Connection error with backend server.");
+        }
+    }
 
         // Initial Loads
         loadHabits();
