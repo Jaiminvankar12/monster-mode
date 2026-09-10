@@ -38,11 +38,11 @@
 <body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">
 
     <div class="flex w-full min-h-screen bg-[#05070b]">
-        <!-- Left Side: Cinematic Background (Hidden on mobile) -->
+        <!-- Left Side: Crystal Clear Cinematic Background (Hidden on mobile) -->
         <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 hero-bg" id="heroBgContainer">
-            <!-- Balanced lighting overlay so image remains vibrant and visible -->
-            <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-transparent opacity-90"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#05070b]/20 to-[#05070b]"></div>
+            <!-- Minimal subtle vignette at the bottom only, keeping the main character and abs motivation 100% clear -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-transparent opacity-60"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#05070b]/40"></div>
             <div class="z-10 max-w-xl">
                 <span class="px-3.5 py-1.5 rounded-full bg-red-500/25 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-4 inline-block shadow-lg shadow-red-500/20">
                     ⚡ Apex Predator System
@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <!-- Right Side: Authentication Panel with Crisp Glass Card -->
+        <!-- Right Side: Authentication Panel -->
         <div class="w-full lg:w-[40%] flex flex-col justify-center px-6 sm:px-14 lg:px-16 py-12 bg-[#05070b] m-auto">
             
             <div class="auth-card p-8 sm:p-10 rounded-3xl relative">
@@ -119,9 +119,9 @@
                 const heroDiv = document.getElementById('heroBgContainer');
                 if (heroDiv) {
                     let bgUrl = (data.success && data.url) ? data.url : 'https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg';
-                    // Balanced gradient overlays to ensure background artwork pops cleanly
-                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.2) 0%, rgba(5,7,11,0.7) 80%, #05070b 100%), 
-                                                   linear-gradient(90deg, rgba(5,7,11,0.1) 30%, rgba(5,7,11,0.85) 85%, #05070b 100%), 
+                    // Clean and ultra-transparent gradient so the motivation image shines in absolute clarity
+                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), 
+                                                   linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
                                                    url('${bgUrl}')`;
                 }
             } catch (err) {
