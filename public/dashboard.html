@@ -115,6 +115,17 @@
             </div>
         </div>
 
+        <!-- STUDY CORE MATRIX WIDGET (Start Date, End Date, Progress Rate, Days Left) -->
+        <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-blue-500">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white">📚 Active Study Matrix & Deadlines</h3>
+                <span class="text-xs text-blue-400 font-bold uppercase tracking-widest">Target-Driven Core</span>
+            </div>
+            <div id="dashboardStudyList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-xs text-zinc-500 py-2">Loading study vectors...</p>
+            </div>
+        </div>
+
         <!-- Focus of the Day -->
         <div class="glass-card p-5 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -195,17 +206,6 @@
             </div>
         </div>
 
-        <!-- Yearly Analytics Chart -->
-        <div class="glass-card p-6 rounded-2xl mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white">📈 Yearly Performance Analytics (2026 Consistency)</h3>
-                <span class="text-xs text-zinc-400 font-semibold">Real-time Matrix Data</span>
-            </div>
-            <div style="height: 300px; position: relative;">
-                <canvas id="yearlyAnalyticsChart"></canvas>
-            </div>
-        </div>
-
         <!-- Mobile Logout -->
         <div class="block lg:hidden pt-4 pb-8">
             <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
@@ -215,13 +215,40 @@
     </main>
 
     <script>
-        let yearlyChartInstance = null;
-        const LAUNCH_DATE = "2026-09-11";
-
-        function checkPreLaunchLock() {
-            const banner = document.getElementById('prelaunchBanner');
-            if (banner) banner.classList.add('hidden');
+        function applyGlobalTheme(theme) {
+            let colorMap = {
+                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
+                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
+                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
+                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' },
+                amber: { primary: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)' },
+                crimson: { primary: '#e11d48', glow: 'rgba(225, 29, 72, 0.15)' },
+                purple: { primary: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)' },
+                indigo: { primary: '#6366f1', glow: 'rgba(99, 102, 241, 0.15)' },
+                lime: { primary: '#84cc16', glow: 'rgba(132, 204, 22, 0.15)' },
+                teal: { primary: '#14b8a6', glow: 'rgba(20, 184, 166, 0.15)' },
+                orange: { primary: '#f97316', glow: 'rgba(249, 115, 22, 0.15)' },
+                pink: { primary: '#ec4899', glow: 'rgba(236, 72, 153, 0.15)' },
+                slate: { primary: '#94a3b8', glow: 'rgba(148, 163, 184, 0.15)' },
+                violet: { primary: '#7c3aed', glow: 'rgba(124, 58, 237, 0.15)' },
+                neonemerald: { primary: '#34d399', glow: 'rgba(52, 211, 153, 0.15)' },
+                yellow: { primary: '#facc15', glow: 'rgba(250, 204, 21, 0.15)' },
+                rose: { primary: '#f43f5e', glow: 'rgba(244, 63, 94, 0.15)' },
+                sky: { primary: '#38bdf8', glow: 'rgba(56, 189, 248, 0.15)' },
+                fuchsia: { primary: '#d946ef', glow: 'rgba(217, 70, 239, 0.15)' },
+                acid: { primary: '#4ade80', glow: 'rgba(74, 222, 128, 0.15)' },
+                mystic: { primary: '#a1a1aa', glow: 'rgba(161, 161, 170, 0.15)' },
+                gold: { primary: '#fde047', glow: 'rgba(253, 224, 71, 0.15)' },
+                cyberlime: { primary: '#6ee7b7', glow: 'rgba(110, 231, 183, 0.15)' },
+                neonamber: { primary: '#d97706', glow: 'rgba(217, 119, 6, 0.15)' },
+                midnight: { primary: '#1e40af', glow: 'rgba(30, 64, 175, 0.15)' }
+            };
+            let cfg = colorMap[theme] || colorMap['red'];
+            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
+            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
         }
+
+        const LAUNCH_DATE = "2026-09-11";
 
         function displayCurrentDateAndDay() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -288,32 +315,17 @@
             if(modal) modal.remove();
         }
 
-        function setAccentTheme(theme) {
-            localStorage.setItem('monster_accent_theme', theme);
-            applyTheme(theme);
-        }
-
-        function applyTheme(theme) {
-            let colorMap = {
-                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
-                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
-                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
-                cyan: { primary: '#06b6d4', glow: 'rgba(6, 182, 212, 0.15)' }
-            };
-            let cfg = colorMap[theme] || colorMap['red'];
-            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
-            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
-            checkPreLaunchLock();
+            verifyGlobalSystemLock();
             displayCurrentDateAndDay();
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
-            applyTheme(savedTheme);
+            applyGlobalTheme(savedTheme);
 
             let savedMission = localStorage.getItem('monster_daily_mission') || '';
             const missionInput = document.getElementById('dailyMissionInput');
             if(missionInput) missionInput.value = savedMission;
+
+            loadDashboardData();
         });
 
         async function loadDashboardData() {
@@ -330,14 +342,16 @@
                 }
                 document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
 
-                const [habitsRes, workoutsRes, hydrationRes] = await Promise.all([
+                const [habitsRes, workoutsRes, hydrationRes, studyRes] = await Promise.all([
                     fetch('/api/habits'),
                     fetch('/api/workouts'),
-                    fetch('/api/hydration')
+                    fetch('/api/hydration'),
+                    fetch('/api/study/sessions')
                 ]);
                 const habitsData = await habitsRes.json();
                 const workoutsData = await workoutsRes.json();
                 const hydrationData = await hydrationRes.json();
+                const studyData = await studyRes.json();
 
                 let habits = habitsData.success ? habitsData.habits : [];
                 let workouts = workoutsData.success ? workoutsData.workouts : [];
@@ -348,6 +362,11 @@
                 
                 // Render Active Habits Carousel
                 renderActiveHabitsCarousel(habits);
+
+                // Render Study Matrix with Start Date, End Date, Progress Rate, Days Left
+                if (studyData.success) {
+                    renderDashboardStudyMatrix(studyData.categories, studyData.totalStudiedMinutes);
+                }
 
                 // Hydration Widget Data Binding
                 if (hydrationData.success) {
@@ -365,7 +384,6 @@
                 document.getElementById('yearlyProgressText').innerText = `${yearlyPct}%`;
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
 
-                renderYearlyChart(streak);
                 loadMonsterCoach();
             } catch (err) {
                 console.error("Error loading dashboard data:", err);
@@ -394,8 +412,8 @@
                         <span class="text-[9px] text-red-400 uppercase font-bold tracking-widest block truncate">${h.category || 'Discipline'}</span>
                         <h4 class="font-extrabold text-xs text-white mt-0.5 truncate">${h.name}</h4>
                     </div>
-                    <button onclick="toggleHabit('${h.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition cursor-pointer shrink-0 ${h.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white'}">
-                        ${h.completed ? '✓' : '○'}
+                    <button onclick="toggleHabit('${h.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition cursor-pointer shrink-0 ${h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white'}">
+                        ${h.completedToday ? '✓' : '○'}
                     </button>
                 </div>
             `).join('');
@@ -408,6 +426,81 @@
                     </div>
                 </div>
             `;
+        }
+
+        function renderDashboardStudyMatrix(categories, totalStudiedMins) {
+            const container = document.getElementById('dashboardStudyList');
+            if (!categories || categories.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 col-span-full text-center py-4">No study subjects deployed yet.</p>`;
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            container.innerHTML = categories.map(c => {
+                let startDateStr = c.startDate || '2026-09-11';
+                let endDateStr = c.endDate;
+                let targetMins = parseInt(c.dailyTargetMinutes) || 120;
+
+                let daysLeftText = "No Deadline";
+                let badgeColor = "bg-zinc-500/20 text-zinc-400 border-zinc-500/30";
+                let statusText = "Active Vector";
+
+                if (endDateStr) {
+                    let endDateObj = new Date(endDateStr);
+                    endDateObj.setHours(0, 0, 0, 0);
+                    let diffTime = endDateObj - today;
+                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) {
+                        daysLeftText = `${Math.abs(diffDays)} Days Overdue`;
+                        badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
+                        statusText = "⚠️ Deadline Passed";
+                    } else if (diffDays === 0) {
+                        daysLeftText = "Due Today!";
+                        badgeColor = "bg-amber-500/20 text-amber-400 border-amber-500/30";
+                        statusText = "⚡ Critical Execution";
+                    } else {
+                        daysLeftText = `${diffDays} Days Left`;
+                        badgeColor = "bg-blue-500/20 text-blue-300 border-blue-500/30";
+                        statusText = "Upcoming Target";
+                    }
+                }
+
+                let progressRate = Math.min(Math.round((totalStudiedMins / targetMins) * 100), 100);
+
+                return `
+                    <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3">
+                        <div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[9px] ${badgeColor} border px-2 py-0.5 rounded font-black uppercase">${statusText}</span>
+                                <span class="text-[10px] font-extrabold text-blue-400">Target: ${targetMins}m/day</span>
+                            </div>
+                            <h4 class="font-extrabold text-sm text-white mt-2">${c.name}</h4>
+                        </div>
+                        <div class="bg-black/30 p-3 rounded-xl border border-white/5 space-y-2 text-[10px]">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Start: <strong class="text-white">${startDateStr}</strong></span>
+                                <span>End: <strong class="text-white">${endDateStr || 'None'}</strong></span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold text-slate-300 mb-1">
+                                    <span>Progress Rate</span>
+                                    <span class="text-emerald-400">${progressRate}%</span>
+                                </div>
+                                <div class="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${progressRate}%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-white/5 font-bold text-amber-400">
+                                <span>⏳ Countdown:</span>
+                                <span>${daysLeftText}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function loadMonsterCoach() {
@@ -425,78 +518,20 @@
             } catch (err) {}
         }
 
-        function renderYearlyChart(currentStreak) {
-            const ctx = document.getElementById('yearlyAnalyticsChart').getContext('2d');
-            if (yearlyChartInstance) yearlyChartInstance.destroy();
-
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const dataPoints = months.map((m, idx) => Math.min(30 * (idx + 1), currentStreak * (idx + 1) * 3));
-
-            yearlyChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Discipline & Consistency Score',
-                        data: dataPoints,
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#ef4444'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
         async function logoutUser() {
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = 'index.html';
         }
 
-        loadDashboardData();
-
         async function verifyGlobalSystemLock() {
-    try {
-        const res = await fetch('/api/system-lock');
-        const data = await res.json();
-        if (data.locked) {
-            window.location.href = 'index.html';
-        }
-    } catch (err) {}
-}
-
-        async function unlockSystemGlobal() {
-            const adminPassword = document.getElementById('globalUnlockPass').value;
             try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: false, adminPassword })
-                });
-                if (res.ok) {
-                    const overlay = document.getElementById('globalSystemLockOverlay');
-                    if (overlay) overlay.remove();
-                    location.reload();
-                } else {
-                    alert("🔒 Incorrect Admin Password!");
+                const res = await fetch('/api/system-lock');
+                const data = await res.json();
+                if (data.locked) {
+                    window.location.href = 'index.html';
                 }
-            } catch (err) {
-                alert("Authentication error.");
-            }
+            } catch (err) {}
         }
-
-        verifyGlobalSystemLock();
     </script>
 </body>
-</html>a
+</html>
