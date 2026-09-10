@@ -228,7 +228,7 @@
             </div>
         </div>
 
-        <!-- TAB 3: STUDY CORE -->
+        <!-- TAB 3: STUDY CORE WITH DEADLINE / END DATE -->
         <div id="sectionStudy" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl">
                 <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6">📚 Create Study Subject</h3>
@@ -245,6 +245,10 @@
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
                         <input type="date" id="studyStartDate" value="2026-09-11" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
+                        <input type="date" id="studyEndDate" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
@@ -406,7 +410,7 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">📝</span>
+                <span class="text-5xl mb-4 animate-pulse">📝</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🚨 Exam Mode Matrix</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Manually override your daily study targets to any custom minutes you want during exams.</p>
             </div>
@@ -436,7 +440,7 @@
                 </form>
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-bounce">🛌</span>
+                <span class="text-5xl mb-4 animate-pulse">🛌</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">🌿 Sanctuary Safe-Haven</h3>
                 <p class="text-xs text-slate-400 max-w-xs">Human life comes first. When active, streaks are fully preserved.</p>
             </div>
@@ -705,13 +709,12 @@
             }
         });
 
-        // FIXED DELETE HABIT ENDPOINT TO MATCH SERVER ROUTE
         async function deleteHabit(id) {
             try {
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (res.ok) {
-                    showStatusMessage(`Habit deleted successfully`, 'error');
+                    showStatusMessage(`Habit deleted successfully`, 'success');
                     loadHabits();
                 } else {
                     showStatusMessage(data.error || "Failed to delete habit", 'error');
@@ -832,7 +835,7 @@
                         <div class="bg-[#0c0e15] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
-                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'}</span>
+                                <span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick='editStudy(${JSON.stringify(c)})' class="px-3 py-1.5 bg-blue-500/15 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-bold transition cursor-pointer">Edit</button>
@@ -851,6 +854,7 @@
             document.getElementById('studyName').value = c.name;
             document.getElementById('studyTarget').value = c.dailyTargetMinutes || 120;
             document.getElementById('studyStartDate').value = c.startDate || '2026-09-11';
+            document.getElementById('studyEndDate').value = c.endDate || '';
 
             document.getElementById('studyFormTitle').innerText = '📚 Edit Study Subject';
             document.getElementById('studySubmitBtn').innerText = 'Update Study Subject';
@@ -862,6 +866,7 @@
             document.getElementById('createStudyForm').reset();
             document.getElementById('studyTarget').value = 120;
             document.getElementById('studyStartDate').value = '2026-09-11';
+            document.getElementById('studyEndDate').value = '';
             document.getElementById('studyFormTitle').innerText = '📚 Create Study Subject';
             document.getElementById('studySubmitBtn').innerText = 'Deploy Study Vector';
             document.getElementById('studyCancelBtn').classList.add('hidden');
@@ -873,6 +878,7 @@
             const name = document.getElementById('studyName').value;
             const dailyTargetMinutes = document.getElementById('studyTarget').value;
             const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
+            const endDate = document.getElementById('studyEndDate').value || "";
 
             try {
                 let res, data;
@@ -880,7 +886,7 @@
                     res = await fetch(`/api/study/categories/${editId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
                     });
                     data = await res.json();
                     if (res.ok) {
@@ -894,7 +900,7 @@
                     res = await fetch('/api/study/categories', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, dailyTargetMinutes, startDate })
+                        body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate })
                     });
                     data = await res.json();
                     if (res.ok) {

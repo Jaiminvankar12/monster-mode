@@ -88,7 +88,7 @@ function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
         if (file === HABITS_FILE) {
-            initial = []; // Clean empty default so user can add custom habits without unwanted duplicates
+            initial = [];
         } else if (file === WORKOUTS_FILE) {
             initial = [];
         } else if (file === STUDY_CATEGORIES_FILE) {
@@ -571,7 +571,7 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
     const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
 
-    let data = readJSON(NOTES_REMINDERS_FILE);
+    let data = readJSON(NOTES_REMINDRES_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
 
     const newItem = {
@@ -799,14 +799,14 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
-// --- STUDY TRACKER API ---
+// --- STUDY TRACKER API WITH END DATE SUPPORT ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
 });
 
 app.post('/api/study/categories', requireAuth, (req, res) => {
-    const { name, dailyTargetMinutes, startDate } = req.body;
+    const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required." });
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const newCat = {
@@ -815,6 +815,7 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
         name,
         dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120,
         startDate: startDate || MONSTER_LAUNCH_DATE,
+        endDate: endDate || "",
         createdAt: new Date().toISOString()
     };
     categories.push(newCat);
@@ -827,10 +828,11 @@ app.put('/api/study/categories/:id', requireAuth, (req, res) => {
     const index = categories.findIndex(c => c.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Category not found." });
 
-    const { name, dailyTargetMinutes, startDate } = req.body;
+    const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     categories[index].name = name || categories[index].name;
     categories[index].dailyTargetMinutes = dailyTargetMinutes !== undefined ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes;
     categories[index].startDate = startDate || categories[index].startDate;
+    categories[index].endDate = endDate !== undefined ? endDate : categories[index].endDate;
 
     writeJSON(STUDY_CATEGORIES_FILE, categories);
     res.json({ success: true, message: "Study category updated successfully.", category: categories[index] });
