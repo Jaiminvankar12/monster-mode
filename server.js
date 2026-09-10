@@ -335,12 +335,9 @@ function calculateStreak(userId = MASTER_USER_ID, type) {
     return streak;
 }
 
-// Centralized Server-Side Sync Service
+// Centralized Server-Side Sync Service (REMOVED auto-creation of default habits)
 function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
-
-    let habits = readJSON(HABITS_FILE);
-    let habitLogs = readJSON(HABIT_LOGS_FILE);
 
     const workouts = readJSON(WORKOUTS_FILE);
     const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
@@ -349,30 +346,6 @@ function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
         return { ...w, completed: log ? log.completed : false };
     });
     const allWorkoutsDone = workoutsWithStatus.length > 0 && workoutsWithStatus.every(w => w.completed);
-
-    let workoutHabit = habits.find(h => h.id === 'habit_workout_auto_master' || h.name.toLowerCase().includes('complete daily workout'));
-    if (!workoutHabit && workouts.length > 0) {
-        workoutHabit = {
-            id: 'habit_workout_auto_master',
-            userId: MASTER_USER_ID,
-            trackerId: "habit_workout",
-            name: "🏋️ Complete Daily Workout",
-            description: "Auto-synced with athlete workout matrix",
-            activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-            startDate: MONSTER_LAUNCH_DATE,
-            status: "active"
-        };
-        habits.push(workoutHabit);
-        writeJSON(HABITS_FILE, habits);
-    }
-    if (workoutHabit) {
-        let hLogIndex = habitLogs.findIndex(l => l.habitId === workoutHabit.id && l.date === targetDate);
-        if (hLogIndex > -1) {
-            habitLogs[hLogIndex].completed = allWorkoutsDone;
-        } else {
-            habitLogs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId: workoutHabit.id, date: targetDate, completed: allWorkoutsDone });
-        }
-    }
 
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
@@ -388,31 +361,6 @@ function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
 
-    let studyHabit = habits.find(h => h.id === 'habit_study_auto_master' || h.name.toLowerCase().includes('complete daily study target'));
-    if (!studyHabit) {
-        studyHabit = {
-            id: 'habit_study_auto_master',
-            userId: MASTER_USER_ID,
-            trackerId: "habit_study",
-            name: "📚 Complete Daily Study Target",
-            description: "Auto-synced with deep-work study session matrix",
-            activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-            startDate: MONSTER_LAUNCH_DATE,
-            status: "active"
-        };
-        habits.push(studyHabit);
-        writeJSON(HABITS_FILE, habits);
-    }
-    if (studyHabit) {
-        let sLogIndex = habitLogs.findIndex(l => l.habitId === studyHabit.id && l.date === targetDate);
-        if (sLogIndex > -1) {
-            habitLogs[sLogIndex].completed = studyDone;
-        } else {
-            habitLogs.push({ id: Date.now().toString() + Math.random(), userId: MASTER_USER_ID, habitId: studyHabit.id, date: targetDate, completed: studyDone });
-        }
-    }
-
-    writeJSON(HABIT_LOGS_FILE, habitLogs);
     return { allWorkoutsDone, studyDone, totalStudiedMinutes, totalTargetMinutes };
 }
 
@@ -562,7 +510,6 @@ cron.schedule('0 22 * * *', async () => {
     let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
     let studyStreak = calculateStreak(MASTER_USER_ID, 'study');
 
-    let habitLogs = readJSON(HABIT_LOGS_FILE).filter(l => l.completed);
     let totalHabitStreak = calculateStreak(MASTER_USER_ID, 'habit');
 
     let hydData = getHydrationData(MASTER_USER_ID);
@@ -706,21 +653,6 @@ app.post('/api/hydration/drink', requireAuth, async (req, res) => {
 
     let percent = Math.min(Math.round((newTotal / hydData.goal) * 100), 100);
     let hydrationStreak = calculateHydrationStreak(MASTER_USER_ID);
-
-    if (percent >= 100) {
-        let habits = readJSON(HABITS_FILE);
-        let habitLogs = readJSON(HABIT_LOGS_FILE);
-        let waterHabit = habits.find(h => h.name.toLowerCase().includes('water'));
-        if (waterHabit) {
-            let logIndex = habitLogs.findIndex(l => l.habitId === waterHabit.id && l.date === today);
-            if (logIndex > -1) {
-                habitLogs[logIndex].completed = true;
-            } else {
-                habitLogs.push({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId: waterHabit.id, date: today, completed: true });
-            }
-            writeJSON(HABIT_LOGS_FILE, habitLogs);
-        }
-    }
 
     res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...getUserXP(MASTER_USER_ID) });
 });
@@ -1208,5 +1140,6 @@ app.listen(PORT, () => {
 });
 
 app.get('/api/cron/ping', (req, res) => {
+    console.log("PING RECEIVED FROM CRON-JOB.ORG");
     res.json({ success: true, message: "Monster Mode server is wide awake!" });
 });
