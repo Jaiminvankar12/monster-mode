@@ -571,7 +571,7 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
     const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
 
-    let data = readJSON(NOTES_REMINDRES_FILE);
+    let data = readJSON(NOTES_REMINDERS_FILE);
     if (!data[MASTER_USER_ID]) data[MASTER_USER_ID] = [];
 
     const newItem = {
