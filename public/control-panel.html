@@ -491,7 +491,6 @@
             const password = document.getElementById('actionSecurityPasswordInput').value;
 
             let validPassword = "";
-            // 🔥 FIXED: Updated to the new Master Lock Password
             if (currentActionType === 'lock') validPassword = "Jay_monster_mode_on";
             else if (currentActionType === 'add') validPassword = "Jay#add@monster";
             else if (currentActionType === 'edit') validPassword = "Jay#edit@monster";
@@ -502,12 +501,14 @@
                 return;
             }
 
-            closeSecureActionModal();
-            showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
-            
+            // 🔥 FIX: પહેલા સર્વરને રિક્વેસ્ટ મોકલો!
             if (pendingActionCallback) {
                 await pendingActionCallback(password);
             }
+
+            // રિક્વેસ્ટ પૂરી થાય પછી જ પોપઅપ બંધ કરો!
+            closeSecureActionModal();
+            showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
         }
 
         async function verifyAdminSession() {
