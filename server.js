@@ -467,18 +467,23 @@ app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) =>
     else if (actionType === 'delete') validPassword = "Jay#del@monster";
 
     if (password !== validPassword) {
-        return res.status(403).json({ error: `🔒 Invalid Action Password for ${actionType.toUpperCase()}! Please contact admin.` });
+        return res.status(403).json({ error: `🔒 Wrong Password! Invalid Action Password for ${actionType.toUpperCase()}.` });
     }
     res.json({ success: true, message: "Action authorized successfully." });
 });
 
 app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
     const { locked, adminPassword } = req.body;
-    if (adminPassword !== "Jay#monster@student") return res.status(403).json({ error: "🔒 Invalid Admin Master Password! System is locked. Contact to admin." });
+    if (adminPassword !== "Jay#monster@student") {
+        return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
+    }
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
-    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
-    res.json({ success: true, message: lockData.locked ? "System locked successfully by Admin." : "System unlocked successfully.", ...lockData });
+    
+    const actionText = lockData.locked ? "Portal Successfully Locked by Admin 🔒" : "Portal Successfully Unlocked by Admin 🟢";
+    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${actionText}*`);
+    
+    res.json({ success: true, message: actionText, ...lockData });
 });
 
 app.get('/api/landing-bg', (req, res) => { res.json({ success: true, ...getLandingBg() }); });
@@ -507,7 +512,7 @@ app.get('/api/mates', requireAuth, (req, res) => {
 app.post('/api/mates/add', requireAuth, (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#add@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Add Password! Contact to admin." });
+        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Add Password." });
     }
     if (!name) return res.status(400).json({ error: "Mate name is required." });
 
@@ -526,7 +531,7 @@ app.post('/api/mates/add', requireAuth, (req, res) => {
 app.put('/api/mates/:id', requireAuth, (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#edit@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Edit Password! Contact to admin." });
+        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Edit Password." });
     }
 
     let mates = readJSON(MATES_FILE);
@@ -542,7 +547,7 @@ app.put('/api/mates/:id', requireAuth, (req, res) => {
 app.delete('/api/mates/:id', requireAuth, (req, res) => {
     const { password } = req.body;
     if (password !== "Jay#del@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Delete Password! Contact to admin." });
+        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Delete Password." });
     }
 
     let mates = readJSON(MATES_FILE);
@@ -574,7 +579,7 @@ app.post('/api/auth/login', async (req, res) => {
     let user = users.find(u => u.email === email);
 
     if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
-        return res.status(401).json({ error: "Invalid email or password." });
+        return res.status(401).json({ error: "Wrong Password! Invalid email or password." });
     }
 
     req.session.userId = user.id;
