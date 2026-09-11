@@ -614,10 +614,12 @@ app.get('/api/auth/session', requireAuth, (req, res) => {
     res.json({ authenticated: true, email: req.session.email || "jaiminvankar520@gmail.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
 });
 
+
 app.post('/api/control-panel/login', async (req, res) => {
     req.session.controlPanelAuth = true;
     req.session.userId = MASTER_USER_ID;
     req.session.role = 'ADMIN';
+    req.session.email = "admin@monstermode.com";
     res.json({ success: true, message: "Control Panel authorized." });
 });
 app.post('/api/control-panel/logout', (req, res) => { req.session.controlPanelAuth = false; res.json({ success: true, message: "Control Panel logged out." }); });
