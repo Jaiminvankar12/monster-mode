@@ -477,7 +477,7 @@
                     closeSecureActionModal();
                     if (pendingActionCallback) pendingActionCallback(password);
                 } else {
-                    showStatusMessage("❌ Incorrect System Lock Password!", "error");
+                    showStatusMessage("❌ Wrong Password! Incorrect System Lock Password.", "error");
                 }
                 return;
             }
@@ -497,7 +497,7 @@
                         pendingActionCallback();
                     }
                 } else {
-                    showStatusMessage("❌ " + (data.error || "Incorrect Password! Access Denied."), "error");
+                    showStatusMessage("❌ " + (data.error || "Wrong Password! Access Denied."), "error");
                 }
             } catch (err) {
                 showStatusMessage("❌ Authorization server connection error", "error");
@@ -1076,7 +1076,7 @@
                     closeSecureActionModal();
                     setTimeout(() => location.reload(), 1000);
                 } else { 
-                    showStatusMessage("❌ " + (data.error || "Incorrect System Password!"), "error"); 
+                    showStatusMessage("❌ " + (data.error || "Wrong Password! Incorrect System Lock Password."), "error"); 
                 }
             } catch (err) {
                 showStatusMessage("❌ Connection error", "error");
