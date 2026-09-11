@@ -89,7 +89,13 @@
     <main class="flex-1 lg:ml-64 flex flex-col p-4 sm:p-6 lg:p-10 overflow-y-auto">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-[#1a1f30]">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">System Command Center</h2>
+                <div class="flex items-center gap-3 mb-2">
+                    <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">System Command Center</h2>
+                    <!-- Live Day Counter Badge -->
+                    <span id="monsterDayCounter" class="text-xs font-black uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-xl">
+                        📅 Loading Day...
+                    </span>
+                </div>
                 <p class="text-xs text-slate-400 mt-1">Operational matrix active. Real-time analytics and performance overview.</p>
                 <div id="currentDateDayDisplay" class="text-xs font-extrabold text-amber-400 mt-2 flex items-center gap-2">
                     <span>📅</span> <span>Loading Date & Day...</span>
@@ -287,6 +293,23 @@
             if (container) {
                 container.innerHTML = `<span>📅</span> <span>Operational Baseline: ${formattedDate}</span>`;
             }
+
+            // Calculate Operational Day (Day 1, Day 2...)
+            const launchDateObj = new Date(LAUNCH_DATE);
+            launchDateObj.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = today - launchDateObj;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            const dayCounterEl = document.getElementById('monsterDayCounter');
+            if (dayCounterEl) {
+                if (diffDays < 1) {
+                    dayCounterEl.innerHTML = `⏳ Pre-Launch Phase`;
+                } else {
+                    dayCounterEl.innerHTML = `🔥 DAY ${diffDays}`;
+                }
+            }
         }
 
         function saveDailyMission(val) {
@@ -410,7 +433,6 @@
                 document.getElementById('yearlyProgressText').innerText = `${yearlyPct}%`;
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
 
-                // Render Analytics Charts with actual fetched data
                 renderCharts(habits, workouts, studyData, hydrationData);
 
                 loadMonsterCoach();
