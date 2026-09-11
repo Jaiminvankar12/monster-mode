@@ -590,14 +590,21 @@ app.post('/api/auth/login', async (req, res) => {
     req.session.role = user.role;
     req.session.email = user.email;
 
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 Successfully Logged In: \`${user.email}\` (${user.role}) at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    try {
+        await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 Successfully Logged In: \`${user.email}\` (${user.role}) at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    } catch (e) {
+        console.error("Telegram login notification error:", e);
+    }
+    
     res.json({ success: true, role: user.role, email: user.email, message: "Successfully logged in." });
 });
 
 app.post('/api/auth/logout', async (req, res) => {
     let email = req.session.email || 'User';
     req.session.destroy(async () => {
-        await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🔴 Successfully Logged Out: \`${email}\``);
+        try {
+            await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🔴 Successfully Logged Out: \`${email}\``);
+        } catch (e) {}
         res.json({ success: true, message: "Logged out successfully." });
     });
 });

@@ -471,7 +471,7 @@
             e.preventDefault();
             const password = document.getElementById('actionSecurityPasswordInput').value;
 
-            // Secure Direct Client Password Verification for all actions (Lock, Add, Edit, Delete)
+            // Direct instant client-side robust verification for all actions (Lock, Add, Edit, Delete)
             let validPassword = "";
             if (currentActionType === 'lock') validPassword = "Jay#monster@student";
             else if (currentActionType === 'add') validPassword = "Jay#add@monster";
