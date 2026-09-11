@@ -21,7 +21,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Workout matrix is currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Workout matrix is currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -52,7 +52,7 @@
         <!-- Page Title & Streak Badge Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Global Launch: 11 Sept 2026</span>
+                <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Global Launch: 12 Sept 2026</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Iron & Muscle Matrix</h2>
                 <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
             </div>
@@ -109,14 +109,43 @@
 
     <script>
         let currentSelectedDate = "";
-        const MONSTER_LAUNCH_DATE = "2026-09-11";
+        const MONSTER_LAUNCH_DATE = "2026-09-12";
+
+        function checkPreLaunchLock() {
+            const launchDateObj = new Date(MONSTER_LAUNCH_DATE);
+            launchDateObj.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const banner = document.getElementById('prelaunchBanner');
+            if (today < launchDateObj) {
+                if (banner) banner.classList.remove('hidden');
+            } else {
+                if (banner) banner.classList.add('hidden');
+            }
+        }
+
+        async function verifyGlobalSystemLock() {
+            try {
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                if (data.locked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    if (sessionData.role !== 'ADMIN') {
+                        window.location.href = 'index.html';
+                    }
+                }
+            } catch (err) {}
+        }
 
         async function fetchWorkouts(dateStr = "") {
             try {
-                let url = '/api/workouts';
-                if (dateStr) url += `?date=${dateStr}`;
+                let url = `/api/workouts?t=${new Date().getTime()}`;
+                if (dateStr) url += `&date=${dateStr}`;
 
-                const res = await fetch(url);
+                const res = await fetch(url, { cache: 'no-store' });
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
                     return;
@@ -244,13 +273,10 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < MONSTER_LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
-            }
+            verifyGlobalSystemLock();
+            checkPreLaunchLock();
+            fetchWorkouts();
         });
-
-        fetchWorkouts();
     </script>
 </body>
 </html>

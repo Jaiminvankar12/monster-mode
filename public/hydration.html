@@ -11,27 +11,45 @@
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .water-glow { box-shadow: 0 0 50px rgba(59, 130, 246, 0.25); }
-        .water-drop-container {
-            position: relative;
-            overflow: hidden;
-            background: rgba(59, 130, 246, 0.05);
+        
+        /* 💧 PERFECT WATER DROP SHAPE CSS 💧 */
+        .drop-shape {
+            /* Top right corner becomes the tip of the drop */
+            border-radius: 50% 0 50% 50%;
+            /* Rotate to point the tip straight upwards */
+            transform: rotate(-45deg);
         }
+        
+        /* Wrapper to counter-rotate the water inside so it stays flat */
+        .drop-liquid-wrapper {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
         .liquid-wave {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.4) 0%, rgba(6, 182, 212, 0.7) 100%);
-            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0.8) 0%, rgba(59, 130, 246, 0.6) 100%);
+            box-shadow: inset 0 10px 20px rgba(255, 255, 255, 0.15);
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         :root {
-        --accent-primary: #ef4444; /* Default Red */
-        --accent-glow: rgba(239, 68, 68, 0.15);
-    }
-    .dynamic-accent { color: var(--accent-primary) !important; }
-    .dynamic-bg { background-color: var(--accent-primary) !important; }
-    .dynamic-border { border-color: var(--accent-primary) !important; }
-    .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
+            --accent-primary: #ef4444;
+            --accent-glow: rgba(239, 68, 68, 0.15);
+        }
+        .dynamic-accent { color: var(--accent-primary) !important; }
+        .dynamic-bg { background-color: var(--accent-primary) !important; }
+        .dynamic-border { border-color: var(--accent-primary) !important; }
+        .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
@@ -42,7 +60,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Hydration tracking and fluid matrix are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Hydration tracking and fluid matrix are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -96,15 +114,21 @@
                 <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-2">Today</h2>
             </div>
 
-            <!-- Giant Water Drop with Fluid Fill Animation -->
-            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center rounded-full border-2 border-blue-500/30 water-glow water-drop-container">
-                <!-- Liquid Fill Animation Layer -->
-                <div id="liquidFill" class="liquid-wave" style="height: 0%;"></div>
+            <!-- 💧 NEW GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center mt-6 mb-6">
+                
+                <!-- Drop Shape Mask / Outline -->
+                <div class="absolute inset-0 drop-shape water-glow bg-blue-500/5 border-2 border-blue-500/40 overflow-hidden">
+                    <!-- Liquid Wrapper (Counter-Rotated to keep water flat) -->
+                    <div class="drop-liquid-wrapper">
+                        <div id="liquidFill" class="liquid-wave" style="height: 0%;"></div>
+                    </div>
+                </div>
 
-                <!-- Labels -->
-                <div class="z-10 flex flex-col items-center justify-center">
-                    <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-md">0 ml</span>
-                    <span id="goalSubLabel" class="text-xs text-zinc-300 font-bold uppercase tracking-widest mt-2 drop-shadow">Goal: 3000 ml</span>
+                <!-- Labels (Shifted down slightly to stay in the round belly of the drop) -->
+                <div class="z-10 flex flex-col items-center justify-center mt-12 sm:mt-16">
+                    <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-lg">0 ml</span>
+                    <span id="goalSubLabel" class="text-xs text-blue-200 font-black uppercase tracking-widest mt-2 drop-shadow-md">Goal: 3000 ml</span>
                 </div>
             </div>
 
@@ -171,15 +195,21 @@
         let currentGoal = 3000;
         let currentGlass = 250;
         let hydrationHistoryLogs = {};
-        // Locked strictly to launch date September 11, 2026
-        const LAUNCH_DATE = "2026-09-11";
+        
+        // Locked strictly to launch date September 12, 2026
+        const LAUNCH_DATE = "2026-09-12";
 
         function checkPreLaunchLock() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            const launchDateObj = new Date(LAUNCH_DATE);
+            launchDateObj.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const banner = document.getElementById('prelaunchBanner');
+            if (today < launchDateObj) {
+                if (banner) banner.classList.remove('hidden');
             } else {
-                document.getElementById('prelaunchBanner').classList.add('hidden');
+                if (banner) banner.classList.add('hidden');
             }
         }
 
@@ -211,7 +241,8 @@
 
         async function fetchHydrationData() {
             try {
-                const res = await fetch('/api/hydration');
+                const ts = new Date().getTime();
+                const res = await fetch('/api/hydration?t=' + ts, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) {
                     currentGoal = data.goal;
@@ -238,6 +269,8 @@
                 const data = await res.json();
                 if (data.success) {
                     fetchHydrationData();
+                } else if (data.error) {
+                    alert("❌ " + data.error);
                 }
             } catch (err) {}
         }
@@ -279,46 +312,29 @@
             }).join('');
         }
 
+        async function verifyGlobalSystemLock() {
+            try {
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                // We rely on backend trackerApiGuard and HTML overlay logic in server.js 
+                // but this acts as an extra safety net
+                if (data.locked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    if (sessionData.role !== 'ADMIN') {
+                        window.location.href = 'index.html';
+                    }
+                }
+            } catch (err) {}
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            verifyGlobalSystemLock();
             checkPreLaunchLock();
             fetchHydrationData();
         });
 
-        async function verifyGlobalSystemLock() {
-    try {
-        const res = await fetch('/api/system-lock');
-        const data = await res.json();
-        if (data.locked) {
-            window.location.href = 'index.html';
-        }
-    } catch (err) {}
-}
-
-        async function unlockSystemGlobal() {
-            const adminPassword = document.getElementById('globalUnlockPass').value;
-            try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: false, adminPassword })
-                });
-                if (res.ok) {
-                    const overlay = document.getElementById('globalSystemLockOverlay');
-                    if (overlay) overlay.remove();
-                    location.reload();
-                } else {
-                    alert("🔒 Incorrect Admin Password!");
-                }
-            } catch (err) {
-                alert("Authentication error.");
-            }
-        }
-
-        verifyGlobalSystemLock();
-        function checkPreLaunchLock() {
-    const banner = document.getElementById('prelaunchBanner');
-    if (banner) banner.classList.add('hidden');
-}
     </script>
 </body>
 </html>
