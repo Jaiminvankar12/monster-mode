@@ -118,7 +118,7 @@
                 const data = await res.json();
                 const heroDiv = document.getElementById('heroBgContainer');
                 if (heroDiv) {
-                    let bgUrl = (data.success && data.url) ? data.url : 'https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg';
+                    let bgUrl = (data.success && data.url) ? data.url : '';
                     // Clean and ultra-transparent gradient so the motivation image shines in absolute clarity
                     heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), 
                                                    linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
