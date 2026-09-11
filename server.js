@@ -421,7 +421,20 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
     
-    let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
+    let currentLockData = getSystemLockStatus();
+    let newLockStatus = locked !== undefined ? locked : true;
+
+    // 🛑 SPAM FIX: Jo status already same hoy to telegram msg nai moklavano
+    if (currentLockData.locked === newLockStatus) {
+        return res.json({ 
+            success: true, 
+            message: `System is already ${newLockStatus ? 'LOCKED' : 'UNLOCKED'}.`, 
+            ...currentLockData 
+        });
+    }
+    
+    // Status change thay to j save karo ane 1 j vaar message moklo
+    let lockData = { locked: newLockStatus, lockedAt: newLockStatus ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     
     const actionText = lockData.locked ? "System is now in Hardcore Lock." : "System Unlocked.";
@@ -644,9 +657,24 @@ app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     let data = readJSON(SANCTUARY_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
     let today = getServerToday();
-    data[userId] = { enabled: enabled !== undefined ? enabled : false, activatedAt: enabled ? today : null, reason: reason || "Emergency Recovery" };
-    writeJSON(SANCTUARY_FILE, data);
-    await sendTelegramNotification(`⚠️ *SANCTUARY PROTOCOL*\nUser toggled sanctuary to: *${enabled ? 'ON' : 'OFF'}*`);
+    
+    let currentStatus = data[userId] ? data[userId].enabled : false;
+    let newStatus = enabled !== undefined ? enabled : false;
+
+    // 🛑 SPAM FIX: Status change thay to j message moklo
+    if (currentStatus !== newStatus) {
+        data[userId] = { enabled: newStatus, activatedAt: newStatus ? today : null, reason: reason || "Emergency Recovery" };
+        writeJSON(SANCTUARY_FILE, data);
+        await sendTelegramNotification(`⚠️ *SANCTUARY PROTOCOL*\nUser toggled sanctuary to: *${newStatus ? 'ON' : 'OFF'}*`);
+    } else {
+        if(data[userId]) {
+            data[userId].reason = reason || data[userId].reason;
+        } else {
+            data[userId] = { enabled: newStatus, activatedAt: null, reason: reason || "Emergency Recovery" };
+        }
+        writeJSON(SANCTUARY_FILE, data);
+    }
+    
     res.json({ success: true, message: "Sanctuary updated.", ...data[userId] });
 });
 
