@@ -33,7 +33,7 @@ const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
 const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
 const MATES_FILE = path.join(__dirname, 'mates.json');
-const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json');
+const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json'); // 🔥 NEW: Dynamic Text DB
 
 // 🔥 NEW LAUNCH DATE SET TO 12-09-2026 🔥
 const MONSTER_LAUNCH_DATE = "2026-09-12";
@@ -86,12 +86,13 @@ function readJSON(file) {
         } else if (file === USERS_AUTH_FILE) {
             const salt = bcrypt.genSaltSync(10);
             initial = [
-                { id: 'u_admin', email: 'admin@monstermode.com', passwordHash: bcrypt.hashSync('admin123', salt), role: 'ADMIN' },
+                // 🔥 ADMIN PASSWORD CHANGED HERE 🔥
+                { id: 'u_admin', email: 'admin@monstermode.com', passwordHash: bcrypt.hashSync('MonsterAdmin@2026', salt), role: 'ADMIN' },
                 { id: 'u_tracker', email: 'jaiminvankar520@gmail.com', passwordHash: bcrypt.hashSync('Jay#monster', salt), role: 'TRACKER_USER' }
             ];
         } else if (file === MATES_FILE) {
             initial = [];
-        } else if (file === GATEWAY_TEXT_FILE) {
+        } else if (file === GATEWAY_TEXT_FILE) { 
             initial = { headline: "BECOME A<br>MONSTER.<br>DOMINATE REALITY.", subtext: "Pure discipline. Zero excuses. Absolute control." };
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === DASHBOARD_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
@@ -302,7 +303,7 @@ app.use(session({
 }));
 
 // ======================================================================
-// 🛡️ SECURITY HTML INTERCEPTOR (HARDCORE OPTION 1 FOR SINGLE USER)
+// 🛡️ SECURITY HTML INTERCEPTOR 
 // ======================================================================
 app.use((req, res, next) => {
     const trackerPages = ['/dashboard', '/dashboard.html', '/tracker', '/tracker.html', '/workout', '/workout.html', '/study', '/study.html', '/hygiene', '/hygiene.html', '/hydration', '/hydration.html'];
@@ -314,25 +315,28 @@ app.use((req, res, next) => {
         }
 
         let lockStatus = getSystemLockStatus();
+        const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
         
-        // 🔴 STRICT BLOCK: In Single-User Mode, if system is locked, YOU are blocked too!
-        if (lockStatus.locked) {
+        if (lockStatus.locked && !isAdmin) {
             return res.send(`
                 <!DOCTYPE html>
                 <html lang="en" class="dark">
                 <head>
                     <meta charset="UTF-8">
-                    <title>HARDCORE LOCK ACTIVE</title>
+                    <title>SYSTEM LOCKED</title>
                     <script src="https://cdn.tailwindcss.com"></script>
                 </head>
                 <body class="bg-[#07090f] text-white min-h-screen flex items-center justify-center p-4">
-                    <div class="bg-[#121520] p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.4)]">
-                        <span class="text-5xl animate-pulse">🛑</span>
-                        <h2 class="text-3xl font-black uppercase text-red-500 tracking-wider">HARDCORE LOCK</h2>
-                        <p class="text-sm text-slate-300">The entire tracking system is currently in HARD LOCK. No execution vectors can be accessed.</p>
-                        <button onclick="window.location.href='control-panel.html'" class="w-full mt-6 py-4 bg-red-600 hover:bg-red-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30 transition">
-                            Open Control Panel
-                        </button>
+                    <div class="bg-[#121520] p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full text-center space-y-4 shadow-2xl">
+                        <span class="text-5xl">🛡️</span>
+                        <h2 class="text-xl font-black uppercase text-red-500 tracking-wider">System Locked by Admin</h2>
+                        <p class="text-xs text-slate-300">The entire tracker portal is globally locked. Non-admin access is restricted.</p>
+                        <div class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 py-2 px-3 rounded-xl font-bold uppercase">
+                            Entire Portal is Locked by Admin
+                        </div>
+                        <a href="/index.html" class="block mt-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition">
+                            Return to Gateway
+                        </a>
                     </div>
                 </body>
                 </html>
@@ -355,8 +359,9 @@ function requireAuth(req, res, next) {
 // Tracker API Guard
 function trackerApiGuard(req, res, next) {
     let lockStatus = getSystemLockStatus();
-    if (lockStatus.locked) {
-        return res.status(403).json({ error: "🛡️ HARDCORE LOCK: System is totally locked." });
+    const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
+    if (lockStatus.locked && !isAdmin) {
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Action restricted." });
     }
     next();
 }
@@ -409,15 +414,16 @@ app.post('/api/system-lock', requireAuth, (req, res) => {
     const { locked, adminPassword, password } = req.body;
     const pwdToVerify = adminPassword || password;
     
-    if (pwdToVerify !== "Jay#monster@student") {
+    // 🔥 3FA MASTER KEY CHANGED HERE 🔥
+    if (pwdToVerify !== "Jay_monster_mode_on") {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
     
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     
-    const actionText = lockData.locked ? "System is now in Hardcore Lock." : "System Unlocked.";
-    sendTelegramNotification(`🛡️ *SYSTEM CONTROL*\nStatus changed to: *${lockData.locked ? 'HARDCORE LOCKED 🛑' : 'UNLOCKED 🟢'}*`);
+    const actionText = lockData.locked ? "Portal Successfully Locked by Admin" : "Portal Successfully Unlocked by Admin";
+    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
     
     res.json({ success: true, message: actionText, ...lockData });
 });
@@ -561,7 +567,8 @@ app.post('/api/control-panel/verify-3fa', async (req, res) => {
         return res.status(400).json({ error: "Invalid security flow. OTP verification required first." });
     }
 
-    if (masterKey !== "Jay#monster@student") {
+    // 🔥 3FA MASTER KEY CHANGED HERE 🔥
+    if (masterKey !== "Jay_monster_mode_on") {
         return res.status(401).json({ error: "❌ Invalid Master Key! 3FA Access Denied." });
     }
 
