@@ -561,14 +561,16 @@ app.delete('/api/mates/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Mate deleted successfully." });
 });
 
-// Static HTML Page Serving Routes
+// Explicit Permanent Static HTML Page Serving Routes
 app.get('/hydration', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hydration.html')); });
 app.get('/hygiene', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
 app.get('/study', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'study.html')); });
 app.get('/workout', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'workout.html')); });
 app.get('/tracker', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'tracker.html')); });
 app.get('/dashboard', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
+app.get('/dashboard.html', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
 app.get('/control-panel', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
+app.get('/control-panel.html', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
 
 // ================= AUTHENTICATION & LOGIN ROUTES =================
 app.post('/api/auth/login', async (req, res) => {
