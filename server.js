@@ -11,6 +11,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Render / Production Reverse Proxy Fix
+app.set('trust proxy', 1);
+
 // Database File Paths
 const HABITS_FILE = path.join(__dirname, 'habits.json');
 const HABIT_LOGS_FILE = path.join(__dirname, 'habit_logs.json');
@@ -31,7 +34,8 @@ const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
 const MATES_FILE = path.join(__dirname, 'mates.json');
 
-const MONSTER_LAUNCH_DATE = "2026-09-11";
+// 🔥 NEW LAUNCH DATE SET TO TOMORROW 🔥
+const MONSTER_LAUNCH_DATE = "2026-09-12";
 const MASTER_USER_ID = "admin_master_user";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -51,15 +55,32 @@ async function sendTelegramNotification(message) {
     }
 }
 
-// Robust JSON Persistence Reader
+// Robust JSON Persistence Reader with Starter Items
 function readJSON(file) {
     if (!fs.existsSync(file)) {
         let initial = [];
-        if (file === HYGIENE_TASKS_FILE) {
+        if (file === HABITS_FILE) {
             initial = [
-                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
-                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
+                { id: 'hab_1', userId: MASTER_USER_ID, name: '🌅 5 AM Wakeup & Deep Work', category: 'Discipline', description: 'Early morning momentum', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'hab_2', userId: MASTER_USER_ID, name: '📵 Zero Social Media Scroll', category: 'Focus', description: 'Dopamine detox', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'hab_3', userId: MASTER_USER_ID, name: '📖 Read 10 Pages Daily', category: 'Mindset', description: 'Core knowledge expansion', startDate: MONSTER_LAUNCH_DATE }
+            ];
+        } else if (file === WORKOUTS_FILE) {
+            initial = [
+                { id: 'w_1', userId: MASTER_USER_ID, name: 'Pushups', sets: 4, value: 25, unit: 'reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'w_2', userId: MASTER_USER_ID, name: 'Pullups', sets: 3, value: 10, unit: 'reps', category: 'Strength', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'w_3', userId: MASTER_USER_ID, name: 'Core Planks', sets: 3, value: 60, unit: 'secs', category: 'Endurance', startDate: MONSTER_LAUNCH_DATE }
+            ];
+        } else if (file === STUDY_CATEGORIES_FILE) {
+            initial = [
+                { id: 's_1', userId: MASTER_USER_ID, name: 'Web Dev & Fullstack Architecture', dailyTargetMinutes: 120, startDate: MONSTER_LAUNCH_DATE, endDate: '' },
+                { id: 's_2', userId: MASTER_USER_ID, name: 'Data Structures & Algorithms', dailyTargetMinutes: 90, startDate: MONSTER_LAUNCH_DATE, endDate: '' }
+            ];
+        } else if (file === HYGIENE_TASKS_FILE) {
+            initial = [
+                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care Routine', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Cleansing & Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 Cold Shower & Body Grooming', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
             ];
         } else if (file === USERS_AUTH_FILE) {
             const salt = bcrypt.genSaltSync(10);
@@ -326,17 +347,17 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'monster_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true, sameSite: 'strict', maxAge: 1000 * 60 * 60 * 24 }
+    cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 24 }
 }));
 
-// STRICT GLOBAL SYSTEM LOCK GUARD MIDDLEWARE (Direct JSON File Check)
+// STRICT GLOBAL SYSTEM LOCK GUARD MIDDLEWARE
 function requireAuth(req, res, next) {
     let lockStatus = getSystemLockStatus();
     const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
     
-    // 🛑 Direct block if locked and not admin
+    // 🛑 Block tracker routes if system is locked and not admin
     if (lockStatus.locked && !isAdmin) {
-        if (req.accepts('html')) {
+        if (req.accepts('html') && !req.path.startsWith('/api/')) {
             return res.send(`
                 <!DOCTYPE html>
                 <html lang="en" class="dark">
@@ -363,10 +384,14 @@ function requireAuth(req, res, next) {
         }
         return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: Entire portal is locked by admin." });
     }
+
     if (!req.session.userId) {
-        req.session.userId = MASTER_USER_ID;
-        req.session.role = 'TRACKER_USER';
+        if (req.accepts('html') && !req.path.startsWith('/api/')) {
+            return res.redirect('/index.html'); // Kick unauthenticated users back to login
+        }
+        return res.status(401).json({ error: "🔒 Unauthorized access. Please log in first." });
     }
+    
     return next();
 }
 
@@ -382,10 +407,7 @@ console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.
 
 // ================= TELEGRAM CRON SCHEDULER =================
 cron.schedule('0 7 * * *', async () => {
-    const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n` +
-                `"Discipline equals absolute freedom."\n\n` +
-                `✅ Check your Daily Hydration & Hygiene targets.\n` +
-                `🔥 Stay locked in and crush your goals today!`;
+    const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n"Discipline equals absolute freedom."\n\n✅ Check your Daily Hydration & Hygiene targets.\n🔥 Stay locked in and crush your goals today!`;
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
 
@@ -419,13 +441,30 @@ cron.schedule('* * * * *', async () => {
     } catch (err) {}
 }, { timezone: 'Asia/Kolkata' });
 
-// ================= SYSTEM & CONTROL PANEL ROUTES =================
+// ================= 🔐 SYSTEM LOCK/UNLOCK =================
 app.get('/api/system-lock', (req, res) => {
     let lockData = getSystemLockStatus();
     res.json({ success: true, ...lockData });
 });
 
-app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) => {
+app.post('/api/system-lock', (req, res) => {
+    const { locked, adminPassword, password } = req.body;
+    const pwdToVerify = adminPassword || password;
+    
+    if (pwdToVerify !== "Jay#monster@student") {
+        return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
+    }
+    
+    let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
+    writeJSON(SYSTEM_LOCK_FILE, lockData);
+    
+    const actionText = lockData.locked ? "Portal Successfully Locked by Admin" : "Portal Successfully Unlocked by Admin";
+    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
+    
+    res.json({ success: true, message: actionText, ...lockData });
+});
+
+app.post('/api/verify-action-password', (req, res) => {
     const { actionType, password } = req.body;
     let validPassword = "";
     if (actionType === 'add') validPassword = "Jay#add@monster";
@@ -438,46 +477,36 @@ app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) =>
     res.json({ success: true, message: "Action authorized successfully." });
 });
 
-app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
-    const { locked, adminPassword, password } = req.body;
-    const pwdToVerify = adminPassword || password;
-    
-    if (pwdToVerify !== "Jay#monster@student") {
-        return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
-    }
-    let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
-    writeJSON(SYSTEM_LOCK_FILE, lockData);
-    
-    const actionText = lockData.locked ? "Portal Successfully Locked by Admin" : "Portal Successfully Unlocked by Admin";
-    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
-    
-    res.json({ success: true, message: actionText, ...lockData });
-});
-
 app.get('/api/landing-bg', (req, res) => { res.json({ success: true, ...getLandingBg() }); });
-app.post('/api/control-panel/landing-bg', requireAuth, requireAdmin, (req, res) => {
-    const { url } = req.body;
+app.post('/api/control-panel/landing-bg', (req, res) => {
+    const { url, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized." });
+    }
     if (!url) return res.status(400).json({ error: "Image URL is required." });
     writeJSON(LANDING_BG_FILE, { url });
     res.json({ success: true, message: "Landing background updated successfully." });
 });
 
 app.get('/api/dashboard-bg', (req, res) => { res.json({ success: true, ...getDashboardBg() }); });
-app.post('/api/control-panel/dashboard-bg', requireAuth, requireAdmin, (req, res) => {
-    const { color } = req.body;
+app.post('/api/control-panel/dashboard-bg', (req, res) => {
+    const { color, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized." });
+    }
     if (!color) return res.status(400).json({ error: "Background color is required." });
     writeJSON(DASHBOARD_BG_FILE, { color });
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
 // ================= MATES MANAGEMENT API =================
-app.get('/api/mates', requireAuth, (req, res) => {
+app.get('/api/mates', (req, res) => {
     const mates = readJSON(MATES_FILE);
     const sanitizedMates = mates.map(m => ({ id: m.id, name: m.name, role: m.role }));
     res.json({ success: true, mates: sanitizedMates });
 });
 
-app.post('/api/mates/add', requireAuth, (req, res) => {
+app.post('/api/mates/add', (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#add@monster") {
         return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Add Password." });
@@ -490,7 +519,7 @@ app.post('/api/mates/add', requireAuth, (req, res) => {
     res.json({ success: true, message: "Mate added successfully.", mate: { id: newMate.id, name: newMate.name, role: newMate.role } });
 });
 
-app.put('/api/mates/:id', requireAuth, (req, res) => {
+app.put('/api/mates/:id', (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#edit@monster") {
         return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Edit Password." });
@@ -504,7 +533,7 @@ app.put('/api/mates/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Mate updated successfully." });
 });
 
-app.delete('/api/mates/:id', requireAuth, (req, res) => {
+app.delete('/api/mates/:id', (req, res) => {
     const { password } = req.body;
     if (password !== "Jay#del@monster") {
         return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Delete Password." });
@@ -525,15 +554,14 @@ app.get('/workout', requireAuth, (req, res) => { res.sendFile(path.join(__dirnam
 app.get('/tracker', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'tracker.html')); });
 app.get('/dashboard', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
 app.get('/dashboard.html', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
-app.get('/control-panel', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
-app.get('/control-panel.html', requireAuth, (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
+app.get('/control-panel', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
+app.get('/control-panel.html', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
 
 // ================= AUTHENTICATION & LOGIN ROUTES =================
 app.post('/api/auth/login', async (req, res) => {
-    // 🛑 BULLSEYE: Direct JSON File Check for System Lock
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked) {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted." });
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.", locked: true });
     }
 
     const { email, password } = req.body;
@@ -548,7 +576,6 @@ app.post('/api/auth/login', async (req, res) => {
     req.session.role = user.role;
     req.session.email = user.email;
 
-    // Instant Telegram Login Notification
     await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 Successfully Logged In: \`${user.email}\` (${user.role}) at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
 
     res.json({ success: true, role: user.role, email: user.email, message: "Successfully logged in." });
@@ -584,12 +611,12 @@ app.post('/api/control-panel/logout', (req, res) => { req.session.controlPanelAu
 app.get('/api/control-panel/session', (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
 
 // ================= EXAM & SANCTUARY MODES =================
-app.get('/api/exam-mode', requireAuth, (req, res) => {
+app.get('/api/exam-mode', (req, res) => {
     let data = getExamModeData(req.session.userId || MASTER_USER_ID);
     res.json({ success: true, ...data });
 });
 
-app.post('/api/exam-mode', requireAuth, async (req, res) => {
+app.post('/api/exam-mode', async (req, res) => {
     const { enabled, targetMinutes } = req.body;
     let data = readJSON(EXAM_MODE_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
@@ -599,12 +626,12 @@ app.post('/api/exam-mode', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Exam Mode updated." });
 });
 
-app.get('/api/sanctuary', requireAuth, (req, res) => {
+app.get('/api/sanctuary', (req, res) => {
     let data = getSanctuaryData(req.session.userId || MASTER_USER_ID);
     res.json({ success: true, ...data });
 });
 
-app.post('/api/sanctuary', requireAuth, async (req, res) => {
+app.post('/api/sanctuary', async (req, res) => {
     const { enabled, reason } = req.body;
     let data = readJSON(SANCTUARY_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
@@ -616,7 +643,7 @@ app.post('/api/sanctuary', requireAuth, async (req, res) => {
 });
 
 // ================= HYDRATION API =================
-app.get('/api/hydration', requireAuth, (req, res) => {
+app.get('/api/hydration', (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
     let userId = req.session.userId || MASTER_USER_ID;
@@ -627,10 +654,13 @@ app.get('/api/hydration', requireAuth, (req, res) => {
     res.json({ success: true, goal: hydData.goal, glassSize: hydData.glassSize, consumed, percent, hydrationStreak, history: hydData.logs, serverDate: targetDate });
 });
 
-app.post('/api/hydration/drink', requireAuth, async (req, res) => {
+app.post('/api/hydration/drink', async (req, res) => {
     const today = getServerToday();
     const targetDate = req.body.date || today;
+    
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
+    
     let userId = req.session.userId || MASTER_USER_ID;
     let hydData = getHydrationData(userId);
     let current = hydData.logs[targetDate] || 0;
@@ -645,7 +675,7 @@ app.post('/api/hydration/drink', requireAuth, async (req, res) => {
     res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...getUserXP(userId) });
 });
 
-app.post('/api/hydration/settings', requireAuth, (req, res) => {
+app.post('/api/hydration/settings', (req, res) => {
     const { goal, glassSize } = req.body;
     let userId = req.session.userId || MASTER_USER_ID;
     let hydData = getHydrationData(userId);
@@ -658,15 +688,18 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
 });
 
 // ================= NOTES & REMINDERS API =================
-app.get('/api/notes-reminders', requireAuth, (req, res) => {
+app.get('/api/notes-reminders', (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
     let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
     res.json({ success: true, items, ...getUserXP(userId) });
 });
 
-app.post('/api/notes-reminders', requireAuth, (req, res) => {
-    const { title, description, isReminder, date, time } = req.body;
+app.post('/api/notes-reminders', (req, res) => {
+    const { title, description, isReminder, date, time, password } = req.body;
+    if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for adding note." });
+    }
     if (!title) return res.status(400).json({ error: "Title is required." });
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
@@ -677,7 +710,11 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
     res.json({ success: true, item: newItem });
 });
 
-app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
+app.delete('/api/notes-reminders/:id', (req, res) => {
+    const { password } = req.body;
+    if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized delete password." });
+    }
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
     let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
@@ -688,8 +725,8 @@ app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Item deleted." });
 });
 
-// ================= HABIT TRACKER API =================
-app.get('/api/habits', requireAuth, (req, res) => {
+// ================= 📋 HABIT TRACKER API =================
+app.get('/api/habits', (req, res) => {
     const habits = readJSON(HABITS_FILE);
     const logs = readJSON(HABIT_LOGS_FILE);
     const today = getServerToday();
@@ -703,21 +740,27 @@ app.get('/api/habits', requireAuth, (req, res) => {
     res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus, ...getUserXP(req.session.userId || MASTER_USER_ID) });
 });
 
-app.post('/api/habits', requireAuth, (req, res) => {
-    const { name, category, description, endDate, startDate } = req.body;
+app.post('/api/habits', (req, res) => {
+    const { name, category, description, endDate, startDate, password } = req.body;
+    if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for adding habit." });
+    }
     if (!name) return res.status(400).json({ error: "Habit name required." });
     const habits = readJSON(HABITS_FILE);
-    const newHabit = { id: Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, category: category || "General", description: description || "", startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() };
+    const newHabit = { id: 'hab_' + Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, category: category || "General", description: description || "", startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() };
     habits.push(newHabit);
     writeJSON(HABITS_FILE, habits);
     res.json({ success: true, habit: newHabit });
 });
 
-app.put('/api/habits/:id', requireAuth, (req, res) => {
+app.put('/api/habits/:id', (req, res) => {
+    const { name, category, description, startDate, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for editing habit." });
+    }
     let habits = readJSON(HABITS_FILE);
     const index = habits.findIndex(h => h.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Habit not found." });
-    const { name, category, description, startDate } = req.body;
     habits[index].name = name || habits[index].name;
     habits[index].category = category !== undefined ? category : habits[index].category;
     habits[index].description = description !== undefined ? description : habits[index].description;
@@ -726,7 +769,11 @@ app.put('/api/habits/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Habit updated." });
 });
 
-app.delete('/api/habits/:id', requireAuth, (req, res) => {
+app.delete('/api/habits/:id', (req, res) => {
+    const { password } = req.body;
+    if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for deleting habit." });
+    }
     let habits = readJSON(HABITS_FILE);
     const index = habits.findIndex(h => h.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Habit not found." });
@@ -735,12 +782,15 @@ app.delete('/api/habits/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Habit deleted." });
 });
 
-app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
+app.post('/api/habits/:id/toggle', async (req, res) => {
     const habitId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
+    
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
+    
     let logs = readJSON(HABIT_LOGS_FILE);
     let index = logs.findIndex(l => l.habitId === habitId && l.date === targetDate);
     if (index > -1) logs[index].completed = completed;
@@ -752,8 +802,8 @@ app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, completed, ...updatedXP });
 });
 
-// ================= WORKOUT TRACKER API =================
-app.get('/api/workouts', requireAuth, (req, res) => {
+// ================= 🏋️ WORKOUT TRACKER API =================
+app.get('/api/workouts', (req, res) => {
     const workouts = readJSON(WORKOUTS_FILE);
     const logs = readJSON(WORKOUT_LOGS_FILE);
     const today = getServerToday();
@@ -767,21 +817,27 @@ app.get('/api/workouts', requireAuth, (req, res) => {
     res.json({ success: true, workouts: workoutsWithStatus, allDone: syncResult.allWorkoutsDone, currentStreak, serverDate: targetDate, ...getUserXP(req.session.userId || MASTER_USER_ID) });
 });
 
-app.post('/api/workouts', requireAuth, (req, res) => {
-    const { name, sets, value, reps, unit, category, startDate } = req.body;
+app.post('/api/workouts', (req, res) => {
+    const { name, sets, value, reps, unit, category, startDate, password } = req.body;
+    if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for adding workout." });
+    }
     if (!name) return res.status(400).json({ error: "Exercise name required." });
     const workouts = readJSON(WORKOUTS_FILE);
-    const newWorkout = { id: Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, sets: sets || 3, value: value || reps || 10, unit: unit || 'reps', category: category || "Strength", startDate: startDate || MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() };
+    const newWorkout = { id: 'w_' + Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, sets: sets || 3, value: value || reps || 10, unit: unit || 'reps', category: category || "Strength", startDate: startDate || MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() };
     workouts.push(newWorkout);
     writeJSON(WORKOUTS_FILE, workouts);
     res.json({ success: true, workout: newWorkout });
 });
 
-app.put('/api/workouts/:id', requireAuth, (req, res) => {
+app.put('/api/workouts/:id', (req, res) => {
+    const { name, sets, value, unit, category, startDate, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for editing workout." });
+    }
     let workouts = readJSON(WORKOUTS_FILE);
     const index = workouts.findIndex(w => w.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Workout not found." });
-    const { name, sets, value, unit, category, startDate } = req.body;
     workouts[index].name = name || workouts[index].name;
     workouts[index].sets = sets !== undefined ? sets : workouts[index].sets;
     workouts[index].value = value !== undefined ? value : workouts[index].value;
@@ -792,7 +848,11 @@ app.put('/api/workouts/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Workout updated." });
 });
 
-app.delete('/api/workouts/:id', requireAuth, (req, res) => {
+app.delete('/api/workouts/:id', (req, res) => {
+    const { password } = req.body;
+    if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for deleting workout." });
+    }
     let workouts = readJSON(WORKOUTS_FILE);
     const index = workouts.findIndex(w => w.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Workout not found." });
@@ -801,12 +861,15 @@ app.delete('/api/workouts/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Workout deleted." });
 });
 
-app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
+app.post('/api/workouts/:id/toggle', async (req, res) => {
     const workoutId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
+    
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
+    
     let logs = readJSON(WORKOUT_LOGS_FILE);
     let index = logs.findIndex(l => l.workoutId === workoutId && l.date === targetDate);
     if (index > -1) logs[index].completed = completed;
@@ -819,27 +882,33 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, allWorkoutsDone: syncResult.allWorkoutsDone, ...updatedXP });
 });
 
-// ================= STUDY TRACKER API =================
-app.get('/api/study/categories', requireAuth, (req, res) => {
+// ================= 📚 STUDY TRACKER API =================
+app.get('/api/study/categories', (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
 });
 
-app.post('/api/study/categories', requireAuth, (req, res) => {
-    const { name, dailyTargetMinutes, startDate, endDate } = req.body;
+app.post('/api/study/categories', (req, res) => {
+    const { name, dailyTargetMinutes, startDate, endDate, password } = req.body;
+    if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for adding study category." });
+    }
     if (!name) return res.status(400).json({ error: "Category name required." });
     const categories = readJSON(STUDY_CATEGORIES_FILE);
-    const newCat = { id: Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name: name.trim(), dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120, startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() };
+    const newCat = { id: 's_' + Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name: name.trim(), dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120, startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() };
     categories.push(newCat);
     writeJSON(STUDY_CATEGORIES_FILE, categories);
     res.json({ success: true, category: newCat });
 });
 
-app.put('/api/study/categories/:id', requireAuth, (req, res) => {
+app.put('/api/study/categories/:id', (req, res) => {
+    const { name, dailyTargetMinutes, startDate, endDate, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for editing study category." });
+    }
     let categories = readJSON(STUDY_CATEGORIES_FILE);
     const index = categories.findIndex(c => c.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Category not found." });
-    const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     categories[index].name = name ? name.trim() : categories[index].name;
     categories[index].dailyTargetMinutes = dailyTargetMinutes !== undefined ? parseInt(dailyTargetMinutes) : categories[index].dailyTargetMinutes;
     categories[index].startDate = startDate || categories[index].startDate;
@@ -848,7 +917,11 @@ app.put('/api/study/categories/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Category updated." });
 });
 
-app.delete('/api/study/categories/:id', requireAuth, (req, res) => {
+app.delete('/api/study/categories/:id', (req, res) => {
+    const { password } = req.body;
+    if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for deleting study category." });
+    }
     let categories = readJSON(STUDY_CATEGORIES_FILE);
     const index = categories.findIndex(c => c.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Category not found." });
@@ -857,7 +930,7 @@ app.delete('/api/study/categories/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Category deleted." });
 });
 
-app.get('/api/study/sessions', requireAuth, (req, res) => {
+app.get('/api/study/sessions', (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
     const categories = readJSON(STUDY_CATEGORIES_FILE);
@@ -866,12 +939,15 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, serverDate: targetDate, ...getUserXP(req.session.userId || MASTER_USER_ID) });
 });
 
-app.post('/api/study/sessions', requireAuth, async (req, res) => {
+app.post('/api/study/sessions', async (req, res) => {
     const { categoryId, topic, durationMinutes, date } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     const today = getServerToday();
     const targetDate = date || today;
+    
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
+    
     const sessions = readJSON(STUDY_SESSIONS_FILE);
     const newSession = { id: Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, categoryId, topic: topic || "Deep Work", durationMinutes: parseInt(durationMinutes), date: targetDate, createdAt: new Date().toISOString() };
     sessions.push(newSession);
@@ -881,7 +957,7 @@ app.post('/api/study/sessions', requireAuth, async (req, res) => {
     res.json({ success: true, session: newSession, ...updatedXP });
 });
 
-app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
+app.delete('/api/study/sessions/:id', async (req, res) => {
     let sessions = readJSON(STUDY_SESSIONS_FILE);
     const index = sessions.findIndex(s => s.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Session not found." });
@@ -890,8 +966,8 @@ app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Session deleted." });
 });
 
-// ================= HYGIENE TRACKER API =================
-app.get('/api/hygiene', requireAuth, (req, res) => {
+// ================= 🧼 HYGIENE TRACKER API =================
+app.get('/api/hygiene', (req, res) => {
     const tasks = readJSON(HYGIENE_TASKS_FILE);
     const logs = readJSON(HYGIENE_LOGS_FILE);
     const today = getServerToday();
@@ -907,21 +983,27 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
     res.json({ success: true, tasks: tasksWithStatus, applicableTasks, allDone, serverDate: targetDate, ...getUserXP(req.session.userId || MASTER_USER_ID) });
 });
 
-app.post('/api/hygiene', requireAuth, (req, res) => {
-    const { name, frequency, startDate } = req.body;
+app.post('/api/hygiene', (req, res) => {
+    const { name, frequency, startDate, password } = req.body;
+    if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for adding hygiene task." });
+    }
     if (!name) return res.status(400).json({ error: "Task name required." });
     const tasks = readJSON(HYGIENE_TASKS_FILE);
-    const newTask = { id: Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, frequency: frequency || 'daily', startDate: startDate || MONSTER_LAUNCH_DATE };
+    const newTask = { id: 'h_' + Date.now().toString(), userId: req.session.userId || MASTER_USER_ID, name, frequency: frequency || 'daily', startDate: startDate || MONSTER_LAUNCH_DATE };
     tasks.push(newTask);
     writeJSON(HYGIENE_TASKS_FILE, tasks);
     res.json({ success: true, task: newTask });
 });
 
-app.put('/api/hygiene/:id', requireAuth, (req, res) => {
+app.put('/api/hygiene/:id', (req, res) => {
+    const { name, frequency, startDate, password } = req.body;
+    if (password && password !== "Jay#edit@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for editing hygiene task." });
+    }
     let tasks = readJSON(HYGIENE_TASKS_FILE);
     const index = tasks.findIndex(t => t.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Task not found." });
-    const { name, frequency, startDate } = req.body;
     tasks[index].name = name || tasks[index].name;
     tasks[index].frequency = frequency !== undefined ? frequency : tasks[index].frequency;
     tasks[index].startDate = startDate || tasks[index].startDate;
@@ -929,7 +1011,11 @@ app.put('/api/hygiene/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Task updated." });
 });
 
-app.delete('/api/hygiene/:id', requireAuth, (req, res) => {
+app.delete('/api/hygiene/:id', (req, res) => {
+    const { password } = req.body;
+    if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "Unauthorized password for deleting hygiene task." });
+    }
     let tasks = readJSON(HYGIENE_TASKS_FILE);
     const index = tasks.findIndex(t => t.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Task not found." });
@@ -938,12 +1024,15 @@ app.delete('/api/hygiene/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Task deleted." });
 });
 
-app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
+app.post('/api/hygiene/:id/toggle', async (req, res) => {
     const taskId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
+    
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
+    
     let logs = readJSON(HYGIENE_LOGS_FILE);
     let index = logs.findIndex(l => l.taskId === taskId && l.date === targetDate);
     if (index > -1) logs[index].completed = completed;
@@ -955,7 +1044,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, ...updatedXP });
 });
 
-app.get('/api/monster-coach', requireAuth, (req, res) => {
+app.get('/api/monster-coach', (req, res) => {
     res.json({ success: true, message: "Monster Coach active." });
 });
 
