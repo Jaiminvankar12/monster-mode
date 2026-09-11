@@ -62,7 +62,7 @@
 
     <div id="inlineStatusNotification"></div>
 
-    <!-- Custom Secure Action Password Modal (Cleaned & Secured) -->
+    <!-- Custom Secure Action Password Modal (Secured without exposing key) -->
     <div id="secureActionModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-3xl border border-red-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
             <div class="flex items-center gap-3 mb-4">
@@ -418,7 +418,7 @@
 
     <script>
         let pendingActionCallback = null;
-        let currentActionType = 'add'; // 'add', 'edit', 'delete', 'lock'
+        let currentActionType = 'add'; 
 
         function requestSecureAuthorization(actionType, callback) {
             currentActionType = actionType;
@@ -450,7 +450,7 @@
                     closeSecureActionModal();
                     if (pendingActionCallback) pendingActionCallback(password);
                 } else {
-                    showStatusMessage("❌ Invalid System Lock Password!", "error");
+                    showStatusMessage("❌ Incorrect System Lock Password!", "error");
                 }
                 return;
             }
@@ -464,13 +464,16 @@
                 });
                 const data = await res.json();
                 if (res.ok && data.success) {
+                    showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
                     closeSecureActionModal();
-                    if (pendingActionCallback) pendingActionCallback();
+                    if (pendingActionCallback) {
+                        pendingActionCallback();
+                    }
                 } else {
-                    showStatusMessage("❌ " + (data.error || "Invalid Password!"), "error");
+                    showStatusMessage("❌ " + (data.error || "Incorrect Password! Access Denied."), "error");
                 }
             } catch (err) {
-                showStatusMessage("❌ Authorization server error", "error");
+                showStatusMessage("❌ Authorization server connection error", "error");
             }
         }
 
@@ -534,13 +537,13 @@
             const host = document.getElementById('inlineStatusNotification');
             if (!host) return;
             host.innerHTML = '';
-            const icon = type === 'success' ? '✓' : '🗑';
+            const icon = type === 'success' ? '✓' : '✕';
             const toast = document.createElement('div');
             toast.className = `status-toast ${type === 'success' ? 'success' : 'error'}`;
             toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
             host.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 2500);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
 
         function togglePanelTimerFields() {
@@ -613,7 +616,7 @@
                 try {
                     const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
                     if (res.ok) {
-                        showStatusMessage("Entry deleted.", "error");
+                        showStatusMessage("Entry deleted successfully.", "success");
                         loadNotesReminders();
                     }
                 } catch (err) { showStatusMessage("Connection error", "error"); }
@@ -671,7 +674,7 @@
                         let url = editId ? `/api/habits/${editId}` : '/api/habits';
                         let method = editId ? 'PUT' : 'POST';
                         const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate }) });
-                        if (res.ok) { showStatusMessage(editId ? "Habit updated!" : "Habit added!", "success"); resetHabitForm(); loadHabits(); }
+                        if (res.ok) { showStatusMessage(editId ? "Habit updated successfully!" : "Habit added successfully!", "success"); resetHabitForm(); loadHabits(); }
                     } catch (err) {}
                 });
             });
@@ -680,7 +683,7 @@
         function confirmAndDeleteHabit(id) {
             requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
-                if (res.ok) { showStatusMessage("Habit deleted", "error"); loadHabits(); }
+                if (res.ok) { showStatusMessage("Habit deleted successfully", "success"); loadHabits(); }
             });
         }
 
@@ -735,7 +738,7 @@
                         let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
                         let method = editId ? 'PUT' : 'POST';
                         const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11" }) });
-                        if (res.ok) { showStatusMessage(editId ? "Workout updated!" : "Workout added!", "success"); resetWorkoutForm(); loadWorkouts(); }
+                        if (res.ok) { showStatusMessage(editId ? "Workout updated successfully!" : "Workout added successfully!", "success"); resetWorkoutForm(); loadWorkouts(); }
                     } catch (err) {}
                 });
             });
@@ -744,7 +747,7 @@
         function confirmAndDeleteWorkout(id) {
             requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
-                if (res.ok) { showStatusMessage("Workout deleted", "error"); loadWorkouts(); }
+                if (res.ok) { showStatusMessage("Workout deleted successfully", "success"); loadWorkouts(); }
             });
         }
 
@@ -800,7 +803,7 @@
                         let method = editId ? 'PUT' : 'POST';
                         const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate }) });
                         const data = await res.json();
-                        if (res.ok) { showStatusMessage(editId ? "Subject updated!" : "Subject added!", "success"); resetStudyForm(); loadStudy(); }
+                        if (res.ok) { showStatusMessage(editId ? "Subject updated successfully!" : "Subject added successfully!", "success"); resetStudyForm(); loadStudy(); }
                         else { alert("❌ " + data.error); }
                     } catch (err) {}
                 });
@@ -810,7 +813,7 @@
         function confirmAndDeleteStudy(id) {
             requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-                if (res.ok) { showStatusMessage("Subject deleted", "error"); loadStudy(); }
+                if (res.ok) { showStatusMessage("Subject deleted successfully", "success"); loadStudy(); }
             });
         }
 
@@ -861,7 +864,7 @@
                         let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
                         let method = editId ? 'PUT' : 'POST';
                         const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11" }) });
-                        if (res.ok) { showStatusMessage(editId ? "Task updated!" : "Hygiene task added!", "success"); resetHygieneForm(); loadHygiene(); }
+                        if (res.ok) { showStatusMessage(editId ? "Task updated successfully!" : "Hygiene task added successfully!", "success"); resetHygieneForm(); loadHygiene(); }
                     } catch (err) {}
                 });
             });
@@ -870,7 +873,7 @@
         function confirmAndDeleteHygiene(id) {
             requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
-                if (res.ok) { showStatusMessage("Task deleted", "error"); loadHygiene(); }
+                if (res.ok) { showStatusMessage("Task deleted successfully", "success"); loadHygiene(); }
             });
         }
 
@@ -894,7 +897,7 @@
                     const goal = document.getElementById('configGoal').value;
                     try {
                         const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal }) });
-                        if (res.ok) showStatusMessage("Hydration updated!", "success");
+                        if (res.ok) showStatusMessage("Hydration updated successfully!", "success");
                     } catch (err) {}
                 });
             });
@@ -920,7 +923,7 @@
                     const targetMinutes = document.getElementById('examModeTarget').value;
                     try {
                         const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes }) });
-                        if (res.ok) showStatusMessage("Exam mode updated!", "success");
+                        if (res.ok) showStatusMessage("Exam mode updated successfully!", "success");
                     } catch (err) {}
                 });
             });
@@ -946,7 +949,7 @@
                     const reason = document.getElementById('sanctuaryReason').value;
                     try {
                         const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason }) });
-                        if (res.ok) showStatusMessage("Sanctuary updated!", "success");
+                        if (res.ok) showStatusMessage("Sanctuary updated successfully!", "success");
                     } catch (err) {}
                 });
             });
@@ -1042,11 +1045,11 @@
                 });
                 const data = await res.json();
                 if (res.ok) { 
-                    showStatusMessage(data.message, "success"); 
+                    showStatusMessage("✅ " + data.message, "success"); 
                     closeSecureActionModal();
                     setTimeout(() => location.reload(), 1000);
                 } else { 
-                    showStatusMessage("❌ " + data.error, "error"); 
+                    showStatusMessage("❌ " + (data.error || "Incorrect System Password!"), "error"); 
                 }
             } catch (err) {
                 showStatusMessage("❌ Connection error", "error");
