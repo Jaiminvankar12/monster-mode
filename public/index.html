@@ -40,7 +40,6 @@
     <div class="flex w-full min-h-screen bg-[#05070b]">
         <!-- Left Side: Crystal Clear Cinematic Background (Hidden on mobile) -->
         <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 hero-bg" id="heroBgContainer">
-            <!-- Minimal subtle vignette at the bottom only, keeping the main character and abs motivation 100% clear -->
             <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-transparent opacity-60"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#05070b]/40"></div>
             <div class="z-10 max-w-xl">
@@ -118,11 +117,12 @@
     <script>
         let currentPortal = 'tracker';
         let isRegister = false;
-        const LAUNCH_DATE = "2026-09-11";
+        const LAUNCH_DATE = "2026-09-12"; // Updated launch date here as well
 
         async function loadDynamicLandingBg() {
             try {
-                const res = await fetch('/api/landing-bg');
+                // Prevent browser caching for background image check
+                const res = await fetch(`/api/landing-bg?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const data = await res.json();
                 const heroDiv = document.getElementById('heroBgContainer');
                 if (heroDiv) {
@@ -204,14 +204,22 @@
             succDiv.classList.add('hidden');
 
             try {
-                // 1. HARD BLOCK: Check Global System Lock before sending login request
-                const lockRes = await fetch('/api/system-lock');
+                // 1. HARD BLOCK & CACHE BUSTING: Check Global System Lock LIVE (Bypass Browser Cache)
+                const lockRes = await fetch(`/api/system-lock?t=${new Date().getTime()}`, { 
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
                 const lockData = await lockRes.json();
                 
                 if (lockData.locked && currentPortal !== 'admin') {
                     errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
                     errDiv.classList.remove('hidden');
-                    return; // Stop execution completely
+                    return; // Stop execution completely!
                 }
 
                 let endpoint = '';
@@ -258,7 +266,7 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.add('hidden');
+                errDiv.classList.remove('hidden');
             }
         });
 
