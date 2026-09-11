@@ -204,13 +204,14 @@
             succDiv.classList.add('hidden');
 
             try {
-                // Check Global System Lock before logging in
+                // 1. HARD BLOCK: Check Global System Lock before sending login request
                 const lockRes = await fetch('/api/system-lock');
                 const lockData = await lockRes.json();
+                
                 if (lockData.locked && currentPortal !== 'admin') {
                     errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
                     errDiv.classList.remove('hidden');
-                    return;
+                    return; // Stop execution completely
                 }
 
                 let endpoint = '';
@@ -231,6 +232,13 @@
                     errDiv.textContent = data.error || "Authentication failed.";
                     errDiv.classList.remove('hidden');
                 } else {
+                    // Double check lock status from server login response
+                    if (data.locked) {
+                        errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
+                        errDiv.classList.remove('hidden');
+                        return;
+                    }
+
                     if (isRegister && currentPortal === 'tracker') {
                         succDiv.textContent = data.message;
                         succDiv.classList.remove('hidden');
@@ -250,7 +258,7 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.remove('hidden');
+                errDiv.classList.add('hidden');
             }
         });
 
