@@ -128,8 +128,8 @@
                 if (heroDiv) {
                     let bgUrl = (data.success && data.url) ? data.url : '';
                     heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), 
-                                                    linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
-                                                    url('${bgUrl}')`;
+                                                     linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
+                                                     url('${bgUrl}')`;
                 }
             } catch (err) {
                 console.error("Failed to load background", err);
@@ -198,19 +198,28 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            let endpoint = '';
-            if (currentPortal === 'admin') {
-                endpoint = '/api/control-panel/login';
-            } else {
-                endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-            }
-
             const errDiv = document.getElementById('errorMessage');
             const succDiv = document.getElementById('successMessage');
             errDiv.classList.add('hidden');
             succDiv.classList.add('hidden');
 
             try {
+                // Check Global System Lock before logging in
+                const lockRes = await fetch('/api/system-lock');
+                const lockData = await lockRes.json();
+                if (lockData.locked && currentPortal !== 'admin') {
+                    errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
+                    errDiv.classList.remove('hidden');
+                    return;
+                }
+
+                let endpoint = '';
+                if (currentPortal === 'admin') {
+                    endpoint = '/api/control-panel/login';
+                } else {
+                    endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
+                }
+
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -250,4 +259,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
