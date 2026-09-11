@@ -471,7 +471,6 @@
             e.preventDefault();
             const password = document.getElementById('actionSecurityPasswordInput').value;
 
-            // Direct instant client-side robust verification for all actions (Lock, Add, Edit, Delete)
             let validPassword = "";
             if (currentActionType === 'lock') validPassword = "Jay#monster@student";
             else if (currentActionType === 'add') validPassword = "Jay#add@monster";
@@ -487,7 +486,7 @@
             showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
             
             if (pendingActionCallback) {
-                pendingActionCallback(password);
+                await pendingActionCallback(password);
             }
         }
 
