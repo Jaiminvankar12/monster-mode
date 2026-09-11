@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -294,7 +294,6 @@
                 container.innerHTML = `<span>📅</span> <span>Operational Baseline: ${formattedDate}</span>`;
             }
 
-            // Calculate Operational Day (Day 1, Day 2...)
             const launchDateObj = new Date(LAUNCH_DATE);
             launchDateObj.setHours(0, 0, 0, 0);
             today.setHours(0, 0, 0, 0);
@@ -434,7 +433,6 @@
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
 
                 renderCharts(habits, workouts, studyData, hydrationData);
-
                 loadMonsterCoach();
             } catch (err) {
                 console.error("Error loading dashboard data:", err);
@@ -632,26 +630,16 @@
             });
         }
 
+        // SINGLE FOOLPROOF SYSTEM LOCK CHECK WITH OVERLAY
         async function verifyGlobalSystemLock() {
             try {
                 const res = await fetch('/api/system-lock');
                 const data = await res.json();
                 if (data.locked) {
-                    window.location.href = 'index.html';
-                }
-            } catch (err) {}
-        }
-        async function verifyGlobalSystemLock() {
-            try {
-                const res = await fetch('/api/system-lock');
-                const data = await res.json();
-                if (data.locked) {
-                    // Check if current user is admin, if not, lock out completely
                     const sessionRes = await fetch('/api/auth/session');
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
-                        // Show System Locked Fullscreen Overlay
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full dynamic-glow space-y-4 shadow-2xl">
