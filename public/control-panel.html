@@ -62,6 +62,31 @@
 
     <div id="inlineStatusNotification"></div>
 
+    <!-- Custom Secure Action Password Modal -->
+    <div id="secureActionModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-3xl border border-red-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl">🔒</span>
+                <div>
+                    <h3 class="text-base font-black uppercase tracking-wider text-white">Security Authorization Required</h3>
+                    <p class="text-[11px] text-red-400 font-bold uppercase tracking-wider">Restricted Action Vector</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mb-6">Enter your Master Admin Password (`Jay#monster@student`) to authorize this operation.</p>
+            
+            <form class="space-y-4" onsubmit="handleSecureActionSubmit(event)">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Master Admin Password</label>
+                    <input type="password" id="actionSecurityPasswordInput" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="Enter password...">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Authorize & Execute</button>
+                    <button type="button" onclick="closeSecureActionModal()" class="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <span class="text-2xl animate-pulse">🐉</span>
@@ -89,11 +114,10 @@
             <p class="text-xs text-zinc-400 mb-4">Freeze or unfreeze all execution vectors across portals using Master Admin password.</p>
             
             <div class="flex flex-col sm:flex-row items-center gap-4">
-                <input type="password" id="adminLockPassword" placeholder="Enter Master Admin Password" class="w-full sm:w-64 bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:border-red-500 outline-none">
-                <button onclick="toggleSystemLock(true)" class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-red-600/30">
+                <button onclick="requestSystemLockAuth(true)" class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-red-600/30">
                     🔒 Lock System
                 </button>
-                <button onclick="toggleSystemLock(false)" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-emerald-600/30">
+                <button onclick="requestSystemLockAuth(false)" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-pointer shadow-lg shadow-emerald-600/30">
                     🔓 Unlock System
                 </button>
             </div>
@@ -110,6 +134,7 @@
             <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam</button>
             <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
             <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway BG</button>
+            <button onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Dashboard BG</button>
             <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Themes (50)</button>
         </div>
 
@@ -307,6 +332,27 @@
             </div>
         </div>
 
+        <!-- TAB 9.5: DASHBOARD BACKGROUND COLOR MANAGEMENT -->
+        <div id="sectionDashboardBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-6 flex items-center gap-2"><span>🎨</span> Update Dashboard Background Color</h3>
+                <form id="updateDashboardBgForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Background Color (Hex Code or CSS Color)</label>
+                        <input type="text" id="dashboardBgColorInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="#07090f or #111827">
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-emerald-600/30">
+                        Apply Dashboard Background Color
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4">🌟</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Instant UI Tone Sync</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Instantly shifts the dashboard portal background shade to match your desired aesthetic.</p>
+            </div>
+        </div>
+
         <!-- TAB 10: THEME MATRIX (FULL 50 ELITE COLORS) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
@@ -371,6 +417,38 @@
     </main>
 
     <script>
+        let pendingActionCallback = null;
+
+        function requestSecureAuthorization(callback) {
+            pendingActionCallback = callback;
+            const modal = document.getElementById('secureActionModal');
+            const input = document.getElementById('actionSecurityPasswordInput');
+            if (modal && input) {
+                input.value = '';
+                modal.classList.remove('hidden');
+                input.focus();
+            }
+        }
+
+        function closeSecureActionModal() {
+            const modal = document.getElementById('secureActionModal');
+            if (modal) modal.classList.add('hidden');
+            pendingActionCallback = null;
+        }
+
+        function handleSecureActionSubmit(e) {
+            e.preventDefault();
+            const password = document.getElementById('actionSecurityPasswordInput').value;
+            if (password === "Jay#monster@student") {
+                closeSecureActionModal();
+                if (pendingActionCallback) {
+                    pendingActionCallback();
+                }
+            } else {
+                showStatusMessage("❌ Invalid Master Security Password!", "error");
+            }
+        }
+
         async function verifyAdminSession() {
             try {
                 const res = await fetch('/api/control-panel/session');
@@ -401,7 +479,7 @@
         applySavedTheme();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'theme'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
@@ -417,6 +495,7 @@
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
             if (tab === 'landingBg') loadLandingBgConfig();
+            if (tab === 'dashboardBg') loadDashboardBgConfig();
         }
 
         function setPanelTheme(theme, hex) {
@@ -467,7 +546,7 @@
                                 </div>
                                 <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
                             </div>
-                            <button onclick="deleteNoteItem('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                            <button onclick="confirmAndDeleteNote('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
                         </div>
                     `).join('');
                 } else {
@@ -480,36 +559,40 @@
         if (noteForm) {
             noteForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const title = document.getElementById('noteTitle').value;
-                const description = document.getElementById('noteDesc').value;
-                const isReminder = document.getElementById('panelIsReminder').checked;
-                const date = document.getElementById('panelReminderDate').value;
-                const time = document.getElementById('panelReminderTime').value;
+                requestSecureAuthorization(async () => {
+                    const title = document.getElementById('noteTitle').value;
+                    const description = document.getElementById('noteDesc').value;
+                    const isReminder = document.getElementById('panelIsReminder').checked;
+                    const date = document.getElementById('panelReminderDate').value;
+                    const time = document.getElementById('panelReminderTime').value;
 
+                    try {
+                        const res = await fetch('/api/notes-reminders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, description, isReminder, date, time })
+                        });
+                        if (res.ok) {
+                            showStatusMessage("Note deployed successfully!", "success");
+                            noteForm.reset();
+                            togglePanelTimerFields();
+                            loadNotesReminders();
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
+            });
+        }
+
+        function confirmAndDeleteNote(id) {
+            requestSecureAuthorization(async () => {
                 try {
-                    const res = await fetch('/api/notes-reminders', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ title, description, isReminder, date, time })
-                    });
+                    const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
                     if (res.ok) {
-                        showStatusMessage("Note deployed successfully!", "success");
-                        noteForm.reset();
-                        togglePanelTimerFields();
+                        showStatusMessage("Entry deleted.", "error");
                         loadNotesReminders();
                     }
                 } catch (err) { showStatusMessage("Connection error", "error"); }
             });
-        }
-
-        async function deleteNoteItem(id) {
-            try {
-                const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    showStatusMessage("Entry deleted.", "error");
-                    loadNotesReminders();
-                }
-            } catch (err) { showStatusMessage("Connection error", "error"); }
         }
 
         // HABITS EDIT & LOAD
@@ -525,7 +608,7 @@
                             <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-11'}</span></div>
                             <div class="flex gap-2">
                                 <button onclick="editHabit('${h.id}', '${h.name}', '${h.category || ''}', '${h.description || ''}', '${h.startDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button onclick="deleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                                <button onclick="confirmAndDeleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -552,23 +635,27 @@
         if (habitForm) {
             habitForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const editId = document.getElementById('editHabitId').value;
-                const name = document.getElementById('habitName').value;
-                const category = document.getElementById('habitCategory').value || 'General';
-                const description = document.getElementById('habitDesc').value;
-                const startDate = document.getElementById('habitStartDate').value || "2026-09-11";
-                try {
-                    let url = editId ? `/api/habits/${editId}` : '/api/habits';
-                    let method = editId ? 'PUT' : 'POST';
-                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate }) });
-                    if (res.ok) { showStatusMessage(editId ? "Habit updated!" : "Habit added!", "success"); resetHabitForm(); loadHabits(); }
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const editId = document.getElementById('editHabitId').value;
+                    const name = document.getElementById('habitName').value;
+                    const category = document.getElementById('habitCategory').value || 'General';
+                    const description = document.getElementById('habitDesc').value;
+                    const startDate = document.getElementById('habitStartDate').value || "2026-09-11";
+                    try {
+                        let url = editId ? `/api/habits/${editId}` : '/api/habits';
+                        let method = editId ? 'PUT' : 'POST';
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate }) });
+                        if (res.ok) { showStatusMessage(editId ? "Habit updated!" : "Habit added!", "success"); resetHabitForm(); loadHabits(); }
+                    } catch (err) {}
+                });
             });
         }
 
-        async function deleteHabit(id) {
-            const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
-            if (res.ok) { showStatusMessage("Habit deleted", "error"); loadHabits(); }
+        function confirmAndDeleteHabit(id) {
+            requestSecureAuthorization(async () => {
+                const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+                if (res.ok) { showStatusMessage("Habit deleted", "error"); loadHabits(); }
+            });
         }
 
         // WORKOUTS EDIT & LOAD
@@ -584,7 +671,7 @@
                             <div><h4 class="font-extrabold text-sm text-white">${w.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || 10} ${w.unit || 'reps'}</span></div>
                             <div class="flex gap-2">
                                 <button onclick="editWorkout('${w.id}', '${w.name}', '${w.sets}', '${w.value || 10}', '${w.unit || 'reps'}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button onclick="deleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                                <button onclick="confirmAndDeleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -611,23 +698,27 @@
         if (workoutForm) {
             workoutForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const editId = document.getElementById('editWorkoutId').value;
-                const name = document.getElementById('workoutName').value;
-                const sets = document.getElementById('workoutSets').value;
-                const value = document.getElementById('workoutValue').value;
-                const unit = document.getElementById('workoutUnit').value;
-                try {
-                    let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
-                    let method = editId ? 'PUT' : 'POST';
-                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11" }) });
-                    if (res.ok) { showStatusMessage(editId ? "Workout updated!" : "Workout added!", "success"); resetWorkoutForm(); loadWorkouts(); }
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const editId = document.getElementById('editWorkoutId').value;
+                    const name = document.getElementById('workoutName').value;
+                    const sets = document.getElementById('workoutSets').value;
+                    const value = document.getElementById('workoutValue').value;
+                    const unit = document.getElementById('workoutUnit').value;
+                    try {
+                        let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
+                        let method = editId ? 'PUT' : 'POST';
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11" }) });
+                        if (res.ok) { showStatusMessage(editId ? "Workout updated!" : "Workout added!", "success"); resetWorkoutForm(); loadWorkouts(); }
+                    } catch (err) {}
+                });
             });
         }
 
-        async function deleteWorkout(id) {
-            const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
-            if (res.ok) { showStatusMessage("Workout deleted", "error"); loadWorkouts(); }
+        function confirmAndDeleteWorkout(id) {
+            requestSecureAuthorization(async () => {
+                const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
+                if (res.ok) { showStatusMessage("Workout deleted", "error"); loadWorkouts(); }
+            });
         }
 
         // STUDY EDIT & LOAD
@@ -643,7 +734,7 @@
                             <div><h4 class="font-extrabold text-sm text-white">${c.name}</h4><span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-11'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span></div>
                             <div class="flex gap-2">
                                 <button onclick="editStudy('${c.id}', '${c.name}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button onclick="deleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                                <button onclick="confirmAndDeleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -670,25 +761,29 @@
         if (studyForm) {
             studyForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const editId = document.getElementById('editStudyId').value;
-                const name = document.getElementById('studyName').value;
-                const dailyTargetMinutes = document.getElementById('studyTarget').value;
-                const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
-                const endDate = document.getElementById('studyEndDate').value;
-                try {
-                    let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
-                    let method = editId ? 'PUT' : 'POST';
-                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate }) });
-                    const data = await res.json();
-                    if (res.ok) { showStatusMessage(editId ? "Subject updated!" : "Subject added!", "success"); resetStudyForm(); loadStudy(); }
-                    else { alert("❌ " + data.error); }
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const editId = document.getElementById('editStudyId').value;
+                    const name = document.getElementById('studyName').value;
+                    const dailyTargetMinutes = document.getElementById('studyTarget').value;
+                    const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
+                    const endDate = document.getElementById('studyEndDate').value;
+                    try {
+                        let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
+                        let method = editId ? 'PUT' : 'POST';
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate }) });
+                        const data = await res.json();
+                        if (res.ok) { showStatusMessage(editId ? "Subject updated!" : "Subject added!", "success"); resetStudyForm(); loadStudy(); }
+                        else { alert("❌ " + data.error); }
+                    } catch (err) {}
+                });
             });
         }
 
-        async function deleteStudy(id) {
-            const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-            if (res.ok) { showStatusMessage("Subject deleted", "error"); loadStudy(); }
+        function confirmAndDeleteStudy(id) {
+            requestSecureAuthorization(async () => {
+                const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
+                if (res.ok) { showStatusMessage("Subject deleted", "error"); loadStudy(); }
+            });
         }
 
         // HYGIENE EDIT & LOAD
@@ -704,7 +799,7 @@
                             <div><h4 class="font-extrabold text-sm text-white">${t.name}</h4><span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span></div>
                             <div class="flex gap-2">
                                 <button onclick="editHygiene('${t.id}', '${t.name}', '${t.frequency}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button onclick="deleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                                <button onclick="confirmAndDeleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -729,21 +824,25 @@
         if (hygieneForm) {
             hygieneForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const editId = document.getElementById('editHygieneId').value;
-                const name = document.getElementById('hygieneName').value;
-                const frequency = document.getElementById('hygieneFreq').value;
-                try {
-                    let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
-                    let method = editId ? 'PUT' : 'POST';
-                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11" }) });
-                    if (res.ok) { showStatusMessage(editId ? "Task updated!" : "Hygiene task added!", "success"); resetHygieneForm(); loadHygiene(); }
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const editId = document.getElementById('editHygieneId').value;
+                    const name = document.getElementById('hygieneName').value;
+                    const frequency = document.getElementById('hygieneFreq').value;
+                    try {
+                        let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
+                        let method = editId ? 'PUT' : 'POST';
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11" }) });
+                        if (res.ok) { showStatusMessage(editId ? "Task updated!" : "Hygiene task added!", "success"); resetHygieneForm(); loadHygiene(); }
+                    } catch (err) {}
+                });
             });
         }
 
-        async function deleteHygiene(id) {
-            const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
-            if (res.ok) { showStatusMessage("Task deleted", "error"); loadHygiene(); }
+        function confirmAndDeleteHygiene(id) {
+            requestSecureAuthorization(async () => {
+                const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
+                if (res.ok) { showStatusMessage("Task deleted", "error"); loadHygiene(); }
+            });
         }
 
         async function loadHydrationConfig() {
@@ -761,12 +860,14 @@
         if (hydrationForm) {
             hydrationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const glassSize = document.getElementById('configGlassSize').value;
-                const goal = document.getElementById('configGoal').value;
-                try {
-                    const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal }) });
-                    if (res.ok) showStatusMessage("Hydration updated!", "success");
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const glassSize = document.getElementById('configGlassSize').value;
+                    const goal = document.getElementById('configGoal').value;
+                    try {
+                        const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal }) });
+                        if (res.ok) showStatusMessage("Hydration updated!", "success");
+                    } catch (err) {}
+                });
             });
         }
 
@@ -785,12 +886,14 @@
         if (examForm) {
             examForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const enabled = document.getElementById('examModeEnabled').checked;
-                const targetMinutes = document.getElementById('examModeTarget').value;
-                try {
-                    const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes }) });
-                    if (res.ok) showStatusMessage("Exam mode updated!", "success");
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const enabled = document.getElementById('examModeEnabled').checked;
+                    const targetMinutes = document.getElementById('examModeTarget').value;
+                    try {
+                        const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes }) });
+                        if (res.ok) showStatusMessage("Exam mode updated!", "success");
+                    } catch (err) {}
+                });
             });
         }
 
@@ -809,12 +912,14 @@
         if (sanctuaryForm) {
             sanctuaryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const enabled = document.getElementById('sanctuaryEnabled').checked;
-                const reason = document.getElementById('sanctuaryReason').value;
-                try {
-                    const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason }) });
-                    if (res.ok) showStatusMessage("Sanctuary updated!", "success");
-                } catch (err) {}
+                requestSecureAuthorization(async () => {
+                    const enabled = document.getElementById('sanctuaryEnabled').checked;
+                    const reason = document.getElementById('sanctuaryReason').value;
+                    try {
+                        const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason }) });
+                        if (res.ok) showStatusMessage("Sanctuary updated!", "success");
+                    } catch (err) {}
+                });
             });
         }
 
@@ -832,20 +937,56 @@
         if (bgForm) {
             bgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const url = document.getElementById('landingBgUrlInput').value;
-                try {
-                    const res = await fetch('/api/control-panel/landing-bg', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        showStatusMessage("Gateway background updated successfully!", "success");
-                    } else {
-                        alert("❌ " + data.error);
-                    }
-                } catch (err) { showStatusMessage("Connection error", "error"); }
+                requestSecureAuthorization(async () => {
+                    const url = document.getElementById('landingBgUrlInput').value;
+                    try {
+                        const res = await fetch('/api/control-panel/landing-bg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            showStatusMessage("Gateway background updated successfully!", "success");
+                        } else {
+                            alert("❌ " + data.error);
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
+            });
+        }
+
+        // DASHBOARD BG COLOR CONFIG
+        async function loadDashboardBgConfig() {
+            try {
+                const res = await fetch('/api/dashboard-bg');
+                const data = await res.json();
+                if (data.success && data.color) {
+                    document.getElementById('dashboardBgColorInput').value = data.color;
+                }
+            } catch (err) {}
+        }
+
+        const dashboardBgForm = document.getElementById('updateDashboardBgForm');
+        if (dashboardBgForm) {
+            dashboardBgForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                requestSecureAuthorization(async () => {
+                    const color = document.getElementById('dashboardBgColorInput').value;
+                    try {
+                        const res = await fetch('/api/control-panel/dashboard-bg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ color })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            showStatusMessage("Dashboard background color updated successfully!", "success");
+                        } else {
+                            alert("❌ " + data.error);
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
             });
         }
 
@@ -854,9 +995,16 @@
             window.location.href = 'index.html';
         }
 
-        async function toggleSystemLock(shouldLock) {
-            const adminPassword = document.getElementById('adminLockPassword').value;
-            if (!adminPassword) { alert("Enter Master Admin Password!"); return; }
+        let pendingLockState = false;
+        function requestSystemLockAuth(shouldLock) {
+            pendingLockState = shouldLock;
+            requestSecureAuthorization(() => {
+                executeSystemLock(pendingLockState);
+            });
+        }
+
+        async function executeSystemLock(shouldLock) {
+            const adminPassword = document.getElementById('actionSecurityPasswordInput').value;
             const res = await fetch('/api/system-lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ locked: shouldLock, adminPassword }) });
             const data = await res.json();
             if (res.ok) { alert("⚡ " + data.message); location.reload(); }

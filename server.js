@@ -25,6 +25,7 @@ const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
 const SANCTUARY_FILE = path.join(__dirname, 'sanctuary_mode.json');
 const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
 const LANDING_BG_FILE = path.join(__dirname, 'landing_bg.json');
+const DASHBOARD_BG_FILE = path.join(__dirname, 'dashboard_bg.json');
 const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
 const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
@@ -60,19 +61,19 @@ function readJSON(file) {
                 { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
             ];
         } else if (file === USERS_AUTH_FILE) {
-            // Default pre-seeded Admin and Tracker Credentials with bcrypt hashing
             const salt = bcrypt.genSaltSync(10);
             initial = [
                 { id: 'u_admin', email: 'admin@monstermode.com', passwordHash: bcrypt.hashSync('admin123', salt), role: 'ADMIN' },
-                { id: 'u_tracker', email: 'tracker@monstermode.com', passwordHash: bcrypt.hashSync('tracker123', salt), role: 'TRACKER_USER' }
+                { id: 'u_tracker', email: 'jaiminvankar520@gmail.com', passwordHash: bcrypt.hashSync('Jay#monster', salt), role: 'TRACKER_USER' }
             ];
-        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === DASHBOARD_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
             if (file === HYDRATION_FILE) initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
             if (file === EXAM_MODE_FILE) initial[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
             if (file === SANCTUARY_FILE) initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
             if (file === USER_XP_FILE) initial[MASTER_USER_ID] = { xp: 0, level: 1 };
             if (file === LANDING_BG_FILE) initial = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
+            if (file === DASHBOARD_BG_FILE) initial = { color: "#07090f" };
             if (file === NOTES_REMINDERS_FILE) initial = { [MASTER_USER_ID]: [] };
             if (file === SYSTEM_LOCK_FILE) initial = { locked: false, lockedAt: null };
         }
@@ -111,6 +112,15 @@ function getLandingBg() {
     if (!bgData || !bgData.url) {
         bgData = { url: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
         writeJSON(LANDING_BG_FILE, bgData);
+    }
+    return bgData;
+}
+
+function getDashboardBg() {
+    let bgData = readJSON(DASHBOARD_BG_FILE);
+    if (!bgData || !bgData.color) {
+        bgData = { color: "#07090f" };
+        writeJSON(DASHBOARD_BG_FILE, bgData);
     }
     return bgData;
 }
@@ -341,7 +351,6 @@ function requireAdmin(req, res, next) {
 console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.");
 
 // ================= TELEGRAM AUTOMATED CRON SCHEDULER =================
-// 🌅 MORNING AUDIT (7:00 AM IST)
 cron.schedule('0 7 * * *', async () => {
     const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n` +
                 `"Discipline equals absolute freedom."\n\n` +
@@ -349,10 +358,41 @@ cron.schedule('0 7 * * *', async () => {
                 `🔥 Stay locked in and crush your goals today!`;
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
-// Alias or definition for Telegram messaging
+
 async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
+
+// REAL-TIME REMINDER DISPATCH CRON (Checks every minute)
+cron.schedule('* * * * *', async () => {
+    try {
+        let notesData = readJSON(NOTES_REMINDERS_FILE);
+        let now = new Date();
+        let todayStr = now.toISOString().split('T')[0];
+        let currentHours = String(now.getHours()).padStart(2, '0');
+        let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        let currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+        let updated = false;
+        for (let userId in notesData) {
+            let items = notesData[userId];
+            if (!Array.isArray(items)) continue;
+
+            for (let item of items) {
+                if (item.isReminder && !item.notifiedToday && item.date === todayStr && item.time === currentTimeStr) {
+                    await sendTelegramMessage(`⏰ *MONSTER REMINDER ALERT*\n\n📌 *${item.title}*\n📝 ${item.description || 'No additional details.'}\n\n🔥 *Execute immediately!*`);
+                    item.notifiedToday = true;
+                    updated = true;
+                }
+            }
+        }
+        if (updated) {
+            writeJSON(NOTES_REMINDERS_FILE, notesData);
+        }
+    } catch (err) {
+        console.error("Reminder cron error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
 
 // 🌙 NIGHT PROGRESS & INCOMPLETE WARNING RECAP (10:00 PM IST)
 cron.schedule('0 22 * * *', async () => {
@@ -362,7 +402,7 @@ cron.schedule('0 22 * * *', async () => {
     for (const user of users) {
         if (user.role !== 'TRACKER_USER') continue;
         let sanctuary = getSanctuaryData(user.id);
-        if (sanctuary.enabled) continue; // Skip warnings if Sanctuary Protocol is active
+        if (sanctuary.enabled) continue;
 
         const workouts = readJSON(WORKOUTS_FILE);
         const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
@@ -378,12 +418,501 @@ cron.schedule('0 22 * * *', async () => {
         const syncResult = runServerSyncEngine(user.id, todayStr);
         const studyDone = syncResult.studyDone;
 
+        let workoutStreak = calculateWorkoutStreak(user.id);
+        let hydrationStreak = calculateHydrationStreak(user.id);
+        let studyStreak = calculateStreak(user.id, 'study');
+        let hygieneStreak = calculateStreak(user.id, 'hygiene');
+
         let warnings = [];
         if (!workoutDone) warnings.push('❌ *Workout INCOMPLETE* (All sets not marked DONE)');
         if (!hydrationDone) warnings.push(`❌ *Hydration INCOMPLETE* (${consumed}/${hydData.goal || 3000} ml)`);
         if (!studyDone) warnings.push(`❌ *Study Target INCOMPLETE* (${syncResult.totalStudiedMinutes}/${syncResult.totalTargetMinutes} mins)`);
 
-        let reportMsg = `🌙 *MONSTER MODE ON — NIGHT RECAP*\nDate: \`${todayStr}\`\n\n`;
+        let reportMsg = `🌙 *MONSTER MODE ON — NIGHT RECAP*\nDate: \`${todayStr}\`\n\n` +
+                        `🔥 *CURRENT STREAKS:*\n` +
+                        `• Workout Streak: *${workoutStreak} Days*\n` +
+                        `• Hydration Streak: *${hydrationStreak} Days*\n` +
+                        `• Study Streak: *${studyStreak} Days*\n` +
+                        `• Hygiene Streak: *${hygieneStreak} Days*\n\n`;
+
+        if (warnings.length > 0) {
+            reportMsg += `⚠️ *WARNING: GOALS MISSED TODAY!*\n` + warnings.join('\n') + `\n\n🔥 *Do not break your discipline. Bounce back stronger tomorrow!*`;
+        } else {
+            reportMsg += `🟢 *ALL SYSTEMS DOMINATED!* Workout, Hydration, and Study targets successfully achieved! 🔥`;
+        }
+
+        await sendTelegramMessage(reportMsg);
+    }
+}, { timezone: 'Asia/Kolkata' });
+
+// ================= SYSTEM & CONTROL PANEL ROUTES =================
+app.get('/api/system-lock', (req, res) => {
+    let lockData = getSystemLockStatus();
+    res.json({ success: true, ...lockData });
+});
+
+// ACTION VERIFICATION ENDPOINT FOR ADD, EDIT, DELETE
+app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) => {
+    const { actionType, password } = req.body; // actionType: 'add', 'edit', 'delete'
+    let validPassword = "";
+    if (actionType === 'add') validPassword = "Jay#add@monster";
+    else if (actionType === 'edit') validPassword = "Jay#edit@monster";
+    else if (actionType === 'delete') validPassword = "Jay#del@monster";
+
+    if (password !== validPassword) {
+        return res.status(403).json({ error: `🔒 Invalid Action Password for ${actionType.toUpperCase()}!` });
+    }
+    res.json({ success: true, message: "Action authorized." });
+});
+
+app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
+    const { locked, adminPassword } = req.body;
+    if (adminPassword !== "Jay#monster@student") return res.status(403).json({ error: "🔒 Invalid Admin Master Password!" });
+    let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
+    writeJSON(SYSTEM_LOCK_FILE, lockData);
+    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKEDHere is the fully updated `server.js` file with your requested features (`add mate`, `delete mate`, `edit mate`) and dedicated secure passwords integrated cleanly into the code without deleting any existing lines or logic:
+
+```javascript
+const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
+const cron = require('node-cron');
+const fetch = require('node-fetch');
+const { getServerToday, validateDateAccess } = require('./server/services/dateService');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+// Database File Paths
+const HABITS_FILE = path.join(__dirname, 'habits.json');
+const HABIT_LOGS_FILE = path.join(__dirname, 'habit_logs.json');
+const WORKOUTS_FILE = path.join(__dirname, 'workouts.json');
+const WORKOUT_LOGS_FILE = path.join(__dirname, 'workout_logs.json');
+const STUDY_CATEGORIES_FILE = path.join(__dirname, 'study_categories.json');
+const STUDY_SESSIONS_FILE = path.join(__dirname, 'study_sessions.json');
+const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
+const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
+const HYDRATION_FILE = path.join(__dirname, 'hydration_data.json');
+const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
+const SANCTUARY_FILE = path.join(__dirname, 'sanctuary_mode.json');
+const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
+const LANDING_BG_FILE = path.join(__dirname, 'landing_bg.json');
+const DASHBOARD_BG_FILE = path.join(__dirname, 'dashboard_bg.json');
+const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
+const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
+const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
+const MATES_FILE = path.join(__dirname, 'mates.json'); // Added Mates Database File
+
+const MONSTER_LAUNCH_DATE = "2026-09-11";
+const MASTER_USER_ID = "admin_master_user";
+
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+// Secure Telegram Notification Dispatcher
+async function sendTelegramNotification(message) {
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+    try {
+        await fetch(`[https://api.telegram.org/bot$](https://api.telegram.org/bot$){TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' })
+        });
+    } catch (err) {
+        console.error('Telegram dispatch error:', err);
+    }
+}
+
+// Robust JSON Persistence Reader
+function readJSON(file) {
+    if (!fs.existsSync(file)) {
+        let initial = [];
+        if (file === HYGIENE_TASKS_FILE) {
+            initial = [
+                { id: 'h1', userId: MASTER_USER_ID, name: '🧴 Hair Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h2', userId: MASTER_USER_ID, name: '🧼 Face Care', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE },
+                { id: 'h3', userId: MASTER_USER_ID, name: '🚿 General Body Hygiene', frequency: 'daily', startDate: MONSTER_LAUNCH_DATE }
+            ];
+        } else if (file === USERS_AUTH_FILE) {
+            const salt = bcrypt.genSaltSync(10);
+            initial = [
+                { id: 'u_admin', email: 'admin@monstermode.com', passwordHash: bcrypt.hashSync('admin123', salt), role: 'ADMIN' },
+                { id: 'u_tracker', email: 'jaiminvankar520@gmail.com', passwordHash: bcrypt.hashSync('Jay#monster', salt), role: 'TRACKER_USER' }
+            ];
+        } else if (file === MATES_FILE) {
+            initial = [];
+        } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === DASHBOARD_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
+            initial = {};
+            if (file === HYDRATION_FILE) initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
+            if (file === EXAM_MODE_FILE) initial[MASTER_USER_ID] = { enabled: false, targetMinutes: 90 };
+            if (file === SANCTUARY_FILE) initial[MASTER_USER_ID] = { enabled: false, activatedAt: null, reason: "" };
+            if (file === USER_XP_FILE) initial[MASTER_USER_ID] = { xp: 0, level: 1 };
+            if (file === LANDING_BG_FILE) initial = { url: "[https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg](https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg)" };
+            if (file === DASHBOARD_BG_FILE) initial = { color: "#07090f" };
+            if (file === NOTES_REMINDERS_FILE) initial = { [MASTER_USER_ID]: [] };
+            if (file === SYSTEM_LOCK_FILE) initial = { locked: false, lockedAt: null };
+        }
+        fs.writeFileSync(file, JSON.stringify(initial, null, 2));
+    }
+    try {
+        let content = fs.readFileSync(file, 'utf8');
+        let parsed = JSON.parse(content);
+        if (file === NOTES_REMINDERS_FILE && Array.isArray(parsed)) {
+            let converted = { [MASTER_USER_ID]: parsed };
+            fs.writeFileSync(file, JSON.stringify(converted, null, 2));
+            return converted;
+        }
+        return parsed;
+    } catch (err) {
+        return file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') || file.includes('notes_reminders.json') ? { [MASTER_USER_ID]: [] } : [];
+    }
+}
+
+// Safe JSON Persistence Writer (Prevents Data Loss)
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+function getSystemLockStatus() {
+    let lockData = readJSON(SYSTEM_LOCK_FILE);
+    if (!lockData || lockData.locked === undefined) {
+        lockData = { locked: false, lockedAt: null };
+        writeJSON(SYSTEM_LOCK_FILE, lockData);
+    }
+    return lockData;
+}
+
+function getLandingBg() {
+    let bgData = readJSON(LANDING_BG_FILE);
+    if (!bgData || !bgData.url) {
+        bgData = { url: "[https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg](https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg)" };
+        writeJSON(LANDING_BG_FILE, bgData);
+    }
+    return bgData;
+}
+
+function getDashboardBg() {
+    let bgData = readJSON(DASHBOARD_BG_FILE);
+    if (!bgData || !bgData.color) {
+        bgData = { color: "#07090f" };
+        writeJSON(DASHBOARD_BG_FILE, bgData);
+    }
+    return bgData;
+}
+
+function getHydrationData(userId = MASTER_USER_ID) {
+    let data = readJSON(HYDRATION_FILE);
+    if (!data[userId]) {
+        data[userId] = { goal: 3000, glassSize: 250, logs: {} };
+        writeJSON(HYDRATION_FILE, data);
+    }
+    return data[userId];
+}
+
+function calculateHydrationStreak(userId = MASTER_USER_ID) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    let hydData = getHydrationData(userId);
+    let logs = hydData.logs || {};
+    let goal = hydData.goal || 3000;
+    let sanctuary = getSanctuaryData(userId);
+    let streak = 0;
+    let d = new Date();
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
+        let consumed = logs[dateStr] || 0;
+        if (consumed >= goal) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1);
+                continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
+function getExamModeData(userId = MASTER_USER_ID) {
+    let data = readJSON(EXAM_MODE_FILE);
+    if (!data[userId]) {
+        data[userId] = { enabled: false, targetMinutes: 90 };
+        writeJSON(EXAM_MODE_FILE, data);
+    }
+    return data[userId];
+}
+
+function getSanctuaryData(userId = MASTER_USER_ID) {
+    let data = readJSON(SANCTUARY_FILE);
+    if (!data[userId]) {
+        data[userId] = { enabled: false, activatedAt: null, reason: "" };
+        writeJSON(SANCTUARY_FILE, data);
+    }
+    return data[userId];
+}
+
+function addXP(userId = MASTER_USER_ID, amount) {
+    let xpData = readJSON(USER_XP_FILE);
+    if (!xpData[userId]) xpData[userId] = { xp: 0, level: 1 };
+    xpData[userId].xp += amount;
+    xpData[userId].level = Math.floor(xpData[userId].xp / 500) + 1;
+    writeJSON(USER_XP_FILE, xpData);
+    return xpData[userId];
+}
+
+function getUserXP(userId = MASTER_USER_ID) {
+    let xpData = readJSON(USER_XP_FILE);
+    if (!xpData[userId]) {
+        xpData[userId] = { xp: 0, level: 1 };
+        writeJSON(USER_XP_FILE, xpData);
+    }
+    return xpData[userId];
+}
+
+function calculateWorkoutStreak(userId = MASTER_USER_ID) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    const workouts = readJSON(WORKOUTS_FILE);
+    const logs = readJSON(WORKOUT_LOGS_FILE);
+    if (workouts.length === 0) return 0;
+    let sanctuary = getSanctuaryData(userId);
+    let streak = 0;
+    let d = new Date();
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
+        let dayDone = workouts.every(w => {
+            let log = logs.find(l => l.workoutId === w.id && l.date === dateStr);
+            return log ? log.completed : false;
+        });
+        if (dayDone) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1);
+                continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
+function calculateStreak(userId = MASTER_USER_ID, type) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    if (type === 'workout') return calculateWorkoutStreak(userId);
+    if (type === 'hydration') return calculateHydrationStreak(userId);
+    let sanctuary = getSanctuaryData(userId);
+    let d = new Date();
+    let streak = 0;
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
+        let dayPassed = true;
+        if (type === 'hygiene') {
+            const tasks = readJSON(HYGIENE_TASKS_FILE);
+            const logs = readJSON(HYGIENE_LOGS_FILE);
+            let dayOfWeek = d.getDay();
+            let applicable = tasks.filter(t => t.frequency === 'daily' || (dayOfWeek === 0 && t.frequency === 'sunday'));
+            if (applicable.length > 0) {
+                dayPassed = applicable.every(t => {
+                    let l = logs.find(log => log.taskId === t.id && log.date === dateStr);
+                    return l ? l.completed : false;
+                });
+            }
+        } else if (type === 'study') {
+            const sessions = readJSON(STUDY_SESSIONS_FILE);
+            const categories = readJSON(STUDY_CATEGORIES_FILE);
+            let targetMins = categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+            let daySessions = sessions.filter(s => s.date === dateStr);
+            let studiedMins = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
+            dayPassed = targetMins > 0 && studiedMins >= targetMins;
+        }
+        if (dayPassed) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1);
+                continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
+// Strict Server Sync Engine
+function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
+    const today = getServerToday();
+    if (targetDate > today || targetDate < MONSTER_LAUNCH_DATE) {
+        return { allWorkoutsDone: false, studyDone: false, hydrationDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
+    }
+    
+    const workouts = readJSON(WORKOUTS_FILE);
+    const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
+    const workoutsWithStatus = workouts.map(w => {
+        const log = workoutLogs.find(l => l.workoutId === w.id && l.date === targetDate);
+        return { ...w, completed: log ? log.completed : false };
+    });
+    const allWorkoutsDone = workoutsWithStatus.length > 0 && workoutsWithStatus.every(w => w.completed);
+
+    const categories = readJSON(STUDY_CATEGORIES_FILE);
+    const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
+    let examData = getExamModeData(userId);
+    let totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) || 90 : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
+    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes && categories.length > 0 && sessions.length > 0;
+
+    let hydData = getHydrationData(userId);
+    let consumed = hydData.logs[targetDate] || 0;
+    let hydrationDone = consumed >= (hydData.goal || 3000);
+
+    return { allWorkoutsDone, studyDone, hydrationDone, totalStudiedMinutes, totalTargetMinutes };
+}
+
+// Express App Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'monster_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, httpOnly: true, sameSite: 'strict', maxAge: 1000 * 60 * 60 * 24 }
+}));
+
+// Authentication Middleware with System Lock Guard
+function requireAuth(req, res, next) {
+    let lockStatus = getSystemLockStatus();
+    if (lockStatus.locked && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin." });
+    }
+    if (!req.session.userId) {
+        req.session.userId = MASTER_USER_ID;
+        req.session.role = 'TRACKER_USER';
+    }
+    return next();
+}
+
+function requireAdmin(req, res, next) {
+    if (!req.session.userId || req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "🔒 Access Denied: Admin privileges required." });
+    }
+    next();
+}
+
+console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.");
+
+// ================= TELEGRAM AUTOMATED CRON SCHEDULER =================
+cron.schedule('0 7 * * *', async () => {
+    const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n` +
+                `"Discipline equals absolute freedom."\n\n` +
+                `✅ Check your Daily Hydration & Hygiene targets.\n` +
+                `🔥 Stay locked in and crush your goals today!`;
+    await sendTelegramMessage(msg);
+}, { timezone: 'Asia/Kolkata' });
+
+async function sendTelegramMessage(message) {
+    await sendTelegramNotification(message);
+}
+
+// REAL-TIME REMINDER DISPATCH CRON (Checks every minute)
+cron.schedule('* * * * *', async () => {
+    try {
+        let notesData = readJSON(NOTES_REMINDERS_FILE);
+        let now = new Date();
+        let todayStr = now.toISOString().split('T')[0];
+        let currentHours = String(now.getHours()).padStart(2, '0');
+        let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        let currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+        let updated = false;
+        for (let userId in notesData) {
+            let items = notesData[userId];
+            if (!Array.isArray(items)) continue;
+
+            for (let item of items) {
+                if (item.isReminder && !item.notifiedToday && item.date === todayStr && item.time === currentTimeStr) {
+                    await sendTelegramMessage(`⏰ *MONSTER REMINDER ALERT*\n\n📌 *${item.title}*\n📝 ${item.description || 'No additional details.'}\n\n🔥 *Execute immediately!*`);
+                    item.notifiedToday = true;
+                    updated = true;
+                }
+            }
+        }
+        if (updated) {
+            writeJSON(NOTES_REMINDERS_FILE, notesData);
+        }
+    } catch (err) {
+        console.error("Reminder cron error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
+
+// 🌙 NIGHT PROGRESS & INCOMPLETE WARNING RECAP (10:00 PM IST)
+cron.schedule('0 22 * * *', async () => {
+    const todayStr = getServerToday();
+    const users = readJSON(USERS_AUTH_FILE);
+
+    for (const user of users) {
+        if (user.role !== 'TRACKER_USER') continue;
+        let sanctuary = getSanctuaryData(user.id);
+        if (sanctuary.enabled) continue;
+
+        const workouts = readJSON(WORKOUTS_FILE);
+        const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
+        const workoutDone = workouts.length > 0 && workouts.every(w => {
+            const log = workoutLogs.find(l => l.workoutId === w.id && l.date === todayStr);
+            return log ? log.completed : false;
+        });
+
+        const hydData = getHydrationData(user.id);
+        const consumed = hydData.logs[todayStr] || 0;
+        const hydrationDone = consumed >= (hydData.goal || 3000);
+
+        const syncResult = runServerSyncEngine(user.id, todayStr);
+        const studyDone = syncResult.studyDone;
+
+        let workoutStreak = calculateWorkoutStreak(user.id);
+        let hydrationStreak = calculateHydrationStreak(user.id);
+        let studyStreak = calculateStreak(user.id, 'study');
+        let hygieneStreak = calculateStreak(user.id, 'hygiene');
+
+        let warnings = [];
+        if (!workoutDone) warnings.push('❌ *Workout INCOMPLETE* (All sets not marked DONE)');
+        if (!hydrationDone) warnings.push(`❌ *Hydration INCOMPLETE* (${consumed}/${hydData.goal || 3000} ml)`);
+        if (!studyDone) warnings.push(`❌ *Study Target INCOMPLETE* (${syncResult.totalStudiedMinutes}/${syncResult.totalTargetMinutes} mins)`);
+
+        let reportMsg = `🌙 *MONSTER MODE ON — NIGHT RECAP*\nDate: \`${todayStr}\`\n\n` +
+                        `🔥 *CURRENT STREAKS:*\n` +
+                        `• Workout Streak: *${workoutStreak} Days*\n` +
+                        `• Hydration Streak: *${hydrationStreak} Days*\n` +
+                        `• Study Streak: *${studyStreak} Days*\n` +
+                        `• Hygiene Streak: *${hygieneStreak} Days*\n\n`;
+
         if (warnings.length > 0) {
             reportMsg += `⚠️ *WARNING: GOALS MISSED TODAY!*\n` + warnings.join('\n') + `\n\n🔥 *Do not break your discipline. Bounce back stronger tomorrow!*`;
         } else {
@@ -402,7 +931,7 @@ app.get('/api/system-lock', (req, res) => {
 
 app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
     const { locked, adminPassword } = req.body;
-    if (adminPassword !== "monster123") return res.status(403).json({ error: "🔒 Invalid Admin Master Password!" });
+    if (adminPassword !== "Jay#monster@student") return res.status(403).json({ error: "🔒 Invalid Admin Master Password!" });
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
@@ -415,6 +944,75 @@ app.post('/api/control-panel/landing-bg', requireAuth, requireAdmin, (req, res) 
     if (!url) return res.status(400).json({ error: "Image URL is required." });
     writeJSON(LANDING_BG_FILE, { url });
     res.json({ success: true, message: "Landing background updated successfully." });
+});
+
+app.get('/api/dashboard-bg', (req, res) => { res.json({ success: true, ...getDashboardBg() }); });
+app.post('/api/control-panel/dashboard-bg', requireAuth, requireAdmin, (req, res) => {
+    const { color } = req.body;
+    if (!color) return res.status(400).json({ error: "Background color is required." });
+    writeJSON(DASHBOARD_BG_FILE, { color });
+    res.json({ success: true, message: "Dashboard background color updated successfully." });
+});
+
+// ================= MATES MANAGEMENT API (WITH DAREK & PASSWORDS) =================
+app.get('/api/mates', requireAuth, (req, res) => {
+    const mates = readJSON(MATES_FILE);
+    // Hide password hashes when sending back to client for security
+    const sanitizedMates = mates.map(m => ({ id: m.id, name: m.name, role: m.role }));
+    res.json({ success: true, mates: sanitizedMates });
+});
+
+// ADD MATE API (Password: Jay#add@monster)
+app.post('/api/mates/add', requireAuth, (req, res) => {
+    const { name, role, password } = req.body;
+    if (password !== "Jay#add@monster") {
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Add Mate Password!" });
+    }
+    if (!name) return res.status(400).json({ error: "Mate name is required." });
+
+    let mates = readJSON(MATES_FILE);
+    const newMate = {
+        id: Date.now().toString(),
+        name,
+        role: role || 'MATE_USER',
+        createdAt: new Date().toISOString()
+    };
+    mates.push(newMate);
+    writeJSON(MATES_FILE, mates);
+    res.json({ success: true, message: "Mate added successfully.", mate: { id: newMate.id, name: newMate.name, role: newMate.role } });
+});
+
+// EDIT MATE API (Password: Jay#edit@monster)
+app.put('/api/mates/:id', requireAuth, (req, res) => {
+    const { name, role, password } = req.body;
+    if (password !== "Jay#edit@monster") {
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Edit Mate Password!" });
+    }
+
+    let mates = readJSON(MATES_FILE);
+    const index = mates.findIndex(m => m.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Mate not found." });
+
+    if (name) mates[index].name = name;
+    if (role) mates[index].role = role;
+    writeJSON(MATES_FILE, mates);
+    res.json({ success: true, message: "Mate updated successfully.", mate: { id: mates[index].id, name: mates[index].name, role: mates[index].role } });
+});
+
+// DELETE MATE API (Password: Jay#del@monster)
+app.delete('/api/mates/:id', requireAuth, (req, res) => {
+    const { password } = req.body;
+    if (password !== "Jay#del@monster") {
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Delete Mate Password!" });
+    }
+
+    let mates = readJSON(MATES_FILE);
+    const index = mates.findIndex(m => m.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Mate not found." });
+
+    mates.splice(index, 1);
+    writeJSON(MATES_FILE, mates);
+    res.json({ success: true, message: "Mate deleted successfully." });
 });
 
 // Static HTML Page Serving Routes
@@ -454,7 +1052,7 @@ app.post('/api/auth/logout', async (req, res) => {
 
 app.get('/api/auth/session', requireAuth, (req, res) => {
     let xpInfo = getUserXP(req.session.userId || MASTER_USER_ID);
-    res.json({ authenticated: true, email: req.session.email || "admin@monstermode.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
+    res.json({ authenticated: true, email: req.session.email || "jaiminvankar520@gmail.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
 });
 
 app.post('/api/control-panel/login', async (req, res) => {
@@ -464,7 +1062,7 @@ app.post('/api/control-panel/login', async (req, res) => {
     res.json({ success: true, message: "Control Panel authorized." });
 });
 app.post('/api/control-panel/logout', (req, res) => { req.session.controlPanelAuth = false; res.json({ success: true, message: "Control Panel logged out." }); });
-app.get('/api/control-panel/session', (req, res) => { res.json({ authenticated: true, email: "admin@monstermode.com" }); });
+app.get('/api/control-panel/session', (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
 
 // ================= EXAM & SANCTUARY MODES =================
 app.get('/api/exam-mode', requireAuth, (req, res) => {
@@ -542,11 +1140,11 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
     res.json({ success: true, message: "Hydration settings updated." });
 });
 
-// ================= NOTES & REMINDERS API =================
+// ================= NOTES & REMINDERS API (UNIFIED SHARED DB) =================
 app.get('/api/notes-reminders', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
-    let items = Array.isArray(data) ? data : (data[userId] || []);
+    let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
     res.json({ success: true, items, ...getUserXP(userId) });
 });
 
@@ -555,7 +1153,7 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
     if (!title) return res.status(400).json({ error: "Title is required." });
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
-    let items = Array.isArray(data) ? data : (data[userId] || []);
+    let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
     const newItem = {
         id: Date.now().toString(),
         userId,
@@ -569,18 +1167,18 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
         createdAt: new Date().toISOString()
     };
     items.push(newItem);
-    writeJSON(NOTES_REMINDERS_FILE, { [userId]: items });
+    writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items, [userId]: items });
     res.json({ success: true, item: newItem });
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     let userId = req.session.userId || MASTER_USER_ID;
-    let items = Array.isArray(data) ? data : (data[userId] || []);
+    let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
     const index = items.findIndex(i => i.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Item not found." });
     items.splice(index, 1);
-    writeJSON(NOTES_REMINDERS_FILE, { [userId]: items });
+    writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items, [userId]: items });
     res.json({ success: true, message: "Item deleted successfully." });
 });
 
@@ -947,7 +1545,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
 
     let userId = req.session.userId || MASTER_USER_ID;
     let updatedXP = getUserXP(userId);
-    if (completed) updatedXP = addXP(userId, 40);
+    if (completed) updatedXP = addXP(userId, 40);   
     let hygieneStreak = calculateStreak(userId, 'hygiene');
     res.json({ success: true, message: "Hygiene status updated.", hygieneStreak, ...updatedXP });
 });
