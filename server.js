@@ -335,7 +335,7 @@ app.use(session({
 function requireAuth(req, res, next) {
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked && req.session.role !== 'ADMIN') {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin." });
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin. Contact to Admin." });
     }
     if (!req.session.userId) {
         req.session.userId = MASTER_USER_ID;
@@ -345,6 +345,10 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
+    let lockStatus = getSystemLockStatus();
+    if (lockStatus.locked && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin. Contact to Admin." });
+    }
     if (!req.session.userId || req.session.role !== 'ADMIN') {
         return res.status(403).json({ error: "🔒 Access Denied: Admin privileges required." });
     }
@@ -463,18 +467,18 @@ app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) =>
     else if (actionType === 'delete') validPassword = "Jay#del@monster";
 
     if (password !== validPassword) {
-        return res.status(403).json({ error: `🔒 Invalid Action Password for ${actionType.toUpperCase()}!` });
+        return res.status(403).json({ error: `🔒 Invalid Action Password for ${actionType.toUpperCase()}! Please contact admin.` });
     }
-    res.json({ success: true, message: "Action authorized." });
+    res.json({ success: true, message: "Action authorized successfully." });
 });
 
 app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
     const { locked, adminPassword } = req.body;
-    if (adminPassword !== "Jay#monster@student") return res.status(403).json({ error: "🔒 Invalid Admin Master Password!" });
+    if (adminPassword !== "Jay#monster@student") return res.status(403).json({ error: "🔒 Invalid Admin Master Password! System is locked. Contact to admin." });
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
-    res.json({ success: true, message: lockData.locked ? "System locked successfully by Admin." : "System unlocked.", ...lockData });
+    res.json({ success: true, message: lockData.locked ? "System locked successfully by Admin." : "System unlocked successfully.", ...lockData });
 });
 
 app.get('/api/landing-bg', (req, res) => { res.json({ success: true, ...getLandingBg() }); });
@@ -503,7 +507,7 @@ app.get('/api/mates', requireAuth, (req, res) => {
 app.post('/api/mates/add', requireAuth, (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#add@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Add Password!" });
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Add Password! Contact to admin." });
     }
     if (!name) return res.status(400).json({ error: "Mate name is required." });
 
@@ -522,7 +526,7 @@ app.post('/api/mates/add', requireAuth, (req, res) => {
 app.put('/api/mates/:id', requireAuth, (req, res) => {
     const { name, role, password } = req.body;
     if (password !== "Jay#edit@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Edit Password!" });
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Edit Password! Contact to admin." });
     }
 
     let mates = readJSON(MATES_FILE);
@@ -538,7 +542,7 @@ app.put('/api/mates/:id', requireAuth, (req, res) => {
 app.delete('/api/mates/:id', requireAuth, (req, res) => {
     const { password } = req.body;
     if (password !== "Jay#del@monster") {
-        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Delete Password!" });
+        return res.status(403).json({ error: "🔒 Unauthorized: Invalid Delete Password! Contact to admin." });
     }
 
     let mates = readJSON(MATES_FILE);
@@ -561,6 +565,10 @@ app.get('/control-panel', requireAuth, (req, res) => { res.sendFile(path.join(__
 
 // ================= AUTHENTICATION & LOGIN ROUTES =================
 app.post('/api/auth/login', async (req, res) => {
+    let lockStatus = getSystemLockStatus();
+    if (lockStatus.locked) {
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin. Contact to Admin." });
+    }
     const { email, password } = req.body;
     let users = readJSON(USERS_AUTH_FILE);
     let user = users.find(u => u.email === email);
