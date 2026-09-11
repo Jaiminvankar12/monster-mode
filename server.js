@@ -332,7 +332,8 @@ app.use(session({
 // STRICT GLOBAL SYSTEM LOCK GUARD MIDDLEWARE
 function requireAuth(req, res, next) {
     let lockStatus = getSystemLockStatus();
-    if (lockStatus.locked && req.session.role !== 'ADMIN') {
+    const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
+    if (lockStatus.locked && !isAdmin) {
         if (req.accepts('html')) {
             return res.send(`
                 <!DOCTYPE html>
@@ -368,11 +369,8 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-    let lockStatus = getSystemLockStatus();
-    if (lockStatus.locked && req.session.role !== 'ADMIN') {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin." });
-    }
-    if (!req.session.userId || req.session.role !== 'ADMIN') {
+    const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
+    if (!isAdmin) {
         return res.status(403).json({ error: "🔒 Access Denied: Admin privileges required." });
     }
     next();
@@ -530,10 +528,12 @@ app.get('/control-panel.html', requireAuth, (req, res) => { res.sendFile(path.jo
 
 // ================= AUTHENTICATION & LOGIN ROUTES =================
 app.post('/api/auth/login', async (req, res) => {
+    // 🛑 STRICT SERVER-SIDE LOCK GUARD (Blocks login if system is locked)
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked) {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin." });
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted." });
     }
+
     const { email, password } = req.body;
     let users = readJSON(USERS_AUTH_FILE);
     let user = users.find(u => u.email === email);
