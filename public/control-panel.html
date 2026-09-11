@@ -600,7 +600,7 @@
         if (noteForm) {
             noteForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('add', async () => {
+                requestSecureAuthorization('add', async (password) => {
                     const title = document.getElementById('noteTitle').value;
                     const description = document.getElementById('noteDesc').value;
                     const isReminder = document.getElementById('panelIsReminder').checked;
@@ -611,7 +611,7 @@
                         const res = await fetch('/api/notes-reminders', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ title, description, isReminder, date, time })
+                            body: JSON.stringify({ title, description, isReminder, date, time, password })
                         });
                         if (res.ok) {
                             showStatusMessage("Note deployed successfully!", "success");
@@ -625,9 +625,13 @@
         }
 
         function confirmAndDeleteNote(id) {
-            requestSecureAuthorization('delete', async () => {
+            requestSecureAuthorization('delete', async (password) => {
                 try {
-                    const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`/api/notes-reminders/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
                     if (res.ok) {
                         showStatusMessage("Entry deleted successfully.", "success");
                         loadNotesReminders();
@@ -678,7 +682,7 @@
                 e.preventDefault();
                 const editId = document.getElementById('editHabitId').value;
                 const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async () => {
+                requestSecureAuthorization(actionType, async (password) => {
                     const name = document.getElementById('habitName').value;
                     const category = document.getElementById('habitCategory').value || 'General';
                     const description = document.getElementById('habitDesc').value;
@@ -686,7 +690,7 @@
                     try {
                         let url = editId ? `/api/habits/${editId}` : '/api/habits';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, category, description, startDate, password }) });
                         if (res.ok) { showStatusMessage(editId ? "Habit updated successfully!" : "Habit added successfully!", "success"); resetHabitForm(); loadHabits(); }
                     } catch (err) {}
                 });
@@ -694,8 +698,12 @@
         }
 
         function confirmAndDeleteHabit(id) {
-            requestSecureAuthorization('delete', async () => {
-                const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
+            requestSecureAuthorization('delete', async (password) => {
+                const res = await fetch(`/api/habits/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
                 if (res.ok) { showStatusMessage("Habit deleted successfully", "success"); loadHabits(); }
             });
         }
@@ -742,7 +750,7 @@
                 e.preventDefault();
                 const editId = document.getElementById('editWorkoutId').value;
                 const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async () => {
+                requestSecureAuthorization(actionType, async (password) => {
                     const name = document.getElementById('workoutName').value;
                     const sets = document.getElementById('workoutSets').value;
                     const value = document.getElementById('workoutValue').value;
@@ -750,7 +758,7 @@
                     try {
                         let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11" }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-11", password }) });
                         if (res.ok) { showStatusMessage(editId ? "Workout updated successfully!" : "Workout added successfully!", "success"); resetWorkoutForm(); loadWorkouts(); }
                     } catch (err) {}
                 });
@@ -758,8 +766,12 @@
         }
 
         function confirmAndDeleteWorkout(id) {
-            requestSecureAuthorization('delete', async () => {
-                const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
+            requestSecureAuthorization('delete', async (password) => {
+                const res = await fetch(`/api/workouts/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
                 if (res.ok) { showStatusMessage("Workout deleted successfully", "success"); loadWorkouts(); }
             });
         }
@@ -806,7 +818,7 @@
                 e.preventDefault();
                 const editId = document.getElementById('editStudyId').value;
                 const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async () => {
+                requestSecureAuthorization(actionType, async (password) => {
                     const name = document.getElementById('studyName').value;
                     const dailyTargetMinutes = document.getElementById('studyTarget').value;
                     const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
@@ -814,7 +826,7 @@
                     try {
                         let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, password }) });
                         const data = await res.json();
                         if (res.ok) { showStatusMessage(editId ? "Subject updated successfully!" : "Subject added successfully!", "success"); resetStudyForm(); loadStudy(); }
                         else { alert("❌ " + data.error); }
@@ -824,8 +836,12 @@
         }
 
         function confirmAndDeleteStudy(id) {
-            requestSecureAuthorization('delete', async () => {
-                const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
+            requestSecureAuthorization('delete', async (password) => {
+                const res = await fetch(`/api/study/categories/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
                 if (res.ok) { showStatusMessage("Subject deleted successfully", "success"); loadStudy(); }
             });
         }
@@ -870,13 +886,13 @@
                 e.preventDefault();
                 const editId = document.getElementById('editHygieneId').value;
                 const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async () => {
+                requestSecureAuthorization(actionType, async (password) => {
                     const name = document.getElementById('hygieneName').value;
                     const frequency = document.getElementById('hygieneFreq').value;
                     try {
                         let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11" }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, frequency, startDate: "2026-09-11", password }) });
                         if (res.ok) { showStatusMessage(editId ? "Task updated successfully!" : "Hygiene task added successfully!", "success"); resetHygieneForm(); loadHygiene(); }
                     } catch (err) {}
                 });
@@ -884,8 +900,12 @@
         }
 
         function confirmAndDeleteHygiene(id) {
-            requestSecureAuthorization('delete', async () => {
-                const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
+            requestSecureAuthorization('delete', async (password) => {
+                const res = await fetch(`/api/hygiene/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
                 if (res.ok) { showStatusMessage("Task deleted successfully", "success"); loadHygiene(); }
             });
         }
@@ -905,11 +925,11 @@
         if (hydrationForm) {
             hydrationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('edit', async () => {
+                requestSecureAuthorization('edit', async (password) => {
                     const glassSize = document.getElementById('configGlassSize').value;
                     const goal = document.getElementById('configGoal').value;
                     try {
-                        const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal }) });
+                        const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ glassSize, goal, password }) });
                         if (res.ok) showStatusMessage("Hydration updated successfully!", "success");
                     } catch (err) {}
                 });
@@ -931,11 +951,11 @@
         if (examForm) {
             examForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('edit', async () => {
+                requestSecureAuthorization('edit', async (password) => {
                     const enabled = document.getElementById('examModeEnabled').checked;
                     const targetMinutes = document.getElementById('examModeTarget').value;
                     try {
-                        const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes }) });
+                        const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, targetMinutes, password }) });
                         if (res.ok) showStatusMessage("Exam mode updated successfully!", "success");
                     } catch (err) {}
                 });
@@ -957,11 +977,11 @@
         if (sanctuaryForm) {
             sanctuaryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('edit', async () => {
+                requestSecureAuthorization('edit', async (password) => {
                     const enabled = document.getElementById('sanctuaryEnabled').checked;
                     const reason = document.getElementById('sanctuaryReason').value;
                     try {
-                        const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason }) });
+                        const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled, reason, password }) });
                         if (res.ok) showStatusMessage("Sanctuary updated successfully!", "success");
                     } catch (err) {}
                 });
@@ -982,13 +1002,13 @@
         if (bgForm) {
             bgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('edit', async () => {
+                requestSecureAuthorization('edit', async (password) => {
                     const url = document.getElementById('landingBgUrlInput').value;
                     try {
                         const res = await fetch('/api/control-panel/landing-bg', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url })
+                            body: JSON.stringify({ url, password })
                         });
                         const data = await res.json();
                         if (res.ok) {
@@ -1016,13 +1036,13 @@
         if (dashboardBgForm) {
             dashboardBgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization('edit', async () => {
+                requestSecureAuthorization('edit', async (password) => {
                     const color = document.getElementById('dashboardBgColorInput').value;
                     try {
                         const res = await fetch('/api/control-panel/dashboard-bg', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ color })
+                            body: JSON.stringify({ color, password })
                         });
                         const data = await res.json();
                         if (res.ok) {
