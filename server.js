@@ -473,15 +473,17 @@ app.post('/api/verify-action-password', requireAuth, requireAdmin, (req, res) =>
 });
 
 app.post('/api/system-lock', requireAuth, requireAdmin, (req, res) => {
-    const { locked, adminPassword } = req.body;
-    if (adminPassword !== "Jay#monster@student") {
+    const { locked, adminPassword, password } = req.body;
+    const pwdToVerify = adminPassword || password;
+    
+    if (pwdToVerify !== "Jay#monster@student") {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     
-    const actionText = lockData.locked ? "Portal Successfully Locked by Admin 🔒" : "Portal Successfully Unlocked by Admin 🟢";
-    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${actionText}*`);
+    const actionText = lockData.locked ? "Portal Successfully Locked by Admin" : "Portal Successfully Unlocked by Admin";
+    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
     
     res.json({ success: true, message: actionText, ...lockData });
 });
