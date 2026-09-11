@@ -1099,7 +1099,10 @@ app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     let hygieneStreak = calculateStreak(userId, 'hygiene');
     res.json({ success: true, message: "Hygiene status updated.", hygieneStreak, ...updatedXP });
 });
-
+// Dummy Handler for Monster Coach API to prevent 404 errors in console
+app.get('/api/monster-coach', requireAuth, (req, res) => {
+    res.json({ success: true, message: "Monster Coach active." });
+});
 app.listen(PORT, () => {
     console.log(`🚀 MONSTER MODE Server running at http://localhost:${PORT}`);
 });
