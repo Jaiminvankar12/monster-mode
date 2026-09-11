@@ -34,7 +34,7 @@ const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
 const MATES_FILE = path.join(__dirname, 'mates.json');
 
-// 🔥 NEW LAUNCH DATE SET TO TOMORROW 🔥
+// 🔥 NEW LAUNCH DATE SET TO 12-09-2026 🔥
 const MONSTER_LAUNCH_DATE = "2026-09-12";
 const MASTER_USER_ID = "admin_master_user";
 
@@ -576,7 +576,8 @@ app.post('/api/auth/login', async (req, res) => {
     req.session.role = user.role;
     req.session.email = user.email;
 
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 Successfully Logged In: \`${user.email}\` (${user.role}) at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    // 🔥 FIXED: Safe Markdown for Tracker Login
+    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *TRACKER PORTAL LOGIN*\nUser: ${user.email}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
 
     res.json({ success: true, role: user.role, email: user.email, message: "Successfully logged in." });
 });
@@ -585,7 +586,8 @@ app.post('/api/auth/logout', async (req, res) => {
     let email = req.session.email || 'User';
     req.session.destroy(async () => {
         try {
-            await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🔴 Successfully Logged Out: \`${email}\``);
+            // 🔥 FIXED: Safe Markdown for Tracker Logout
+            await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🔴 *TRACKER PORTAL LOGOUT*\nUser: ${email}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
         } catch (e) {}
         res.json({ success: true, message: "Logged out successfully." });
     });
@@ -602,13 +604,22 @@ app.post('/api/control-panel/login', async (req, res) => {
     req.session.role = 'ADMIN';
     req.session.email = "admin@monstermode.com";
     
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 Admin Control Panel Authorized at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    // 🔥 FIXED: Distinct formatting for Admin Login
+    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛡️ *ADMIN PANEL LOGIN*\nStatus: Authorized\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
 
     res.json({ success: true, message: "Control Panel authorized." });
 });
 
-app.post('/api/control-panel/logout', (req, res) => { req.session.controlPanelAuth = false; res.json({ success: true, message: "Control Panel logged out." }); });
-app.get('/api/control-panel/session', (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
+app.post('/api/control-panel/logout', async (req, res) => { 
+    req.session.controlPanelAuth = false; 
+    
+    // 🔥 ADDED: Missing Admin Logout Notification
+    try {
+        await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛑 *ADMIN PANEL LOGOUT*\nStatus: Session Ended\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    } catch (e) {}
+
+    res.json({ success: true, message: "Control Panel logged out." }); 
+});
 
 // ================= EXAM & SANCTUARY MODES =================
 app.get('/api/exam-mode', (req, res) => {
