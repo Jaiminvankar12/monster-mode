@@ -99,16 +99,18 @@
             </div>
         </div>
 
+        <!-- Navigation Tabs Bar -->
         <div class="flex flex-wrap gap-2 mb-8 bg-[#121520] p-2 rounded-2xl border border-white/5 overflow-x-auto">
-            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🔥 Habits</button>
-            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🏋️ Workouts</button>
-            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📚 Study Core</button>
-            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🧼 Hygiene</button>
-            <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📌 Notes</button>
-            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">💧 Hydration</button>
-            <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam Mode</button>
-            <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
-            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Theme Matrix (50)</button>
+            <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[90px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🔥 Habits</button>
+            <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🏋️ Workouts</button>
+            <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📚 Study</button>
+            <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🧼 Hygiene</button>
+            <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📌 Notes</button>
+            <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">💧 Hydration</button>
+            <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam</button>
+            <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
+            <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway BG</button>
+            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Themes (50)</button>
         </div>
 
         <!-- TAB 1: HABITS -->
@@ -140,7 +142,7 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label><input type="number" id="workoutSets" value="3" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
                         <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label><input type="number" id="workoutValue" value="10" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label><select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none"><option value="reps">Reps</option><option value="mins">Mins</option></select></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label><select id="workoutUnit" class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none"><option value="reps">Reps</option><option value="mins">Mins</option><option value="secs">Secs</option></select></div>
                     </div>
                     <button type="submit" id="workoutSubmitBtn" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Deploy Workout</button>
                 </form>
@@ -176,9 +178,6 @@
                     <div class="flex gap-2">
                         <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
                             Deploy Study Vector
-                        </button>
-                        <button type="button" id="studyCancelBtn" onclick="resetStudyForm()" class="hidden px-4 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                            Cancel
                         </button>
                     </div>
                 </form>
@@ -277,7 +276,28 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🛌</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Sanctuary Safe-Haven</h3></div>
         </div>
 
-        <!-- TAB 9: THEME MATRIX (FULL 50 ELITE COLORS) -->
+        <!-- TAB 9: LANDING BACKGROUND MANAGEMENT -->
+        <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🖼️</span> Update Gateway Background Image</h3>
+                <form id="updateLandingBgForm" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Image URL (Direct Link)</label>
+                        <input type="url" id="landingBgUrlInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="https://i.pinimg.com/736x/...jpg">
+                    </div>
+                    <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">
+                        Deploy New Background
+                    </button>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-5xl mb-4">⚡</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Live Gateway Sync</h3>
+                <p class="text-xs text-slate-400 max-w-xs">Instantly updates the background image on the main index.html login gateway via server.js.</p>
+            </div>
+        </div>
+
+        <!-- TAB 10: THEME MATRIX (FULL 50 ELITE COLORS) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
                 <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Theme Matrix (50 Elite Colors)</h3>
@@ -337,27 +357,6 @@
             </div>
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🎨</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">50-Tone HUD Matrix</h3></div>
         </div>
-        <!-- TAB: LANDING BACKGROUND MANAGEMENT -->
-<div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <div class="glass-card p-6 sm:p-8 rounded-3xl">
-        <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🖼️</span> Update Gateway Background Image</h3>
-        <form id="updateLandingBgForm" class="space-y-4">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Image URL (Direct Link)</label>
-                <input type="url" id="landingBgUrlInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="https://i.pinimg.com/736x/...jpg">
-            </div>
-            <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">
-                Deploy New Background
-            </button>
-        </form>
-    </div>
-    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-        <span class="text-5xl mb-4">⚡</span>
-        <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Live Gateway Sync</h3>
-        <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway BG</button>
-        <p class="text-xs text-slate-400 max-w-xs">Instantly updates the background image on the main `index.html` login gateway.</p>
-    </div>
-</div>
 
     </main>
 
@@ -392,21 +391,22 @@
         applySavedTheme();
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'theme'].forEach(t => {
+            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'theme'].forEach(t => {
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
-                if (btn) btn.className = "flex-1 min-w-[100px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                if (btn) btn.className = "flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             });
             const targetSec = document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
             const targetBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
             if (targetSec) targetSec.classList.remove('hidden');
-            if (targetBtn) targetBtn.className = "flex-1 min-w-[100px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            if (targetBtn) targetBtn.className = "flex-1 min-w-[90px] py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
             
             if (tab === 'notes') loadNotesReminders();
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
+            if (tab === 'landingBg') loadLandingBgConfig();
         }
 
         function setPanelTheme(theme, hex) {
@@ -722,6 +722,37 @@
             });
         }
 
+        async function loadLandingBgConfig() {
+            try {
+                const res = await fetch('/api/landing-bg');
+                const data = await res.json();
+                if (data.success && data.url) {
+                    document.getElementById('landingBgUrlInput').value = data.url;
+                }
+            } catch (err) {}
+        }
+
+        const bgForm = document.getElementById('updateLandingBgForm');
+        if (bgForm) {
+            bgForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const url = document.getElementById('landingBgUrlInput').value;
+                try {
+                    const res = await fetch('/api/control-panel/landing-bg', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showStatusMessage("Gateway background updated successfully!", "success");
+                    } else {
+                        alert("❌ " + data.error);
+                    }
+                } catch (err) { showStatusMessage("Connection error", "error"); }
+            });
+        }
+
         async function adminLogout() {
             await fetch('/api/control-panel/logout', { method: 'POST' });
             window.location.href = 'index.html';
@@ -735,38 +766,6 @@
             if (res.ok) { alert("⚡ " + data.message); location.reload(); }
             else { alert("❌ " + data.error); }
         }
-        // In switchTab function array, add 'landingBg'
-// And add these functions:
-async function loadLandingBgConfig() {
-    try {
-        const res = await fetch('/api/landing-bg');
-        const data = await res.json();
-        if (data.success && data.url) {
-            document.getElementById('landingBgUrlInput').value = data.url;
-        }
-    } catch (err) {}
-}
-
-const bgForm = document.getElementById('updateLandingBgForm');
-if (bgForm) {
-    bgForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const url = document.getElementById('landingBgUrlInput').value;
-        try {
-            const res = await fetch('/api/control-panel/landing-bg', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                showStatusMessage("Gateway background updated successfully!", "success");
-            } else {
-                alert("❌ " + data.error);
-            }
-        } catch (err) { showStatusMessage("Connection error", "error"); }
-    });
-}
 
         loadHabits(); loadWorkouts(); loadStudy(); loadHygiene();
     </script>
