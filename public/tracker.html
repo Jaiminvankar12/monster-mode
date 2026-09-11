@@ -97,14 +97,14 @@
             <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
         </div>
 
-        <!-- VIEW-ONLY NOTES & REMINDERS SECTION -->
+        <!-- VIEW-ONLY NOTES & REMINDERS SECTION (Now Interactive!) -->
         <div class="pt-6 border-t border-white/5">
             <div class="mb-4 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
-                        <span>📌</span> Notes & Reminders (View Matrix)
+                        <span>📌</span> Notes & Reminders
                     </h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Managed from Control Panel. Ticking tasks triggers instant Telegram alerts.</p>
+                    <p class="text-xs text-zinc-400 mt-0.5">Tick to complete. Manage from Control Panel.</p>
                 </div>
             </div>
             <div id="trackerNotesContainer" class="grid gap-3">
@@ -137,14 +137,41 @@
                 const ts = new Date().getTime();
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
                 const data = await res.json();
+                
                 if (data.locked) {
                     const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                     const sessionData = await sessionRes.json();
+                    
                     if (sessionData.role !== 'ADMIN') {
-                        window.location.href = 'index.html';
+                        // 🛑 સામાન્ય યુઝર માટે - Full Screen Lock Display
+                        document.body.innerHTML = `
+                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                    <span class="text-5xl animate-bounce">🛡️</span>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED BY ADMIN</h2>
+                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                        The entire tracker portal has been globally locked by the administrator. All execution vectors are frozen.
+                                    </p>
+                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                        Access Denied / Contact Admin
+                                    </div>
+                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                        Return to Gateway
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // 🟢 એડમિન માટે - Smart Warning Banner
+                        const adminBanner = document.createElement('div');
+                        adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
+                        adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
+                        document.body.prepend(adminBanner);
                     }
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Lock verification failed", err);
+            }
         }
 
         async function fetchHabits(dateStr = "") {
@@ -187,7 +214,7 @@
                     container.innerHTML = data.items.map(item => `
                         <div class="glass-card p-4 rounded-2xl flex items-center justify-between gap-4">
                             <div class="flex items-start gap-3 min-w-0">
-                                <input type="checkbox" ${item.completed ? 'checked' : ''} onclick="toggleTrackerNote('${item.id}')" class="w-5 h-5 mt-0.5 rounded-lg accent-amber-500 cursor-pointer shrink-0">
+                                <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTrackerNote('${item.id}')" class="w-5 h-5 mt-0.5 rounded-lg accent-amber-500 cursor-pointer shrink-0">
                                 <div class="min-w-0">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <h4 class="font-extrabold text-sm text-white truncate ${item.completed ? 'line-through opacity-50' : ''}">${item.title}</h4>
@@ -201,15 +228,34 @@
                 } else {
                     container.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-xs font-medium">No notes or reminders deployed yet.</div>`;
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Error fetching notes:", err);
+            }
         }
 
+        // Toggle Note Status and Refresh UI
         async function toggleTrackerNote(id) {
             try {
                 await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST' });
-                fetchTrackerNotes();
-            } catch (err) {}
+                fetchTrackerNotes(); // Refresh to update the strike-through styling
+            } catch (err) {
+                console.error("Error toggling note:", err);
+            }
         }
+
+        // --- Original Habit Logic ---
+        async function toggleHabit(id, completed) {
+             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+             try {
+                await fetch(`/api/habits/${id}/toggle`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ date: targetDate, completed })
+                });
+                fetchHabits(targetDate);
+             } catch (err) {}
+        }
+
 
         function shiftDate(days) {
             const dateInput = document.getElementById('targetDateInput');
@@ -274,53 +320,16 @@
             }).join('');
         }
 
-        async function verifyGlobalSystemLock() {
-            try {
-                const ts = new Date().getTime();
-                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
-                const data = await res.json();
-                
-                if (data.locked) {
-                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
-                    const sessionData = await sessionRes.json();
-                    
-                    if (sessionData.role !== 'ADMIN') {
-                        // 🛑 સામાન્ય યુઝર માટે - Full Screen Lock Display
-                        document.body.innerHTML = `
-                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                                    <span class="text-5xl animate-bounce">🛡️</span>
-                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED BY ADMIN</h2>
-                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                        The entire tracker portal has been globally locked by the administrator. All execution vectors are frozen.
-                                    </p>
-                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                        Access Denied / Contact Admin
-                                    </div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                        Return to Gateway
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // 🟢 એડમિન માટે - Smart Warning Banner
-                        const adminBanner = document.createElement('div');
-                        adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
-                        adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
-                        document.body.prepend(adminBanner);
-                    }
-                }
-            } catch (err) {
-                console.error("Lock verification failed", err);
-            }
-        }
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = 'index.html';
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             checkPreLaunchLock();
             fetchHabits();
-            fetchTrackerNotes();
+            fetchTrackerNotes(); // Make sure this runs!
         });
     </script>
 </body>
