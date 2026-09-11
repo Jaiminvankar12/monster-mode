@@ -329,10 +329,12 @@ app.use(session({
     cookie: { secure: false, httpOnly: true, sameSite: 'strict', maxAge: 1000 * 60 * 60 * 24 }
 }));
 
-// STRICT GLOBAL SYSTEM LOCK GUARD MIDDLEWARE
+// STRICT GLOBAL SYSTEM LOCK GUARD MIDDLEWARE (Direct JSON File Check)
 function requireAuth(req, res, next) {
     let lockStatus = getSystemLockStatus();
     const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
+    
+    // 🛑 Direct block if locked and not admin
     if (lockStatus.locked && !isAdmin) {
         if (req.accepts('html')) {
             return res.send(`
@@ -528,7 +530,7 @@ app.get('/control-panel.html', requireAuth, (req, res) => { res.sendFile(path.jo
 
 // ================= AUTHENTICATION & LOGIN ROUTES =================
 app.post('/api/auth/login', async (req, res) => {
-    // 🛑 STRICT SERVER-SIDE LOCK GUARD (Blocks login if system is locked)
+    // 🛑 BULLSEYE: Direct JSON File Check for System Lock
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked) {
         return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted." });
