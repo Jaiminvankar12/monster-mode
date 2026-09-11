@@ -62,21 +62,21 @@
 
     <div id="inlineStatusNotification"></div>
 
-    <!-- Custom Secure Action Password Modal -->
+    <!-- Custom Secure Action Password Modal (Cleaned & Secured) -->
     <div id="secureActionModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-3xl border border-red-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-2xl">🔒</span>
                 <div>
                     <h3 class="text-base font-black uppercase tracking-wider text-white">Security Authorization Required</h3>
-                    <p class="text-[11px] text-red-400 font-bold uppercase tracking-wider">Restricted Action Vector</p>
+                    <p class="text-[11px] text-red-400 font-bold uppercase tracking-wider" id="modalActionSubtitle">Restricted Action Vector</p>
                 </div>
             </div>
-            <p class="text-xs text-slate-400 mb-6">Enter your Master Admin Password (`Jay#monster@student`) to authorize this operation.</p>
+            <p class="text-xs text-slate-400 mb-6">Enter the designated security password for this operation to proceed.</p>
             
             <form class="space-y-4" onsubmit="handleSecureActionSubmit(event)">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Master Admin Password</label>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Security Password</label>
                     <input type="password" id="actionSecurityPasswordInput" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-red-500 outline-none" placeholder="Enter password...">
                 </div>
                 <div class="flex gap-3 pt-2">
@@ -418,13 +418,17 @@
 
     <script>
         let pendingActionCallback = null;
+        let currentActionType = 'add'; // 'add', 'edit', 'delete', 'lock'
 
-        function requestSecureAuthorization(callback) {
+        function requestSecureAuthorization(actionType, callback) {
+            currentActionType = actionType;
             pendingActionCallback = callback;
             const modal = document.getElementById('secureActionModal');
             const input = document.getElementById('actionSecurityPasswordInput');
+            const subtitle = document.getElementById('modalActionSubtitle');
             if (modal && input) {
                 input.value = '';
+                if (subtitle) subtitle.innerText = `${actionType.toUpperCase()} OPERATION VECTOR`;
                 modal.classList.remove('hidden');
                 input.focus();
             }
@@ -436,16 +440,37 @@
             pendingActionCallback = null;
         }
 
-        function handleSecureActionSubmit(e) {
+        async function handleSecureActionSubmit(e) {
             e.preventDefault();
             const password = document.getElementById('actionSecurityPasswordInput').value;
-            if (password === "Jay#monster@student") {
-                closeSecureActionModal();
-                if (pendingActionCallback) {
-                    pendingActionCallback();
+
+            // Handle System Lock authorization separately
+            if (currentActionType === 'lock') {
+                if (password === "Jay#monster@student") {
+                    closeSecureActionModal();
+                    if (pendingActionCallback) pendingActionCallback(password);
+                } else {
+                    showStatusMessage("❌ Invalid System Lock Password!", "error");
                 }
-            } else {
-                showStatusMessage("❌ Invalid Master Security Password!", "error");
+                return;
+            }
+
+            // Verify Action Specific Passwords via Backend Server
+            try {
+                const res = await fetch('/api/verify-action-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionType: currentActionType, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    closeSecureActionModal();
+                    if (pendingActionCallback) pendingActionCallback();
+                } else {
+                    showStatusMessage("❌ " + (data.error || "Invalid Password!"), "error");
+                }
+            } catch (err) {
+                showStatusMessage("❌ Authorization server error", "error");
             }
         }
 
@@ -559,7 +584,7 @@
         if (noteForm) {
             noteForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('add', async () => {
                     const title = document.getElementById('noteTitle').value;
                     const description = document.getElementById('noteDesc').value;
                     const isReminder = document.getElementById('panelIsReminder').checked;
@@ -584,7 +609,7 @@
         }
 
         function confirmAndDeleteNote(id) {
-            requestSecureAuthorization(async () => {
+            requestSecureAuthorization('delete', async () => {
                 try {
                     const res = await fetch(`/api/notes-reminders/${id}`, { method: 'DELETE' });
                     if (res.ok) {
@@ -635,8 +660,9 @@
         if (habitForm) {
             habitForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
-                    const editId = document.getElementById('editHabitId').value;
+                const editId = document.getElementById('editHabitId').value;
+                const actionType = editId ? 'edit' : 'add';
+                requestSecureAuthorization(actionType, async () => {
                     const name = document.getElementById('habitName').value;
                     const category = document.getElementById('habitCategory').value || 'General';
                     const description = document.getElementById('habitDesc').value;
@@ -652,7 +678,7 @@
         }
 
         function confirmAndDeleteHabit(id) {
-            requestSecureAuthorization(async () => {
+            requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/habits/${id}`, { method: 'DELETE' });
                 if (res.ok) { showStatusMessage("Habit deleted", "error"); loadHabits(); }
             });
@@ -698,8 +724,9 @@
         if (workoutForm) {
             workoutForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
-                    const editId = document.getElementById('editWorkoutId').value;
+                const editId = document.getElementById('editWorkoutId').value;
+                const actionType = editId ? 'edit' : 'add';
+                requestSecureAuthorization(actionType, async () => {
                     const name = document.getElementById('workoutName').value;
                     const sets = document.getElementById('workoutSets').value;
                     const value = document.getElementById('workoutValue').value;
@@ -715,7 +742,7 @@
         }
 
         function confirmAndDeleteWorkout(id) {
-            requestSecureAuthorization(async () => {
+            requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' });
                 if (res.ok) { showStatusMessage("Workout deleted", "error"); loadWorkouts(); }
             });
@@ -761,8 +788,9 @@
         if (studyForm) {
             studyForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
-                    const editId = document.getElementById('editStudyId').value;
+                const editId = document.getElementById('editStudyId').value;
+                const actionType = editId ? 'edit' : 'add';
+                requestSecureAuthorization(actionType, async () => {
                     const name = document.getElementById('studyName').value;
                     const dailyTargetMinutes = document.getElementById('studyTarget').value;
                     const startDate = document.getElementById('studyStartDate').value || "2026-09-11";
@@ -780,7 +808,7 @@
         }
 
         function confirmAndDeleteStudy(id) {
-            requestSecureAuthorization(async () => {
+            requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
                 if (res.ok) { showStatusMessage("Subject deleted", "error"); loadStudy(); }
             });
@@ -824,8 +852,9 @@
         if (hygieneForm) {
             hygieneForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
-                    const editId = document.getElementById('editHygieneId').value;
+                const editId = document.getElementById('editHygieneId').value;
+                const actionType = editId ? 'edit' : 'add';
+                requestSecureAuthorization(actionType, async () => {
                     const name = document.getElementById('hygieneName').value;
                     const frequency = document.getElementById('hygieneFreq').value;
                     try {
@@ -839,7 +868,7 @@
         }
 
         function confirmAndDeleteHygiene(id) {
-            requestSecureAuthorization(async () => {
+            requestSecureAuthorization('delete', async () => {
                 const res = await fetch(`/api/hygiene/${id}`, { method: 'DELETE' });
                 if (res.ok) { showStatusMessage("Task deleted", "error"); loadHygiene(); }
             });
@@ -860,7 +889,7 @@
         if (hydrationForm) {
             hydrationForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('edit', async () => {
                     const glassSize = document.getElementById('configGlassSize').value;
                     const goal = document.getElementById('configGoal').value;
                     try {
@@ -886,7 +915,7 @@
         if (examForm) {
             examForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('edit', async () => {
                     const enabled = document.getElementById('examModeEnabled').checked;
                     const targetMinutes = document.getElementById('examModeTarget').value;
                     try {
@@ -912,7 +941,7 @@
         if (sanctuaryForm) {
             sanctuaryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('edit', async () => {
                     const enabled = document.getElementById('sanctuaryEnabled').checked;
                     const reason = document.getElementById('sanctuaryReason').value;
                     try {
@@ -937,7 +966,7 @@
         if (bgForm) {
             bgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('edit', async () => {
                     const url = document.getElementById('landingBgUrlInput').value;
                     try {
                         const res = await fetch('/api/control-panel/landing-bg', {
@@ -971,7 +1000,7 @@
         if (dashboardBgForm) {
             dashboardBgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                requestSecureAuthorization(async () => {
+                requestSecureAuthorization('edit', async () => {
                     const color = document.getElementById('dashboardBgColorInput').value;
                     try {
                         const res = await fetch('/api/control-panel/dashboard-bg', {
@@ -998,17 +1027,30 @@
         let pendingLockState = false;
         function requestSystemLockAuth(shouldLock) {
             pendingLockState = shouldLock;
-            requestSecureAuthorization(() => {
+            requestSecureAuthorization('lock', () => {
                 executeSystemLock(pendingLockState);
             });
         }
 
         async function executeSystemLock(shouldLock) {
             const adminPassword = document.getElementById('actionSecurityPasswordInput').value;
-            const res = await fetch('/api/system-lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ locked: shouldLock, adminPassword }) });
-            const data = await res.json();
-            if (res.ok) { alert("⚡ " + data.message); location.reload(); }
-            else { alert("❌ " + data.error); }
+            try {
+                const res = await fetch('/api/system-lock', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ locked: shouldLock, adminPassword }) 
+                });
+                const data = await res.json();
+                if (res.ok) { 
+                    showStatusMessage(data.message, "success"); 
+                    closeSecureActionModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else { 
+                    showStatusMessage("❌ " + data.error, "error"); 
+                }
+            } catch (err) {
+                showStatusMessage("❌ Connection error", "error");
+            }
         }
 
         loadHabits(); loadWorkouts(); loadStudy(); loadHygiene();
