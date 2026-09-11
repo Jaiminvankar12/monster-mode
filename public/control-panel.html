@@ -471,36 +471,23 @@
             e.preventDefault();
             const password = document.getElementById('actionSecurityPasswordInput').value;
 
-            // Handle System Lock authorization separately
-            if (currentActionType === 'lock') {
-                if (password === "Jay#monster@student") {
-                    closeSecureActionModal();
-                    if (pendingActionCallback) pendingActionCallback(password);
-                } else {
-                    showStatusMessage("❌ Wrong Password! Incorrect System Lock Password.", "error");
-                }
+            // Secure Direct Client Password Verification for all actions (Lock, Add, Edit, Delete)
+            let validPassword = "";
+            if (currentActionType === 'lock') validPassword = "Jay#monster@student";
+            else if (currentActionType === 'add') validPassword = "Jay#add@monster";
+            else if (currentActionType === 'edit') validPassword = "Jay#edit@monster";
+            else if (currentActionType === 'delete') validPassword = "Jay#del@monster";
+
+            if (password !== validPassword) {
+                showStatusMessage(`❌ Wrong Password! Incorrect password for ${currentActionType.toUpperCase()} action.`, "error");
                 return;
             }
 
-            // Verify Action Specific Passwords via Backend Server
-            try {
-                const res = await fetch('/api/verify-action-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ actionType: currentActionType, password })
-                });
-                const data = await res.json();
-                if (res.ok && data.success) {
-                    showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
-                    closeSecureActionModal();
-                    if (pendingActionCallback) {
-                        pendingActionCallback();
-                    }
-                } else {
-                    showStatusMessage("❌ " + (data.error || "Wrong Password! Access Denied."), "error");
-                }
-            } catch (err) {
-                showStatusMessage("❌ Authorization server connection error", "error");
+            closeSecureActionModal();
+            showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
+            
+            if (pendingActionCallback) {
+                pendingActionCallback(password);
             }
         }
 
