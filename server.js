@@ -373,13 +373,18 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
+// 🔥 FIX: Server Timezone Issue (Convert explicitly to IST / Indian Time)
 cron.schedule('* * * * *', async () => {
     try {
         let notesData = readJSON(NOTES_REMINDERS_FILE);
-        let now = new Date();
-        let todayStr = now.toISOString().split('T')[0];
-        let currentHours = String(now.getHours()).padStart(2, '0');
-        let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        
+        let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+        let istNow = new Date(istTimeStr);
+        
+        let todayStr = istNow.getFullYear() + "-" + String(istNow.getMonth() + 1).padStart(2, '0') + "-" + String(istNow.getDate()).padStart(2, '0');
+        
+        let currentHours = String(istNow.getHours()).padStart(2, '0');
+        let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
         let currentTimeStr = `${currentHours}:${currentMinutes}`;
 
         let updated = false;
@@ -396,8 +401,10 @@ cron.schedule('* * * * *', async () => {
             }
         }
         if (updated) writeJSON(NOTES_REMINDERS_FILE, notesData);
-    } catch (err) {}
-}, { timezone: 'Asia/Kolkata' });
+    } catch (err) {
+        console.error("Reminder Cron Error:", err);
+    }
+});
 
 // ================= 🔐 SYSTEM LOCK/UNLOCK =================
 app.get('/api/system-lock', (req, res) => {
@@ -1055,6 +1062,10 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     let updatedXP = getUserXP(userId);
     if (completed) updatedXP = addXP(userId, 40);
     res.json({ success: true, ...updatedXP });
+});
+
+app.get('/api/monster-coach', (req, res) => {
+    res.json({ success: true, message: "Monster Coach active." });
 });
 
 app.listen(PORT, () => {
