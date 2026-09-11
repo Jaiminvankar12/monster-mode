@@ -42,6 +42,10 @@ const MASTER_USER_ID = "admin_master_user";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+// In-memory Anti-Duplicate Dispatch Lock (Prevents race conditions)
+const processedRemindersLock = new Set();
+let isCronRunning = false;
+
 // Secure Telegram Notification Dispatcher
 async function sendTelegramNotification(message) {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
@@ -373,8 +377,11 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
-// 🔥 FIX: Server Timezone Issue (Convert explicitly to IST / Indian Time)
+// 🔥 FIX: SERVER TIMEZONE + DOUBLE NOTIFICATION RACE CONDITION FIX
 cron.schedule('* * * * *', async () => {
+    if (isCronRunning) return; // Concurrency block
+    isCronRunning = true;
+
     try {
         let notesData = readJSON(NOTES_REMINDERS_FILE);
         
@@ -382,27 +389,64 @@ cron.schedule('* * * * *', async () => {
         let istNow = new Date(istTimeStr);
         
         let todayStr = istNow.getFullYear() + "-" + String(istNow.getMonth() + 1).padStart(2, '0') + "-" + String(istNow.getDate()).padStart(2, '0');
-        
         let currentHours = String(istNow.getHours()).padStart(2, '0');
         let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
         let currentTimeStr = `${currentHours}:${currentMinutes}`;
 
-        let updated = false;
-        for (let userId in notesData) {
-            let items = notesData[userId];
-            if (!Array.isArray(items)) continue;
-
-            for (let item of items) {
-                if (item.isReminder && !item.notifiedToday && item.date === todayStr && item.time === currentTimeStr) {
-                    await sendTelegramMessage(`⏰ *MONSTER REMINDER ALERT*\n\n📌 *${item.title}*\n📝 ${item.description || 'No details.'}\n\n🔥 *Execute immediately!*`);
-                    item.notifiedToday = true;
-                    updated = true;
+        // Deduplicate items across multiple users/shared keys
+        const itemMap = new Map();
+        for (let userKey in notesData) {
+            let list = notesData[userKey];
+            if (Array.isArray(list)) {
+                for (let it of list) {
+                    if (it && it.id) {
+                        itemMap.set(it.id, it);
+                    }
                 }
             }
         }
-        if (updated) writeJSON(NOTES_REMINDERS_FILE, notesData);
+
+        const messagesToDispatch = [];
+
+        // Identify items that need immediate dispatch
+        for (let [itemId, item] of itemMap.entries()) {
+            const lockKey = `${itemId}_${todayStr}_${currentTimeStr}`;
+            
+            if (
+                item.isReminder && 
+                !item.notifiedToday && 
+                item.date === todayStr && 
+                item.time === currentTimeStr &&
+                !processedRemindersLock.has(lockKey)
+            ) {
+                // Instantly lock memory and mark item
+                processedRemindersLock.add(lockKey);
+                item.notifiedToday = true;
+                messagesToDispatch.push({
+                    lockKey,
+                    text: `⏰ *MONSTER REMINDER ALERT*\n\n📌 *${item.title}*\n📝 ${item.description || 'No details.'}\n\n🔥 *Execute immediately!*`
+                });
+            }
+        }
+
+        // Save states back into all matching user objects first to prevent DB read race
+        if (messagesToDispatch.length > 0) {
+            for (let userKey in notesData) {
+                if (Array.isArray(notesData[userKey])) {
+                    notesData[userKey] = notesData[userKey].map(obj => itemMap.get(obj.id) || obj);
+                }
+            }
+            writeJSON(NOTES_REMINDERS_FILE, notesData);
+
+            // Now safely dispatch telegram notifications 1-by-1
+            for (const dispatch of messagesToDispatch) {
+                await sendTelegramMessage(dispatch.text);
+            }
+        }
     } catch (err) {
         console.error("Reminder Cron Error:", err);
+    } finally {
+        isCronRunning = false;
     }
 });
 
@@ -424,7 +468,7 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
     let currentLockData = getSystemLockStatus();
     let newLockStatus = locked !== undefined ? locked : true;
 
-    // 🛑 SPAM FIX: Jo status already same hoy to telegram msg nai moklavano
+    // 🛑 SPAM FIX: Status already same hoy to duplicate msg nai moklavano
     if (currentLockData.locked === newLockStatus) {
         return res.json({ 
             success: true, 
@@ -433,7 +477,6 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
         });
     }
     
-    // Status change thay to j save karo ane 1 j vaar message moklo
     let lockData = { locked: newLockStatus, lockedAt: newLockStatus ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     
@@ -493,7 +536,6 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, (req, res) => {
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
-
 // ================= AUTHENTICATION & MULTI-LAYER LOGIN ROUTES =================
 
 // LAYER 1: Email + Password -> Generates OTP (2FA)
@@ -512,8 +554,14 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(403).json({ error: "🛑 HARDCORE LOCK: System is locked. Tracker access denied.", locked: true });
     }
 
+    // Debounce/Rate-limit quick double requests within 10 seconds
+    const now = Date.now();
+    if (req.session.pendingAuth && req.session.pendingAuth.email === user.email && req.session.pendingAuth.sentAt && (now - req.session.pendingAuth.sentAt < 10000)) {
+        return res.json({ success: true, requireOtp: true, message: "Authorization code already sent. Please check your Telegram." });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: false };
+    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: false, sentAt: now };
 
     await sendTelegramNotification(`🔐 *SECURITY ALERT: LOGIN ATTEMPT*\n\nPortal: *TRACKER*\nUser: \`${user.email}\`\n\nYour Authorization Code is: \`${otp}\``);
     res.json({ success: true, requireOtp: true, message: "Authorization code sent to your Telegram." });
@@ -529,8 +577,13 @@ app.post('/api/control-panel/login', async (req, res) => {
         return res.status(401).json({ error: "🔒 Access Denied! Invalid Admin credentials." });
     }
 
+    const now = Date.now();
+    if (req.session.pendingAuth && req.session.pendingAuth.email === user.email && req.session.pendingAuth.sentAt && (now - req.session.pendingAuth.sentAt < 10000)) {
+        return res.json({ success: true, requireOtp: true, message: "Admin authorization code already sent. Please check Telegram." });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: true };
+    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: true, sentAt: now };
 
     await sendTelegramNotification(`🔐 *SECURITY ALERT: ADMIN LOGIN ATTEMPT*\n\nPortal: *CONTROL PANEL*\nUser: \`${user.email}\`\n\nYour Admin Authorization Code is: \`${otp}\``);
     res.json({ success: true, requireOtp: true, message: "Admin authorization code sent to your Telegram." });
@@ -548,26 +601,21 @@ app.post('/api/auth/verify-otp', async (req, res) => {
         return res.status(401).json({ error: "❌ Incorrect OTP Code! Access Denied." });
     }
 
-    // 🛡️ SECURITY BREACH CHECK: Verify the portal context matches the initial login
     if (portal === 'admin' && !req.session.pendingAuth.isAdminPortal) {
         delete req.session.pendingAuth;
         return res.status(403).json({ error: "❌ Security Breach Detected! Invalid portal execution flow." });
     }
 
-    // 🔒 CHECK 2: THE ULTIMATE DOUBLE-LOCK VALIDATION
-    // Even if OTP is 100% correct, check the lock status right before granting access!
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked && portal !== 'admin') {
-        delete req.session.pendingAuth; // Destroy the session immediately
+        delete req.session.pendingAuth;
         return res.status(403).json({ error: "🛑 HARDCORE LOCK: Portal is currently locked by Admin. Correct OTP Denied.", locked: true });
     }
 
     if (portal === 'admin') {
-        // Admin needs 3FA, move to next step
         req.session.pendingAuth.otpVerified = true;
         return res.json({ success: true, require3fa: true, message: "OTP Verified. Awaiting Master Control Key." });
     } else {
-        // Tracker user is done after 2FA
         req.session.userId = req.session.pendingAuth.userId;
         req.session.role = req.session.pendingAuth.role;
         req.session.email = req.session.pendingAuth.email;
@@ -588,7 +636,6 @@ app.post('/api/control-panel/verify-3fa', async (req, res) => {
         return res.status(400).json({ error: "Invalid security flow. OTP verification required first." });
     }
 
-    // 🔥 3FA MASTER KEY
     if (masterKey !== "Jay_monster_mode_on") {
         return res.status(401).json({ error: "❌ Invalid Master Key! 3FA Access Denied." });
     }
@@ -661,7 +708,6 @@ app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     let currentStatus = data[userId] ? data[userId].enabled : false;
     let newStatus = enabled !== undefined ? enabled : false;
 
-    // 🛑 SPAM FIX: Status change thay to j message moklo
     if (currentStatus !== newStatus) {
         data[userId] = { enabled: newStatus, activatedAt: newStatus ? today : null, reason: reason || "Emergency Recovery" };
         writeJSON(SANCTUARY_FILE, data);
