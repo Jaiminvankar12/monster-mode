@@ -33,7 +33,7 @@ const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
 const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
 const MATES_FILE = path.join(__dirname, 'mates.json');
-const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json'); // 🔥 NEW: Dynamic Text DB
+const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json');
 
 // 🔥 NEW LAUNCH DATE SET TO 12-09-2026 🔥
 const MONSTER_LAUNCH_DATE = "2026-09-12";
@@ -91,7 +91,7 @@ function readJSON(file) {
             ];
         } else if (file === MATES_FILE) {
             initial = [];
-        } else if (file === GATEWAY_TEXT_FILE) { // 🔥 NEW INIT
+        } else if (file === GATEWAY_TEXT_FILE) {
             initial = { headline: "BECOME A<br>MONSTER.<br>DOMINATE REALITY.", subtext: "Pure discipline. Zero excuses. Absolute control." };
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === DASHBOARD_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
@@ -472,16 +472,10 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, (req, res) => {
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
-// HTML Page Serving Routes (Covered by Interceptor)
-app.get('/hydration', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hydration.html')); });
-app.get('/hygiene', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
-app.get('/study', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'study.html')); });
-app.get('/workout', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'workout.html')); });
-app.get('/tracker', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'tracker.html')); });
-app.get('/dashboard', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboard.html')); });
-app.get('/control-panel', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'control-panel.html')); });
 
-// ================= AUTHENTICATION & LOGIN ROUTES =================
+// ================= AUTHENTICATION & MULTI-LAYER LOGIN ROUTES =================
+
+// LAYER 1: Email + Password -> Generates OTP (2FA)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     let users = readJSON(USERS_AUTH_FILE);
@@ -491,20 +485,20 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(401).json({ error: "Wrong Password! Invalid email or password." });
     }
 
+    // 🔒 CHECK 1: If system is locked, reject IMMEDIATELY. Don't even send OTP.
     let lockStatus = getSystemLockStatus();
-    if (lockStatus.locked) {
+    if (lockStatus.locked && user.role !== 'ADMIN') {
         return res.status(403).json({ error: "🛑 HARDCORE LOCK: System is locked. Tracker access denied.", locked: true });
     }
 
-    req.session.userId = user.id;
-    req.session.role = user.role;
-    req.session.email = user.email;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: false };
 
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *TRACKER PORTAL LOGIN*\nUser: ${user.email}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-
-    res.json({ success: true, role: user.role, email: user.email, message: "Successfully logged in." });
+    await sendTelegramNotification(`🔐 *SECURITY ALERT: LOGIN ATTEMPT*\n\nPortal: *TRACKER*\nUser: \`${user.email}\`\n\nYour Authorization Code is: \`${otp}\``);
+    res.json({ success: true, requireOtp: true, message: "Authorization code sent to your Telegram." });
 });
 
+// LAYER 1 (ADMIN): Email + Password -> Generates OTP (2FA)
 app.post('/api/control-panel/login', async (req, res) => {
     const { email, password } = req.body;
     let users = readJSON(USERS_AUTH_FILE);
@@ -514,14 +508,74 @@ app.post('/api/control-panel/login', async (req, res) => {
         return res.status(401).json({ error: "🔒 Access Denied! Invalid Admin credentials." });
     }
 
-    req.session.controlPanelAuth = true;
-    req.session.userId = user.id;
-    req.session.role = 'ADMIN';
-    req.session.email = user.email;
-    
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛡️ *ADMIN PANEL LOGIN*\nStatus: Authorized\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: true };
 
-    res.json({ success: true, message: "Control Panel authorized." });
+    await sendTelegramNotification(`🔐 *SECURITY ALERT: ADMIN LOGIN ATTEMPT*\n\nPortal: *CONTROL PANEL*\nUser: \`${user.email}\`\n\nYour Admin Authorization Code is: \`${otp}\``);
+    res.json({ success: true, requireOtp: true, message: "Admin authorization code sent to your Telegram." });
+});
+
+// LAYER 2: OTP Verification
+app.post('/api/auth/verify-otp', async (req, res) => {
+    const { otp, portal } = req.body;
+
+    if (!req.session.pendingAuth) {
+        return res.status(400).json({ error: "Session expired or invalid. Please try logging in again." });
+    }
+
+    if (req.session.pendingAuth.otp !== otp) {
+        return res.status(401).json({ error: "❌ Incorrect OTP Code! Access Denied." });
+    }
+
+    // 🔒 CHECK 2: THE ULTIMATE LOCK CHECK. 
+    // Even if OTP is correct, check lock status right before granting access!
+    let lockStatus = getSystemLockStatus();
+    if (lockStatus.locked && portal !== 'admin') {
+        delete req.session.pendingAuth; // Destroy the session immediately
+        return res.status(403).json({ error: "🛑 HARDCORE LOCK: System was locked during verification. Access denied.", locked: true });
+    }
+
+    if (portal === 'admin') {
+        // Admin needs 3FA, move to next step
+        req.session.pendingAuth.otpVerified = true;
+        return res.json({ success: true, require3fa: true, message: "OTP Verified. Awaiting Master Control Key." });
+    } else {
+        // Tracker user is done after 2FA
+        req.session.userId = req.session.pendingAuth.userId;
+        req.session.role = req.session.pendingAuth.role;
+        req.session.email = req.session.pendingAuth.email;
+        const emailToLog = req.session.email;
+        
+        delete req.session.pendingAuth;
+
+        await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *TRACKER PORTAL LOGIN SUCCESSFUL*\nUser: \`${emailToLog}\`\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+        return res.json({ success: true, message: "Login successful!" });
+    }
+});
+
+// LAYER 3 (ADMIN ONLY): Master Key Verification
+app.post('/api/control-panel/verify-3fa', async (req, res) => {
+    const { masterKey } = req.body;
+
+    if (!req.session.pendingAuth || !req.session.pendingAuth.otpVerified) {
+        return res.status(400).json({ error: "Invalid security flow. OTP verification required first." });
+    }
+
+    if (masterKey !== "Jay#monster@student") {
+        return res.status(401).json({ error: "❌ Invalid Master Key! 3FA Access Denied." });
+    }
+
+    req.session.userId = req.session.pendingAuth.userId;
+    req.session.role = req.session.pendingAuth.role;
+    req.session.email = req.session.pendingAuth.email;
+    req.session.controlPanelAuth = true;
+
+    const emailToLog = req.session.email;
+    delete req.session.pendingAuth;
+
+    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *ADMIN PANEL LOGIN SUCCESSFUL (3FA VERIFIED)*\nUser: \`${emailToLog}\`\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+
+    res.json({ success: true, message: "Admin Login full clearance granted." });
 });
 
 app.post('/api/auth/logout', async (req, res) => {
@@ -993,10 +1047,6 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     let updatedXP = getUserXP(userId);
     if (completed) updatedXP = addXP(userId, 40);
     res.json({ success: true, ...updatedXP });
-});
-
-app.get('/api/monster-coach', (req, res) => {
-    res.json({ success: true, message: "Monster Coach active." });
 });
 
 app.listen(PORT, () => {

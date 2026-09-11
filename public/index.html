@@ -38,7 +38,7 @@
 <body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">
 
     <div class="flex w-full min-h-screen bg-[#05070b]">
-        <!-- Left Side: Crystal Clear Cinematic Background (Hidden on mobile) -->
+        <!-- Left Side: Cinematic Background -->
         <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 hero-bg" id="heroBgContainer">
             <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-transparent opacity-60"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#05070b]/40"></div>
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Portal Switcher Tabs -->
-                <div class="flex bg-[#0c0e15] p-1.5 rounded-2xl border border-white/10 mb-6 shadow-inner">
+                <div id="portalTabs" class="flex bg-[#0c0e15] p-1.5 rounded-2xl border border-white/10 mb-6 shadow-inner">
                     <button type="button" id="tabTracker" onclick="switchPortal('tracker')" class="flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer">
                         🔥 Tracker Portal
                     </button>
@@ -78,7 +78,7 @@
                     </button>
                 </div>
 
-                <!-- Auth Form -->
+                <!-- STEP 1: Email/Password Form -->
                 <form id="authForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">EMAIL ADDRESS</label>
@@ -89,7 +89,7 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">PASSWORD</label>
                         <div class="relative">
                             <input type="password" id="password" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pr-12 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner" placeholder="••••••••••••" required>
-                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-transform active:scale-90 cursor-pointer p-1">
+                            <button type="button" onclick="togglePasswordVisibility('password', 'eyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-transform active:scale-90 cursor-pointer p-1">
                                 <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -99,16 +99,66 @@
                     </div>
 
                     <div id="errorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold"></div>
-                    <div id="successMessage" class="text-emerald-400 text-xs hidden bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/30 font-black uppercase tracking-wider text-center shadow-lg shadow-emerald-500/10"></div>
-
+                    
                     <button type="submit" id="submitBtn" class="w-full py-4 mt-2 red-glow-btn text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">
                         ENTER TRACKER PORTAL
                     </button>
                 </form>
 
-                <div class="mt-6 text-center border-t border-white/5 pt-5">
-                    <p id="toggleText" class="text-xs text-slate-400">Don't have an account? <a href="#" id="toggleMode" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Initialize Account</a></p>
-                </div>
+                <!-- STEP 2: Telegram OTP Form (Hidden initially) -->
+                <form id="otpForm" class="hidden space-y-4">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">📱</span>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mt-2">2FA Security Lock</h3>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Check Telegram for Authorization Code</p>
+                    </div>
+
+                    <div>
+                        <input type="text" id="otpInput" class="w-full bg-[#07090f] border border-blue-500/50 rounded-xl px-4 py-4 text-white text-2xl tracking-[0.5em] text-center focus:outline-none focus:border-blue-400 transition shadow-[0_0_15px_rgba(59,130,246,0.2)]" placeholder="------" maxlength="6" autocomplete="off">
+                    </div>
+
+                    <div id="otpErrorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold text-center"></div>
+
+                    <button type="submit" id="verifyOtpBtn" class="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-500/30 transition">
+                        VERIFY & PROCEED
+                    </button>
+                    
+                    <button type="button" onclick="cancelAuthFlow()" class="w-full py-3 mt-2 text-slate-500 font-bold hover:text-white text-xs uppercase tracking-widest transition cursor-pointer">
+                        Cancel / Go Back
+                    </button>
+                </form>
+
+                <!-- STEP 3: Admin Master Key Form (Hidden initially) -->
+                <form id="step3Form" class="hidden space-y-4">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">🔐</span>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mt-2">3FA Admin Clearance</h3>
+                        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Master Security Key Required</p>
+                    </div>
+
+                    <div>
+                        <div class="relative">
+                            <input type="password" id="masterKeyInput" class="w-full bg-[#07090f] border border-purple-500/50 rounded-xl px-4 py-4 pr-12 text-white text-sm focus:outline-none focus:border-purple-400 transition shadow-[0_0_15px_rgba(168,85,247,0.2)]" placeholder="Enter Admin Master Key..." autocomplete="off">
+                            <button type="button" onclick="togglePasswordVisibility('masterKeyInput', 'eyeIcon3')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-transform active:scale-90 cursor-pointer p-1">
+                                <svg id="eyeIcon3" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="step3ErrorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold text-center"></div>
+
+                    <button type="submit" id="verify3faBtn" class="w-full py-4 mt-2 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30 transition">
+                        AUTHORIZE ADMIN ACCESS
+                    </button>
+                    
+                    <button type="button" onclick="cancelAuthFlow()" class="w-full py-3 mt-2 text-slate-500 font-bold hover:text-white text-xs uppercase tracking-widest transition cursor-pointer">
+                        Abort
+                    </button>
+                </form>
+
             </div>
 
         </div>
@@ -116,12 +166,9 @@
 
     <script>
         let currentPortal = 'tracker';
-        let isRegister = false;
-        const LAUNCH_DATE = "2026-09-12"; // Updated launch date here as well
-
+        
         async function loadDynamicLandingBg() {
             try {
-                // Prevent browser caching for background image check
                 const res = await fetch(`/api/landing-bg?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const data = await res.json();
                 const heroDiv = document.getElementById('heroBgContainer');
@@ -131,27 +178,20 @@
                                                      linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
                                                      url('${bgUrl}')`;
                 }
-            } catch (err) {
-                console.error("Failed to load background", err);
-            }
+            } catch (err) {}
         }
 
-        function togglePasswordVisibility() {
-            const input = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(iconId);
             if (!input || !eyeIcon) return;
             
             if (input.type === 'password') {
                 input.type = 'text';
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                `;
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
             } else {
                 input.type = 'password';
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                `;
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
             }
         }
 
@@ -160,74 +200,51 @@
             const tabTracker = document.getElementById('tabTracker');
             const tabAdmin = document.getElementById('tabAdmin');
             const submitBtn = document.getElementById('submitBtn');
-            const emailInput = document.getElementById('email');
 
             if (portal === 'tracker') {
                 tabTracker.className = "flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer";
                 tabAdmin.className = "flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
-                submitBtn.textContent = isRegister ? "REGISTER & INITIALIZE" : "ENTER TRACKER PORTAL";
-                emailInput.value = "";
+                submitBtn.textContent = "ENTER TRACKER PORTAL";
             } else {
                 tabAdmin.className = "flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer";
                 tabTracker.className = "flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
                 submitBtn.textContent = "ENTER ADMIN PANEL";
-                emailInput.value = "";
             }
         }
 
-        function toggleRegister(e) {
-            e.preventDefault();
-            isRegister = !isRegister;
-            const submitBtn = document.getElementById('submitBtn');
-            const title = document.getElementById('panelTitle');
-            const toggleText = document.getElementById('toggleText');
-
-            if (isRegister) {
-                title.textContent = "INITIALIZE ACCOUNT";
-                submitBtn.textContent = currentPortal === 'tracker' ? "REGISTER & INITIALIZE" : "ENTER ADMIN PANEL";
-                toggleText.innerHTML = `Already initialized? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Enter Portal</a>`;
-            } else {
-                title.textContent = "MONSTER MODE ON";
-                submitBtn.textContent = currentPortal === 'tracker' ? "ENTER TRACKER PORTAL" : "ENTER ADMIN PANEL";
-                toggleText.innerHTML = `Don't have an account? <a href="#" onclick="toggleRegister(event)" class="text-white font-bold hover:underline ml-1">Initialize Account</a>`;
-            }
+        function cancelAuthFlow() {
+            document.getElementById('otpForm').classList.add('hidden');
+            document.getElementById('step3Form').classList.add('hidden');
+            document.getElementById('authForm').classList.remove('hidden');
+            document.getElementById('portalTabs').classList.remove('hidden');
+            
+            document.getElementById('otpInput').value = "";
+            document.getElementById('masterKeyInput').value = "";
+            document.getElementById('otpErrorMessage').classList.add('hidden');
+            document.getElementById('step3ErrorMessage').classList.add('hidden');
         }
 
+        // STEP 1: INITIAL LOGIN (TRIGGERS OTP)
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             const errDiv = document.getElementById('errorMessage');
-            const succDiv = document.getElementById('successMessage');
             errDiv.classList.add('hidden');
-            succDiv.classList.add('hidden');
 
             try {
-                // 1. HARD BLOCK & CACHE BUSTING: Check Global System Lock LIVE (Bypass Browser Cache)
-                const lockRes = await fetch(`/api/system-lock?t=${new Date().getTime()}`, { 
-                    method: 'GET',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-                
+                // Check Global Lock First
+                const lockRes = await fetch(`/api/system-lock?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const lockData = await lockRes.json();
                 
                 if (lockData.locked && currentPortal !== 'admin') {
-                    errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
+                    errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked.";
                     errDiv.classList.remove('hidden');
-                    return; // Stop execution completely!
+                    return;
                 }
 
-                let endpoint = '';
-                if (currentPortal === 'admin') {
-                    endpoint = '/api/control-panel/login';
-                } else {
-                    endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-                }
+                let endpoint = currentPortal === 'admin' ? '/api/control-panel/login' : '/api/auth/login';
 
                 const res = await fetch(endpoint, {
                     method: 'POST',
@@ -239,33 +256,83 @@
                 if (!res.ok) {
                     errDiv.textContent = data.error || "Authentication failed.";
                     errDiv.classList.remove('hidden');
-                } else {
-                    // Double check lock status from server login response
-                    if (data.locked) {
-                        errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.";
-                        errDiv.classList.remove('hidden');
-                        return;
-                    }
-
-                    if (isRegister && currentPortal === 'tracker') {
-                        succDiv.textContent = data.message;
-                        succDiv.classList.remove('hidden');
-                        setTimeout(() => { toggleRegister(e); }, 1500);
-                    } else {
-                        succDiv.textContent = currentPortal === 'admin' ? "🛡️ Admin Panel Login Successful!" : "🔥 Tracker Portal Login Successful!";
-                        succDiv.classList.remove('hidden');
-
-                        setTimeout(() => {
-                            if (currentPortal === 'admin') {
-                                window.location.href = 'control-panel.html';
-                            } else {
-                                window.location.href = 'dashboard.html';
-                            }
-                        }, 1000);
-                    }
+                } else if (data.locked) {
+                    errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked.";
+                    errDiv.classList.remove('hidden');
+                } else if (data.requireOtp) {
+                    // 🎉 PASSWORD IS CORRECT! HIDE FORM AND SHOW OTP INPUT
+                    document.getElementById('authForm').classList.add('hidden');
+                    document.getElementById('portalTabs').classList.add('hidden');
+                    document.getElementById('otpForm').classList.remove('hidden');
+                    document.getElementById('otpInput').focus();
                 }
+
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
+                errDiv.classList.remove('hidden');
+            }
+        });
+
+        // STEP 2: VERIFY OTP
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otpInput').value;
+            const otpErrDiv = document.getElementById('otpErrorMessage');
+            otpErrDiv.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp, portal: currentPortal })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    otpErrDiv.textContent = data.error || "Verification failed.";
+                    otpErrDiv.classList.remove('hidden');
+                } else if (data.require3fa) {
+                    // 🚀 ADMIN NEEDS 3rd LAYER! Show Master Key Form
+                    document.getElementById('otpForm').classList.add('hidden');
+                    document.getElementById('step3Form').classList.remove('hidden');
+                    document.getElementById('masterKeyInput').focus();
+                } else {
+                    // Tracker User logic (Done at Layer 2)
+                    document.getElementById('verifyOtpBtn').innerText = "VERIFIED! ENTERING...";
+                    document.getElementById('verifyOtpBtn').classList.replace('bg-blue-600', 'bg-emerald-600');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                }
+            } catch (err) {
+                otpErrDiv.textContent = "Connection error verifying OTP.";
+                otpErrDiv.classList.remove('hidden');
+            }
+        });
+
+        // STEP 3: VERIFY 3FA MASTER KEY (ADMIN ONLY)
+        document.getElementById('step3Form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const masterKey = document.getElementById('masterKeyInput').value;
+            const errDiv = document.getElementById('step3ErrorMessage');
+            errDiv.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/control-panel/verify-3fa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ masterKey })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errDiv.textContent = data.error || "Verification failed.";
+                    errDiv.classList.remove('hidden');
+                } else {
+                    document.getElementById('verify3faBtn').innerText = "CLEARANCE GRANTED";
+                    document.getElementById('verify3faBtn').classList.replace('bg-purple-600', 'bg-emerald-600');
+                    setTimeout(() => { window.location.href = 'control-panel.html'; }, 800);
+                }
+            } catch (err) {
+                errDiv.textContent = "Connection error verifying Master Key.";
                 errDiv.classList.remove('hidden');
             }
         });
