@@ -141,7 +141,7 @@
             <button onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">💧 Hydration</button>
             <button onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam</button>
             <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
-            <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway BG</button>
+            <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway Settings</button>
             <button onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Dashboard BG</button>
             <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[90px] py-3 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Themes (50)</button>
         </div>
@@ -319,24 +319,43 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🛌</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Sanctuary Safe-Haven</h3></div>
         </div>
 
-        <!-- TAB 9: LANDING BACKGROUND MANAGEMENT -->
+        <!-- TAB 9: GATEWAY SETTINGS -->
         <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🖼️</span> Update Gateway Background Image</h3>
-                <form id="updateLandingBgForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Image URL (Direct Link)</label>
-                        <input type="url" id="landingBgUrlInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="https://i.pinimg.com/736x/...jpg">
-                    </div>
-                    <button type="submit" class="w-full py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">
-                        Deploy New Background
-                    </button>
-                </form>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+                <!-- Image Update -->
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2"><span>🖼️</span> Update Gateway Image</h3>
+                    <form id="updateLandingBgForm" class="space-y-3">
+                        <div>
+                            <input type="url" id="landingBgUrlInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="https://i.pinimg.com/736x/...jpg">
+                        </div>
+                        <button type="submit" class="w-full py-3 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Deploy Image</button>
+                    </form>
+                </div>
+                
+                <hr class="border-white/5">
+
+                <!-- Text Update -->
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-500 mb-4 flex items-center gap-2"><span>📝</span> Customize Gateway Text</h3>
+                    <form id="updateGatewayTextForm" class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Big Headline (Use &lt;br&gt; for new line)</label>
+                            <input type="text" id="gatewayHeadlineInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="BECOME A MONSTER.">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Small Subtext</label>
+                            <input type="text" id="gatewaySubtextInput" required class="w-full bg-[#0c0e15] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none" placeholder="Pure discipline.">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-amber-600 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer">Update Text</button>
+                    </form>
+                </div>
             </div>
+            
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-5xl mb-4">⚡</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Live Gateway Sync</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Instantly updates the background image on the main index.html login gateway via server.js.</p>
+                <p class="text-xs text-slate-400 max-w-xs">Instantly updates the login gateway visual aesthetics.</p>
             </div>
         </div>
 
@@ -492,7 +511,6 @@
 
         async function verifyAdminSession() {
             try {
-                // Added Cache-busting here
                 const res = await fetch('/api/control-panel/session?t=' + new Date().getTime(), { cache: 'no-store' });
                 const data = await res.json();
                 if (!data.authenticated) window.location.href = 'index.html';
@@ -536,7 +554,7 @@
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
-            if (tab === 'landingBg') loadLandingBgConfig();
+            if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
             if (tab === 'dashboardBg') loadDashboardBgConfig();
         }
 
@@ -999,6 +1017,17 @@
             } catch (err) {}
         }
 
+        async function loadGatewayTextConfig() {
+            try {
+                const res = await fetch('/api/gateway-text?t=' + new Date().getTime(), { cache: 'no-store' });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('gatewayHeadlineInput').value = data.headline || "";
+                    document.getElementById('gatewaySubtextInput').value = data.subtext || "";
+                }
+            } catch (err) {}
+        }
+
         const bgForm = document.getElementById('updateLandingBgForm');
         if (bgForm) {
             bgForm.addEventListener('submit', async (e) => {
@@ -1018,6 +1047,25 @@
                             alert("❌ " + data.error);
                         }
                     } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
+            });
+        }
+
+        const textForm = document.getElementById('updateGatewayTextForm');
+        if (textForm) {
+            textForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                requestSecureAuthorization('edit', async (password) => {
+                    const headline = document.getElementById('gatewayHeadlineInput').value;
+                    const subtext = document.getElementById('gatewaySubtextInput').value;
+                    try {
+                        const res = await fetch('/api/control-panel/gateway-text', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ headline, subtext, password })
+                        });
+                        if (res.ok) showStatusMessage("Gateway text updated!", "success");
+                    } catch (err) {}
                 });
             });
         }
