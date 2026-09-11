@@ -335,7 +335,32 @@ app.use(session({
 function requireAuth(req, res, next) {
     let lockStatus = getSystemLockStatus();
     if (lockStatus.locked && req.session.role !== 'ADMIN') {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: The entire tracker portal is locked by Admin. Contact to Admin." });
+        if (req.accepts('html')) {
+            return res.send(`
+                <!DOCTYPE html>
+                <html lang="en" class="dark">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>SYSTEM LOCKED</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                </head>
+                <body class="bg-[#07090f] text-white min-h-screen flex items-center justify-center p-4">
+                    <div class="bg-[#121520] p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full text-center space-y-4 shadow-2xl">
+                        <span class="text-5xl">🛡️</span>
+                        <h2 class="text-xl font-black uppercase text-red-500 tracking-wider">System Locked by Admin</h2>
+                        <p class="text-xs text-slate-300">The entire tracker portal is globally locked. Non-admin access is restricted.</p>
+                        <div class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 py-2 px-3 rounded-xl font-bold uppercase">
+                            Entire Portal is Locked by Admin
+                        </div>
+                        <a href="/control-panel.html" class="block mt-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition">
+                            Admin Access (Control Panel)
+                        </a>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED: Entire portal is locked by admin." });
     }
     if (!req.session.userId) {
         req.session.userId = MASTER_USER_ID;
@@ -613,7 +638,6 @@ app.get('/api/auth/session', requireAuth, (req, res) => {
     let xpInfo = getUserXP(req.session.userId || MASTER_USER_ID);
     res.json({ authenticated: true, email: req.session.email || "jaiminvankar520@gmail.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
 });
-
 
 app.post('/api/control-panel/login', async (req, res) => {
     req.session.controlPanelAuth = true;
