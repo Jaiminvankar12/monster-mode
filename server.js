@@ -54,7 +54,6 @@ function readJSON(file) {
     try {
         let content = fs.readFileSync(file, 'utf8');
         let parsed = JSON.parse(content);
-        // Robust auto-fix for notes_reminders.json if it is saved as an array [] instead of object
         if (file === NOTES_REMINDERS_FILE && Array.isArray(parsed)) {
             let converted = { [MASTER_USER_ID]: parsed };
             fs.writeFileSync(file, JSON.stringify(converted, null, 2));
@@ -249,8 +248,13 @@ function calculateStreak(userId = MASTER_USER_ID, type) {
     return streak;
 }
 
+// STRICT SYNC ENGINE (Study, Workout, Hydration 100% check + Future Lock)
 function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
-    if (targetDate < MONSTER_LAUNCH_DATE) return { allWorkoutsDone: false, studyDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
+    const today = getServerToday();
+    if (targetDate > today || targetDate < MONSTER_LAUNCH_DATE) {
+        return { allWorkoutsDone: false, studyDone: false, hydrationDone: false, totalStudiedMinutes: 0, totalTargetMinutes: 0 };
+    }
+    
     const workouts = readJSON(WORKOUTS_FILE);
     const workoutLogs = readJSON(WORKOUT_LOGS_FILE);
     const workoutsWithStatus = workouts.map(w => {
@@ -258,13 +262,19 @@ function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
         return { ...w, completed: log ? log.completed : false };
     });
     const allWorkoutsDone = workoutsWithStatus.length > 0 && workoutsWithStatus.every(w => w.completed);
+
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
     let examData = getExamModeData(userId);
     let totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) || 90 : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
     let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
-    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
-    return { allWorkoutsDone, studyDone, totalStudiedMinutes, totalTargetMinutes };
+    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes && categories.length > 0 && sessions.length > 0;
+
+    let hydData = getHydrationData(userId);
+    let consumed = hydData.logs[targetDate] || 0;
+    let hydrationDone = consumed >= (hydData.goal || 3000);
+
+    return { allWorkoutsDone, studyDone, hydrationDone, totalStudiedMinutes, totalTargetMinutes };
 }
 
 app.use(express.json());
@@ -283,7 +293,7 @@ function requireAuth(req, res, next) {
     return next();
 }
 
-console.log("🔥 MONSTER MODE: Locked to September 11, 2026. Bulletproof Data Persistence Active.");
+console.log("🔥 MONSTER MODE: Future Date Lock & Strict Sync Engine Active.");
 
 app.get('/api/system-lock', requireAuth, (req, res) => {
     let lockData = getSystemLockStatus();
@@ -362,11 +372,15 @@ app.get('/api/hydration', requireAuth, (req, res) => {
 
 app.post('/api/hydration/drink', requireAuth, async (req, res) => {
     const today = getServerToday();
+    const targetDate = req.body.date || today;
+    if (targetDate > today) {
+        return res.status(403).json({ error: "🔒 FUTURE LOCK: Cannot log hydration for future dates!" });
+    }
     let hydData = getHydrationData(MASTER_USER_ID);
-    let current = hydData.logs[today] || 0;
+    let current = hydData.logs[targetDate] || 0;
     let added = hydData.glassSize || 250;
     let newTotal = current + added;
-    hydData.logs[today] = newTotal;
+    hydData.logs[targetDate] = newTotal;
     let dataAll = readJSON(HYDRATION_FILE);
     dataAll[MASTER_USER_ID] = hydData;
     writeJSON(HYDRATION_FILE, dataAll);
@@ -386,7 +400,6 @@ app.post('/api/hydration/settings', requireAuth, (req, res) => {
     res.json({ success: true, message: "Hydration settings updated." });
 });
 
-// --- NOTES & REMINDERS API (Fixed for object/array auto-recovery) ---
 app.get('/api/notes-reminders', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
@@ -396,10 +409,8 @@ app.get('/api/notes-reminders', requireAuth, (req, res) => {
 app.post('/api/notes-reminders', requireAuth, (req, res) => {
     const { title, description, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
-    
     let data = readJSON(NOTES_REMINDERS_FILE);
     let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
-
     const newItem = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
@@ -412,7 +423,6 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
         notifiedToday: false,
         createdAt: new Date().toISOString()
     };
-
     items.push(newItem);
     writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items });
     res.json({ success: true, item: newItem });
@@ -421,16 +431,13 @@ app.post('/api/notes-reminders', requireAuth, (req, res) => {
 app.delete('/api/notes-reminders/:id', requireAuth, (req, res) => {
     let data = readJSON(NOTES_REMINDERS_FILE);
     let items = Array.isArray(data) ? data : (data[MASTER_USER_ID] || []);
-
     const index = items.findIndex(i => i.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Item not found." });
-
     items.splice(index, 1);
     writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items });
     res.json({ success: true, message: "Item deleted successfully." });
 });
 
-// --- HABIT TRACKER API ---
 app.get('/api/habits', requireAuth, (req, res) => {
     const habits = readJSON(HABITS_FILE);
     const logs = readJSON(HABIT_LOGS_FILE);
@@ -457,14 +464,11 @@ app.post('/api/habits', requireAuth, (req, res) => {
     const newHabit = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
-        trackerId: "habit_" + Date.now(),
         name,
         category: category || "General",
         description: description || "",
-        activeDays: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
         startDate: startDate || MONSTER_LAUNCH_DATE,
         endDate: endDate || "",
-        status: "active",
         createdAt: new Date().toISOString()
     };
     habits.push(newHabit);
@@ -488,9 +492,10 @@ app.put('/api/habits/:id', requireAuth, (req, res) => {
 app.post('/api/habits/:id/toggle', requireAuth, async (req, res) => {
     const habitId = req.params.id;
     const { date, completed } = req.body;
-    const targetDate = date || getServerToday();
-    if (targetDate < MONSTER_LAUNCH_DATE) {
-        return res.status(403).json({ error: "🔒 PRE-LAUNCH: Planning Mode active." });
+    const today = getServerToday();
+    const targetDate = date || today;
+    if (targetDate > today) {
+        return res.status(403).json({ error: "🔒 FUTURE LOCK: Cannot edit future dates!" });
     }
     let logs = readJSON(HABIT_LOGS_FILE);
     let index = logs.findIndex(l => l.habitId === habitId && l.date === targetDate);
@@ -514,7 +519,6 @@ app.delete('/api/habits/:id', requireAuth, (req, res) => {
     res.json({ success: true, message: "Habit deleted." });
 });
 
-// --- WORKOUT TRACKER API ---
 app.get('/api/workouts', requireAuth, (req, res) => {
     const workouts = readJSON(WORKOUTS_FILE);
     const logs = readJSON(WORKOUT_LOGS_FILE);
@@ -539,7 +543,7 @@ app.post('/api/workouts', requireAuth, (req, res) => {
         name,
         sets: sets || 3,
         value: value || reps || 10,
-        unit: unit || 'Reps',
+        unit: unit || 'reps',
         category: category || "Strength",
         startDate: startDate || MONSTER_LAUNCH_DATE,
         createdAt: new Date().toISOString()
@@ -576,7 +580,11 @@ app.delete('/api/workouts/:id', requireAuth, (req, res) => {
 app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     const workoutId = req.params.id;
     const { date, completed } = req.body;
-    const targetDate = date || getServerToday();
+    const today = getServerToday();
+    const targetDate = date || today;
+    if (targetDate > today) {
+        return res.status(403).json({ error: "🔒 FUTURE LOCK: Cannot edit future workout dates!" });
+    }
     let logs = readJSON(WORKOUT_LOGS_FILE);
     let index = logs.findIndex(l => l.workoutId === workoutId && l.date === targetDate);
     if (index > -1) {
@@ -592,7 +600,6 @@ app.post('/api/workouts/:id/toggle', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Workout updated and synced.", allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
-// --- STUDY TRACKER API ---
 app.get('/api/study/categories', requireAuth, (req, res) => {
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     res.json({ success: true, categories });
@@ -602,12 +609,6 @@ app.post('/api/study/categories', requireAuth, (req, res) => {
     const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required." });
     const categories = readJSON(STUDY_CATEGORIES_FILE);
-    
-    let existing = categories.find(c => c.name.toLowerCase() === name.trim().toLowerCase());
-    if (existing) {
-        return res.status(400).json({ error: "❌ Study subject with this name already exists!" });
-    }
-
     const newCat = {
         id: Date.now().toString(),
         userId: MASTER_USER_ID,
@@ -649,21 +650,16 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
     const targetDate = req.query.date || today;
     const categories = readJSON(STUDY_CATEGORIES_FILE);
     const sessions = readJSON(STUDY_SESSIONS_FILE).filter(s => s.date === targetDate);
-    let examData = getExamModeData(MASTER_USER_ID);
-    const totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-    const totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
-    const progressPercent = totalTargetMinutes > 0 ? Math.min(Math.round((totalStudiedMinutes / totalTargetMinutes) * 100), 100) : 0;
-    const isDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes;
+    const syncResult = runServerSyncEngine(MASTER_USER_ID, targetDate);
     const studyStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(MASTER_USER_ID, 'study');
-    runServerSyncEngine(MASTER_USER_ID, targetDate);
     res.json({
         success: true,
         categories,
         sessions,
-        totalTargetMinutes,
-        totalStudiedMinutes,
-        progressPercent,
-        isDone,
+        totalTargetMinutes: syncResult.totalTargetMinutes,
+        totalStudiedMinutes: syncResult.totalStudiedMinutes,
+        progressPercent: syncResult.totalTargetMinutes > 0 ? Math.min(Math.round((syncResult.totalStudiedMinutes / syncResult.totalTargetMinutes) * 100), 100) : 0,
+        isDone: syncResult.studyDone,
         studyStreak,
         serverDate: targetDate,
         ...getUserXP(MASTER_USER_ID)
@@ -673,7 +669,11 @@ app.get('/api/study/sessions', requireAuth, (req, res) => {
 app.post('/api/study/sessions', requireAuth, async (req, res) => {
     const { categoryId, topic, durationMinutes, date } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Category and duration are required." });
-    const targetDate = date || getServerToday();
+    const today = getServerToday();
+    const targetDate = date || today;
+    if (targetDate > today) {
+        return res.status(403).json({ error: "🔒 FUTURE LOCK: Cannot log study sessions for future dates!" });
+    }
     const sessions = readJSON(STUDY_SESSIONS_FILE);
     const newSession = {
         id: Date.now().toString(),
@@ -696,14 +696,11 @@ app.delete('/api/study/sessions/:id', requireAuth, async (req, res) => {
     let sessions = readJSON(STUDY_SESSIONS_FILE);
     const index = sessions.findIndex(s => s.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: "Session not found." });
-    const targetDate = sessions[index].date;
     sessions.splice(index, 1);
     writeJSON(STUDY_SESSIONS_FILE, sessions);
-    runServerSyncEngine(MASTER_USER_ID, targetDate);
     res.json({ success: true, message: "Session deleted." });
 });
 
-// --- HYGIENE TRACKER API ---
 app.get('/api/hygiene', requireAuth, (req, res) => {
     const tasks = readJSON(HYGIENE_TASKS_FILE);
     const logs = readJSON(HYGIENE_LOGS_FILE);
@@ -713,38 +710,19 @@ app.get('/api/hygiene', requireAuth, (req, res) => {
     let isSunday = targetDateObj.getDay() === 0;
     const tasksWithStatus = tasks.map(t => {
         const log = logs.find(l => l.taskId === t.id && l.date === targetDate);
-        return {
-            ...t,
-            completed: log ? log.completed : false,
-            isSundayTask: t.frequency === 'sunday'
-        };
+        return { ...t, completed: log ? log.completed : false, isSundayTask: t.frequency === 'sunday' };
     });
     let applicableTasks = tasksWithStatus.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
     let allDone = applicableTasks.length > 0 && applicableTasks.every(t => t.completed);
     let hygieneStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : calculateStreak(MASTER_USER_ID, 'hygiene');
-    res.json({
-        success: true,
-        tasks: tasksWithStatus,
-        applicableTasks,
-        allDone,
-        hygieneStreak,
-        isSunday,
-        serverDate: targetDate,
-        ...getUserXP(MASTER_USER_ID)
-    });
+    res.json({ success: true, tasks: tasksWithStatus, applicableTasks, allDone, hygieneStreak, isSunday, serverDate: targetDate, ...getUserXP(MASTER_USER_ID) });
 });
 
 app.post('/api/hygiene', requireAuth, (req, res) => {
     const { name, frequency, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Task name is required." });
     const tasks = readJSON(HYGIENE_TASKS_FILE);
-    const newTask = {
-        id: Date.now().toString(),
-        userId: MASTER_USER_ID,
-        name,
-        frequency: frequency || 'daily',
-        startDate: startDate || MONSTER_LAUNCH_DATE
-    };
+    const newTask = { id: Date.now().toString(), userId: MASTER_USER_ID, name, frequency: frequency || 'daily', startDate: startDate || MONSTER_LAUNCH_DATE };
     tasks.push(newTask);
     writeJSON(HYGIENE_TASKS_FILE, tasks);
     res.json({ success: true, task: newTask });
@@ -774,7 +752,11 @@ app.delete('/api/hygiene/:id', requireAuth, (req, res) => {
 app.post('/api/hygiene/:id/toggle', requireAuth, async (req, res) => {
     const taskId = req.params.id;
     const { date, completed } = req.body;
-    const targetDate = date || getServerToday();
+    const today = getServerToday();
+    const targetDate = date || today;
+    if (targetDate > today) {
+        return res.status(403).json({ error: "🔒 FUTURE LOCK: Cannot edit future hygiene dates!" });
+    }
     let logs = readJSON(HYGIENE_LOGS_FILE);
     let index = logs.findIndex(l => l.taskId === taskId && l.date === targetDate);
     if (index > -1) {
