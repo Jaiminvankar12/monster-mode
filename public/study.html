@@ -12,7 +12,7 @@
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
         .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
          :root {
-        --accent-primary: #ef4444; /* Default Red */
+        --accent-primary: #ef4444; 
         --accent-glow: rgba(239, 68, 68, 0.15);
     }
     .dynamic-accent { color: var(--accent-primary) !important; }
@@ -29,7 +29,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -209,15 +209,21 @@
         let pomoTimer = null;
         let isPomoRunning = false;
         let isBreakMode = false;
-        // Locked strictly to official launch date September 11, 2026
-        const LAUNCH_DATE = "2026-09-11";
+        
+        // Locked strictly to official launch date September 12, 2026
+        const LAUNCH_DATE = "2026-09-12";
 
         function checkPreLaunchLock() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                document.getElementById('prelaunchBanner').classList.remove('hidden');
+            const launchDateObj = new Date(LAUNCH_DATE);
+            launchDateObj.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const banner = document.getElementById('prelaunchBanner');
+            if (today < launchDateObj) {
+                if (banner) banner.classList.remove('hidden');
             } else {
-                document.getElementById('prelaunchBanner').classList.add('hidden');
+                if (banner) banner.classList.add('hidden');
             }
         }
 
@@ -226,11 +232,13 @@
         let pomoSecondsLeft = pomoDurationMinutes * 60;
 
         window.addEventListener('DOMContentLoaded', () => {
+            verifyGlobalSystemLock();
             checkPreLaunchLock();
             const inputField = document.getElementById('customPomoMinutes');
             if(inputField) inputField.value = pomoDurationMinutes;
             document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
             updatePomoDisplay();
+            fetchStudyData();
         });
 
         function playBeepSound() {
@@ -250,7 +258,8 @@
 
         async function fetchStudyData() {
             try {
-                const res = await fetch('/api/study/sessions');
+                const ts = new Date().getTime();
+                const res = await fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' });
                 if(res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
                     return;
@@ -517,43 +526,20 @@
             window.location.href = 'index.html';
         });
 
-        fetchStudyData();
-
         async function verifyGlobalSystemLock() {
-    try {
-        const res = await fetch('/api/system-lock');
-        const data = await res.json();
-        if (data.locked) {
-            window.location.href = 'index.html';
-        }
-    } catch (err) {}
-}
-
-        async function unlockSystemGlobal() {
-            const adminPassword = document.getElementById('globalUnlockPass').value;
             try {
-                const res = await fetch('/api/system-lock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ locked: false, adminPassword })
-                });
-                if (res.ok) {
-                    const overlay = document.getElementById('globalSystemLockOverlay');
-                    if (overlay) overlay.remove();
-                    location.reload();
-                } else {
-                    alert("🔒 Incorrect Admin Password!");
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                if (data.locked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    if (sessionData.role !== 'ADMIN') {
+                        window.location.href = 'index.html';
+                    }
                 }
-            } catch (err) {
-                alert("Authentication error.");
-            }
+            } catch (err) {}
         }
-
-        verifyGlobalSystemLock();
-        function checkPreLaunchLock() {
-    const banner = document.getElementById('prelaunchBanner');
-    if (banner) banner.classList.add('hidden');
-}
     </script>
 </body>
 </html>

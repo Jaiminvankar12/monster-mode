@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Outfit', sans-serif; }
-        body { background-color: #07090f; color: #f3f4f6; }
+        body { background-color: #07090f; color: #f3f4f6; transition: background-color 0.5s ease; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
         .glass-card:hover { border-color: rgba(255, 255, 255, 0.15); }
         .dynamic-glow { box-shadow: 0 0 35px var(--theme-glow, rgba(239, 68, 68, 0.15)); }
@@ -51,11 +51,14 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 11, 2026</strong>. Trackers and editing are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Trackers and editing are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
             </div>
+            <button onclick="document.getElementById('prelaunchBanner').classList.add('hidden')" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                Enter Read-Only View
+            </button>
         </div>
     </div>
 
@@ -283,7 +286,7 @@
             document.documentElement.style.setProperty('--theme-glow', cfg.glow);
         }
 
-        const LAUNCH_DATE = "2026-09-11";
+        const LAUNCH_DATE = "2026-09-12";
 
         function displayCurrentDateAndDay() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -302,12 +305,13 @@
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
             const dayCounterEl = document.getElementById('monsterDayCounter');
-            if (dayCounterEl) {
-                if (diffDays < 1) {
-                    dayCounterEl.innerHTML = `⏳ Pre-Launch Phase`;
-                } else {
-                    dayCounterEl.innerHTML = `🔥 DAY ${diffDays}`;
-                }
+            const prelaunchBanner = document.getElementById('prelaunchBanner');
+            
+            if (diffDays < 1) {
+                if (dayCounterEl) dayCounterEl.innerHTML = `⏳ Pre-Launch Phase`;
+                if (prelaunchBanner) prelaunchBanner.classList.remove('hidden');
+            } else {
+                if (dayCounterEl) dayCounterEl.innerHTML = `🔥 DAY ${diffDays}`;
             }
         }
 
@@ -347,7 +351,7 @@
             let randomQuote = emergencyQuotes[Math.floor(Math.random() * emergencyQuotes.length)];
             
             let modalHtml = `
-                <div id="emergencyModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+                <div id="emergencyModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
                     <div class="glass-card border-2 border-red-500 p-8 rounded-3xl max-w-lg w-full text-center dynamic-glow space-y-6">
                         <div class="text-4xl animate-bounce">🚨</div>
                         <h2 class="text-xl font-black uppercase tracking-widest text-red-500">SYSTEM OVERRIDE ACTIVE</h2>
@@ -369,6 +373,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             displayCurrentDateAndDay();
+            
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
             applyGlobalTheme(savedTheme);
 
@@ -381,7 +386,16 @@
 
         async function loadDashboardData() {
             try {
-                const sessionRes = await fetch('/api/auth/session');
+                const ts = new Date().getTime();
+                
+                // Fetch dynamic background color from Control Panel settings
+                const bgRes = await fetch('/api/dashboard-bg?t=' + ts, { cache: 'no-store' });
+                const bgData = await bgRes.json();
+                if (bgData.success && bgData.color) {
+                    document.body.style.backgroundColor = bgData.color;
+                }
+
+                const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                 if(sessionRes.status === 401 || sessionRes.status === 403) {
                     window.location.href = 'index.html';
                     return;
@@ -394,11 +408,12 @@
                 document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
 
                 const [habitsRes, workoutsRes, hydrationRes, studyRes] = await Promise.all([
-                    fetch('/api/habits'),
-                    fetch('/api/workouts'),
-                    fetch('/api/hydration'),
-                    fetch('/api/study/sessions')
+                    fetch('/api/habits?t=' + ts, { cache: 'no-store' }),
+                    fetch('/api/workouts?t=' + ts, { cache: 'no-store' }),
+                    fetch('/api/hydration?t=' + ts, { cache: 'no-store' }),
+                    fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' })
                 ]);
+                
                 const habitsData = await habitsRes.json();
                 const workoutsData = await workoutsRes.json();
                 const hydrationData = await hydrationRes.json();
@@ -439,13 +454,23 @@
             }
         }
 
-        async function toggleHabit(id) {
+        async function toggleHabit(id, currentState) {
             try {
-                const res = await fetch(`/api/habits/${id}/toggle`, { method: 'POST' });
+                const res = await fetch(`/api/habits/${id}/toggle`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ completed: !currentState })
+                });
+                
                 if (res.ok) {
                     loadDashboardData();
+                } else {
+                    const data = await res.json();
+                    if(data.error) alert("❌ " + data.error);
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         function renderActiveHabitsCarousel(habits) {
@@ -461,7 +486,7 @@
                         <span class="text-[9px] text-red-400 uppercase font-bold tracking-widest block truncate">${h.category || 'Discipline'}</span>
                         <h4 class="font-extrabold text-xs text-white mt-0.5 truncate">${h.name}</h4>
                     </div>
-                    <button onclick="toggleHabit('${h.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition cursor-pointer shrink-0 ${h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white'}">
+                    <button onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-1.5 rounded-xl text-xs font-bold uppercase transition cursor-pointer shrink-0 ${h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white'}">
                         ${h.completedToday ? '✓' : '○'}
                     </button>
                 </div>
@@ -488,7 +513,7 @@
             today.setHours(0, 0, 0, 0);
 
             container.innerHTML = categories.map(c => {
-                let startDateStr = c.startDate || '2026-09-11';
+                let startDateStr = c.startDate || '2026-09-12';
                 let endDateStr = c.endDate;
                 let targetMins = parseInt(c.dailyTargetMinutes) || 120;
 
@@ -554,11 +579,11 @@
 
         async function loadMonsterCoach() {
             try {
-                const res = await fetch('/api/monster-coach');
+                const res = await fetch('/api/monster-coach?t=' + new Date().getTime(), { cache: 'no-store' });
                 if(res.ok) {
                     const data = await res.json();
                     if (data.success) {
-                        document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage}"`;
+                        document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage || "Discipline equals absolute freedom."}"`;
                         if (data.xp) {
                             document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`;
                         }
@@ -633,10 +658,11 @@
         // SINGLE FOOLPROOF SYSTEM LOCK CHECK WITH OVERLAY
         async function verifyGlobalSystemLock() {
             try {
-                const res = await fetch('/api/system-lock');
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.locked) {
-                    const sessionRes = await fetch('/api/auth/session');
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
