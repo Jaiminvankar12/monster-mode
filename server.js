@@ -33,6 +33,7 @@ const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
 const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
 const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
 const MATES_FILE = path.join(__dirname, 'mates.json');
+const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json'); // 🔥 NEW: Dynamic Text DB
 
 // 🔥 NEW LAUNCH DATE SET TO 12-09-2026 🔥
 const MONSTER_LAUNCH_DATE = "2026-09-12";
@@ -90,6 +91,8 @@ function readJSON(file) {
             ];
         } else if (file === MATES_FILE) {
             initial = [];
+        } else if (file === GATEWAY_TEXT_FILE) { // 🔥 NEW INIT
+            initial = { headline: "BECOME A<br>MONSTER.<br>DOMINATE REALITY.", subtext: "Pure discipline. Zero excuses. Absolute control." };
         } else if (file === USER_XP_FILE || file === HYDRATION_FILE || file === EXAM_MODE_FILE || file === SANCTUARY_FILE || file === LANDING_BG_FILE || file === DASHBOARD_BG_FILE || file === NOTES_REMINDERS_FILE || file === SYSTEM_LOCK_FILE) {
             initial = {};
             if (file === HYDRATION_FILE) initial[MASTER_USER_ID] = { goal: 3000, glassSize: 250, logs: {} };
@@ -113,7 +116,7 @@ function readJSON(file) {
         }
         return parsed;
     } catch (err) {
-        return file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') || file.includes('notes_reminders.json') ? { [MASTER_USER_ID]: [] } : [];
+        return file.includes('data.json') || file.includes('mode.json') || file.includes('xp.json') || file.includes('bg.json') || file.includes('lock.json') || file.includes('notes_reminders.json') || file.includes('gateway_text.json') ? {} : [];
     }
 }
 
@@ -299,43 +302,37 @@ app.use(session({
 }));
 
 // ======================================================================
-// 🛡️ SECURITY HTML INTERCEPTOR (The God-Mode Fix)
+// 🛡️ SECURITY HTML INTERCEPTOR (HARDCORE OPTION 1 FOR SINGLE USER)
 // ======================================================================
 app.use((req, res, next) => {
-    // Fkt Tracker Portal ni HTML pages ahiya aavse (Admin portal excluded)
     const trackerPages = ['/dashboard', '/dashboard.html', '/tracker', '/tracker.html', '/workout', '/workout.html', '/study', '/study.html', '/hygiene', '/hygiene.html', '/hydration', '/hydration.html'];
     const isTrackerPage = trackerPages.some(page => req.path === page);
 
     if (isTrackerPage) {
-        // 1. Auth Check (Unauthenticated users go to gateway)
         if (!req.session || !req.session.userId) {
             return res.redirect('/index.html');
         }
 
-        // 2. Lock Check (Admin portal and Admins are excluded)
         let lockStatus = getSystemLockStatus();
-        const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
         
-        if (lockStatus.locked && !isAdmin) {
+        // 🔴 STRICT BLOCK: In Single-User Mode, if system is locked, YOU are blocked too!
+        if (lockStatus.locked) {
             return res.send(`
                 <!DOCTYPE html>
                 <html lang="en" class="dark">
                 <head>
                     <meta charset="UTF-8">
-                    <title>SYSTEM LOCKED</title>
+                    <title>HARDCORE LOCK ACTIVE</title>
                     <script src="https://cdn.tailwindcss.com"></script>
                 </head>
                 <body class="bg-[#07090f] text-white min-h-screen flex items-center justify-center p-4">
-                    <div class="bg-[#121520] p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full text-center space-y-4 shadow-2xl">
-                        <span class="text-5xl">🛡️</span>
-                        <h2 class="text-xl font-black uppercase text-red-500 tracking-wider">System Locked by Admin</h2>
-                        <p class="text-xs text-slate-300">The entire tracker portal is globally locked. Non-admin access is restricted.</p>
-                        <div class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 py-2 px-3 rounded-xl font-bold uppercase">
-                            Entire Portal is Locked by Admin
-                        </div>
-                        <a href="/index.html" class="block mt-4 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition">
-                            Return to Gateway
-                        </a>
+                    <div class="bg-[#121520] p-8 rounded-3xl border-2 border-red-500/50 max-w-md w-full text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.4)]">
+                        <span class="text-5xl animate-pulse">🛑</span>
+                        <h2 class="text-3xl font-black uppercase text-red-500 tracking-wider">HARDCORE LOCK</h2>
+                        <p class="text-sm text-slate-300">The entire tracking system is currently in HARD LOCK. No execution vectors can be accessed.</p>
+                        <button onclick="window.location.href='control-panel.html'" class="w-full mt-6 py-4 bg-red-600 hover:bg-red-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-red-600/30 transition">
+                            Open Control Panel
+                        </button>
                     </div>
                 </body>
                 </html>
@@ -345,7 +342,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Have aapde static files serve kari shakiye
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Standard API Auth Guard
@@ -356,12 +352,11 @@ function requireAuth(req, res, next) {
     next();
 }
 
-// Tracker API Guard (Prevents fetching/toggling data when locked)
+// Tracker API Guard
 function trackerApiGuard(req, res, next) {
     let lockStatus = getSystemLockStatus();
-    const isAdmin = req.session.role === 'ADMIN' || req.session.controlPanelAuth === true;
-    if (lockStatus.locked && !isAdmin) {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Action restricted." });
+    if (lockStatus.locked) {
+        return res.status(403).json({ error: "🛡️ HARDCORE LOCK: System is totally locked." });
     }
     next();
 }
@@ -421,8 +416,8 @@ app.post('/api/system-lock', requireAuth, (req, res) => {
     let lockData = { locked: locked !== undefined ? locked : true, lockedAt: locked ? new Date().toISOString() : null };
     writeJSON(SYSTEM_LOCK_FILE, lockData);
     
-    const actionText = lockData.locked ? "Portal Successfully Locked by Admin" : "Portal Successfully Unlocked by Admin";
-    sendTelegramNotification(`🛡️ *ADMIN SYSTEM CONTROL*\nTracker Portal status changed globally to: *${lockData.locked ? 'LOCKED 🔒' : 'UNLOCKED 🟢'}*`);
+    const actionText = lockData.locked ? "System is now in Hardcore Lock." : "System Unlocked.";
+    sendTelegramNotification(`🛡️ *SYSTEM CONTROL*\nStatus changed to: *${lockData.locked ? 'HARDCORE LOCKED 🛑' : 'UNLOCKED 🟢'}*`);
     
     res.json({ success: true, message: actionText, ...lockData });
 });
@@ -438,6 +433,21 @@ app.post('/api/verify-action-password', requireAuth, (req, res) => {
         return res.status(403).json({ error: `🔒 Wrong Password! Invalid Action Password for ${actionType.toUpperCase()}.` });
     }
     res.json({ success: true, message: "Action authorized successfully." });
+});
+
+// 🔥 NEW: Gateway Text API
+app.get('/api/gateway-text', (req, res) => {
+    let textData = readJSON(GATEWAY_TEXT_FILE);
+    res.json({ success: true, ...textData });
+});
+
+app.post('/api/control-panel/gateway-text', requireAuth, (req, res) => {
+    const { headline, subtext, password } = req.body;
+    if (password !== "Jay#edit@monster") {
+        return res.status(403).json({ error: "Unauthorized Password." });
+    }
+    writeJSON(GATEWAY_TEXT_FILE, { headline, subtext });
+    res.json({ success: true, message: "Gateway text updated successfully." });
 });
 
 app.get('/api/landing-bg', (req, res) => { res.json({ success: true, ...getLandingBg() }); });
@@ -462,53 +472,6 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, (req, res) => {
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
-// ================= MATES MANAGEMENT API =================
-app.get('/api/mates', requireAuth, (req, res) => {
-    const mates = readJSON(MATES_FILE);
-    const sanitizedMates = mates.map(m => ({ id: m.id, name: m.name, role: m.role }));
-    res.json({ success: true, mates: sanitizedMates });
-});
-
-app.post('/api/mates/add', requireAuth, (req, res) => {
-    const { name, role, password } = req.body;
-    if (password !== "Jay#add@monster") {
-        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Add Password." });
-    }
-    if (!name) return res.status(400).json({ error: "Mate name is required." });
-    let mates = readJSON(MATES_FILE);
-    const newMate = { id: Date.now().toString(), name, role: role || 'MATE_USER', createdAt: new Date().toISOString() };
-    mates.push(newMate);
-    writeJSON(MATES_FILE, mates);
-    res.json({ success: true, message: "Mate added successfully.", mate: { id: newMate.id, name: newMate.name, role: newMate.role } });
-});
-
-app.put('/api/mates/:id', requireAuth, (req, res) => {
-    const { name, role, password } = req.body;
-    if (password !== "Jay#edit@monster") {
-        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Edit Password." });
-    }
-    let mates = readJSON(MATES_FILE);
-    const index = mates.findIndex(m => m.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: "Mate not found." });
-    if (name) mates[index].name = name;
-    if (role) mates[index].role = role;
-    writeJSON(MATES_FILE, mates);
-    res.json({ success: true, message: "Mate updated successfully." });
-});
-
-app.delete('/api/mates/:id', requireAuth, (req, res) => {
-    const { password } = req.body;
-    if (password !== "Jay#del@monster") {
-        return res.status(403).json({ error: "🔒 Wrong Password! Unauthorized Delete Password." });
-    }
-    let mates = readJSON(MATES_FILE);
-    const index = mates.findIndex(m => m.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: "Mate not found." });
-    mates.splice(index, 1);
-    writeJSON(MATES_FILE, mates);
-    res.json({ success: true, message: "Mate deleted successfully." });
-});
-
 // HTML Page Serving Routes (Covered by Interceptor)
 app.get('/hydration', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hydration.html')); });
 app.get('/hygiene', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'hygiene.html')); });
@@ -528,10 +491,9 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(401).json({ error: "Wrong Password! Invalid email or password." });
     }
 
-    // Tracker Login Lock Check
     let lockStatus = getSystemLockStatus();
-    if (lockStatus.locked && user.role !== 'ADMIN') {
-        return res.status(403).json({ error: "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked. Login restricted.", locked: true });
+    if (lockStatus.locked) {
+        return res.status(403).json({ error: "🛑 HARDCORE LOCK: System is locked. Tracker access denied.", locked: true });
     }
 
     req.session.userId = user.id;
@@ -541,6 +503,25 @@ app.post('/api/auth/login', async (req, res) => {
     await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *TRACKER PORTAL LOGIN*\nUser: ${user.email}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
 
     res.json({ success: true, role: user.role, email: user.email, message: "Successfully logged in." });
+});
+
+app.post('/api/control-panel/login', async (req, res) => {
+    const { email, password } = req.body;
+    let users = readJSON(USERS_AUTH_FILE);
+    let user = users.find(u => u.email === email && u.role === 'ADMIN');
+
+    if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+        return res.status(401).json({ error: "🔒 Access Denied! Invalid Admin credentials." });
+    }
+
+    req.session.controlPanelAuth = true;
+    req.session.userId = user.id;
+    req.session.role = 'ADMIN';
+    req.session.email = user.email;
+    
+    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛡️ *ADMIN PANEL LOGIN*\nStatus: Authorized\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+
+    res.json({ success: true, message: "Control Panel authorized." });
 });
 
 app.post('/api/auth/logout', async (req, res) => {
@@ -556,17 +537,6 @@ app.post('/api/auth/logout', async (req, res) => {
 app.get('/api/auth/session', requireAuth, (req, res) => {
     let xpInfo = getUserXP(req.session.userId || MASTER_USER_ID);
     res.json({ authenticated: true, email: req.session.email || "jaiminvankar520@gmail.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
-});
-
-app.post('/api/control-panel/login', async (req, res) => {
-    req.session.controlPanelAuth = true;
-    req.session.userId = MASTER_USER_ID;
-    req.session.role = 'ADMIN';
-    req.session.email = "admin@monstermode.com";
-    
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛡️ *ADMIN PANEL LOGIN*\nStatus: Authorized\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-
-    res.json({ success: true, message: "Control Panel authorized." });
 });
 
 app.post('/api/control-panel/logout', async (req, res) => { 
@@ -677,6 +647,18 @@ app.post('/api/notes-reminders', requireAuth, trackerApiGuard, (req, res) => {
     items.push(newItem);
     writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items, [userId]: items });
     res.json({ success: true, item: newItem });
+});
+
+app.post('/api/notes-reminders/:id/toggle', requireAuth, trackerApiGuard, (req, res) => {
+    let data = readJSON(NOTES_REMINDERS_FILE);
+    let userId = req.session.userId || MASTER_USER_ID;
+    let items = Array.isArray(data) ? data : (data[userId] || data[MASTER_USER_ID] || []);
+    const index = items.findIndex(i => i.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Item not found." });
+    
+    items[index].completed = !items[index].completed;
+    writeJSON(NOTES_REMINDERS_FILE, { [MASTER_USER_ID]: items, [userId]: items });
+    res.json({ success: true, completed: items[index].completed });
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, trackerApiGuard, (req, res) => {
