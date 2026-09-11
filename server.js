@@ -349,6 +349,10 @@ cron.schedule('0 7 * * *', async () => {
                 `🔥 Stay locked in and crush your goals today!`;
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
+// Alias or definition for Telegram messaging
+async function sendTelegramMessage(message) {
+    await sendTelegramNotification(message);
+}
 
 // 🌙 NIGHT PROGRESS & INCOMPLETE WARNING RECAP (10:00 PM IST)
 cron.schedule('0 22 * * *', async () => {
