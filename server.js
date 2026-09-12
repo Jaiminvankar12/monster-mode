@@ -1280,79 +1280,36 @@ app.delete('/api/targets/:id', requireAuth, trackerApiGuard, async (req, res) =>
 });
 
 // ============================================================================
-// 🌙 1. OLED AUTO-SWITCH STATUS ROUTE (12 AM to 7 AM)
+// 🤖 NEW: TELEGRAM INTERACTIVE AI BOT (WEBHOOK / COMMAND LISTENER)
 // ============================================================================
-app.get('/api/oled-status', (req, res) => {
-    const istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-    const currentHour = new Date(istTimeStr).getHours();
-    const isOledTime = currentHour >= 0 && currentHour < 7;
-    res.json({ success: true, isOledTime });
-});
-
-// ============================================================================
-// 📜 2. DAILY MONSTER LOG / JOURNALING API ROUTES
-// ============================================================================
-app.get('/api/monster-log', requireAuth, async (req, res) => {
+app.post('/api/telegram-webhook', async (req, res) => {
     try {
-        let userId = req.session.userId || MASTER_USER_ID;
-        let today = getServerToday();
-        let log = await MonsterLog.findOne({ userId, date: today });
-        res.json({ success: true, log });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch monster log." });
-    }
-});
+        const update = req.body;
+        if (update && update.message && update.message.text) {
+            const text = update.message.text.trim();
+            const userId = MASTER_USER_ID;
 
-app.post('/api/monster-log', requireAuth, trackerApiGuard, async (req, res) => {
-    try {
-        let { content } = req.body;
-        if (!content) return res.status(400).json({ error: "Log content required." });
-        let userId = req.session.userId || MASTER_USER_ID;
-        let today = getServerToday();
-
-        let aiFeedback = "Discipline equals absolute freedom. Keep pushing.";
-        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            try {
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const prompt = `You are a brutal David Goggins style AI coach. Read this daily journal log from a disciplined user: "${content}". Give a short 1-sentence hardcore roast or motivational verdict.`;
-                const result = await model.generateContent(prompt);
-                aiFeedback = result.response.text().trim().replace(/"/g, '');
-            } catch (aiErr) {
-                console.error("Gemini Journal AI error:", aiErr);
+            if (text === '/status') {
+                const today = getServerToday();
+                const sync = await runServerSyncEngine(userId, today);
+                const xpInfo = await getUserXP(userId);
+                const reply = `📊 *TODAY'S APEX STATUS*\n\n🔥 Level: ${xpInfo.level} (${xpInfo.xp} XP)\n🏋️ Workouts: ${sync.allWorkoutsDone ? '✅ DONE' : '❌ PENDING'}\n📚 Study: ${sync.totalStudiedMinutes} / ${sync.totalTargetMinutes} mins\n💧 Hydration: ${sync.hydrationDone ? '✅ DONE' : '❌ PENDING'}`;
+                await sendTelegramNotification(reply);
+            } 
+            else if (text === '/roast' || text === '/motivation') {
+                let coachMessage = "Discipline equals absolute freedom.";
+                if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                    coachMessage = result.response.text().trim();
+                }
+                await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
             }
         }
-
-        let log = await MonsterLog.findOneAndUpdate(
-            { userId, date: today },
-            { content, aiFeedback, createdAt: new Date().toISOString() },
-            { new: true, upsert: true }
-        );
-
-        res.json({ success: true, log });
+        res.status(200).send('OK');
     } catch (err) {
-        res.status(500).json({ error: "Failed to save monster log." });
-    }
-});
-
-// ============================================================================
-// 🏆 3. GAMIFICATION BADGES API ROUTE
-// ============================================================================
-app.get('/api/badges', requireAuth, async (req, res) => {
-    try {
-        let userId = req.session.userId || MASTER_USER_ID;
-        let xpInfo = await getUserXP(userId);
-        let level = xpInfo.level;
-        
-        let badges = [
-            { id: 'b1', name: 'Awakened Beast', levelRequired: 1, unlocked: level >= 1, icon: '⚡' },
-            { id: 'b2', name: 'Iron Forged', levelRequired: 3, unlocked: level >= 3, icon: '🏋️' },
-            { id: 'b3', name: 'Deep Work Scholar', levelRequired: 5, unlocked: level >= 5, icon: '📚' },
-            { id: 'b4', name: 'Apex Predator', levelRequired: 10, unlocked: level >= 10, icon: '🐉' }
-        ];
-
-        res.json({ success: true, level: xpInfo.level, xp: xpInfo.xp, badges });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch badges." });
+        console.error("Telegram Webhook Error:", err);
+        res.status(500).send('Error');
     }
 });
 
