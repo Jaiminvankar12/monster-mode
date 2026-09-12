@@ -49,6 +49,32 @@ const HygieneLog = mongoose.model('HygieneLog', hygieneLogSchema);
 const noteReminderSchema = new mongoose.Schema({ id: String, userId: String, title: String, description: String, isReminder: Boolean, date: String, time: String, completed: Boolean, notifiedToday: Boolean, createdAt: String });
 const NoteReminder = mongoose.model('NoteReminder', noteReminderSchema);
 
+// ============================================================================
+// 🎯 TARGETS / MILESTONES SCHEMA (ADDED)
+// ============================================================================
+const targetSchema = new mongoose.Schema({
+    id: String,
+    userId: String,
+    name: String,
+    date: String,
+    completed: { type: Boolean, default: false },
+    createdAt: String
+});
+const Target = mongoose.model('Target', targetSchema);
+
+// ============================================================================
+// 📜 NEW: MONSTER LOG / JOURNALING SCHEMA (ADDED)
+// ============================================================================
+const monsterLogSchema = new mongoose.Schema({
+    id: String,
+    userId: String,
+    date: String,
+    content: String,
+    aiFeedback: String,
+    createdAt: String
+});
+const MonsterLog = mongoose.model('MonsterLog', monsterLogSchema);
+
 const userSchema = new mongoose.Schema({ id: String, email: String, passwordHash: String, role: String });
 const User = mongoose.model('User', userSchema);
 
@@ -1191,7 +1217,146 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     res.json({ success: true, ...updatedXP });
 });
 
-// 🧠 1. NEW: REAL GEMINI AI INTEGRATION
+// ============================================================================
+// 🎯 TARGETS API ROUTES (ADDED)
+// ============================================================================
+app.get('/api/targets', requireAuth, async (req, res) => {
+    try {
+        let userId = req.session.userId || MASTER_USER_ID;
+        let targets = await Target.find({ userId });
+        res.json({ success: true, targets });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch targets." });
+    }
+});
+
+app.post('/api/targets', requireAuth, trackerApiGuard, async (req, res) => {
+    try {
+        const { name, date, password } = req.body;
+        if (password && password !== "Jay#add@monster" && req.session.role !== 'ADMIN') {
+            return res.status(403).json({ error: "Unauthorized password for adding target." });
+        }
+        if (!name) return res.status(400).json({ error: "Target name required." });
+        let userId = req.session.userId || MASTER_USER_ID;
+
+        const newTarget = new Target({
+            id: 't_' + Date.now().toString(),
+            userId,
+            name,
+            date: date || "2026-09-13",
+            completed: false,
+            createdAt: new Date().toISOString()
+        });
+        await newTarget.save();
+        res.json({ success: true, target: newTarget });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to create target." });
+    }
+});
+
+app.post('/api/targets/:id/complete', requireAuth, async (req, res) => {
+    try {
+        let target = await Target.findOne({ id: req.params.id });
+        if (!target) return res.status(404).json({ error: "Target not found." });
+        target.completed = !target.completed;
+        await target.save();
+        res.json({ success: true, completed: target.completed });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update target status." });
+    }
+});
+
+app.delete('/api/targets/:id', requireAuth, trackerApiGuard, async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (password && password !== "Jay#del@monster" && req.session.role !== 'ADMIN') {
+            return res.status(403).json({ error: "Unauthorized password for deleting target." });
+        }
+        await Target.deleteOne({ id: req.params.id });
+        res.json({ success: true, message: "Target deleted successfully." });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete target." });
+    }
+});
+
+// ============================================================================
+// 🌙 1. OLED AUTO-SWITCH STATUS ROUTE (12 AM to 7 AM)
+// ============================================================================
+app.get('/api/oled-status', (req, res) => {
+    const istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    const currentHour = new Date(istTimeStr).getHours();
+    const isOledTime = currentHour >= 0 && currentHour < 7;
+    res.json({ success: true, isOledTime });
+});
+
+// ============================================================================
+// 📜 2. DAILY MONSTER LOG / JOURNALING API ROUTES
+// ============================================================================
+app.get('/api/monster-log', requireAuth, async (req, res) => {
+    try {
+        let userId = req.session.userId || MASTER_USER_ID;
+        let today = getServerToday();
+        let log = await MonsterLog.findOne({ userId, date: today });
+        res.json({ success: true, log });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch monster log." });
+    }
+});
+
+app.post('/api/monster-log', requireAuth, trackerApiGuard, async (req, res) => {
+    try {
+        let { content } = req.body;
+        if (!content) return res.status(400).json({ error: "Log content required." });
+        let userId = req.session.userId || MASTER_USER_ID;
+        let today = getServerToday();
+
+        let aiFeedback = "Discipline equals absolute freedom. Keep pushing.";
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const prompt = `You are a brutal David Goggins style AI coach. Read this daily journal log from a disciplined user: "${content}". Give a short 1-sentence hardcore roast or motivational verdict.`;
+                const result = await model.generateContent(prompt);
+                aiFeedback = result.response.text().trim().replace(/"/g, '');
+            } catch (aiErr) {
+                console.error("Gemini Journal AI error:", aiErr);
+            }
+        }
+
+        let log = await MonsterLog.findOneAndUpdate(
+            { userId, date: today },
+            { content, aiFeedback, createdAt: new Date().toISOString() },
+            { new: true, upsert: true }
+        );
+
+        res.json({ success: true, log });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to save monster log." });
+    }
+});
+
+// ============================================================================
+// 🏆 3. GAMIFICATION BADGES API ROUTE
+// ============================================================================
+app.get('/api/badges', requireAuth, async (req, res) => {
+    try {
+        let userId = req.session.userId || MASTER_USER_ID;
+        let xpInfo = await getUserXP(userId);
+        let level = xpInfo.level;
+        
+        let badges = [
+            { id: 'b1', name: 'Awakened Beast', levelRequired: 1, unlocked: level >= 1, icon: '⚡' },
+            { id: 'b2', name: 'Iron Forged', levelRequired: 3, unlocked: level >= 3, icon: '🏋️' },
+            { id: 'b3', name: 'Deep Work Scholar', levelRequired: 5, unlocked: level >= 5, icon: '📚' },
+            { id: 'b4', name: 'Apex Predator', levelRequired: 10, unlocked: level >= 10, icon: '🐉' }
+        ];
+
+        res.json({ success: true, level: xpInfo.level, xp: xpInfo.xp, badges });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch badges." });
+    }
+});
+
+// 🧠 REAL GEMINI AI INTEGRATION
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
 
 app.get('/api/monster-coach', async (req, res) => {
@@ -1211,7 +1376,7 @@ app.get('/api/monster-coach', async (req, res) => {
     }
 });
 
-// 🌦️ 2. NEW: WEATHER API ROUTE (Ahmedabad)
+// 🌦️ WEATHER API ROUTE (Ahmedabad)
 app.get('/api/weather', async (req, res) => {
     try {
         const apiKey = process.env.WEATHER_API_KEY || "YOUR_OPENWEATHER_API_KEY"; 

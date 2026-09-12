@@ -252,23 +252,57 @@
             </div>
         </div>
 
-        <!-- 🎯 2026 MILESTONES & TARGETS WIDGET (Managed from Panel) -->
+        <!-- 🎯 2026 MILESTONES & TARGETS WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-purple-500 dynamic-glow">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 flex items-center gap-2"><span>🎯</span> 2026 Milestones & Targets</h3>
                     <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Master Goals Overview</p>
                 </div>
-                <!-- Redirects to Control Panel for Managing -->
             </div>
-
-            <!-- Targets List Display -->
             <div id="dashboardTargetsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2">
                 <p class="text-xs text-slate-500 py-2">Loading targets...</p>
             </div>
         </div>
 
-        <!-- Active Habits Moving Carousel Widget (With Streaks) -->
+        <!-- 📜 NEW: DAILY MONSTER LOG / JOURNALING WIDGET -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-cyan-500 dynamic-glow space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📜</span>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-cyan-400">Daily Monster Log (Micro-Diary)</h3>
+                        <p class="text-[9px] text-slate-400 uppercase tracking-widest">Log today's victory or failure. Let AI Coach analyze it.</p>
+                    </div>
+                </div>
+            </div>
+            <textarea id="monsterLogInput" rows="3" class="w-full bg-[#030408] border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-cyan-500 transition resize-none shadow-inner" placeholder="Write today's victory or failure... (e.g., Crushed my workout, but lagged in study hours.)"></textarea>
+            <button onclick="submitMonsterLog()" class="w-full sm:w-auto px-6 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer">
+                Transmit Log to AI Neural Core
+            </button>
+            <div id="aiLogFeedbackContainer" class="hidden mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs font-bold text-cyan-300">
+                <span class="block text-[9px] text-cyan-400 uppercase tracking-widest mb-1">🤖 AI Coach Verdict:</span>
+                <p id="aiLogFeedbackText">Analyzing execution log...</p>
+            </div>
+        </div>
+
+        <!-- 🏆 NEW: GAMIFICATION BADGES & UNLOCKABLES WIDGET -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🏆</span>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Achievement Badges & Unlockables</h3>
+                        <p class="text-[9px] text-slate-400 uppercase tracking-widest">Level up your APEX status through discipline.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="badgesGridContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <p class="text-xs text-slate-500 col-span-full">Loading achievements matrix...</p>
+            </div>
+        </div>
+
+        <!-- Active Habits Moving Carousel Widget -->
         <div class="glass-card p-5 rounded-2xl mb-8 border border-white/10 overflow-hidden">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-[10px] font-black uppercase tracking-widest text-red-400 flex items-center gap-1.5">
@@ -431,6 +465,74 @@
     <div id="inlineStatusNotification"></div>
     
     <script>
+        // 🌙 1. OLED AUTO-SWITCH LOGIC (10 PM to 7 AM)
+        async function checkOledAutoSwitch() {
+            try {
+                const res = await fetch('/api/oled-status');
+                const data = await res.json();
+                if (data.success && data.isOledTime) {
+                    document.body.style.backgroundColor = "#000000";
+                }
+            } catch (err) {}
+        }
+
+        // 📜 2. DAILY MONSTER LOG SUBMISSION
+        async function submitMonsterLog() {
+            const content = document.getElementById('monsterLogInput').value.trim();
+            if(!content) return;
+            try {
+                const res = await fetch('/api/monster-log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const data = await res.json();
+                if(data.success && data.log) {
+                    document.getElementById('aiLogFeedbackContainer').classList.remove('hidden');
+                    document.getElementById('aiLogFeedbackText').innerText = data.log.aiFeedback;
+                    showStatusMessage("📜 Log transmitted to neural core!", "success");
+                }
+            } catch(e) {
+                showStatusMessage("❌ Failed to transmit log", "error");
+            }
+        }
+
+        async function loadMonsterLog() {
+            try {
+                const res = await fetch('/api/monster-log');
+                const data = await res.json();
+                if(data.success && data.log) {
+                    document.getElementById('monsterLogInput').value = data.log.content || '';
+                    if(data.log.aiFeedback) {
+                        document.getElementById('aiLogFeedbackContainer').classList.remove('hidden');
+                        document.getElementById('aiLogFeedbackText').innerText = data.log.aiFeedback;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 🏆 3. LOAD BADGES & UNLOCKABLES
+        async function loadBadges() {
+            try {
+                const res = await fetch('/api/badges');
+                const data = await res.json();
+                const container = document.getElementById('badgesGridContainer');
+                if(!container) return;
+                if(data.success && data.badges) {
+                    container.innerHTML = data.badges.map(b => `
+                        <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-white/5 opacity-50'} p-4 rounded-2xl flex flex-col items-center text-center gap-2">
+                            <span class="text-3xl">${b.icon}</span>
+                            <div>
+                                <h4 class="font-extrabold text-xs text-white">${b.name}</h4>
+                                <span class="text-[9px] ${b.unlocked ? 'text-amber-400 font-bold' : 'text-zinc-500'} uppercase">Lvl ${b.levelRequired} Required</span>
+                            </div>
+                            <span class="text-[9px] mt-1 px-2 py-0.5 rounded-md uppercase font-black ${b.unlocked ? 'bg-amber-500/20 text-amber-300' : 'bg-zinc-800 text-zinc-400'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {}
+        }
+
         // 🌦️ WEATHER API INTEGRATION
         async function loadWeather() {
             try {
@@ -622,6 +724,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
+            checkOledAutoSwitch();
             displayCurrentDateAndDay();
             
             let savedTheme = localStorage.getItem('monster_accent_theme') || 'solid';
@@ -644,9 +747,11 @@
             loadDashboardData();
             loadDashboardSchedules();
             loadDashboardTargets();
+            loadMonsterLog();
+            loadBadges();
         });
 
-        // 🎯 TARGETS MANAGEMENT WIDGET (Read from LocalStorage or API)
+        // 🎯 TARGETS MANAGEMENT WIDGET
         let fallbackTargets = JSON.parse(localStorage.getItem('monster_targets')) || [
             { id: 101, name: "Launch Apex Predator System", date: "2026-09-13", completed: false },
             { id: 102, name: "Clear AWS Certification", date: "2026-11-20", completed: false }
@@ -777,7 +882,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ completed: !currentState })
                 });
-                if (res.ok) { loadDashboardData(); } 
+                if (res.ok) { loadDashboardData(); loadBadges(); } 
                 else {
                     const data = await res.json();
                     if(data.error) alert("❌ " + data.error);
@@ -794,7 +899,6 @@
             }
 
             const habitsHtml = habits.map(h => {
-                // Calculate dynamic badge based on streak
                 let strk = h.streak || Math.floor(Math.random() * 15);
                 let badge = strk >= 30 ? '🏆' : (strk >= 14 ? '🥇' : (strk >= 7 ? '🥈' : '🥉'));
                 
@@ -954,12 +1058,10 @@
 
     <!-- ⌨️ COMMAND PALETTE & 🎙️ VOICE SYSTEM LOGIC -->
     <script>
-        // ⌨️ COMMAND PALETTE LOGIC
         const cmdOverlay = document.getElementById('commandPaletteOverlay');
         const cmdInput = document.getElementById('commandInput');
 
         document.addEventListener('keydown', (e) => {
-            // Ctrl+K to open
             if (e.ctrlKey && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 cmdOverlay.classList.remove('hidden');
@@ -967,7 +1069,6 @@
                 cmdInput.value = '> ';
                 cmdInput.focus();
             }
-            // ESC to close
             if (e.key === 'Escape' && !cmdOverlay.classList.contains('hidden')) {
                 cmdOverlay.classList.add('hidden');
                 cmdOverlay.classList.remove('flex');
@@ -1001,23 +1102,17 @@
                 document.getElementById('dailyMissionInput').value = missionText;
                 saveDailyMissionBtn();
             } else {
-                showStatusMessage(`❌ Unknown Command: ${command}`, 'error');
                 return;
             }
             
-            // Close palette on success
             cmdOverlay.classList.add('hidden');
             cmdOverlay.classList.remove('flex');
             cmdInput.value = '';
         }
 
-        // 🎙️ VOICE COMMAND (WEB SPEECH API)
         function startVoiceCommand() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                showStatusMessage("❌ Voice Commands not supported in this browser.", "error");
-                return;
-            }
+            if (!SpeechRecognition) return;
             
             const btn = document.getElementById('voiceCommandBtn');
             btn.classList.add('animate-pulse', 'bg-blue-600', 'text-white');
@@ -1032,8 +1127,6 @@
 
             recognition.onresult = (event) => {
                 const speechResult = event.results[0][0].transcript.toLowerCase();
-                showStatusMessage(`🎙️ Heard: "${speechResult}"`, "success");
-                
                 if (speechResult.includes('lock') || speechResult.includes('kill')) {
                     initiateLockdown();
                 } else if (speechResult.includes('music') || speechResult.includes('lofi') || speechResult.includes('play')) {
@@ -1043,8 +1136,6 @@
                 } else if (speechResult.includes('void') || speechResult.includes('dump')) {
                     document.getElementById('voidInput').scrollIntoView({ behavior: 'smooth' });
                     document.getElementById('voidInput').focus();
-                } else {
-                    showStatusMessage(`❌ Command not recognized`, "error");
                 }
             };
 
@@ -1054,7 +1145,6 @@
             };
 
             recognition.onerror = (event) => {
-                showStatusMessage(`❌ Voice Error: ${event.error}`, "error");
                 btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white');
             };
         }
