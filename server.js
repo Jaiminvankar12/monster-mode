@@ -11,10 +11,7 @@ const { getServerToday, validateDateAccess } = require('./server/services/dateSe
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+
 // ============================================================================
 // 🟢 MONGODB CLOUD CONNECTION & SCHEMAS (ડેટા 100% ક્લાઉડ પર)
 // ============================================================================
