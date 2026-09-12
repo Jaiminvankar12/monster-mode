@@ -1,4 +1,3 @@
-
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -6,14 +5,15 @@ const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 const fetch = require('node-fetch');
-const mongoose = require('mongoose'); // 🟢 NEW: MongoDB
+const mongoose = require('mongoose');
 const { getServerToday, validateDateAccess } = require('./server/services/dateService');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
 // ============================================================================
-// 🟢 MONGODB CLOUD CONNECTION & SCHEMAS (ડેટા 100% ક્લાઉડ પર)
+// 🟢 MONGODB CLOUD CONNECTION & SCHEMAS
 // ============================================================================
 const MONGO_URI = "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
 
@@ -62,7 +62,8 @@ const userDataSchema = new mongoose.Schema({
     sanctuaryReason: String,
     hydrationGoal: { type: Number, default: 3000 },
     hydrationGlassSize: { type: Number, default: 250 },
-    hydrationLogs: { type: Object, default: {} }
+    hydrationLogs: { type: Object, default: {} },
+    customDailyTargets: { type: Map, of: Number, default: {} }
 });
 const UserData = mongoose.model('UserData', userDataSchema);
 
@@ -77,7 +78,6 @@ const globalSettingsSchema = new mongoose.Schema({
 });
 const GlobalSettings = mongoose.model('GlobalSettings', globalSettingsSchema);
 
-// ડેટાબેઝમાં પહેલી વાર યુઝર અને સેટિંગ એડ કરવા
 async function initDB() {
     let uCount = await User.countDocuments();
     if(uCount === 0) {
@@ -94,42 +94,17 @@ async function initDB() {
 }
 initDB();
 
-// Render / Production Reverse Proxy Fix
 app.set('trust proxy', 1);
 
-// Database File Paths (જૂની ફાઈલો, લાઈન કાઉન્ટ જાળવવા માટે રાખેલ છે)
-const HABITS_FILE = path.join(__dirname, 'habits.json');
-const HABIT_LOGS_FILE = path.join(__dirname, 'habit_logs.json');
-const WORKOUTS_FILE = path.join(__dirname, 'workouts.json');
-const WORKOUT_LOGS_FILE = path.join(__dirname, 'workout_logs.json');
-const STUDY_CATEGORIES_FILE = path.join(__dirname, 'study_categories.json');
-const STUDY_SESSIONS_FILE = path.join(__dirname, 'study_sessions.json');
-const HYGIENE_TASKS_FILE = path.join(__dirname, 'hygiene_tasks.json');
-const HYGIENE_LOGS_FILE = path.join(__dirname, 'hygiene_logs.json');
-const HYDRATION_FILE = path.join(__dirname, 'hydration_data.json');
-const EXAM_MODE_FILE = path.join(__dirname, 'exam_mode.json');
-const SANCTUARY_FILE = path.join(__dirname, 'sanctuary_mode.json');
-const USER_XP_FILE = path.join(__dirname, 'user_xp.json');
-const LANDING_BG_FILE = path.join(__dirname, 'landing_bg.json');
-const DASHBOARD_BG_FILE = path.join(__dirname, 'dashboard_bg.json');
-const NOTES_REMINDERS_FILE = path.join(__dirname, 'notes_reminders.json');
-const SYSTEM_LOCK_FILE = path.join(__dirname, 'system_lock.json');
-const USERS_AUTH_FILE = path.join(__dirname, 'users_auth.json');
-const MATES_FILE = path.join(__dirname, 'mates.json');
-const GATEWAY_TEXT_FILE = path.join(__dirname, 'gateway_text.json'); 
-
-// 🔥 NEW LAUNCH DATE SET TO 12-09-2026 🔥
 const MONSTER_LAUNCH_DATE = "2026-09-13";
 const MASTER_USER_ID = "admin_master_user";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-// In-memory Anti-Duplicate Dispatch Lock (Prevents race conditions)
 const processedRemindersLock = new Set();
 let isCronRunning = false;
 
-// Secure Telegram Notification Dispatcher
 async function sendTelegramNotification(message) {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
     try {
@@ -143,20 +118,19 @@ async function sendTelegramNotification(message) {
     }
 }
 
-// 🟢 MONGODB CLOUD HELPER FUNCTIONS
 async function getSystemLockStatus() {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    return { locked: gs.systemLocked, lockedAt: gs.lockedAt };
+    return { locked: gs ? gs.systemLocked : false, lockedAt: gs ? gs.lockedAt : null };
 }
 
 async function getLandingBg() {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    return { url: gs.landingBgUrl };
+    return { url: gs ? gs.landingBgUrl : "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" };
 }
 
 async function getDashboardBg() {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    return { color: gs.dashboardBgColor };
+    return { color: gs ? gs.dashboardBgColor : "#07090f" };
 }
 
 async function getHydrationData(userId = MASTER_USER_ID) {
@@ -286,7 +260,6 @@ async function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     return { allWorkoutsDone, studyDone, hydrationDone, totalStudiedMinutes, totalTargetMinutes };
 }
 
-// Express App Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -297,9 +270,6 @@ app.use(session({
     cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 24 }
 }));
 
-// ======================================================================
-// 🛡️ SECURITY HTML INTERCEPTOR (HARDCORE OPTION 1 FOR SINGLE USER)
-// ======================================================================
 app.use(async (req, res, next) => {
     const trackerPages = ['/dashboard', '/dashboard.html', '/tracker', '/tracker.html', '/workout', '/workout.html', '/study', '/study.html', '/hygiene', '/hygiene.html', '/hydration', '/hydration.html'];
     const isTrackerPage = trackerPages.some(page => req.path === page);
@@ -310,8 +280,6 @@ app.use(async (req, res, next) => {
         }
 
         let lockStatus = await getSystemLockStatus();
-        
-        // 🔴 STRICT BLOCK: In Single-User Mode, if system is locked, YOU are blocked too!
         if (lockStatus.locked) {
             return res.send(`
                 <!DOCTYPE html>
@@ -340,7 +308,6 @@ app.use(async (req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Standard API Auth Guard
 function requireAuth(req, res, next) {
     if (!req.session.userId) {
         return res.status(401).json({ error: "🔒 Unauthorized access. Please log in first." });
@@ -348,7 +315,6 @@ function requireAuth(req, res, next) {
     next();
 }
 
-// Tracker API Guard
 async function trackerApiGuard(req, res, next) {
     let lockStatus = await getSystemLockStatus();
     if (lockStatus.locked) {
@@ -359,7 +325,6 @@ async function trackerApiGuard(req, res, next) {
 
 console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.");
 
-// ================= TELEGRAM CRON SCHEDULER =================
 cron.schedule('0 7 * * *', async () => {
     const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n"Discipline equals absolute freedom."\n\n✅ Check your Daily Hydration & Hygiene targets.\n🔥 Stay locked in and crush your goals today!`;
     await sendTelegramMessage(msg);
@@ -369,9 +334,8 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
-// 🔥 FIX: SERVER TIMEZONE + DOUBLE NOTIFICATION RACE CONDITION FIX
 cron.schedule('* * * * *', async () => {
-    if (isCronRunning) return; // Concurrency block
+    if (isCronRunning) return;
     isCronRunning = true;
 
     try {
@@ -383,13 +347,11 @@ cron.schedule('* * * * *', async () => {
         let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
         let currentTimeStr = `${currentHours}:${currentMinutes}`;
 
-        // 🟢 MongoDB માંથી Reminders લાવો
         const reminders = await NoteReminder.find({ isReminder: true, notifiedToday: false, date: todayStr, time: currentTimeStr });
 
         for (let item of reminders) {
             const lockKey = `${item.id}_${todayStr}_${currentTimeStr}`;
             if (!processedRemindersLock.has(lockKey)) {
-                // Instantly lock memory and mark item
                 processedRemindersLock.add(lockKey);
                 item.notifiedToday = true;
                 await item.save();
@@ -405,7 +367,6 @@ cron.schedule('* * * * *', async () => {
     }
 });
 
-// ================= 🔐 SYSTEM LOCK/UNLOCK =================
 app.get('/api/system-lock', async (req, res) => {
     let lockData = await getSystemLockStatus();
     res.json({ success: true, ...lockData });
@@ -415,7 +376,6 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
     const { locked, adminPassword, password } = req.body;
     const pwdToVerify = adminPassword || password;
     
-    // 🔥 3FA MASTER KEY
     if (pwdToVerify !== "Jay_monster_mode_on") {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
@@ -423,7 +383,6 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
     let currentLockData = await getSystemLockStatus();
     let newLockStatus = locked !== undefined ? locked : true;
 
-    // 🛑 SPAM FIX: Status already same hoy to duplicate msg nai moklavano
     if (currentLockData.locked === newLockStatus) {
         return res.json({ 
             success: true, 
@@ -456,7 +415,6 @@ app.post('/api/verify-action-password', requireAuth, (req, res) => {
     res.json({ success: true, message: "Action authorized successfully." });
 });
 
-// 🔥 NEW: Gateway Text API
 app.get('/api/gateway-text', async (req, res) => {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
     res.json({ success: true, headline: gs ? gs.gatewayHeadline : '', subtext: gs ? gs.gatewaySubtext : '' });
@@ -468,7 +426,6 @@ app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
         return res.status(403).json({ error: "Unauthorized Password." });
     }
     
-    // માત્ર ટેક્સ્ટ માટે upsert સેટ કર્યું છે જેથી ડેટાબેઝમાં રેકોર્ડ ન હોય તો પણ સેવ થઈ જાય
     let gs = await GlobalSettings.findOneAndUpdate(
         { key: 'GLOBAL' },
         { gatewayHeadline: headline, gatewaySubtext: subtext },
@@ -509,9 +466,7 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     await gs.save();
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
-// ================= AUTHENTICATION & MULTI-LAYER LOGIN ROUTES =================
 
-// LAYER 1: Email + Password -> Generates OTP (2FA)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
@@ -520,13 +475,11 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(401).json({ error: "Wrong Password! Invalid email or password." });
     }
 
-    // 🔒 CHECK 1: If system is locked, reject IMMEDIATELY. Don't even send OTP.
     let lockStatus = await getSystemLockStatus();
     if (lockStatus.locked && user.role !== 'ADMIN') {
         return res.status(403).json({ error: "🛑 HARDCORE LOCK: System is locked. Tracker access denied.", locked: true });
     }
 
-    // Debounce/Rate-limit quick double requests within 10 seconds
     const now = Date.now();
     if (req.session.pendingAuth && req.session.pendingAuth.email === user.email && req.session.pendingAuth.sentAt && (now - req.session.pendingAuth.sentAt < 10000)) {
         return res.json({ success: true, requireOtp: true, message: "Authorization code already sent. Please check your Telegram." });
@@ -539,7 +492,6 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ success: true, requireOtp: true, message: "Authorization code sent to your Telegram." });
 });
 
-// LAYER 1 (ADMIN): Email + Password -> Generates OTP (2FA)
 app.post('/api/control-panel/login', async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email, role: 'ADMIN' });
@@ -560,7 +512,6 @@ app.post('/api/control-panel/login', async (req, res) => {
     res.json({ success: true, requireOtp: true, message: "Admin authorization code sent to your Telegram." });
 });
 
-// LAYER 2: OTP Verification
 app.post('/api/auth/verify-otp', async (req, res) => {
     const { otp, portal } = req.body;
 
@@ -599,7 +550,6 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     }
 });
 
-// LAYER 3 (ADMIN ONLY): Master Key Verification
 app.post('/api/control-panel/verify-3fa', async (req, res) => {
     const { masterKey } = req.body;
 
@@ -649,7 +599,6 @@ app.post('/api/control-panel/logout', async (req, res) => {
 
 app.get('/api/control-panel/session', requireAuth, (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
 
-// ================= EXAM & SANCTUARY MODES =================
 app.get('/api/exam-mode', requireAuth, trackerApiGuard, async (req, res) => {
     let data = await getExamModeData(req.session.userId || MASTER_USER_ID);
     res.json({ success: true, ...data });
@@ -695,7 +644,6 @@ app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     res.json({ success: true, message: "Sanctuary updated.", enabled: ud.sanctuaryEnabled, activatedAt: ud.sanctuaryActivatedAt, reason: ud.sanctuaryReason });
 });
 
-// ================= HYDRATION API =================
 app.get('/api/hydration', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
@@ -747,19 +695,16 @@ app.post('/api/hydration/settings', requireAuth, trackerApiGuard, async (req, re
     res.json({ success: true, message: "Hydration settings updated." });
 });
 
-// ================= NOTES & REMINDERS API =================
-// ================= NOTES & REMINDERS API (SMART DATE FILTER) =================
 app.get('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) => {
     let userId = req.session.userId || MASTER_USER_ID;
     let todayStr = getServerToday();
     let queryDate = req.query.date || todayStr;
 
-    // ફક્ત તે જ તારીખની નોટ્સ/રીમાઇન્ડર્સ લાવશે જે કમ્પ્લીટ નથી થઈ અથવા આજે જ શિડ્યુઅલ છે
     let items = await NoteReminder.find({ 
         userId, 
         $or: [
             { date: queryDate },
-            { isReminder: false } // જનરલ નોટ્સ હંમેશાં દેખાય
+            { isReminder: false }
         ]
     });
 
@@ -808,7 +753,7 @@ app.delete('/api/notes-reminders/:id', requireAuth, trackerApiGuard, async (req,
     await NoteReminder.deleteOne({ id: req.params.id });
     res.json({ success: true, message: "Item deleted." });
 });
-// ================= 📋 HABIT TRACKER API =================
+
 app.get('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
@@ -894,7 +839,6 @@ app.post('/api/habits/:id/toggle', requireAuth, trackerApiGuard, async (req, res
     res.json({ success: true, completed, ...updatedXP });
 });
 
-// ================= 🏋️ WORKOUT TRACKER API =================
 app.get('/api/workouts', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
@@ -980,7 +924,6 @@ app.post('/api/workouts/:id/toggle', requireAuth, trackerApiGuard, async (req, r
     res.json({ success: true, allWorkoutsDone: syncResult.allWorkoutsDone, ...updatedXP });
 });
 
-// ================= 📚 STUDY TRACKER API =================
 app.get('/api/study/categories', requireAuth, trackerApiGuard, async (req, res) => {
     const categories = await StudyCategory.find({ userId: req.session.userId || MASTER_USER_ID });
     res.json({ success: true, categories });
@@ -1027,7 +970,6 @@ app.delete('/api/study/categories/:id', requireAuth, trackerApiGuard, async (req
     res.json({ success: true, message: "Category deleted." });
 });
 
-// 🟢 NEW: કસ્ટમ ડાયનેમિક ટાર્ગેટ ગેટ કરવા માટે (જેમ કે આજે 4 કલાક કે 10 કલાક કરવા હોય તો)
 app.get('/api/study/target', requireAuth, trackerApiGuard, async (req, res) => {
     let userId = req.session.userId || MASTER_USER_ID;
     let today = getServerToday();
@@ -1037,7 +979,6 @@ app.get('/api/study/target', requireAuth, trackerApiGuard, async (req, res) => {
     res.json({ success: true, date: targetDate, customMinutes: customTargets.get ? customTargets.get(targetDate) : customTargets[targetDate] || null });
 });
 
-// 🟢 NEW: આજનો ટાર્ગેટ ફ્લેક્સિબલ બદલવા માટે (POST)
 app.post('/api/study/target', requireAuth, trackerApiGuard, async (req, res) => {
     let { targetMinutes, date } = req.body;
     let userId = req.session.userId || MASTER_USER_ID;
@@ -1099,7 +1040,6 @@ app.delete('/api/study/sessions/:id', requireAuth, trackerApiGuard, async (req, 
     res.json({ success: true, message: "Session deleted." });
 });
 
-// ================= 🧼 HYGIENE TRACKER API =================
 app.get('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
