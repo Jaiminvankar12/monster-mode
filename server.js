@@ -74,7 +74,12 @@ const globalSettingsSchema = new mongoose.Schema({
     landingBgUrl: { type: String, default: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" },
     dashboardBgColor: { type: String, default: "#07090f" },
     gatewayHeadline: { type: String, default: "BECOME A<br>MONSTER.<br>DOMINATE REALITY." },
-    gatewaySubtext: { type: String, default: "Pure discipline. Zero excuses. Absolute control." }
+    gatewaySubtext: { type: String, default: "Pure discipline. Zero excuses. Absolute control." },
+    // 🟢 NEW: Workout & Study Schedule / Reminder Times
+    workoutReminderTime: { type: String, default: "" },
+    studyReminderTime: { type: String, default: "" },
+    workoutNotifiedDate: { type: String, default: "" },
+    studyNotifiedDate: { type: String, default: "" }
 });
 const GlobalSettings = mongoose.model('GlobalSettings', globalSettingsSchema);
 
@@ -334,6 +339,7 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
+// 🟢 CRON: Reminders + Workout/Study Timed Alerts
 cron.schedule('* * * * *', async () => {
     if (isCronRunning) return;
     isCronRunning = true;
@@ -347,8 +353,8 @@ cron.schedule('* * * * *', async () => {
         let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
         let currentTimeStr = `${currentHours}:${currentMinutes}`;
 
+        // 1. Note Reminders
         const reminders = await NoteReminder.find({ isReminder: true, notifiedToday: false, date: todayStr, time: currentTimeStr });
-
         for (let item of reminders) {
             const lockKey = `${item.id}_${todayStr}_${currentTimeStr}`;
             if (!processedRemindersLock.has(lockKey)) {
@@ -360,6 +366,24 @@ cron.schedule('* * * * *', async () => {
                 await sendTelegramMessage(text);
             }
         }
+
+        // 2. 🟢 Workout & Study Timed Alerts
+        let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
+        if (gs) {
+            // Workout Alert
+            if (gs.workoutReminderTime === currentTimeStr && gs.workoutNotifiedDate !== todayStr) {
+                gs.workoutNotifiedDate = todayStr;
+                await gs.save();
+                await sendTelegramMessage(`🏋️ *MONSTER WORKOUT TIME!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Gear up and crush your workout session right now!`);
+            }
+            // Study Alert
+            if (gs.studyReminderTime === currentTimeStr && gs.studyNotifiedDate !== todayStr) {
+                gs.studyNotifiedDate = todayStr;
+                await gs.save();
+                await sendTelegramMessage(`📚 *MONSTER STUDY SESSION!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Deep work mode ON. Dominate your targets!`);
+            }
+        }
+
     } catch (err) {
         console.error("Reminder Cron Error:", err);
     } finally {
@@ -433,6 +457,34 @@ app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
     );
     
     res.json({ success: true, message: "Gateway text updated successfully." });
+});
+
+// 🟢 NEW: Workout & Study Schedule API (Get & Post for Control Panel & Dashboards)
+app.get('/api/schedules', async (req, res) => {
+    let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
+    res.json({ 
+        success: true, 
+        workoutReminderTime: gs ? gs.workoutReminderTime : "", 
+        studyReminderTime: gs ? gs.studyReminderTime : "" 
+    });
+});
+
+app.post('/api/control-panel/schedules', requireAuth, async (req, res) => {
+    const { workoutReminderTime, studyReminderTime, password } = req.body;
+    if (password !== "Jay#edit@monster") {
+        return res.status(403).json({ error: "Unauthorized Password." });
+    }
+    
+    let gs = await GlobalSettings.findOneAndUpdate(
+        { key: 'GLOBAL' },
+        { 
+            workoutReminderTime: workoutReminderTime !== undefined ? workoutReminderTime : "", 
+            studyReminderTime: studyReminderTime !== undefined ? studyReminderTime : "" 
+        },
+        { new: true, upsert: true }
+    );
+    
+    res.json({ success: true, message: "Workout & Study schedules updated successfully." });
 });
 
 app.get('/api/landing-bg', async (req, res) => { 
