@@ -29,7 +29,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -134,37 +134,18 @@
             </div>
         </div>
 
-        <!-- Grid Layout: Add Category & Log Session / View Sessions -->
+        <!-- Grid Layout: Log Session & Active Subjects -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Left Column: Manage Categories & Log Session -->
+            <!-- Left Column: Log Study Session Form -->
             <div class="space-y-6">
-                <!-- Add Category Form -->
-                <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4">📂 Create Study Subject</h3>
-                    <form id="createCategoryForm" class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Subject / Category Name</label>
-                            <input type="text" id="categoryName" required placeholder="e.g., Web Dev : P68 / DSA" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Daily Target (Minutes)</label>
-                            <input type="number" id="categoryTarget" value="120" min="15" step="15" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer">
-                            Add Category
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Log Study Session Form -->
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
                     <form id="logSessionForm" class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Select Subject</label>
                             <select id="sessionCategorySelect" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                                <option value="">Loading categories...</option>
+                                <option value="">Loading subjects from Admin...</option>
                             </select>
                         </div>
                         <div>
@@ -186,9 +167,9 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Subject Categories List -->
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Categories</h3>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Subjects (Managed by Admin)</h3>
                     <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <p class="text-xs text-zinc-500">Loading categories...</p>
+                        <p class="text-xs text-zinc-500">Loading subjects...</p>
                     </div>
                 </div>
 
@@ -210,8 +191,11 @@
         let isPomoRunning = false;
         let isBreakMode = false;
         
-        // Locked strictly to official launch date September 12, 2026
-        const LAUNCH_DATE = "2026-09-12";
+        const LAUNCH_DATE = "2026-09-13";
+
+        let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
+        let pomoDurationMinutes = savedDefaultMins;
+        let pomoSecondsLeft = pomoDurationMinutes * 60;
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(LAUNCH_DATE);
@@ -227,17 +211,37 @@
             }
         }
 
-        let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-        let pomoDurationMinutes = savedDefaultMins;
-        let pomoSecondsLeft = pomoDurationMinutes * 60;
-
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             checkPreLaunchLock();
+            
             const inputField = document.getElementById('customPomoMinutes');
             if(inputField) inputField.value = pomoDurationMinutes;
             document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-            updatePomoDisplay();
+            
+            const isActive = localStorage.getItem('pomo_active') === 'true';
+            if (isActive) {
+                isPomoRunning = true;
+                isBreakMode = localStorage.getItem('pomo_isBreak') === 'true';
+                pomoDurationMinutes = parseInt(localStorage.getItem('pomo_duration')) || 25;
+                
+                document.getElementById('pomoStartBtn').innerText = "Pause";
+                document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
+                if (isBreakMode) {
+                    document.getElementById('pomoModeBadge').innerText = "☕ Short Break";
+                    document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                }
+                
+                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
+                if (Date.now() >= endTime) {
+                    handleTimerComplete(); 
+                } else {
+                    runPomodoroLoop();
+                }
+            } else {
+                updatePomoDisplay();
+            }
+
             fetchStudyData();
         });
 
@@ -302,16 +306,14 @@
         function renderCategories(categories) {
             const container = document.getElementById('categoriesList');
             if (categories.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No categories created yet.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500">No active subjects found. Contact Admin to add subjects.</p>`;
                 return;
             }
             container.innerHTML = categories.map(c => `
                 <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
-                        <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Target: ${c.dailyTargetMinutes} mins/day</p>
                     </div>
-                    <button onclick="deleteCategory('${c.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Delete</button>
                 </div>
             `).join('');
         }
@@ -342,13 +344,13 @@
             const select2 = document.getElementById('pomoCategorySelect');
 
             if (categories.length === 0) {
-                select1.innerHTML = `<option value="">Create a category first</option>`;
-                select2.innerHTML = `<option value="">Create a category first</option>`;
+                select1.innerHTML = `<option value="">No subjects available</option>`;
+                select2.innerHTML = `<option value="">No subjects available</option>`;
                 return;
             }
 
             const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
-                <option value="${c.id}">${c.name} (${c.dailyTargetMinutes}m target)</option>
+                <option value="${c.id}">${c.name}</option>
             `).join('');
 
             select1.innerHTML = optionsHtml;
@@ -381,6 +383,11 @@
             if (isPomoRunning) {
                 clearInterval(pomoTimer);
                 isPomoRunning = false;
+                localStorage.setItem('pomo_active', 'false'); 
+                
+                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
+                pomoSecondsLeft = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                
                 document.getElementById('pomoStartBtn').innerText = isBreakMode ? "Resume Break" : "Resume Focus";
                 document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', isBreakMode ? 'bg-emerald-600' : 'bg-blue-600');
                 return;
@@ -392,53 +399,83 @@
                     alert("Please select a study subject for the Pomodoro session!");
                     return;
                 }
+                localStorage.setItem('pomo_categoryId', categoryId);
+                const selectEl = document.getElementById('pomoCategorySelect');
+                const topicName = selectEl.options[selectEl.selectedIndex].text;
+                localStorage.setItem('pomo_topic', `Focus: ${topicName}`);
             }
 
             isPomoRunning = true;
             document.getElementById('pomoStartBtn').innerText = "Pause";
             document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
 
+            const endTime = Date.now() + (pomoSecondsLeft * 1000);
+            localStorage.setItem('pomo_active', 'true');
+            localStorage.setItem('pomo_isBreak', isBreakMode);
+            localStorage.setItem('pomo_duration', pomoDurationMinutes);
+            localStorage.setItem('pomo_endTime', endTime);
+
+            runPomodoroLoop();
+        }
+
+        function runPomodoroLoop() {
+            clearInterval(pomoTimer);
             pomoTimer = setInterval(() => {
-                if (pomoSecondsLeft > 0) {
-                    pomoSecondsLeft--;
-                    updatePomoDisplay();
-                } else {
+                const isActive = localStorage.getItem('pomo_active') === 'true';
+                if (!isActive) return clearInterval(pomoTimer);
+
+                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
+                const diff = endTime - Date.now();
+
+                if (diff <= 0) {
                     clearInterval(pomoTimer);
-                    isPomoRunning = false;
-                    playBeepSound();
-
-                    if (!isBreakMode) {
-                        alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
-                        completePomodoroSession();
-
-                        isBreakMode = true;
-                        pomoSecondsLeft = 5 * 60;
-                        document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
-                        document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                        document.getElementById('pomoStartBtn').innerText = "Start Break";
-                        document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-emerald-600');
-                        updatePomoDisplay();
-                    } else {
-                        alert(`⚡ Break Over! Get back to the focus zone.`);
-                        isBreakMode = false;
-                        let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-                        pomoDurationMinutes = defaultMins;
-                        pomoSecondsLeft = pomoDurationMinutes * 60;
-                        document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
-                        document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                        document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                        document.getElementById('pomoStartBtn').innerText = "Start Focus";
-                        document.getElementById('pomoStartBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
-                        updatePomoDisplay();
-                    }
+                    pomoSecondsLeft = 0;
+                    updatePomoDisplay();
+                    handleTimerComplete();
+                } else {
+                    pomoSecondsLeft = Math.ceil(diff / 1000);
+                    updatePomoDisplay();
                 }
             }, 1000);
+        }
+
+        function handleTimerComplete() {
+            isPomoRunning = false;
+            playBeepSound();
+            localStorage.setItem('pomo_active', 'false');
+
+            if (!isBreakMode) {
+                alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
+                completePomodoroSession();
+
+                isBreakMode = true;
+                pomoSecondsLeft = 5 * 60;
+                document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
+                document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                document.getElementById('pomoStartBtn').innerText = "Start Break";
+                document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-emerald-600');
+                updatePomoDisplay();
+            } else {
+                alert(`⚡ Break Over! Get back to the focus zone.`);
+                isBreakMode = false;
+                let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
+                pomoDurationMinutes = defaultMins;
+                pomoSecondsLeft = pomoDurationMinutes * 60;
+                document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
+                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
+                document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                document.getElementById('pomoStartBtn').innerText = "Start Focus";
+                document.getElementById('pomoStartBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
+                updatePomoDisplay();
+            }
         }
 
         function resetPomodoro() {
             clearInterval(pomoTimer);
             isPomoRunning = false;
             isBreakMode = false;
+            localStorage.setItem('pomo_active', 'false');
+            
             let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
             pomoDurationMinutes = defaultMins;
             pomoSecondsLeft = pomoDurationMinutes * 60;
@@ -451,15 +488,21 @@
         }
 
         async function completePomodoroSession() {
-            const categoryId = document.getElementById('pomoCategorySelect').value;
+            const categoryId = localStorage.getItem('pomo_categoryId') || document.getElementById('pomoCategorySelect').value;
+            const dur = parseInt(localStorage.getItem('pomo_duration')) || pomoDurationMinutes;
+            
+            localStorage.removeItem('pomo_categoryId');
+            localStorage.removeItem('pomo_topic');
+            localStorage.removeItem('pomo_duration');
+
             try {
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         categoryId: categoryId,
-                        topic: `Deep Work Focus (${pomoDurationMinutes}m)`,
-                        durationMinutes: pomoDurationMinutes
+                        topic: `Deep Work Focus (${dur}m)`,
+                        durationMinutes: dur
                     })
                 });
                 const data = await res.json();
@@ -470,23 +513,6 @@
                 }
             } catch (err) {}
         }
-
-        document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('categoryName').value;
-            const dailyTargetMinutes = document.getElementById('categoryTarget').value;
-
-            const res = await fetch('/api/study/categories', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, dailyTargetMinutes })
-            });
-            if (res.ok) {
-                document.getElementById('createCategoryForm').reset();
-                document.getElementById('categoryTarget').value = "120";
-                fetchStudyData();
-            }
-        });
 
         document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -508,12 +534,6 @@
                 alert(data.error || "Failed to log session.");
             }
         });
-
-        async function deleteCategory(id) {
-            if (!confirm("Delete this category?")) return;
-            await fetch(`/api/study/categories/${id}`, { method: 'DELETE' });
-            fetchStudyData();
-        }
 
         async function deleteSession(id) {
             if (!confirm("Delete this session?")) return;
@@ -537,7 +557,6 @@
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
-                        // 🛑 સામાન્ય યુઝર માટે - Full Screen Lock Display
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
@@ -556,7 +575,6 @@
                             </div>
                         `;
                     } else {
-                        // 🟢 એડમિન માટે - Smart Warning Banner
                         const adminBanner = document.createElement('div');
                         adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
                         adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
@@ -567,12 +585,6 @@
                 console.error("Lock verification failed", err);
             }
         }
-        window.addEventListener('DOMContentLoaded', () => {
-            verifyGlobalSystemLock();
-            checkPreLaunchLock();
-            fetchHygieneData();
-        });
-
     </script>
 </body>
 </html>

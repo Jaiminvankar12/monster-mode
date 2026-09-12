@@ -51,7 +51,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Trackers and editing are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Trackers and editing are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -125,7 +125,7 @@
         <!-- STUDY CORE MATRIX WIDGET -->
         <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-blue-500">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white">📚 Active Study Matrix & Deadlines</h3>
+                <h3 class="text-sm font-black uppercase tracking-wider text-white">📚 Active Study Matrix & Deadlines (Admin Managed)</h3>
                 <span class="text-xs text-blue-400 font-bold uppercase tracking-widest">Target-Driven Core</span>
             </div>
             <div id="dashboardStudyList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -286,7 +286,7 @@
             document.documentElement.style.setProperty('--theme-glow', cfg.glow);
         }
 
-        const LAUNCH_DATE = "2026-09-12";
+        const LAUNCH_DATE = "2026-09-13";
 
         function displayCurrentDateAndDay() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -388,7 +388,6 @@
             try {
                 const ts = new Date().getTime();
                 
-                // Fetch dynamic background color from Control Panel settings
                 const bgRes = await fetch('/api/dashboard-bg?t=' + ts, { cache: 'no-store' });
                 const bgData = await bgRes.json();
                 if (bgData.success && bgData.color) {
@@ -505,59 +504,24 @@
         function renderDashboardStudyMatrix(categories, totalStudiedMins) {
             const container = document.getElementById('dashboardStudyList');
             if (!categories || categories.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 col-span-full text-center py-4">No study subjects deployed yet.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 col-span-full text-center py-4">No study subjects deployed by admin yet.</p>`;
                 return;
             }
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
             container.innerHTML = categories.map(c => {
-                let startDateStr = c.startDate || '2026-09-12';
-                let endDateStr = c.endDate;
                 let targetMins = parseInt(c.dailyTargetMinutes) || 120;
-
-                let daysLeftText = "No Deadline";
-                let badgeColor = "bg-zinc-500/20 text-zinc-400 border-zinc-500/30";
-                let statusText = "Active Vector";
-
-                if (endDateStr) {
-                    let endDateObj = new Date(endDateStr);
-                    endDateObj.setHours(0, 0, 0, 0);
-                    let diffTime = endDateObj - today;
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    if (diffDays < 0) {
-                        daysLeftText = `${Math.abs(diffDays)} Days Overdue`;
-                        badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
-                        statusText = "⚠️ Deadline Passed";
-                    } else if (diffDays === 0) {
-                        daysLeftText = "Due Today!";
-                        badgeColor = "bg-amber-500/20 text-amber-400 border-amber-500/30";
-                        statusText = "⚡ Critical Execution";
-                    } else {
-                        daysLeftText = `${diffDays} Days Left`;
-                        badgeColor = "bg-blue-500/20 text-blue-300 border-blue-500/30";
-                        statusText = "Upcoming Target";
-                    }
-                }
-
                 let progressRate = Math.min(Math.round((totalStudiedMins / targetMins) * 100), 100);
 
                 return `
                     <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3">
                         <div>
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-[9px] ${badgeColor} border px-2 py-0.5 rounded font-black uppercase">${statusText}</span>
+                                <span class="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded font-black uppercase">Active Vector</span>
                                 <span class="text-[10px] font-extrabold text-blue-400">Target: ${targetMins}m/day</span>
                             </div>
                             <h4 class="font-extrabold text-sm text-white mt-2">${c.name}</h4>
                         </div>
                         <div class="bg-black/30 p-3 rounded-xl border border-white/5 space-y-2 text-[10px]">
-                            <div class="flex justify-between text-zinc-400">
-                                <span>Start: <strong class="text-white">${startDateStr}</strong></span>
-                                <span>End: <strong class="text-white">${endDateStr || 'None'}</strong></span>
-                            </div>
                             <div>
                                 <div class="flex justify-between font-bold text-slate-300 mb-1">
                                     <span>Progress Rate</span>
@@ -566,10 +530,6 @@
                                 <div class="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
                                     <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${progressRate}%"></div>
                                 </div>
-                            </div>
-                            <div class="flex justify-between items-center pt-1 border-t border-white/5 font-bold text-amber-400">
-                                <span>⏳ Countdown:</span>
-                                <span>${daysLeftText}</span>
                             </div>
                         </div>
                     </div>
@@ -655,7 +615,6 @@
             });
         }
 
-        // SINGLE FOOLPROOF SYSTEM LOCK CHECK WITH OVERLAY
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
@@ -667,7 +626,6 @@
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
-                        // 🛑 સામાન્ય યુઝર માટે - Full Screen Lock Display
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
@@ -686,7 +644,6 @@
                             </div>
                         `;
                     } else {
-                        // 🟢 એડમિન માટે - Smart Warning Banner
                         const adminBanner = document.createElement('div');
                         adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
                         adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
