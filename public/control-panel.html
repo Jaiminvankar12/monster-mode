@@ -180,7 +180,7 @@
             <button onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
             <button onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway</button>
             <button onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Dash BG</button>
-            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Themes (50)</button>
+            <button onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Custom Theme</button>
         </div>
 
         <!-- TAB 1: HABITS -->
@@ -442,65 +442,57 @@
             </div>
         </div>
 
-        <!-- TAB 10: THEME MATRIX (FULL 50 ELITE COLORS) -->
+        <!-- TAB 10: UNLIMITED THEME MATRIX (HEX CODE & COLOR PICKER) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-4">
-                <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Theme Matrix (50 Elite Colors)</h3>
-                <p class="text-xs text-slate-400">Select and deploy operational HUD glow color across all terminals.</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 max-h-[380px] overflow-y-auto pr-1">
-                    <button onclick="setPanelTheme('red', '#ef4444')" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-red-500 shrink-0"></span> Cyber Red</button>
-                    <button onclick="setPanelTheme('blue', '#3b82f6')" class="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></span> Neon Blue</button>
-                    <button onclick="setPanelTheme('emerald', '#10b981')" class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></span> Matrix Green</button>
-                    <button onclick="setPanelTheme('cyan', '#06b6d4')" class="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 text-cyan-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-cyan-500 shrink-0"></span> Cyber Cyan</button>
-                    <button onclick="setPanelTheme('amber', '#f59e0b')" class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0"></span> Golden Amber</button>
-                    <button onclick="setPanelTheme('crimson', '#be123c')" class="p-2.5 rounded-xl bg-rose-700/10 border border-rose-700/30 hover:bg-rose-700/20 text-rose-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-rose-700 shrink-0"></span> Blood Crimson</button>
-                    <button onclick="setPanelTheme('purple', '#a855f7')" class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 text-purple-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-purple-500 shrink-0"></span> Royal Purple</button>
-                    <button onclick="setPanelTheme('indigo', '#6366f1')" class="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-indigo-500 shrink-0"></span> Electric Indigo</button>
-                    <button onclick="setPanelTheme('lime', '#84cc16')" class="p-2.5 rounded-xl bg-lime-500/10 border border-lime-500/30 hover:bg-lime-500/20 text-lime-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-lime-500 shrink-0"></span> Toxic Lime</button>
-                    <button onclick="setPanelTheme('teal', '#14b8a6')" class="p-2.5 rounded-xl bg-teal-500/10 border border-teal-500/30 hover:bg-teal-500/20 text-teal-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-teal-500 shrink-0"></span> Deep Teal</button>
-                    <button onclick="setPanelTheme('orange', '#f97316')" class="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 text-orange-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-orange-500 shrink-0"></span> Solar Orange</button>
-                    <button onclick="setPanelTheme('pink', '#ec4899')" class="p-2.5 rounded-xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-pink-500 shrink-0"></span> Hot Pink</button>
-                    <button onclick="setPanelTheme('slate', '#64748b')" class="p-2.5 rounded-xl bg-slate-400/10 border border-slate-400/30 hover:bg-slate-400/20 text-slate-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-slate-400 shrink-0"></span> Slate Steel</button>
-                    <button onclick="setPanelTheme('violet', '#7c3aed')" class="p-2.5 rounded-xl bg-violet-600/10 border border-violet-600/30 hover:bg-violet-600/20 text-violet-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-violet-600 shrink-0"></span> Cyber Violet</button>
-                    <button onclick="setPanelTheme('neonemerald', '#34d399')" class="p-2.5 rounded-xl bg-emerald-400/10 border border-emerald-400/30 hover:bg-emerald-400/20 text-emerald-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-emerald-400 shrink-0"></span> Neon Emerald</button>
-                    <button onclick="setPanelTheme('yellow', '#facc15')" class="p-2.5 rounded-xl bg-yellow-400/10 border border-yellow-400/30 hover:bg-yellow-400/20 text-yellow-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-yellow-400 shrink-0"></span> Laser Yellow</button>
-                    <button onclick="setPanelTheme('rose', '#f43f5e')" class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0"></span> Deep Rose</button>
-                    <button onclick="setPanelTheme('sky', '#38bdf8')" class="p-2.5 rounded-xl bg-sky-400/10 border border-sky-400/30 hover:bg-sky-400/20 text-sky-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-sky-400 shrink-0"></span> Quantum Sky</button>
-                    <button onclick="setPanelTheme('fuchsia', '#d946ef')" class="p-2.5 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 hover:bg-fuchsia-500/20 text-fuchsia-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-fuchsia-500 shrink-0"></span> Plasma Fuchsia</button>
-                    <button onclick="setPanelTheme('acid', '#4ade80')" class="p-2.5 rounded-xl bg-green-400/10 border border-green-400/30 hover:bg-green-400/20 text-green-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-green-400 shrink-0"></span> Acid Green</button>
-                    <button onclick="setPanelTheme('mystic', '#71717a')" class="p-2.5 rounded-xl bg-zinc-500/10 border border-zinc-500/30 hover:bg-zinc-500/20 text-zinc-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-zinc-400 shrink-0"></span> Mystic Slate</button>
-                    <button onclick="setPanelTheme('gold', '#fde047')" class="p-2.5 rounded-xl bg-amber-300/10 border border-amber-300/30 hover:bg-amber-300/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-amber-300 shrink-0"></span> Solar Gold</button>
-                    <button onclick="setPanelTheme('cyberlime', '#6ee7b7')" class="p-2.5 rounded-xl bg-emerald-300/10 border border-emerald-300/30 hover:bg-emerald-300/20 text-emerald-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-emerald-300 shrink-0"></span> Cyber Lime</button>
-                    <button onclick="setPanelTheme('neonamber', '#d97706')" class="p-2.5 rounded-xl bg-amber-600/10 border border-amber-600/30 hover:bg-amber-600/20 text-amber-500 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-amber-600 shrink-0"></span> Neon Amber</button>
-                    <button onclick="setPanelTheme('midnight', '#1e40af')" class="p-2.5 rounded-xl bg-blue-900/10 border border-blue-900/30 hover:bg-blue-900/20 text-blue-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-blue-800 shrink-0"></span> Midnight Blue</button>
-                    <button onclick="setPanelTheme('crimsonneon', '#ff1744')" class="p-2.5 rounded-xl bg-red-600/10 border border-red-600/30 hover:bg-red-600/20 text-red-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-red-600 shrink-0"></span> Crimson Neon</button>
-                    <button onclick="setPanelTheme('electriccyan', '#00e5ff')" class="p-2.5 rounded-xl bg-cyan-400/10 border border-cyan-400/30 hover:bg-cyan-400/20 text-cyan-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0"></span> Electric Cyan</button>
-                    <button onclick="setPanelTheme('hyperviolet', '#9c27b0')" class="p-2.5 rounded-xl bg-purple-600/10 border border-purple-600/30 hover:bg-purple-600/20 text-purple-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-purple-600 shrink-0"></span> Hyper Violet</button>
-                    <button onclick="setPanelTheme('solargreen', '#00e676')" class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></span> Solar Green</button>
-                    <button onclick="setPanelTheme('sunsetorange', '#ff3d00')" class="p-2.5 rounded-xl bg-orange-600/10 border border-orange-600/30 hover:bg-orange-600/20 text-orange-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-orange-600 shrink-0"></span> Sunset Orange</button>
-                    <button onclick="setPanelTheme('deepmagenta', '#c51162')" class="p-2.5 rounded-xl bg-pink-600/10 border border-pink-600/30 hover:bg-pink-600/20 text-pink-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-pink-600 shrink-0"></span> Deep Magenta</button>
-                    <button onclick="setPanelTheme('arcticblue', '#00b0ff')" class="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30 hover:bg-sky-500/20 text-sky-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-sky-500 shrink-0"></span> Arctic Blue</button>
-                    <button onclick="setPanelTheme('toxicyellow', '#ffea00')" class="p-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 hover:bg-yellow-500/20 text-yellow-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-yellow-500 shrink-0"></span> Toxic Yellow</button>
-                    <button onclick="setPanelTheme('radiantpink', '#ff4081')" class="p-2.5 rounded-xl bg-rose-400/10 border border-rose-400/30 hover:bg-rose-400/20 text-rose-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-rose-400 shrink-0"></span> Radiant Pink</button>
-                    <button onclick="setPanelTheme('deepamber', '#ffab00')" class="p-2.5 rounded-xl bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0"></span> Deep Amber</button>
-                    <button onclick="setPanelTheme('neonteal', '#64ffda')" class="p-2.5 rounded-xl bg-teal-400/10 border border-teal-400/30 hover:bg-teal-400/20 text-teal-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-teal-400 shrink-0"></span> Neon Teal</button>
-                    <button onclick="setPanelTheme('matrixlime', '#76ff03')" class="p-2.5 rounded-xl bg-lime-400/10 border border-lime-400/30 hover:bg-lime-400/20 text-lime-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-lime-400 shrink-0"></span> Matrix Lime</button>
-                    <button onclick="setPanelTheme('royalindigo', '#3f51b5')" class="p-2.5 rounded-xl bg-indigo-600/10 border border-indigo-600/30 hover:bg-indigo-600/20 text-indigo-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-indigo-600 shrink-0"></span> Royal Indigo</button>
-                    <button onclick="setPanelTheme('blazepurple', '#e040fb')" class="p-2.5 rounded-xl bg-fuchsia-600/10 border border-fuchsia-600/30 hover:bg-fuchsia-600/20 text-fuchsia-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-fuchsia-600 shrink-0"></span> Blaze Purple</button>
-                    <button onclick="setPanelTheme('moltenlava', '#dd2c00')" class="p-2.5 rounded-xl bg-orange-700/10 border border-orange-700/30 hover:bg-orange-700/20 text-orange-400 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-orange-700 shrink-0"></span> Molten Lava</button>
-                    <button onclick="setPanelTheme('icecyan', '#84ffff')" class="p-2.5 rounded-xl bg-cyan-300/10 border border-cyan-300/30 hover:bg-cyan-300/20 text-cyan-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-cyan-300 shrink-0"></span> Ice Cyan</button>
-                    <button onclick="setPanelTheme('neonlime', '#b2ff59')" class="p-2.5 rounded-xl bg-lime-300/10 border border-lime-300/30 hover:bg-lime-300/20 text-lime-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-lime-300 shrink-0"></span> Neon Lime</button>
-                    <button onclick="setPanelTheme('hotcoral', '#ff6e40')" class="p-2.5 rounded-xl bg-rose-600/10 border border-rose-600/30 hover:bg-rose-600/20 text-rose-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-rose-600 shrink-0"></span> Hot Coral</button>
-                    <button onclick="setPanelTheme('deepruby', '#d50000')" class="p-2.5 rounded-xl bg-red-800/10 border border-red-800/30 hover:bg-red-800/20 text-red-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-red-800 shrink-0"></span> Deep Ruby</button>
-                    <button onclick="setPanelTheme('cyberpink', '#f50057')" class="p-2.5 rounded-xl bg-pink-700/10 border border-pink-700/30 hover:bg-pink-700/20 text-pink-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-pink-700 shrink-0"></span> Cyber Pink</button>
-                    <button onclick="setPanelTheme('neonindigo', '#304ffe')" class="p-2.5 rounded-xl bg-blue-700/10 border border-blue-700/30 hover:bg-blue-700/20 text-blue-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-blue-700 shrink-0"></span> Neon Indigo</button>
-                    <button onclick="setPanelTheme('quantumteal', '#00bfa5')" class="p-2.5 rounded-xl bg-teal-600/10 border border-teal-600/30 hover:bg-teal-600/20 text-teal-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-teal-600 shrink-0"></span> Quantum Teal</button>
-                    <button onclick="setPanelTheme('solarizedgold', '#ffd600')" class="p-2.5 rounded-xl bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 text-amber-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-amber-400 shrink-0"></span> Solarized Gold</button>
-                    <button onclick="setPanelTheme('ultrazeropurple', '#aa00ff')" class="p-2.5 rounded-xl bg-purple-700/10 border border-purple-700/30 hover:bg-purple-700/20 text-purple-300 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-purple-700 shrink-0"></span> Ultra Zero Purple</button>
-                    <button onclick="setPanelTheme('matrixcyan', '#18ffff')" class="p-2.5 rounded-xl bg-cyan-300/10 border border-cyan-300/30 hover:bg-cyan-300/20 text-cyan-200 font-extrabold uppercase tracking-wider text-[10px] transition cursor-pointer flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full bg-cyan-300 shrink-0"></span> Matrix Cyan</button>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Unlimited Theme Matrix</h3>
+                    <p class="text-xs text-slate-400">Zero limitations. Pick any color using the visual picker or type/paste your exact Hex code.</p>
                 </div>
+
+                <!-- Color Picker & Hex Input Form -->
+                <form onsubmit="handleCustomThemeSubmit(event)" class="space-y-4">
+                    <div class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
+                        
+                        <!-- Visual Color Picker -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-xs font-bold text-white uppercase tracking-wider">Visual Color Picker</label>
+                                <span class="text-[10px] text-slate-400">Click box to open palette</span>
+                            </div>
+                            <input type="color" id="visualColorPicker" value="#ef4444" oninput="syncHexInput(this.value)" class="w-12 h-12 bg-transparent rounded-xl cursor-pointer border-0">
+                        </div>
+
+                        <hr class="border-white/5">
+
+                        <!-- Manual Hex Code Input -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exact Hex Code</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">#</span>
+                                <input type="text" id="hexCodeInput" required maxlength="7" placeholder="ef4444" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pl-8 text-white font-mono text-sm uppercase focus:border-red-500 outline-none transition shadow-inner" oninput="syncColorPicker(this.value)">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform active:scale-95">
+                            🚀 Deploy Custom Theme
+                        </button>
+                        <button type="button" onclick="setRandomTheme()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                            🎲 Random
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-6xl mb-4 animate-bounce">🎨</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">50-Tone HUD Matrix</h3></div>
+
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                <span class="text-6xl mb-4 animate-bounce">🎨</span>
+                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Absolute Freedom</h3>
+                <p class="text-xs text-slate-400 max-w-xs">No preset restrictions. Your command center, your exact color codes.</p>
+            </div>
         </div>
 
     </main>
@@ -580,25 +572,76 @@
         }
         verifyAdminSession();
 
+        // 🎨 Theme Sync & Color Picker Functions
         function applySavedTheme() {
-            const savedTheme = localStorage.getItem('monster_accent_theme') || 'red';
-            const themeColors = {
-                red: '#ef4444', blue: '#3b82f6', emerald: '#10b981', cyan: '#06b6d4', amber: '#f59e0b',
-                crimson: '#be123c', purple: '#a855f7', indigo: '#6366f1', lime: '#84cc16', teal: '#14b8a6',
-                orange: '#f97316', pink: '#ec4899', slate: '#64748b', violet: '#7c3aed', neonemerald: '#34d399',
-                yellow: '#facc15', rose: '#f43f5e', sky: '#38bdf8', fuchsia: '#d946ef', acid: '#4ade80',
-                mystic: '#71717a', gold: '#fde047', cyberlime: '#6ee7b7', neonamber: '#d97706', midnight: '#1e40af',
-                crimsonneon: '#ff1744', electriccyan: '#00e5ff', hyperviolet: '#9c27b0', solargreen: '#00e676', sunsetorange: '#ff3d00',
-                deepmagenta: '#c51162', arcticblue: '#00b0ff', toxicyellow: '#ffea00', radiantpink: '#ff4081', deepamber: '#ffab00',
-                neonteal: '#64ffda', matrixlime: '#76ff03', royalindigo: '#3f51b5', blazepurple: '#e040fb', moltenlava: '#dd2c00',
-                icecyan: '#84ffff', neonlime: '#b2ff59', hotcoral: '#ff6e40', deepruby: '#d50000', cyberpink: '#f50057',
-                neonindigo: '#304ffe', quantumteal: '#00bfa5', solarizedgold: '#ffd600', ultrazeropurple: '#aa00ff', matrixcyan: '#18ffff'
-            };
-            const hex = themeColors[savedTheme] || '#ef4444';
+            const savedMode = localStorage.getItem('monster_accent_theme');
+            let hex = '#ef4444';
+
+            if (savedMode === 'custom') {
+                hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
+            }
+
             document.documentElement.style.setProperty('--theme-primary', hex);
             document.documentElement.style.setProperty('--theme-glow', hex + '40');
+
+            const picker = document.getElementById('visualColorPicker');
+            const hexInput = document.getElementById('hexCodeInput');
+            if (picker) picker.value = hex;
+            if (hexInput) hexInput.value = hex.replace('#', '');
         }
         applySavedTheme();
+
+        function syncHexInput(colorVal) {
+            const hexClean = colorVal.replace('#', '');
+            const hexInput = document.getElementById('hexCodeInput');
+            if (hexInput) hexInput.value = hexClean;
+        }
+
+        function syncColorPicker(hexVal) {
+            let clean = hexVal.trim().replace('#', '');
+            if (clean.length === 3 || clean.length === 6) {
+                const picker = document.getElementById('visualColorPicker');
+                if (picker) picker.value = '#' + clean;
+            }
+        }
+
+        function handleCustomThemeSubmit(e) {
+            e.preventDefault();
+            let hexVal = document.getElementById('hexCodeInput').value.trim();
+            if (!hexVal.startsWith('#')) {
+                hexVal = '#' + hexVal;
+            }
+
+            const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(hexVal);
+            if (!isValidHex) {
+                showStatusMessage("❌ Invalid Hex Code! Please enter a valid code (e.g. ff0055).", "error");
+                return;
+            }
+
+            applyCustomHexTheme(hexVal);
+        }
+
+        function applyCustomHexTheme(hex) {
+            localStorage.setItem('monster_accent_theme', 'custom');
+            localStorage.setItem('monster_custom_hex', hex);
+
+            document.documentElement.style.setProperty('--theme-primary', hex);
+            document.documentElement.style.setProperty('--theme-glow', hex + '40');
+            
+            showStatusMessage(`✅ Custom Theme Deployed: ${hex.toUpperCase()}`, 'success');
+        }
+
+        function setRandomTheme() {
+            const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            
+            const picker = document.getElementById('visualColorPicker');
+            const hexInput = document.getElementById('hexCodeInput');
+            
+            if (picker) picker.value = randomHex;
+            if (hexInput) hexInput.value = randomHex.replace('#', '');
+
+            applyCustomHexTheme(randomHex);
+        }
 
         function switchTab(tab) {
             ['habits', 'workouts', 'study', 'hygiene', 'notes', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
@@ -619,13 +662,6 @@
             if (tab === 'sanctuary') loadSanctuaryConfig();
             if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
             if (tab === 'dashboardBg') loadDashboardBgConfig();
-        }
-
-        function setPanelTheme(theme, hex) {
-            localStorage.setItem('monster_accent_theme', theme);
-            document.documentElement.style.setProperty('--theme-primary', hex);
-            document.documentElement.style.setProperty('--theme-glow', hex + '40');
-            showStatusMessage(`Theme updated to ${theme.toUpperCase()}`, 'success');
         }
 
         function showStatusMessage(message, type = 'success') {
@@ -722,7 +758,6 @@
             });
         }
 
-        // 🟢 SCHEDULES LOAD & SUBMIT
         async function loadSchedulesConfig() {
             try {
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -758,7 +793,6 @@
             });
         }
 
-        // HABITS EDIT & LOAD
         async function loadHabits() {
             try {
                 const res = await fetch('/api/habits?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -826,7 +860,6 @@
             });
         }
 
-        // WORKOUTS EDIT & LOAD
         async function loadWorkouts() {
             try {
                 const res = await fetch('/api/workouts?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -894,7 +927,6 @@
             });
         }
 
-        // STUDY EDIT & LOAD
         async function loadStudy() {
             try {
                 const res = await fetch('/api/study/categories?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -964,7 +996,6 @@
             });
         }
 
-        // HYGIENE EDIT & LOAD
         async function loadHygiene() {
             try {
                 const res = await fetch('/api/hygiene?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -1165,40 +1196,6 @@
                         });
                         if (res.ok) showStatusMessage("Gateway text updated!", "success");
                     } catch (err) {}
-                });
-            });
-        }
-
-        // DASHBOARD BG COLOR CONFIG
-        async function loadDashboardBgConfig() {
-            try {
-                const res = await fetch('/api/dashboard-bg?t=' + new Date().getTime(), { cache: 'no-store' });
-                const data = await res.json();
-                if (data.success && data.color) {
-                    document.getElementById('dashboardBgColorInput').value = data.color;
-                }
-            } catch (err) {}
-        }
-
-        const dashboardBgForm = document.getElementById('updateDashboardBgForm');
-        if (dashboardBgForm) {
-            dashboardBgForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const color = document.getElementById('dashboardBgColorInput').value;
-                    try {
-                        const res = await fetch('/api/control-panel/dashboard-bg', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ color, password })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            showStatusMessage("Dashboard background color updated successfully!", "success");
-                        } else {
-                            alert("❌ " + data.error);
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
                 });
             });
         }
