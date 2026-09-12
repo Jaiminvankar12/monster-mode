@@ -29,7 +29,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 12, 2026</strong>. Habit tracking and execution vectors are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Habit tracking and execution vectors are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -116,7 +116,7 @@
 
     <script>
         let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-12";
+        const LAUNCH_DATE = "2026-09-13";
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(LAUNCH_DATE);
@@ -143,7 +143,6 @@
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
-                        // 🛑 સામાન્ય યુઝર માટે - Full Screen Lock Display
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
@@ -162,7 +161,6 @@
                             </div>
                         `;
                     } else {
-                        // 🟢 એડમિન માટે - Smart Warning Banner
                         const adminBanner = document.createElement('div');
                         adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
                         adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
@@ -233,17 +231,15 @@
             }
         }
 
-        // Toggle Note Status and Refresh UI
         async function toggleTrackerNote(id) {
             try {
                 await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST' });
-                fetchTrackerNotes(); // Refresh to update the strike-through styling
+                fetchTrackerNotes();
             } catch (err) {
                 console.error("Error toggling note:", err);
             }
         }
 
-        // --- Original Habit Logic ---
         async function toggleHabit(id, completed) {
              const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
              try {
@@ -255,7 +251,6 @@
                 fetchHabits(targetDate);
              } catch (err) {}
         }
-
 
         function shiftDate(days) {
             const dateInput = document.getElementById('targetDateInput');
@@ -296,7 +291,7 @@
             }
 
             container.innerHTML = habits.map(h => {
-                const startDateStr = h.startDate || '2026-09-12';
+                const startDateStr = h.startDate || '2026-09-13';
                 const isNotStarted = viewingDate < startDateStr;
 
                 return `
@@ -329,7 +324,7 @@
             verifyGlobalSystemLock();
             checkPreLaunchLock();
             fetchHabits();
-            fetchTrackerNotes(); // Make sure this runs!
+            fetchTrackerNotes();
         });
     </script>
 </body>
