@@ -7,6 +7,7 @@ const cron = require('node-cron');
 const fetch = require('node-fetch');
 const mongoose = require('mongoose');
 const { getServerToday, validateDateAccess } = require('./server/services/dateService');
+const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🟢 NEW: Gemini AI Integration
 require('dotenv').config();
 
 const app = express();
@@ -75,7 +76,6 @@ const globalSettingsSchema = new mongoose.Schema({
     dashboardBgColor: { type: String, default: "#07090f" },
     gatewayHeadline: { type: String, default: "BECOME A<br>MONSTER.<br>DOMINATE REALITY." },
     gatewaySubtext: { type: String, default: "Pure discipline. Zero excuses. Absolute control." },
-    // 🟢 NEW: Workout & Study Schedule / Reminder Times
     workoutReminderTime: { type: String, default: "" },
     studyReminderTime: { type: String, default: "" },
     workoutNotifiedDate: { type: String, default: "" },
@@ -335,6 +335,24 @@ cron.schedule('0 7 * * *', async () => {
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
 
+// 🩸 NEW: PUNISHMENT PROTOCOL CRON (11:59 PM CHECK)
+cron.schedule('59 23 * * *', async () => {
+    try {
+        const today = getServerToday();
+        const userId = MASTER_USER_ID; 
+        const syncResult = await runServerSyncEngine(userId, today);
+        
+        if (!syncResult.allWorkoutsDone || !syncResult.studyDone || !syncResult.hydrationDone) {
+            const msg = `🩸 *PUNISHMENT PROTOCOL INITIATED*\n\n⚠️ You FAILED today's core objectives.\n\n🏋️ Workouts: ${syncResult.allWorkoutsDone ? '✅' : '❌'}\n📚 Study: ${syncResult.studyDone ? '✅' : '❌'}\n💧 Hydration: ${syncResult.hydrationDone ? '✅' : '❌'}\n\n"You didn't push hard enough today. Tomorrow, you pay the price in sweat and focus!"`;
+            await sendTelegramMessage(msg);
+        } else {
+            await sendTelegramMessage(`🏆 *APEX PREDATOR PROTOCOL*\n\nAll targets destroyed today. Absolute domination.\n\nRest well. Tomorrow we go harder.`);
+        }
+    } catch (err) {
+        console.error("Punishment Protocol Error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
+
 async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
@@ -459,7 +477,6 @@ app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Gateway text updated successfully." });
 });
 
-// 🟢 NEW: Workout & Study Schedule API (Get & Post for Control Panel & Dashboards)
 app.get('/api/schedules', async (req, res) => {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
     res.json({ 
@@ -1174,8 +1191,40 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     res.json({ success: true, ...updatedXP });
 });
 
-app.get('/api/monster-coach', (req, res) => {
-    res.json({ success: true, message: "Monster Coach active." });
+// 🧠 1. NEW: REAL GEMINI AI INTEGRATION
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
+
+app.get('/api/monster-coach', async (req, res) => {
+    try {
+        let coachMessage = "Discipline equals absolute freedom.";
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
+            const result = await model.generateContent(prompt);
+            coachMessage = result.response.text().trim().replace(/"/g, '');
+        }
+        let xpInfo = await getUserXP(req.session && req.session.userId ? req.session.userId : MASTER_USER_ID);
+        res.json({ success: true, message: "Monster Coach active.", coachMessage: coachMessage, xp: xpInfo });
+    } catch(e) {
+        let xpInfo = await getUserXP(req.session && req.session.userId ? req.session.userId : MASTER_USER_ID);
+        res.json({ success: true, message: "Monster Coach active.", coachMessage: "Execution is everything. Stop complaining.", xp: xpInfo });
+    }
+});
+
+// 🌦️ 2. NEW: WEATHER API ROUTE (Ahmedabad)
+app.get('/api/weather', async (req, res) => {
+    try {
+        const apiKey = process.env.WEATHER_API_KEY || "YOUR_OPENWEATHER_API_KEY"; 
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Ahmedabad&units=metric&appid=${apiKey}`);
+        const data = await response.json();
+        if (data.main) {
+            res.json({ success: true, temp: Math.round(data.main.temp), condition: data.weather[0].main });
+        } else {
+            res.json({ success: false, temp: "32", condition: "CLEAR" });
+        }
+    } catch (err) {
+        res.json({ success: false, temp: "32", condition: "CLEAR" });
+    }
 });
 
 app.listen(PORT, () => {

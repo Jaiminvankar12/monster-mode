@@ -288,7 +288,29 @@
             checkPreLaunchLock();
             fetchHygieneData();
         });
+// 🔊 Global Cyberpunk Click Sound
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playCyberClick() {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        try {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {}
+    }
 
+    // આખા પેજ પર કોઈ પણ બટન પર ક્લિક થાય એટલે સાઉન્ડ વાગશે
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('button')) {
+            playCyberClick();
+        }
+    });
     </script>
 </body>
 </html>

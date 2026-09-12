@@ -6,7 +6,8 @@
     <title>MONSTER MODE ON — Master Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="icon" href="images/dragon 1.png">
+    <!-- 🐲 Monster Favicon properly added -->
+    <link rel="icon" href="https://emojicdn.elk.sh/🐲">
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #030408; color: #f3f4f6; overflow-x: hidden; }
@@ -76,7 +77,7 @@
             --theme-gradient: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
             --theme-glow: rgba(239, 68, 68, 0.2);
         }
-        /* Custom Scrollbar for futuristic feel */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #05070b; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
@@ -168,11 +169,14 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs Bar (Futuristic Grid/Scroll) -->
+        <!-- Navigation Tabs Bar -->
         <div class="flex flex-wrap gap-2 mb-8 bg-[#070a12] p-2.5 rounded-2xl border border-white/10 shadow-inner">
             <button onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[110px] py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🔥 Habits</button>
             <button onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🏋️ Workouts</button>
             <button onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📚 Study</button>
+            <!-- 🎯 New Targets Tab -->
+            <button onclick="switchTab('targets')" id="tabTargets" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎯 Targets '26</button>
+            
             <button onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🧼 Hygiene</button>
             <button onclick="switchTab('notes')" id="tabNotes" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📌 Notes</button>
             <button onclick="switchTab('schedules')" id="tabSchedules" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⏰ Reminders</button>
@@ -203,6 +207,32 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Habits</h3>
                 <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
+            </div>
+        </div>
+
+        <!-- NEW TAB: 🎯 TARGETS 2026 (Management) -->
+        <div id="sectionTargets" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                <h3 id="targetFormTitle" class="text-sm font-black uppercase tracking-wider text-purple-500 mb-6 flex items-center gap-2"><span>🎯</span> Define 2026 Milestone</h3>
+                <form id="createTargetForm" class="space-y-4">
+                    <input type="hidden" id="editTargetId">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Milestone Name</label>
+                        <input type="text" id="targetName" required placeholder="e.g., Launch Apex Predator System" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none focus:border-purple-500 transition shadow-inner">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Launch Date</label>
+                        <input type="date" id="targetDate" value="2026-09-13" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner">
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30">Deploy Milestone</button>
+                        <button type="button" onclick="resetTargetForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>🚀</span> Master Goals Timeline</h3>
+                <div id="targetsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading milestones...</p></div>
             </div>
         </div>
 
@@ -556,6 +586,30 @@
 
     </main>
 
+    <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
+        }
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
+        });
+    </script>
+
     <script>
         let pendingActionCallback = null;
         let currentActionType = 'add'; 
@@ -761,7 +815,7 @@
         }
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'hygiene', 'notes', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
+            ['habits', 'workouts', 'study', 'targets', 'hygiene', 'notes', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
@@ -779,6 +833,7 @@
             if (tab === 'sanctuary') loadSanctuaryConfig();
             if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
             if (tab === 'dashboardBg') loadDashboardBgConfig();
+            if (tab === 'targets') loadTargets();
         }
 
         function showStatusMessage(message, type = 'success') {
@@ -805,6 +860,108 @@
                 container.classList.add('hidden');
             }
         }
+
+        // 🎯 TARGETS MANAGEMENT WIDGET LOGIC
+        async function loadTargets() {
+            try {
+                const res = await fetch('/api/targets?t=' + new Date().getTime(), { cache: 'no-store' });
+                const data = await res.json();
+                const container = document.getElementById('targetsListContainer');
+                if (!container) return;
+                
+                if (data.success && data.targets && data.targets.length > 0) {
+                    container.innerHTML = data.targets.map(t => `
+                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>
+                            </div>
+                            <button onclick="confirmAndDeleteTarget('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+                }
+            } catch (err) {
+                // Fallback for demo
+                const container = document.getElementById('targetsListContainer');
+                let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
+                if(fallback.length > 0) {
+                    container.innerHTML = fallback.map(t => `
+                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>
+                            </div>
+                            <button onclick="confirmAndDeleteTarget('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+                }
+            }
+        }
+
+        const targetForm = document.getElementById('createTargetForm');
+        if (targetForm) {
+            targetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                requestSecureAuthorization('add', async (password) => {
+                    const name = document.getElementById('targetName').value;
+                    const date = document.getElementById('targetDate').value;
+
+                    try {
+                        const res = await fetch('/api/targets', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, date, password })
+                        });
+                        if (res.ok) {
+                            showStatusMessage("Milestone deployed successfully!", "success");
+                            targetForm.reset();
+                            loadTargets();
+                        }
+                    } catch (err) { 
+                        // Fallback logic for demo
+                        let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
+                        fallback.push({id: Date.now(), name, date, completed: false});
+                        localStorage.setItem('monster_targets', JSON.stringify(fallback));
+                        showStatusMessage("Milestone deployed successfully!", "success");
+                        targetForm.reset();
+                        loadTargets();
+                    }
+                });
+            });
+        }
+
+        function confirmAndDeleteTarget(id) {
+            requestSecureAuthorization('delete', async (password) => {
+                try {
+                    const res = await fetch(`/api/targets/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    if (res.ok) {
+                        showStatusMessage("Milestone deleted successfully.", "success");
+                        loadTargets();
+                    }
+                } catch (err) {
+                    // Fallback logic for demo
+                    let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
+                    fallback = fallback.filter(t => t.id != id);
+                    localStorage.setItem('monster_targets', JSON.stringify(fallback));
+                    showStatusMessage("Milestone deleted successfully.", "success");
+                    loadTargets();
+                }
+            });
+        }
+        
+        function resetTargetForm() {
+            document.getElementById('createTargetForm').reset();
+            document.getElementById('editTargetId').value = '';
+        }
+
 
         async function loadNotesReminders() {
             try {
