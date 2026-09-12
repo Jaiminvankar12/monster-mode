@@ -6,12 +6,33 @@
     <title>MONSTER MODE ON — Athlete Workout Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-      <link rel="icon" href="https://emojicdn.elk.sh/">
+    <link rel="icon" href="https://emojicdn.elk.sh/🐲">
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        
+        /* 🟢 Futuristic Cyber Pulse & Neon Glow Animations */
+        @keyframes cyberPulse {
+            0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), inset 0 0 25px rgba(59, 130, 246, 0.2); }
+            100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1); }
+        }
+        @keyframes workoutPulse {
+            0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.5), inset 0 0 25px rgba(239, 68, 68, 0.2); }
+            100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1); }
+        }
+        .cyber-hud-card {
+            background: linear-gradient(135deg, rgba(13, 17, 28, 0.85) 0%, rgba(7, 10, 16, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .study-hud { animation: cyberPulse 4s infinite ease-in-out; border-color: rgba(59, 130, 246, 0.4); }
+        .workout-hud { animation: workoutPulse 4s infinite ease-in-out; border-color: rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -63,6 +84,33 @@
                 <div>
                     <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Workout Streak</span>
                     <span id="workoutStreakLabel" class="text-lg font-black text-amber-400 tracking-wider">0 Days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🟢 FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Workout HUD Widget -->
+            <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
+                <div class="space-y-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Execution Time</h3>
+                    <div id="dashWorkoutTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">
+                    ⚡
+                </div>
+            </div>
+
+            <!-- Study HUD Widget -->
+            <div class="cyber-hud-card study-hud p-6 rounded-3xl flex items-center justify-between">
+                <div class="space-y-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md inline-block">📚 Study Core Vector</span>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Session Time</h3>
+                    <div id="dashStudyTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl animate-pulse">
+                    🛰️
                 </div>
             </div>
         </div>
@@ -137,6 +185,20 @@
                     if (sessionData.role !== 'ADMIN') {
                         window.location.href = 'index.html';
                     }
+                }
+            } catch (err) {}
+        }
+
+        // 🟢 LOAD SCHEDULE TIMES
+        async function loadDashboardSchedules() {
+            try {
+                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store' });
+                const data = await res.json();
+                if (data.success) {
+                    const workoutEl = document.getElementById('dashWorkoutTime');
+                    const studyEl = document.getElementById('dashStudyTime');
+                    if (workoutEl) workoutEl.innerText = data.workoutReminderTime ? data.workoutReminderTime : "NOT SET";
+                    if (studyEl) studyEl.innerText = data.studyReminderTime ? data.studyReminderTime : "NOT SET";
                 }
             } catch (err) {}
         }
@@ -262,6 +324,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             checkPreLaunchLock();
+            loadDashboardSchedules();
             fetchWorkouts();
         });
     </script>
