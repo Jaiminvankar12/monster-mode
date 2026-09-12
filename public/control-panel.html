@@ -211,12 +211,50 @@
                 <h3 id="workoutFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🏋️</span> Deploy / Edit Workout</h3>
                 <form id="createWorkoutForm" class="space-y-4">
                     <input type="hidden" id="editWorkoutId">
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Name</label><input type="text" id="workoutName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label><input type="number" id="workoutSets" value="3" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label><input type="number" id="workoutValue" value="10" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label><select id="workoutUnit" class="w-full bg-[#030408] border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none shadow-inner"><option value="reps">Reps</option><option value="mins">Mins</option><option value="secs">Secs</option></select></div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Name</label>
+                        <input type="text" id="workoutName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
                     </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- CUSTOM ANIMATED SETS CONTROLLER -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
+                            <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
+                                <button type="button" onclick="adjustWorkoutInput('workoutSets', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                                </button>
+                                <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
+                                <button type="button" onclick="adjustWorkoutInput('workoutSets', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CUSTOM ANIMATED VALUE CONTROLLER -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
+                            <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
+                                <button type="button" onclick="adjustWorkoutInput('workoutValue', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                                </button>
+                                <input type="number" id="workoutValue" value="10" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
+                                <button type="button" onclick="adjustWorkoutInput('workoutValue', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label>
+                        <select id="workoutUnit" class="w-full bg-[#030408] border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
+                            <option value="reps">Reps</option>
+                            <option value="mins">Mins</option>
+                            <option value="secs">Secs</option>
+                        </select>
+                    </div>
+
                     <div class="flex gap-3 pt-2">
                         <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Workout</button>
                         <button type="button" onclick="resetWorkoutForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
@@ -500,6 +538,26 @@
     <script>
         let pendingActionCallback = null;
         let currentActionType = 'add'; 
+
+        // Smooth increment/decrement handler with scale effect for workout fields
+        function adjustWorkoutInput(elementId, amount) {
+            const input = document.getElementById(elementId);
+            if (!input) return;
+            
+            let currentVal = parseInt(input.value) || 0;
+            let newVal = currentVal + amount;
+            
+            // Enforce minimum boundary limit (at least 1)
+            if (newVal < 1) newVal = 1;
+            
+            input.value = newVal;
+
+            // Add a brief subtle pulse animation class to the input value display
+            input.classList.add('text-red-400', 'scale-110');
+            setTimeout(() => {
+                input.classList.remove('text-red-400', 'scale-110');
+            }, 150);
+        }
 
         function requestSecureAuthorization(actionType, callback) {
             currentActionType = actionType;
