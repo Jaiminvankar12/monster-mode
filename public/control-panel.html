@@ -26,7 +26,7 @@
             background: linear-gradient(90deg, transparent, var(--theme-primary, #ef4444), transparent);
         }
         .red-glow-tab { 
-            background: linear-gradient(180deg, var(--theme-primary, #ef4444) 0%, #b91c1c 100%); 
+            background: var(--theme-gradient, linear-gradient(180deg, var(--theme-primary, #ef4444) 0%, #b91c1c 100%)); 
             box-shadow: 0 0 25px var(--theme-glow, rgba(239, 68, 68, 0.5)); 
         }
         .hud-glow {
@@ -73,6 +73,7 @@
         }
         :root {
             --theme-primary: #ef4444; 
+            --theme-gradient: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
             --theme-glow: rgba(239, 68, 68, 0.2);
         }
         /* Custom Scrollbar for futuristic feel */
@@ -217,7 +218,6 @@
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- CUSTOM ANIMATED SETS CONTROLLER -->
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
                             <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
@@ -231,7 +231,6 @@
                             </div>
                         </div>
 
-                        <!-- CUSTOM ANIMATED VALUE CONTROLLER -->
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
                             <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
@@ -480,44 +479,66 @@
             </div>
         </div>
 
-        <!-- TAB 10: UNLIMITED THEME MATRIX (HEX CODE & COLOR PICKER) -->
+        <!-- TAB 10: UNLIMITED THEME MATRIX (SOLID OR GRADIENT) -->
         <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Unlimited Theme Matrix</h3>
-                    <p class="text-xs text-slate-400">Zero limitations. Pick any color using the visual picker or type/paste your exact Hex code.</p>
+                    <p class="text-xs text-slate-400">Choose between a Single Solid Color or a Smooth Two-Color Gradient.</p>
                 </div>
 
-                <!-- Color Picker & Hex Input Form -->
+                <!-- Theme Mode Switcher Tabs -->
+                <div class="flex bg-[#030408] p-1 rounded-xl border border-white/10">
+                    <button type="button" id="modeSolidBtn" onclick="setThemeMode('solid')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white">Single Color</button>
+                    <button type="button" id="modeGradientBtn" onclick="setThemeMode('gradient')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white">Gradient Color</button>
+                </div>
+
+                <!-- Form Controls -->
                 <form onsubmit="handleCustomThemeSubmit(event)" class="space-y-4">
-                    <div class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
-                        
-                        <!-- Visual Color Picker -->
+                    
+                    <!-- Solid Color Controls -->
+                    <div id="solidControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
                         <div class="flex items-center justify-between">
                             <div>
-                                <label class="block text-xs font-bold text-white uppercase tracking-wider">Visual Color Picker</label>
-                                <span class="text-[10px] text-slate-400">Click box to open palette</span>
+                                <label class="block text-xs font-bold text-white uppercase tracking-wider">Solid Color Picker</label>
+                                <span class="text-[10px] text-slate-400">Pick exact hue</span>
                             </div>
-                            <input type="color" id="visualColorPicker" value="#ef4444" oninput="syncHexInput(this.value)" class="w-12 h-12 bg-transparent rounded-xl cursor-pointer border-0">
+                            <input type="color" id="solidColorPicker" value="#ef4444" oninput="syncSolidHex(this.value)" class="w-12 h-12 bg-transparent rounded-xl cursor-pointer border-0">
                         </div>
-
                         <hr class="border-white/5">
-
-                        <!-- Manual Hex Code Input -->
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Exact Hex Code</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hex Code</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">#</span>
-                                <input type="text" id="hexCodeInput" required maxlength="7" placeholder="ef4444" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pl-8 text-white font-mono text-sm uppercase focus:border-red-500 outline-none transition shadow-inner" oninput="syncColorPicker(this.value)">
+                                <input type="text" id="solidHexInput" maxlength="7" placeholder="ef4444" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pl-8 text-white font-mono text-sm uppercase focus:border-red-500 outline-none transition shadow-inner" oninput="syncSolidPicker(this.value)">
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Gradient Color Controls (Hidden by Default) -->
+                    <div id="gradientControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4 hidden">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Color</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="gradColor1" value="#ef4444" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
+                                    <input type="text" id="gradHex1" value="EF4444" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">End Color</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="color" id="gradColor2" value="#b91c1c" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
+                                    <input type="text" id="gradHex2" value="B91C1C" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex gap-3">
                         <button type="submit" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform active:scale-95">
-                            🚀 Deploy Custom Theme
+                            🚀 Deploy Theme
                         </button>
                         <button type="button" onclick="setRandomTheme()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                             🎲 Random
@@ -529,7 +550,7 @@
             <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
                 <span class="text-6xl mb-4 animate-bounce">🎨</span>
                 <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Absolute Freedom</h3>
-                <p class="text-xs text-slate-400 max-w-xs">No preset restrictions. Your command center, your exact color codes.</p>
+                <p class="text-xs text-slate-400 max-w-xs">No preset restrictions. Solid colors or stunning gradients at your command.</p>
             </div>
         </div>
 
@@ -538,21 +559,35 @@
     <script>
         let pendingActionCallback = null;
         let currentActionType = 'add'; 
+        let currentThemeMode = 'solid';
 
-        // Smooth increment/decrement handler with scale effect for workout fields
+        function setThemeMode(mode) {
+            currentThemeMode = mode;
+            const solidBtn = document.getElementById('modeSolidBtn');
+            const gradBtn = document.getElementById('modeGradientBtn');
+            const solidCtrl = document.getElementById('solidControls');
+            const gradCtrl = document.getElementById('gradientControls');
+
+            if (mode === 'solid') {
+                solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
+                gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
+                solidCtrl.classList.remove('hidden');
+                gradCtrl.classList.add('hidden');
+            } else {
+                gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
+                solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
+                gradCtrl.classList.remove('hidden');
+                solidCtrl.classList.add('hidden');
+            }
+        }
+
         function adjustWorkoutInput(elementId, amount) {
             const input = document.getElementById(elementId);
             if (!input) return;
-            
             let currentVal = parseInt(input.value) || 0;
             let newVal = currentVal + amount;
-            
-            // Enforce minimum boundary limit (at least 1)
             if (newVal < 1) newVal = 1;
-            
             input.value = newVal;
-
-            // Add a brief subtle pulse animation class to the input value display
             input.classList.add('text-red-400', 'scale-110');
             setTimeout(() => {
                 input.classList.remove('text-red-400', 'scale-110');
@@ -580,15 +615,10 @@
             if (!input || !eyeIcon) return;
             if (input.type === 'password') {
                 input.type = 'text';
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                `;
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
             } else {
                 input.type = 'password';
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                `;
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
             }
         }
 
@@ -601,7 +631,6 @@
         async function handleSecureActionSubmit(e) {
             e.preventDefault();
             const password = document.getElementById('actionSecurityPasswordInput').value;
-
             let validPassword = "";
             if (currentActionType === 'lock') validPassword = "Jay_monster_mode_on";
             else if (currentActionType === 'add') validPassword = "Jay#add@monster";
@@ -632,73 +661,103 @@
 
         // 🎨 Theme Sync & Color Picker Functions
         function applySavedTheme() {
-            const savedMode = localStorage.getItem('monster_accent_theme');
-            let hex = '#ef4444';
+            const savedMode = localStorage.getItem('monster_accent_theme') || 'solid';
+            currentThemeMode = savedMode;
 
-            if (savedMode === 'custom') {
-                hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
+            if (savedMode === 'gradient') {
+                setThemeMode('gradient');
+                const c1 = localStorage.getItem('monster_grad_1') || '#ef4444';
+                const c2 = localStorage.getItem('monster_grad_2') || '#b91c1c';
+                document.documentElement.style.setProperty('--theme-primary', c1);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+
+                document.getElementById('gradColor1').value = c1;
+                document.getElementById('gradHex1').value = c1.replace('#', '');
+                document.getElementById('gradColor2').value = c2;
+                document.getElementById('gradHex2').value = c2.replace('#', '');
+            } else {
+                setThemeMode('solid');
+                const hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
+                document.documentElement.style.setProperty('--theme-primary', hex);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', hex + '40');
+
+                const picker = document.getElementById('solidColorPicker');
+                const hexInput = document.getElementById('solidHexInput');
+                if (picker) picker.value = hex;
+                if (hexInput) hexInput.value = hex.replace('#', '');
             }
-
-            document.documentElement.style.setProperty('--theme-primary', hex);
-            document.documentElement.style.setProperty('--theme-glow', hex + '40');
-
-            const picker = document.getElementById('visualColorPicker');
-            const hexInput = document.getElementById('hexCodeInput');
-            if (picker) picker.value = hex;
-            if (hexInput) hexInput.value = hex.replace('#', '');
         }
         applySavedTheme();
 
-        function syncHexInput(colorVal) {
-            const hexClean = colorVal.replace('#', '');
-            const hexInput = document.getElementById('hexCodeInput');
-            if (hexInput) hexInput.value = hexClean;
+        function syncSolidHex(val) {
+            document.getElementById('solidHexInput').value = val.replace('#', '').toUpperCase();
         }
 
-        function syncColorPicker(hexVal) {
-            let clean = hexVal.trim().replace('#', '');
+        function syncSolidPicker(val) {
+            let clean = val.trim().replace('#', '');
             if (clean.length === 3 || clean.length === 6) {
-                const picker = document.getElementById('visualColorPicker');
-                if (picker) picker.value = '#' + clean;
+                document.getElementById('solidColorPicker').value = '#' + clean;
             }
         }
 
         function handleCustomThemeSubmit(e) {
             e.preventDefault();
-            let hexVal = document.getElementById('hexCodeInput').value.trim();
-            if (!hexVal.startsWith('#')) {
-                hexVal = '#' + hexVal;
+            if (currentThemeMode === 'solid') {
+                let hex = document.getElementById('solidHexInput').value.trim();
+                if (!hex.startsWith('#')) hex = '#' + hex;
+                if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
+                    showStatusMessage("❌ Invalid Hex Code!", "error");
+                    return;
+                }
+                localStorage.setItem('monster_accent_theme', 'solid');
+                localStorage.setItem('monster_custom_hex', hex);
+                document.documentElement.style.setProperty('--theme-primary', hex);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', hex + '40');
+                showStatusMessage(`✅ Solid Theme Deployed: ${hex.toUpperCase()}`, 'success');
+            } else {
+                let c1 = document.getElementById('gradHex1').value.trim();
+                let c2 = document.getElementById('gradHex2').value.trim();
+                if (!c1.startsWith('#')) c1 = '#' + c1;
+                if (!c2.startsWith('#')) c2 = '#' + c2;
+                localStorage.setItem('monster_accent_theme', 'gradient');
+                localStorage.setItem('monster_grad_1', c1);
+                localStorage.setItem('monster_grad_2', c2);
+                document.documentElement.style.setProperty('--theme-primary', c1);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+                showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
             }
-
-            const isValidHex = /^#([0-9A-F]{3}){1,2}$/i.test(hexVal);
-            if (!isValidHex) {
-                showStatusMessage("❌ Invalid Hex Code! Please enter a valid code (e.g. ff0055).", "error");
-                return;
-            }
-
-            applyCustomHexTheme(hexVal);
-        }
-
-        function applyCustomHexTheme(hex) {
-            localStorage.setItem('monster_accent_theme', 'custom');
-            localStorage.setItem('monster_custom_hex', hex);
-
-            document.documentElement.style.setProperty('--theme-primary', hex);
-            document.documentElement.style.setProperty('--theme-glow', hex + '40');
-            
-            showStatusMessage(`✅ Custom Theme Deployed: ${hex.toUpperCase()}`, 'success');
         }
 
         function setRandomTheme() {
-            const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-            
-            const picker = document.getElementById('visualColorPicker');
-            const hexInput = document.getElementById('hexCodeInput');
-            
-            if (picker) picker.value = randomHex;
-            if (hexInput) hexInput.value = randomHex.replace('#', '');
-
-            applyCustomHexTheme(randomHex);
+            if (currentThemeMode === 'solid') {
+                const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                document.getElementById('solidColorPicker').value = randomHex;
+                document.getElementById('solidHexInput').value = randomHex.replace('#', '').toUpperCase();
+                localStorage.setItem('monster_accent_theme', 'solid');
+                localStorage.setItem('monster_custom_hex', randomHex);
+                document.documentElement.style.setProperty('--theme-primary', randomHex);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${randomHex} 0%, #b91c1c 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', randomHex + '40');
+                showStatusMessage(`🎲 Random Solid Theme: ${randomHex.toUpperCase()}`, 'success');
+            } else {
+                const c1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                const c2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                document.getElementById('gradColor1').value = c1;
+                document.getElementById('gradHex1').value = c1.replace('#', '').toUpperCase();
+                document.getElementById('gradColor2').value = c2;
+                document.getElementById('gradHex2').value = c2.replace('#', '').toUpperCase();
+                localStorage.setItem('monster_accent_theme', 'gradient');
+                localStorage.setItem('monster_grad_1', c1);
+                localStorage.setItem('monster_grad_2', c2);
+                document.documentElement.style.setProperty('--theme-primary', c1);
+                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+                showStatusMessage(`🎲 Random Gradient Theme Deployed!`, 'success');
+            }
         }
 
         function switchTab(tab) {
