@@ -44,7 +44,7 @@
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#05070b]/40"></div>
             <div class="z-10 max-w-xl">
                 <span class="px-3.5 py-1.5 rounded-full bg-red-500/25 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-4 inline-block shadow-lg shadow-red-500/20">
-                    ⚡ Apex Predator System
+                    ⚡ Apex Predator System (Launch: 13 Sept 2026)
                 </span>
                 <h1 class="text-6xl font-black tracking-tight uppercase leading-[1.05] mb-4 text-white drop-shadow-2xl">
                     BECOME A<br>MONSTER.<br>DOMINATE REALITY.
@@ -224,7 +224,6 @@
             document.getElementById('step3ErrorMessage').classList.add('hidden');
         }
 
-        // STEP 1: INITIAL LOGIN (TRIGGERS OTP)
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -234,7 +233,6 @@
             errDiv.classList.add('hidden');
 
             try {
-                // Check Global Lock First
                 const lockRes = await fetch(`/api/system-lock?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const lockData = await lockRes.json();
                 
@@ -260,7 +258,6 @@
                     errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked.";
                     errDiv.classList.remove('hidden');
                 } else if (data.requireOtp) {
-                    // 🎉 PASSWORD IS CORRECT! HIDE FORM AND SHOW OTP INPUT
                     document.getElementById('authForm').classList.add('hidden');
                     document.getElementById('portalTabs').classList.add('hidden');
                     document.getElementById('otpForm').classList.remove('hidden');
@@ -273,7 +270,6 @@
             }
         });
 
-        // STEP 2: VERIFY OTP
         document.getElementById('otpForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const otp = document.getElementById('otpInput').value;
@@ -292,12 +288,10 @@
                     otpErrDiv.textContent = data.error || "Verification failed.";
                     otpErrDiv.classList.remove('hidden');
                 } else if (data.require3fa) {
-                    // 🚀 ADMIN NEEDS 3rd LAYER! Show Master Key Form
                     document.getElementById('otpForm').classList.add('hidden');
                     document.getElementById('step3Form').classList.remove('hidden');
                     document.getElementById('masterKeyInput').focus();
                 } else {
-                    // Tracker User logic (Done at Layer 2)
                     document.getElementById('verifyOtpBtn').innerText = "VERIFIED! ENTERING...";
                     document.getElementById('verifyOtpBtn').classList.replace('bg-blue-600', 'bg-emerald-600');
                     setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
@@ -308,7 +302,6 @@
             }
         });
 
-        // STEP 3: VERIFY 3FA MASTER KEY (ADMIN ONLY)
         document.getElementById('step3Form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const masterKey = document.getElementById('masterKeyInput').value;
@@ -333,7 +326,7 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error verifying Master Key.";
-                errDiv.classList.remove('hidden');
+                errDiv.classList.add('hidden');
             }
         });
 

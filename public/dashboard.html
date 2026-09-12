@@ -294,7 +294,7 @@
             const formattedDate = today.toLocaleDateString('en-US', options);
             const container = document.getElementById('currentDateDayDisplay');
             if (container) {
-                container.innerHTML = `<span>📅</span> <span>Operational Baseline: ${formattedDate}</span>`;
+                container.innerHTML = `📅 Operational Baseline: ${formattedDate}`;
             }
 
             const launchDateObj = new Date(LAUNCH_DATE);
