@@ -1,3 +1,4 @@
+
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -11,7 +12,9 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 // ============================================================================
 // 🟢 MONGODB CLOUD CONNECTION & SCHEMAS (ડેટા 100% ક્લાઉડ પર)
 // ============================================================================
@@ -459,7 +462,7 @@ app.post('/api/verify-action-password', requireAuth, (req, res) => {
 // 🔥 NEW: Gateway Text API
 app.get('/api/gateway-text', async (req, res) => {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    res.json({ success: true, headline: gs.gatewayHeadline, subtext: gs.gatewaySubtext });
+    res.json({ success: true, headline: gs ? gs.gatewayHeadline : '', subtext: gs ? gs.gatewaySubtext : '' });
 });
 
 app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
@@ -467,10 +470,14 @@ app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
     if (password !== "Jay#edit@monster") {
         return res.status(403).json({ error: "Unauthorized Password." });
     }
-    let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    gs.gatewayHeadline = headline;
-    gs.gatewaySubtext = subtext;
-    await gs.save();
+    
+    // માત્ર ટેક્સ્ટ માટે upsert સેટ કર્યું છે જેથી ડેટાબેઝમાં રેકોર્ડ ન હોય તો પણ સેવ થઈ જાય
+    let gs = await GlobalSettings.findOneAndUpdate(
+        { key: 'GLOBAL' },
+        { gatewayHeadline: headline, gatewaySubtext: subtext },
+        { new: true, upsert: true }
+    );
+    
     res.json({ success: true, message: "Gateway text updated successfully." });
 });
 
@@ -505,7 +512,6 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     await gs.save();
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
-
 // ================= AUTHENTICATION & MULTI-LAYER LOGIN ROUTES =================
 
 // LAYER 1: Email + Password -> Generates OTP (2FA)
