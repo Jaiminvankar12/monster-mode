@@ -550,6 +550,13 @@ app.post('/api/control-panel/module-lock', requireAuth, async (req, res) => {
     else if (moduleKey === 'hygiene') gs.hygieneLocked = locked;
 
     await gs.save();
+
+    // 🔔 TELEGRAM NOTIFICATION FOR MODULE LOCK / UNLOCK
+    const moduleNameCapital = moduleKey.toUpperCase();
+    const statusEmoji = locked ? "🔒" : "🔓";
+    const statusText = locked ? "LOCKED" : "UNLOCKED";
+    await sendTelegramNotification(`${statusEmoji} *MODULE SECURITY EVENT*\n\nModule: *${moduleNameCapital}*\nStatus: *${statusText}*\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+
     res.json({ success: true, message: `${moduleKey} lock status updated to ${locked}`, ...gs.toObject() });
 });
 
@@ -570,6 +577,10 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
     gs.systemLocked = locked !== undefined ? locked : true;
     gs.lockedAt = gs.systemLocked ? new Date().toISOString() : null;
     await gs.save();
+    
+    // 🔔 TELEGRAM ALERT ADDED HERE
+    const statusText = gs.systemLocked ? "🔴 *SYSTEM GLOBALLY LOCKED*" : "🟢 *SYSTEM UNLOCKED*";
+    await sendTelegramNotification(`🛡️ *SECURITY EVENT*\n\n${statusText}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
     
     res.json({ success: true, message: `System is now ${gs.systemLocked ? 'LOCKED' : 'UNLOCKED'}`, locked: gs.systemLocked });
 });
