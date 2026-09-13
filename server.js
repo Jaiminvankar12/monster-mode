@@ -663,7 +663,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         // 1. Fetch system operational data (Strictly excluding Passwords, Hashes & Master Keys)
         let lockStatus = await getSystemLockStatus();
         let xpInfo = await getUserXP(userId);
-        let ud = await UserData.findOne({ userId }).select('-__v'); // Exclude mongoose internal fields if any
+        let ud = await UserData.findOne({ userId }).select('-__v'); 
         let syncResult = await runServerSyncEngine(userId, today);
         let hydData = await getHydrationData(userId);
         let consumedHydration = hydData.logs[today] || 0;
@@ -671,7 +671,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         let nuclearState = await getNuclearState(userId);
         let examData = await getExamModeData(userId);
 
-        // Fetch tracker documents (excluding internal database IDs and sensitive metadata)
+        // Fetch tracker documents
         let habits = await Habit.find({ userId }).select('name category -_id');
         let habitLogs = await HabitLog.find({ userId, date: today }).select('habitId completed -_id');
         let workouts = await Workout.find({ userId }).select('name sets value unit -_id');
@@ -705,11 +705,10 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
             return `- ${t.name} (${t.frequency})`;
         }).join('\n        ');
 
-        // Summarizing Targets & Reminders safely
         let pendingTargets = targets.filter(t => !t.completed).length;
         let pendingReminders = notesReminders.filter(n => n.isReminder && !n.completed).length;
 
-        // 2. Build 100% Comprehensive System State Context (Zero Passwords / Zero Master Keys)
+        // 2. Build System State Context
         const systemContext = `
         You are 'JARVIS', an elite, highly intelligent AI assistant embedded in the 'Monster Mode' discipline and productivity tracking system.
         Here is the complete live operational database state for the user today (${today}):
@@ -722,7 +721,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
 
         === 🔥 USER PROGRESS & PROFILE ===
         - User Level & XP: Level ${xpInfo.level} (${xpInfo.xp} XP)
-        - Lifelines Remaining (this month): ${ud ? ud.lifelinesRemaining : 5} / 5 (Reset month: ${ud ? ud.lastLifelineMonth : 'N/A'})
+        - Lifelines Remaining (this month): ${ud ? ud.lifelinesRemaining : 5} / 5
         - Exam Mode Enabled: ${examData.enabled ? 'YES (Target: ' + examData.targetMinutes + 'm)' : 'NO'}
 
         === 🏋️ WORKOUT STATUS (${syncResult.allWorkoutsDone ? 'ALL DONE' : 'PENDING'}) ===
@@ -751,7 +750,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         Instructions:
         1. Answer the user's question accurately using the exact operational data provided above.
         2. Keep the tone sharp, professional, authoritative, and intelligent (like Jarvis from Iron Man).
-        3. Use Markdown formatting (**bold text**, bullet points) for clarity. Be direct and concise. Never mention passwords or security credentials.
+        3. Use Markdown formatting (**bold text**, bullet points) for clarity. Be direct and concise.
         `;
 
         let reply = "I have analyzed all operational parameters, sir.";
@@ -781,7 +780,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
                 }
             }
 
-            // Fallback: If both models fail due to SDK or network limits, show formatted system stats safely
+            // Fallback: If both fail, show formatted stats safely
             if (!aiGenerated) {
                 reply = `**JARVIS STATUS REPORT (Operational Core Active):**\n• Level: ${xpInfo.level} (${xpInfo.xp} XP)\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• Workouts Status: ${syncResult.allWorkoutsDone ? 'Completed' : 'Pending'}\n• Study Progress: ${syncResult.totalStudiedMinutes} / ${syncResult.totalTargetMinutes} mins\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
             }
