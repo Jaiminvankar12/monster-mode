@@ -103,7 +103,10 @@ const userDataSchema = new mongoose.Schema({
     hydrationGoal: { type: Number, default: 3000 },
     hydrationGlassSize: { type: Number, default: 250 },
     hydrationLogs: { type: Object, default: {} },
-    customDailyTargets: { type: Map, of: Number, default: {} }
+    customDailyTargets: { type: Map, of: Number, default: {} },
+    // 🛡️ LIFELINE SYSTEM (Month wise 5 lifelines)
+    lifelinesRemaining: { type: Number, default: 5 },
+    lastLifelineMonth: { type: String, default: "" }
 });
 const UserData = mongoose.model('UserData', userDataSchema);
 
@@ -419,47 +422,23 @@ cron.schedule('59 23 * * *', async () => {
     }
 }, { timezone: 'Asia/Kolkata' });
 
-// ☢️ 1. 2-Hour Inactivity Interceptor & Strike System (Cron Job every 10 mins)
-cron.schedule('*/10 * * * *', async () => {
-    try {
-        let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
-        let istNow = new Date(istTimeStr);
-        let hour = istNow.getHours();
-
-        // Execution Window: 7:00 AM to 10:00 PM
-        if (hour >= 7 && hour < 22) {
-            let userId = MASTER_USER_ID;
-            let state = await getNuclearState(userId);
-
-            if (!state.hardcoreLocked) {
-                let lastActive = new Date(state.lastActiveAt);
-                let diffMs = istNow - lastActive;
-                let diffHours = diffMs / (1000 * 60 * 60);
-
-                if (diffHours >= 2) {
-                    state.strikes += 1;
-                    state.lastActiveAt = istNow.toISOString();
-                    
-                    if (state.strikes >= 3) {
-                        state.hardcoreLocked = true;
-                        state.lockReason = "3-Strike Death Rule Triggered (Procrastination)";
-                        state.overtimeRequiredMinutes = 120;
-                        await sendTelegramNotification(`🚨 *NUCLEAR LOCKDOWN ACTIVATED*\n\n3 Strikes reached due to zero activity. Total Hardcore Lockdown deployed! Internet blocked between 1 PM - 3 PM.`);
-                    }
-                    await state.save();
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Nuclear Inactivity Cron Error:", err);
-    }
-}, { timezone: 'Asia/Kolkata' });
-
-// 🌙 2. Midnight / 10:00 PM Execution & Permanent Streak Wipeout (Zero Mercy Reset)
+// 🛡️ 🌙 10:00 PM ZERO MERCY & LIFELINE SYSTEM CRON
 cron.schedule('0 22 * * *', async () => {
     try {
         let userId = MASTER_USER_ID;
         let today = getServerToday();
+        let currentMonthStr = today.substring(0, 7); // YYYY-MM
+        
+        let ud = await UserData.findOne({ userId });
+        if (!ud) { ud = new UserData({ userId }); }
+
+        // Monthly Auto-Reset of Lifelines (5 per month)
+        if (ud.lastLifelineMonth !== currentMonthStr) {
+            ud.lifelinesRemaining = 5;
+            ud.lastLifelineMonth = currentMonthStr;
+            await ud.save();
+        }
+
         let syncResult = await runServerSyncEngine(userId, today);
         let sanctuary = await getSanctuaryData(userId);
         let state = await getNuclearState(userId);
@@ -467,26 +446,31 @@ cron.schedule('0 22 * * *', async () => {
         let targetsFailed = (!syncResult.allWorkoutsDone || !syncResult.studyDone || !syncResult.hydrationDone);
 
         if (targetsFailed && !sanctuary.enabled) {
-            let ud = await UserData.findOne({ userId });
-            if (ud) {
+            // Check Lifeline protection
+            if (ud.lifelinesRemaining > 0) {
+                ud.lifelinesRemaining -= 1;
+                await ud.save();
+                await sendTelegramNotification(`🛡️ *LIFELINE ACTIVATED*\n\n⚠️ Daily targets missed, but your Lifeline protected you!\n❤️ Remaining Lifelines this month: *${ud.lifelinesRemaining}/5*\n\nYour XP & Streak are saved. Stay sharp tomorrow!`);
+            } else {
+                // Zero Mercy Reset (Lifelines exhausted)
                 ud.xp = 0;
                 ud.level = 1;
                 await ud.save();
+
+                state.hardcoreLocked = true;
+                state.lockReason = "Daily Targets Missed & Lifelines Exhausted (Zero Mercy Reset)";
+                state.overtimeRequiredMinutes = 180;
+                state.disciplineDebt += 1;
+                await state.save();
+
+                await sendTelegramNotification(`🩸 *BLOODMOON / ZERO MERCY PROTOCOL*\n\n⚠️ All 5 Lifelines exhausted and day failed! Your entire Streak & XP Level have been WIPED OUT to 0.\n\n🔒 Hardcore Lockdown active. Mandatory overtime required.`);
             }
-
-            state.hardcoreLocked = true;
-            state.lockReason = "Daily Targets Missed by 10:00 PM (Zero Mercy Reset)";
-            state.overtimeRequiredMinutes = 180;
-            state.disciplineDebt += 1;
-            await state.save();
-
-            await sendTelegramNotification(`🩸 *BLOODMOON / ZERO MERCY PROTOCOL*\n\n⚠️ Day failed! Your entire Streak & XP Level have been WIPED OUT to 0 (Level 1 reset).\n\n🔒 Hardcore Lockdown active. Internet blocked (1 PM - 3 PM). Mandatory overtime required.`);
         } else {
             state.strikes = 0;
             await state.save();
         }
     } catch (err) {
-        console.error("Midnight Execution Error:", err);
+        console.error("Midnight Lifeline Execution Error:", err);
     }
 }, { timezone: 'Asia/Kolkata' });
 
@@ -1350,7 +1334,8 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 const today = getServerToday();
                 const sync = await runServerSyncEngine(userId, today);
                 const xpInfo = await getUserXP(userId);
-                const reply = `📊 *TODAY'S APEX STATUS*\n\n🔥 Level: ${xpInfo.level} (${xpInfo.xp} XP)\n🏋️ Workouts: ${sync.allWorkoutsDone ? '✅ DONE' : '❌ PENDING'}\n📚 Study: ${sync.totalStudiedMinutes} / ${sync.totalTargetMinutes} mins\n💧 Hydration: ${sync.hydrationDone ? '✅ DONE' : '❌ PENDING'}`;
+                let ud = await UserData.findOne({ userId });
+                const reply = `📊 *TODAY'S APEX STATUS*\n\n🔥 Level: ${xpInfo.level} (${xpInfo.xp} XP)\n🛡️ Lifelines Left: ${ud ? ud.lifelinesRemaining : 5}/5\n🏋️ Workouts: ${sync.allWorkoutsDone ? '✅ DONE' : '❌ PENDING'}\n📚 Study: ${sync.totalStudiedMinutes} / ${sync.totalTargetMinutes} mins\n💧 Hydration: ${sync.hydrationDone ? '✅ DONE' : '❌ PENDING'}`;
                 await sendTelegramNotification(reply);
             } 
             else if (text === '/roast' || text === '/motivation') {
