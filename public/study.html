@@ -248,57 +248,44 @@
             }
         }
 
-        async function verifyGlobalSystemLock() {
-            try {
-                const ts = new Date().getTime();
-                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
-                const data = await res.json();
-                
-                if (data.locked) {
-                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
-                    const sessionData = await sessionRes.json();
-                    
-                    if (sessionData.role !== 'ADMIN') {
-                        document.body.innerHTML = `
-                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                                    <span class="text-5xl animate-bounce">🛡️</span>
-                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED BY ADMIN</h2>
-                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                        The entire tracker portal has been globally locked by the administrator. All execution vectors are frozen.
-                                    </p>
-                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                        Access Denied / Contact Admin
-                                    </div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                        Return to Gateway
-                                    </button>
-                                </div>
+       async function verifyGlobalSystemLock() {
+    try {
+        const ts = new Date().getTime();
+        const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+        const data = await res.json();
+        
+        // Jo Global Lock hoy YA FIR Habits Lock hoy
+        if (data.locked || data.studyLocked) {
+            const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+            const sessionData = await sessionRes.json();
+            
+            if (sessionData.role !== 'ADMIN') {
+                document.body.innerHTML = `
+                    <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                            <span class="text-5xl animate-bounce">🛡️</span>
+                            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
+                                ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
+                            </p>
+                            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                Access Denied / Contact Admin
                             </div>
-                        `;
-                    }
-                }
-
-                // Check Individual Lock for Study
-                if (data.studyLocked) {
-                    const pomoBtn = document.getElementById('pomoStartBtn');
-                    const logBtn = document.querySelector('#logSessionForm button[type="submit"]');
-                    if (pomoBtn) {
-                        pomoBtn.disabled = true;
-                        pomoBtn.className = "w-full sm:w-auto px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-500 font-extrabold rounded-xl text-xs uppercase tracking-widest cursor-not-allowed opacity-50";
-                        pomoBtn.innerHTML = "🔒 LOCKED";
-                    }
-                    if (logBtn) {
-                        logBtn.disabled = true;
-                        logBtn.className = "w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-500 font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-not-allowed opacity-50";
-                        logBtn.innerHTML = "🔒 MATRIX LOCKED";
-                    }
-                }
-            } catch (err) {
-                console.error("Lock verification failed", err);
+                            <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                Return to Gateway
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return; // Code aagal nahi vadhe, data fetch nai thay
             }
         }
-
+    } catch (err) {
+        console.error("Lock verification failed", err);
+    }
+}
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             checkPreLaunchLock();
