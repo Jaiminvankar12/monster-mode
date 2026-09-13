@@ -756,11 +756,21 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
 
         let reply = "I have analyzed all operational parameters, sir.";
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await model.generateContent(systemContext);
-            reply = result.response.text().trim();
-        } else {
-            reply = `**JARVIS STATUS REPORT:**\n• Level: ${xpInfo.level}\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent(systemContext);
+                const response = await result.response;
+                reply = response.text().trim();
+            } catch (aiErr) {
+                console.error("Gemini API Actual Error:", aiErr);
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const resFlash = await modelFlash.generateContent(systemContext);
+                    reply = resFlash.response.text().trim();
+                } catch (err2) {
+                    reply = `**JARVIS NEURAL ERROR:** Could not generate AI response.\n\n• Level: ${xpInfo.level}\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
+                }
+            }
         }
 
         res.json({ success: true, reply });
@@ -769,7 +779,6 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         res.status(500).json({ error: "Jarvis encountered a neural network anomaly while retrieving system records." });
     }
 });
-
 // 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
