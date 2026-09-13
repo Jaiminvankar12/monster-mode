@@ -26,19 +26,6 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
 
-    <!-- Pre-Launch Banner Hidden for Full Management Access -->
-    <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
-        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full glow-red space-y-4">
-            <span class="text-4xl">🔒</span>
-            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
-            <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Habit tracking and execution vectors are currently in read-only planning preview.
-            </p>
-            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
-                Status: Immutable / Not Editable Yet
-            </div>
-        </div>
-    </div>
 
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
@@ -122,19 +109,7 @@
         const LAUNCH_DATE = "2026-09-14";
         window.isHabitsLocked = false; // 🟢 Global variable for granular locking
 
-        function checkPreLaunchLock() {
-            const launchDateObj = new Date(LAUNCH_DATE);
-            launchDateObj.setHours(0, 0, 0, 0);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const banner = document.getElementById('prelaunchBanner');
-            if (today < launchDateObj) {
-                if (banner) banner.classList.remove('hidden');
-            } else {
-                if (banner) banner.classList.add('hidden');
-            }
-        }
+        
 
         async function verifyGlobalSystemLock() {
     try {
@@ -397,7 +372,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
-            checkPreLaunchLock();
             fetchHabits();
             fetchTrackerNotes();
         });
