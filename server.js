@@ -651,6 +651,7 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     await gs.save();
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
+
 // 🤖 ALL-KNOWING JARVIS UNIVERSAL DATA ASSISTANT API (SECURE & COMPREHENSIVE)
 app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
     try {
@@ -792,6 +793,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         res.status(500).json({ error: "Jarvis encountered a neural network anomaly while retrieving system records." });
     }
 });
+
 // 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
@@ -1492,9 +1494,17 @@ app.post('/api/telegram-webhook', async (req, res) => {
             else if (text === '/roast' || text === '/motivation') {
                 let coachMessage = "Discipline equals absolute freedom.";
                 if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                    const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
-                    coachMessage = result.response.text().trim();
+                    try {
+                        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                        const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                        coachMessage = result.response.text().trim();
+                    } catch(e1) {
+                        try {
+                            const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                            const resFlash = await modelFlash.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                            coachMessage = resFlash.response.text().trim();
+                        } catch(e2) {}
+                    }
                 }
                 await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
             }
@@ -1513,10 +1523,19 @@ app.get('/api/monster-coach', async (req, res) => {
     try {
         let coachMessage = "Discipline equals absolute freedom.";
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
-            const result = await model.generateContent(prompt);
-            coachMessage = result.response.text().trim().replace(/"/g, '');
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
+                const result = await model.generateContent(prompt);
+                coachMessage = result.response.text().trim().replace(/"/g, '');
+            } catch(e1) {
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
+                    const resFlash = await modelFlash.generateContent(prompt);
+                    coachMessage = resFlash.response.text().trim().replace(/"/g, '');
+                } catch(e2) {}
+            }
         }
         let xpInfo = await getUserXP(MASTER_USER_ID);
         res.json({ success: true, message: "Monster Coach active.", coachMessage: coachMessage, xp: xpInfo });
@@ -1533,8 +1552,7 @@ app.post('/api/ai-coach/ask', async (req, res) => {
         let reply = "Focus on your execution vectors. Discipline equals absolute freedom.";
         
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            
+            let aiSuccess = false;
             const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach. 
             You combine the hardcore, no-excuse accountability of David Goggins with the elite sports science, biomechanics, and neurobiology of Andrew Huberman.
             
@@ -1546,8 +1564,21 @@ app.post('/api/ai-coach/ask', async (req, res) => {
             3. NO FLUFF: Be direct, highly intelligent, and authoritative. Do not act like a basic chatbot.
             4. BRUTAL ACCOUNTABILITY: End every single response with a strict, uncompromising, hardcore command to execute the plan immediately. No feelings, just execution.`;
             
-            const result = await model.generateContent(aiPrompt);
-            reply = result.response.text().trim();
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent(aiPrompt);
+                reply = result.response.text().trim();
+                aiSuccess = true;
+            } catch(e1) {}
+
+            if (!aiSuccess) {
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const resFlash = await modelFlash.generateContent(aiPrompt);
+                    reply = resFlash.response.text().trim();
+                    aiSuccess = true;
+                } catch(e2) {}
+            }
         } else {
             const query = (prompt || "").toLowerCase();
             if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
@@ -1588,10 +1619,16 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
     let aiFeedback = "Execute blindly. No emotions.";
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const prompt = `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`;
-            const result = await model.generateContent(prompt);
-            aiFeedback = result.response.text().trim().replace(/"/g, '');
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent(prompt);
+                aiFeedback = result.response.text().trim().replace(/"/g, '');
+            } catch(e1) {
+                const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const resFlash = await modelFlash.generateContent(prompt);
+                aiFeedback = resFlash.response.text().trim().replace(/"/g, '');
+            }
         } catch(e) {}
     }
     
