@@ -187,7 +187,7 @@
         let currentSelectedDate = "";
         const MONSTER_LAUNCH_DATE = "2026-09-13";
 
-        // 🤖 PREMIUM AI COACH BOT LOGIC
+        // 🤖 PREMIUM REAL AI COACH BOT LOGIC (Connected to Real Generative AI Backend API Endpoint)
         function quickAskAI(type) {
             const prompts = {
                 hypertrophy: "Generate an elite, science-based 4-week Push/Pull/Legs hypertrophy routine. Give exact sets, reps, and RPE for each exercise.",
@@ -208,18 +208,23 @@
             chatBox.innerHTML = `
                 <div class="flex items-center gap-3 text-red-400 p-2">
                     <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol...</span>
+                    <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol via AI Cloud...</span>
                 </div>`;
             
             try {
-                const res = await fetch('/api/ai-coach/ask', {
+                // Upgraded to request real dynamic AI generation from backend generative endpoint
+                const res = await fetch('/api/apex-ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
                 });
                 const data = await res.json();
-                if (data.success) {
-                    let formattedReply = data.reply
+                
+                // Supports response payloads from standard LLM integrations (data.reply or data.success)
+                const replyText = data.reply || data.message || (data.success ? data.text : null);
+
+                if (res.ok && replyText) {
+                    let formattedReply = replyText
                         .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
                         .replace(/\n/g, '<br>')
                         .replace(/\*\s/g, '• ');
@@ -378,7 +383,9 @@
                 return;
             }
 
-            const isLockedOrPreLaunch = targetDate < MONSTER_LAUNCH_DATE || dateStatus === 'LOCKED' || dateStatus === 'FUTURE';
+            // 🔒 PROBLEM 2 FIX: Strict lockdown enforcement where BOTH future dates AND past dates/active dates are completely locked when battle is in progress or when date status requires restriction.
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isBattleInProgressOrRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE');
 
             container.innerHTML = workouts.map(w => `
                 <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
@@ -391,7 +398,7 @@
                         <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${w.name}</h3>
                     </div>
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
-                        <button ${isLockedOrPreLaunch ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isLockedOrPreLaunch ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                        <button ${isBattleInProgressOrRestricted ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isBattleInProgressOrRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
                             ${w.completed ? '✓ Done' : '○ Pending'}
                         </button>
                     </div>
