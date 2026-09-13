@@ -127,7 +127,7 @@ initDB();
 
 app.set('trust proxy', 1);
 
-const MONSTER_LAUNCH_DATE = "2026-09-13";
+const MONSTER_LAUNCH_DATE = "2026-09-14";
 const MASTER_USER_ID = "admin_master_user";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -755,7 +755,7 @@ app.post('/api/hydration/drink', requireAuth, trackerApiGuard, async (req, res) 
     const today = getServerToday();
     const targetDate = req.body.date || today;
     
-    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
     
     let userId = req.session.userId || MASTER_USER_ID;
@@ -916,7 +916,7 @@ app.post('/api/habits/:id/toggle', requireAuth, trackerApiGuard, async (req, res
     const today = getServerToday();
     const targetDate = date || today;
     
-    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
     
     let userId = req.session.userId || MASTER_USER_ID;
@@ -1004,7 +1004,7 @@ app.post('/api/workouts/:id/toggle', requireAuth, trackerApiGuard, async (req, r
     const today = getServerToday();
     const targetDate = date || today;
     
-    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
     
     let userId = req.session.userId || MASTER_USER_ID;
@@ -1110,7 +1110,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     const today = getServerToday();
     const targetDate = date || today;
     
-    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
     
     let userId = req.session.userId || MASTER_USER_ID;
@@ -1203,7 +1203,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     const today = getServerToday();
     const targetDate = date || today;
     
-    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 12-09-2026." });
+    if (targetDate < MONSTER_LAUNCH_DATE) return res.status(403).json({ error: "⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026." });
     if (targetDate > today) return res.status(403).json({ error: "🔒 FUTURE LOCK!" });
     
     let userId = req.session.userId || MASTER_USER_ID;
@@ -1243,7 +1243,7 @@ app.post('/api/targets', requireAuth, trackerApiGuard, async (req, res) => {
             id: 't_' + Date.now().toString(),
             userId,
             name,
-            date: date || "2026-09-13",
+            date: date || "2026-09-14",
             completed: false,
             createdAt: new Date().toISOString()
         });
@@ -1330,6 +1330,34 @@ app.get('/api/monster-coach', async (req, res) => {
     } catch(e) {
         let xpInfo = await getUserXP(req.session && req.session.userId ? req.session.userId : MASTER_USER_ID);
         res.json({ success: true, message: "Monster Coach active.", coachMessage: "Execution is everything. Stop complaining.", xp: xpInfo });
+    }
+});
+
+// 🟢 AI COACH BOT API (ADDED)
+app.post('/api/ai-coach/ask', async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        let reply = "Focus on your execution vectors. Discipline equals absolute freedom.";
+        
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const aiPrompt = `You are an aggressive, hardcore David Goggins style AI workout and discipline coach. Answer the user's question regarding fitness, form, penalties, or dream physique. Keep it punchy, intense, and strict. User query: "${prompt}"`;
+            const result = await model.generateContent(aiPrompt);
+            reply = result.response.text().trim().replace(/"/g, '');
+        } else {
+            const query = (prompt || "").toLowerCase();
+            if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
+                reply = "⚠️ Strictness Alert: Skipping workouts triggers an immediate streak reset, Telegram warning alert, and mandatory extra cardio assignment tomorrow!";
+            } else if (query.includes('physique') || query.includes('muscle') || query.includes('body')) {
+                reply = "🎯 Dream Physique Blueprint: Maintain progressive overload, hit your daily protein macro targets, and prioritize clean sleep cycles.";
+            } else if (query.includes('form') || query.includes('exercise')) {
+                reply = "💡 Form Masterclass: Keep your core braced, control the eccentric (negative) phase for 3 seconds, and execute clean repetitions without ego lifting.";
+            }
+        }
+
+        res.json({ success: true, reply });
+    } catch (err) {
+        res.json({ success: true, reply: "Execute your workout regardless of motivation. No excuses." });
     }
 });
 

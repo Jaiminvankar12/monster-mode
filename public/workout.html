@@ -89,22 +89,34 @@
             </div>
         </div>
 
-        <!-- 🤖 MONSTER WORKOUT COACH / COMMANDER WIDGET -->
-        <div class="glass-card p-6 rounded-3xl mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-3">
+        <!-- 🤖 REAL AI WORKOUT COACH BOT WIDGET -->
+        <div class="glass-card p-6 rounded-3xl mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🤖🔥</span>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-red-400">Monster Workout Coach & Commander</h3>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-red-400">Monster AI Workout Coach & Penalties</h3>
                 </div>
-                <span class="text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase animate-pulse">AI Active & Strict</span>
+                <span class="text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase animate-pulse">Neural AI Active</span>
             </div>
-            <p id="coachMessage" class="text-xs sm:text-sm text-slate-200 font-medium italic leading-relaxed">
-                "Welcome to the iron room. Form over ego. If you miss your sets today, your streak drops and the penalty protocol activates. Let's build your dream physique!"
-            </p>
+            
+            <!-- Chat Response Area -->
+            <div id="aiCoachChatBox" class="bg-[#05070b] border border-white/10 p-4 rounded-2xl text-xs sm:text-sm text-slate-200 font-medium italic leading-relaxed min-h-[70px] flex items-center">
+                "I am your AI Coach. Ask me anything about workout form, penalties for missed sessions, or your dream physique roadmap."
+            </div>
+
+            <!-- Input & Send Control -->
+            <div class="flex gap-2">
+                <input type="text" id="aiCoachInput" placeholder="Ask AI Coach (e.g. What is my penalty for skipping legs?)..." class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:border-red-500 outline-none transition">
+                <button onclick="sendPromptToAiCoach()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0">
+                    Ask AI
+                </button>
+            </div>
+
+            <!-- Quick Trigger Pills -->
             <div class="flex flex-wrap gap-2 pt-1">
-                <button onclick="askCoach('form')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1.5 rounded-xl font-bold uppercase transition cursor-pointer">💡 Form & Knowledge Tip</button>
-                <button onclick="askCoach('penalty')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1.5 rounded-xl font-bold uppercase transition cursor-pointer">⚠️ Penalty Warning</button>
-                <button onclick="askCoach('physique')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1.5 rounded-xl font-bold uppercase transition cursor-pointer">🎯 Dream Physique Goal</button>
+                <button onclick="quickAskAI('form')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">💡 Perfect Form Tip</button>
+                <button onclick="quickAskAI('penalty')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">⚠️ Missed Streak Penalty</button>
+                <button onclick="quickAskAI('physique')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">🎯 Dream Physique Roadmap</button>
             </div>
         </div>
 
@@ -172,18 +184,51 @@
 
     <script>
         let currentSelectedDate = "";
-        const MONSTER_LAUNCH_DATE = "2026-09-13";
+        const MONSTER_LAUNCH_DATE = "2026-09-14";
 
-        function askCoach(type) {
-            const msgEl = document.getElementById('coachMessage');
-            if (type === 'form') {
-                msgEl.innerText = `"Proper Form Rule: Keep your core tight, control the negative (eccentric) phase for 2-3 seconds, and explode on the concentric. Never sacrifice form for heavy weights!"`;
-            } else if (type === 'penalty') {
-                msgEl.innerText = `"⚠️ Strictness Warning: If you skip today's workout without logging, your streak will be incinerated and you will face mandatory extra cardio punishment tomorrow!"`;
-            } else if (type === 'physique') {
-                msgEl.innerText = `"🎯 Dream Physique Target: Progressive overload is key. Increase weight or reps every session, hit your protein goals, and stay relentless. Your future self will thank you."`;
-            }
+        // 🤖 AI Coach Bot Interactive Chat Logic (Connected to Server API)
+        function quickAskAI(type) {
+            const prompts = {
+                form: "Give me a perfect form tip for heavy lifting.",
+                penalty: "What is my exact penalty for missing today's workout session?",
+                physique: "Give me a blueprint to achieve my dream physique."
+            };
+            document.getElementById('aiCoachInput').value = prompts[type];
+            sendPromptToAiCoach();
         }
+
+        async function sendPromptToAiCoach() {
+            const input = document.getElementById('aiCoachInput');
+            const chatBox = document.getElementById('aiCoachChatBox');
+            const prompt = input.value.trim();
+            if(!prompt) return;
+
+            chatBox.innerText = "🤖 AI Coach is processing neural telemetry...";
+            
+            try {
+                const res = await fetch('/api/ai-coach/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    chatBox.innerText = `"${data.reply}"`;
+                } else {
+                    chatBox.innerText = `"Execute your workout regardless of motivation. No excuses."`;
+                }
+            } catch(err) {
+                chatBox.innerText = `"System offline. Push through the barrier."`;
+            }
+            input.value = '';
+        }
+
+        document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendPromptToAiCoach();
+            }
+        });
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(MONSTER_LAUNCH_DATE);
@@ -256,7 +301,6 @@
                 console.log("API fetch failed, checking LocalStorage fallback...");
             }
 
-            // LocalStorage Fallback for Control Panel sync
             let localWorkouts = [];
             try {
                 localWorkouts = JSON.parse(localStorage.getItem('monster_workouts') || localStorage.getItem('workouts') || '[]');
