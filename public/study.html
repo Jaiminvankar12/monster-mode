@@ -315,6 +315,7 @@
                 updatePomoDisplay();
             }
 
+            // 100% Cloud-Only Fetch
             fetchStudyData();
         });
 
@@ -346,15 +347,18 @@
             } catch (e) {}
         }
 
+        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
         async function fetchStudyData() {
             const todayStr = new Date().toISOString().split('T')[0];
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' });
+                
                 if(res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
                     return;
                 }
+                
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
@@ -381,40 +385,39 @@
                         renderCategories(categoriesData);
                         renderSessions(data.sessions || [], categoriesData);
                         populateSelects(categoriesData);
-                        return;
+                    } else {
+                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
+                } else {
+                    throw new Error("Server Response Error");
                 }
             } catch (err) {
-                console.log("API fetch failed, checking LocalStorage fallback...");
+                console.error("Cloud Connection Error:", err);
+                
+                // Cloud Error Display Instead of Fallback
+                document.getElementById('serverDateDisplay').innerText = `Server Date: ${todayStr}`;
+                document.getElementById('targetTimeLabel').innerText = "0h 00m";
+                document.getElementById('studiedTimeLabel').innerText = "0h 00m";
+                document.getElementById('studyStreakLabel').innerText = "🔥 0 Days";
+                document.getElementById('progressPercentText').innerText = "0%";
+                document.getElementById('progressBarFill').style.width = "0%";
+                document.getElementById('sessionCountText').innerText = `0 Sessions Logged`;
+
+                const badge = document.getElementById('studyStatusBadge');
+                badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50";
+                badge.innerText = "❌ SERVER OFFLINE";
+
+                document.getElementById('categoriesList').innerHTML = `
+                    <div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
+                    </div>`;
+                document.getElementById('sessionsList').innerHTML = `
+                    <div class="glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cannot reach MongoDB Cloud</p>
+                    </div>`;
+                
+                populateSelects([]);
             }
-
-            // LocalStorage Fallback for Control Panel sync
-            let localCategories = [];
-            let localSessions = [];
-            try {
-                localCategories = JSON.parse(localStorage.getItem('monster_study_categories') || localStorage.getItem('study_categories') || '[]');
-                localSessions = JSON.parse(localStorage.getItem('monster_study_sessions') || localStorage.getItem('study_sessions') || '[]');
-            } catch(e) {
-                localCategories = [];
-                localSessions = [];
-            }
-
-            categoriesData = localCategories;
-            document.getElementById('serverDateDisplay').innerText = `Server Date: ${todayStr}`;
-            document.getElementById('targetTimeLabel').innerText = "0h 00m";
-            document.getElementById('studiedTimeLabel').innerText = "0h 00m";
-            document.getElementById('studyStreakLabel').innerText = "🔥 0 Days";
-            document.getElementById('progressPercentText').innerText = "0%";
-            document.getElementById('progressBarFill').style.width = "0%";
-            document.getElementById('sessionCountText').innerText = `${localSessions.length} Sessions Logged`;
-
-            const badge = document.getElementById('studyStatusBadge');
-            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
-            badge.innerText = "⏳ STATUS: IN PROGRESS";
-
-            renderCategories(localCategories);
-            renderSessions(localSessions, localCategories);
-            populateSelects(localCategories);
         }
 
         function formatMinutes(totalMins) {
@@ -426,7 +429,7 @@
         function renderCategories(categories) {
             const container = document.getElementById('categoriesList');
             if (!categories || categories.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No active subjects found. Add from Control Panel.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 col-span-full">No active subjects found. Add from Control Panel.</p>`;
                 return;
             }
             container.innerHTML = categories.map(c => `
@@ -607,6 +610,7 @@
             document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
         }
 
+        // 🟢 100% CLOUD-ONLY POMO COMPLETE FUNCTION
         async function completePomodoroSession() {
             const categoryId = localStorage.getItem('pomo_categoryId') || document.getElementById('pomoCategorySelect').value;
             const dur = parseInt(localStorage.getItem('pomo_duration')) || pomoDurationMinutes;
@@ -625,6 +629,9 @@
                         durationMinutes: dur
                     })
                 });
+                
+                if (!res.ok) throw new Error("Cloud Sync Failed");
+                
                 const data = await res.json();
                 if (data.success) {
                     fetchStudyData();
@@ -632,20 +639,12 @@
                     alert("Error logging session: " + data.error);
                 }
             } catch (err) {
-                // LocalStorage Fallback implementation for session logging
-                let localSessions = JSON.parse(localStorage.getItem('monster_study_sessions') || '[]');
-                localSessions.push({
-                    id: Date.now().toString(),
-                    categoryId: categoryId,
-                    topic: `Deep Work Focus (${dur}m)`,
-                    durationMinutes: dur,
-                    date: new Date().toISOString().split('T')[0]
-                });
-                localStorage.setItem('monster_study_sessions', JSON.stringify(localSessions));
-                fetchStudyData();
+                console.error(err);
+                alert("❌ Connection Error: Could not sync Pomodoro session with MongoDB Cloud.");
             }
         }
 
+        // 🟢 100% CLOUD-ONLY LOG SESSION FUNCTION
         document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const categoryId = document.getElementById('sessionCategorySelect').value;
@@ -658,41 +657,34 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ categoryId, topic, durationMinutes })
                 });
-                if (res.ok) {
+                
+                if (!res.ok) throw new Error("Cloud Sync Failed");
+                
+                const data = await res.json();
+                if (data.success) {
                     document.getElementById('logSessionForm').reset();
                     document.getElementById('sessionDuration').value = "45";
                     fetchStudyData();
                 } else {
-                    const data = await res.json();
                     alert(data.error || "Failed to log session.");
                 }
             } catch (err) {
-                // LocalStorage Fallback for manual session logging
-                let localSessions = JSON.parse(localStorage.getItem('monster_study_sessions') || '[]');
-                localSessions.push({
-                    id: Date.now().toString(),
-                    categoryId: categoryId,
-                    topic: topic,
-                    durationMinutes: parseInt(durationMinutes),
-                    date: new Date().toISOString().split('T')[0]
-                });
-                localStorage.setItem('monster_study_sessions', JSON.stringify(localSessions));
-                document.getElementById('logSessionForm').reset();
-                document.getElementById('sessionDuration').value = "45";
-                fetchStudyData();
+                console.error(err);
+                alert("❌ Connection Error: Could not sync session with MongoDB Cloud.");
             }
         });
 
+        // 🟢 100% CLOUD-ONLY DELETE SESSION FUNCTION
         async function deleteSession(id) {
             if (!confirm("Delete this session?")) return;
             try {
-                await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
+                const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error("Cloud Sync Failed");
+                fetchStudyData();
             } catch (err) {
-                let localSessions = JSON.parse(localStorage.getItem('monster_study_sessions') || '[]');
-                localSessions = localSessions.filter(s => s.id !== id);
-                localStorage.setItem('monster_study_sessions', JSON.stringify(localSessions));
+                console.error(err);
+                alert("❌ Connection Error: Could not delete session from MongoDB Cloud.");
             }
-            fetchStudyData();
         }
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {

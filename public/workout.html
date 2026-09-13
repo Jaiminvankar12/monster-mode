@@ -34,6 +34,11 @@
         }
         .study-hud { animation: cyberPulse 4s infinite ease-in-out; border-color: rgba(59, 130, 246, 0.4); }
         .workout-hud { animation: workoutPulse 4s infinite ease-in-out; border-color: rgba(239, 68, 68, 0.4); }
+
+        /* Premium Chat Scrollbar */
+        .premium-scroll::-webkit-scrollbar { width: 4px; }
+        .premium-scroll::-webkit-scrollbar-track { background: transparent; }
+        .premium-scroll::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -89,34 +94,41 @@
             </div>
         </div>
 
-        <!-- 🤖 REAL AI WORKOUT COACH BOT WIDGET -->
-        <div class="glass-card p-6 rounded-3xl mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-4">
+        <!-- 🤖 PREMIUM ELITE AI WORKOUT COACH WIDGET -->
+        <div class="glass-card p-6 rounded-3xl mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-4 shadow-[0_0_40px_rgba(239,68,68,0.1)]">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🤖🔥</span>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-red-400">Monster AI Workout Coach & Penalties</h3>
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl animate-pulse">🤖</span>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white">Apex Elite AI Coach</h3>
+                        <p class="text-[10px] text-red-400 font-bold tracking-widest uppercase">Science-Based Protocols & Hardcore Accountability</p>
+                    </div>
                 </div>
-                <span class="text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase animate-pulse">Neural AI Active</span>
+                <span class="hidden sm:inline-block text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">Online</span>
             </div>
             
-            <!-- Chat Response Area -->
-            <div id="aiCoachChatBox" class="bg-[#05070b] border border-white/10 p-4 rounded-2xl text-xs sm:text-sm text-slate-200 font-medium italic leading-relaxed min-h-[70px] flex items-center">
-                "I am your AI Coach. Ask me anything about workout form, penalties for missed sessions, or your dream physique roadmap."
+            <!-- Dynamic Chat Response Area (Upgraded for Rich Text) -->
+            <div id="aiCoachChatBox" class="bg-[#05070b] border border-white/10 p-5 rounded-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-h-[300px] overflow-y-auto premium-scroll shadow-inner">
+                <div class="text-slate-400">
+                    <span class="text-red-500 font-bold block mb-1">SYSTEM BOOT: APEX AI INITIATED</span>
+                    I am your elite personal coach. Forget the generic advice. Ask me for a structured <b class="text-white">hypertrophy plan</b>, <b class="text-white">perfect biomechanical form cues</b>, <b class="text-white">macro breakdowns</b>, or <b class="text-white">scientific recovery protocols</b>. Time to dominate.
+                </div>
             </div>
 
             <!-- Input & Send Control -->
-            <div class="flex gap-2">
-                <input type="text" id="aiCoachInput" placeholder="Ask AI Coach (e.g. What is my penalty for skipping legs?)..." class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:border-red-500 outline-none transition">
-                <button onclick="sendPromptToAiCoach()" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0">
-                    Ask AI
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="aiCoachInput" placeholder="e.g., Generate a 4-week Push/Pull/Legs hypertrophy routine..." class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:border-red-500 outline-none transition shadow-inner">
+                <button onclick="sendPromptToAiCoach()" class="px-6 py-3.5 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition cursor-pointer shrink-0 shadow-lg shadow-red-600/30">
+                    Ask Apex AI
                 </button>
             </div>
 
-            <!-- Quick Trigger Pills -->
-            <div class="flex flex-wrap gap-2 pt-1">
-                <button onclick="quickAskAI('form')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">💡 Perfect Form Tip</button>
-                <button onclick="quickAskAI('penalty')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">⚠️ Missed Streak Penalty</button>
-                <button onclick="quickAskAI('physique')" class="text-[10px] bg-white/5 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 border border-white/10 px-3 py-1 rounded-xl font-bold uppercase transition cursor-pointer">🎯 Dream Physique Roadmap</button>
+            <!-- Premium Quick Trigger Pills -->
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-2">
+                <button onclick="quickAskAI('hypertrophy')" class="text-[10px] bg-zinc-900 hover:bg-red-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">📊 Generate Elite Workout Plan</button>
+                <button onclick="quickAskAI('form')" class="text-[10px] bg-zinc-900 hover:bg-blue-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-blue-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🧬 Biomechanical Form Breakdown</button>
+                <button onclick="quickAskAI('recovery')" class="text-[10px] bg-zinc-900 hover:bg-emerald-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-emerald-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🔋 Science-Based Recovery Protocol</button>
+                <button onclick="quickAskAI('macros')" class="text-[10px] bg-zinc-900 hover:bg-amber-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-amber-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🥩 Macro & Nutrition Calculation</button>
             </div>
         </div>
 
@@ -165,33 +177,23 @@
             <p class="text-sm font-bold text-white mt-1 italic">"Pain is temporary. Pride is forever. The iron never lies."</p>
         </div>
 
-        <!-- Telegram Bot Live Simulation Widget -->
-        <div class="glass-card p-5 rounded-2xl mb-8 border border-blue-500/20 bg-blue-500/5">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] font-black tracking-widest text-blue-400 uppercase flex items-center gap-1.5">
-                    <span>🤖</span> Telegram Bot Telemetry
-                </span>
-                <span id="telegramBotStatus" class="text-[10px] bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full font-bold uppercase">Live Sync Active</span>
-            </div>
-            <p id="telegramBotLog" class="text-xs text-zinc-300 font-mono">Executing toggle triggers secure phone telemetry alerts...</p>
-        </div>
-
         <!-- Workouts List Grid -->
         <div id="workoutsContainer" class="grid gap-4">
-            <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading exercise vectors...</div>
+            <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Connecting to Cloud Server...</div>
         </div>
     </main>
 
     <script>
         let currentSelectedDate = "";
-        const MONSTER_LAUNCH_DATE = "2026-09-13";
+        const MONSTER_LAUNCH_DATE = "2026-09-14";
 
-        // 🤖 AI Coach Bot Interactive Chat Logic
+        // 🤖 PREMIUM AI COACH BOT LOGIC
         function quickAskAI(type) {
             const prompts = {
-                form: "Give me a perfect form tip for heavy lifting.",
-                penalty: "What is my exact penalty for missing today's workout session?",
-                physique: "Give me a blueprint to achieve my dream physique."
+                hypertrophy: "Generate an elite, science-based 4-week Push/Pull/Legs hypertrophy routine. Give exact sets, reps, and RPE for each exercise.",
+                form: "Break down the exact biomechanics and perfect form cues for a Barbell Squat and Deadlift.",
+                recovery: "What is the scientifically optimal protocol for post-workout muscle recovery, sleep optimization, and CNS repair?",
+                macros: "Explain exactly how to calculate protein, carb, and fat macros for a lean muscle-building phase (bulking without fat)."
             };
             document.getElementById('aiCoachInput').value = prompts[type];
             sendPromptToAiCoach();
@@ -203,7 +205,11 @@
             const prompt = input.value.trim();
             if(!prompt) return;
 
-            chatBox.innerText = "🤖 AI Coach is processing neural telemetry...";
+            chatBox.innerHTML = `
+                <div class="flex items-center gap-3 text-red-400 p-2">
+                    <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol...</span>
+                </div>`;
             
             try {
                 const res = await fetch('/api/ai-coach/ask', {
@@ -213,14 +219,20 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    chatBox.innerText = `"${data.reply}"`;
+                    let formattedReply = data.reply
+                        .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\s/g, '• ');
+
+                    chatBox.innerHTML = `<div class="text-slate-300 whitespace-pre-wrap">${formattedReply}</div>`;
                 } else {
-                    chatBox.innerText = `"Execute your workout regardless of motivation. No excuses."`;
+                    chatBox.innerHTML = `<div class="text-red-400 font-bold">Execute your workout regardless of motivation. No excuses.</div>`;
                 }
             } catch(err) {
-                chatBox.innerText = `"System offline. Push through the barrier."`;
+                chatBox.innerHTML = `<div class="text-red-400 font-bold">System offline. Push through the barrier on your own.</div>`;
             }
             input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
@@ -272,6 +284,7 @@
             } catch (err) {}
         }
 
+        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
         async function fetchWorkouts(dateStr = "") {
             const todayStr = new Date().toISOString().split('T')[0];
             if (!dateStr) dateStr = todayStr;
@@ -288,39 +301,34 @@
                 let url = `/api/workouts?t=${new Date().getTime()}&date=${dateStr}`;
                 const res = await fetch(url, { cache: 'no-store' });
                 
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.success && data.workouts && data.workouts.length > 0) {
+                    if (data.success) {
                         document.getElementById('workoutStreakLabel').innerText = `${data.currentStreak || 0} Days`;
                         updateStatusBanner(data.dateStatus || 'UNLOCKED', data.allDone || false, dateInput.value);
-                        renderWorkouts(data.workouts, data.dateStatus || 'UNLOCKED', dateInput.value);
-                        return;
+                        renderWorkouts(data.workouts || [], data.dateStatus || 'UNLOCKED', dateInput.value);
+                    } else {
+                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
+                } else {
+                    throw new Error("Server Response Error");
                 }
             } catch (err) {
-                console.log("API fetch failed, checking LocalStorage fallback...");
+                console.error("Cloud Connection Error:", err);
+                document.getElementById('workoutStreakLabel').innerText = "0 Days";
+                updateStatusBanner('ERROR', false, dateInput.value);
+                document.getElementById('workoutsContainer').innerHTML = `
+                    <div class="glass-card p-12 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                        <span class="text-4xl mb-4 block">⚠️</span>
+                        <p class="text-red-400 text-sm font-black uppercase tracking-widest">Cloud Connection Failed</p>
+                        <p class="text-slate-400 text-xs mt-2">Cannot reach MongoDB. Please check if your backend server is running.</p>
+                    </div>`;
             }
-
-            let localWorkouts = [];
-            try {
-                localWorkouts = JSON.parse(localStorage.getItem('monster_workouts') || localStorage.getItem('workouts') || '[]');
-            } catch(e) {
-                localWorkouts = [];
-            }
-
-            const formattedWorkouts = localWorkouts.map(w => ({
-                id: w.id || Math.random().toString(),
-                name: w.name || w.workoutName || 'Untitled Exercise',
-                category: w.category || 'Strength',
-                sets: w.sets || 3,
-                value: w.value || w.reps || 10,
-                unit: w.unit || 'Reps',
-                completed: w.completed || false
-            }));
-
-            document.getElementById('workoutStreakLabel').innerText = "0 Days";
-            updateStatusBanner('UNLOCKED', false, dateInput.value);
-            renderWorkouts(formattedWorkouts, 'UNLOCKED', dateInput.value);
         }
 
         function shiftDate(days) {
@@ -342,7 +350,10 @@
 
         function updateStatusBanner(status, allDone, targetDate) {
             const badge = document.getElementById('workoutStatusBadge');
-            if (targetDate < MONSTER_LAUNCH_DATE) {
+            if (status === 'ERROR') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
+                badge.innerText = "❌ SERVER OFFLINE";
+            } else if (targetDate < MONSTER_LAUNCH_DATE) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
                 badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
             } else if (status === 'LOCKED') {
@@ -363,7 +374,7 @@
         function renderWorkouts(workouts, dateStatus, targetDate) {
             const container = document.getElementById('workoutsContainer');
             if (!workouts || workouts.length === 0) {
-                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the system.</p><p class="text-red-500/70 text-xs mt-1">Please add workouts from your Control Panel.</p></div>`;
+                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the cloud.</p><p class="text-red-500/70 text-xs mt-1">Please add workouts from your Control Panel.</p></div>`;
                 return;
             }
 
@@ -388,24 +399,25 @@
             `).join('');
         }
 
+        // 🟢 100% CLOUD-ONLY TOGGLE FUNCTION
         async function toggleWorkout(id, completed) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {
-                await fetch(`/api/workouts/${id}/toggle`, {
+                const res = await fetch(`/api/workouts/${id}/toggle`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ date: targetDate, completed })
                 });
-            } catch (err) {
-                // Offline Fallback
-                let localWorkouts = JSON.parse(localStorage.getItem('monster_workouts') || '[]');
-                let workout = localWorkouts.find(w => w.id == id);
-                if(workout) {
-                    workout.completed = completed;
-                    localStorage.setItem('monster_workouts', JSON.stringify(localWorkouts));
+                
+                if(!res.ok) {
+                    throw new Error("Cloud update failed");
                 }
+                
+                fetchWorkouts(targetDate);
+            } catch (err) {
+                console.error(err);
+                alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
             }
-            fetchWorkouts(targetDate);
         }
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {

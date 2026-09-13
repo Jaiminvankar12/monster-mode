@@ -235,91 +235,68 @@
             calculateHistoryStats(filter);
         }
 
+        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
         async function fetchHydrationData() {
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/hydration?t=' + ts, { cache: 'no-store' });
-                const data = await res.json();
-                if (data.success) {
-                    currentGoal = data.goal;
-                    currentGlass = data.glassSize;
-                    hydrationHistoryLogs = data.history || {};
+                
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-                    document.getElementById('consumedLabel').innerText = `${data.consumed} ml`;
-                    document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
-                    document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
-                    document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
-                    document.getElementById('progressBarFill').style.width = `${data.percent}%`;
-                    
-                    document.getElementById('liquidFill').style.height = `${data.percent}%`;
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        currentGoal = data.goal;
+                        currentGlass = data.glassSize;
+                        hydrationHistoryLogs = data.history || {};
 
-                    document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
-                    document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
-                    return; // Added return to skip fallback if successful
+                        document.getElementById('consumedLabel').innerText = `${data.consumed} ml`;
+                        document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
+                        document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
+                        document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
+                        document.getElementById('progressBarFill').style.width = `${data.percent}%`;
+                        
+                        document.getElementById('liquidFill').style.height = `${data.percent}%`;
+
+                        document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
+                        document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
+                    } else {
+                        throw new Error(data.error || "Failed to fetch from Cloud");
+                    }
+                } else {
+                    throw new Error("Server Response Error");
                 }
             } catch (err) {
-                console.log("API fetch failed, checking LocalStorage fallback...");
+                console.error("Cloud Connection Error:", err);
+                document.getElementById('consumedLabel').innerText = `0 ml`;
+                document.getElementById('goalSubLabel').innerText = `Cloud Error`;
+                document.getElementById('percentLabel').innerText = `0% Progress`;
+                document.getElementById('remainingLabel').innerText = `Offline`;
+                document.getElementById('progressBarFill').style.width = `0%`;
+                document.getElementById('liquidFill').style.height = `0%`;
+                document.getElementById('glassSizeDisplay').innerText = `--- ml`;
+                document.getElementById('hydrationStreakText').innerText = `0 Days`;
             }
-            
-            // --- LocalStorage Fallback Added Here ---
-            const todayStr = new Date().toISOString().split('T')[0];
-            currentGoal = parseInt(localStorage.getItem('monster_hydration_goal')) || 3000;
-            currentGlass = parseInt(localStorage.getItem('monster_hydration_glass')) || 250;
-            
-            try {
-                hydrationHistoryLogs = JSON.parse(localStorage.getItem('monster_hydration_logs') || '{}');
-            } catch(e) {
-                hydrationHistoryLogs = {};
-            }
-
-            let consumed = hydrationHistoryLogs[todayStr] || 0;
-            let percent = Math.min(Math.round((consumed / currentGoal) * 100), 100);
-
-            document.getElementById('consumedLabel').innerText = `${consumed} ml`;
-            document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
-            document.getElementById('percentLabel').innerText = `${percent}% Progress`;
-            document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - consumed)} ml Left`;
-            document.getElementById('progressBarFill').style.width = `${percent}%`;
-            document.getElementById('liquidFill').style.height = `${percent}%`;
-            document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
-            document.getElementById('hydrationStreakText').innerText = `0 Days`;
-            // -----------------------------------------
         }
 
+        // 🟢 100% CLOUD-ONLY DRINK FUNCTION
         async function addDrink() {
             try {
                 const res = await fetch('/api/hydration/drink', { method: 'POST' });
+                if (!res.ok) throw new Error("Cloud update failed");
                 const data = await res.json();
                 if (data.success) {
                     fetchHydrationData();
-                    return; // Added return to skip fallback
                 } else if (data.error) {
                     alert("❌ " + data.error);
-                    return; // Added return to skip fallback
                 }
             } catch (err) {
-                console.log("Offline drink log...");
+                console.error(err);
+                alert("❌ Connection Error: Could not log drink to MongoDB Cloud.");
             }
-            
-            // --- LocalStorage Fallback Added Here ---
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (todayStr < LAUNCH_DATE) {
-                alert("⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026.");
-                return;
-            }
-            
-            try {
-                hydrationHistoryLogs = JSON.parse(localStorage.getItem('monster_hydration_logs') || '{}');
-            } catch(e) {
-                hydrationHistoryLogs = {};
-            }
-            
-            let current = hydrationHistoryLogs[todayStr] || 0;
-            hydrationHistoryLogs[todayStr] = current + currentGlass;
-            localStorage.setItem('monster_hydration_logs', JSON.stringify(hydrationHistoryLogs));
-            
-            fetchHydrationData();
-            // -----------------------------------------
         }
 
         function calculateHistoryStats(filter) {

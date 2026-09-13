@@ -7,7 +7,7 @@ const cron = require('node-cron');
 const fetch = require('node-fetch');
 const mongoose = require('mongoose');
 const { getServerToday, validateDateAccess } = require('./server/services/dateService');
-const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🟢 NEW: Gemini AI Integration
+const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🟢 Gemini AI Integration
 require('dotenv').config();
 
 const app = express();
@@ -49,9 +49,7 @@ const HygieneLog = mongoose.model('HygieneLog', hygieneLogSchema);
 const noteReminderSchema = new mongoose.Schema({ id: String, userId: String, title: String, description: String, isReminder: Boolean, date: String, time: String, completed: Boolean, notifiedToday: Boolean, createdAt: String });
 const NoteReminder = mongoose.model('NoteReminder', noteReminderSchema);
 
-// ============================================================================
-// 🎯 TARGETS / MILESTONES SCHEMA (ADDED)
-// ============================================================================
+// 🎯 TARGETS / MILESTONES SCHEMA
 const targetSchema = new mongoose.Schema({
     id: String,
     userId: String,
@@ -62,9 +60,7 @@ const targetSchema = new mongoose.Schema({
 });
 const Target = mongoose.model('Target', targetSchema);
 
-// ============================================================================
-// 📜 NEW: MONSTER LOG / JOURNALING SCHEMA (ADDED)
-// ============================================================================
+// 📜 MONSTER LOG / JOURNALING SCHEMA
 const monsterLogSchema = new mongoose.Schema({
     id: String,
     userId: String,
@@ -361,7 +357,7 @@ cron.schedule('0 7 * * *', async () => {
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
 
-// 🩸 NEW: PUNISHMENT PROTOCOL CRON (11:59 PM CHECK)
+// 🩸 PUNISHMENT PROTOCOL CRON (11:59 PM CHECK)
 cron.schedule('59 23 * * *', async () => {
     try {
         const today = getServerToday();
@@ -411,16 +407,14 @@ cron.schedule('* * * * *', async () => {
             }
         }
 
-        // 2. 🟢 Workout & Study Timed Alerts
+        // 2. Workout & Study Timed Alerts
         let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
         if (gs) {
-            // Workout Alert
             if (gs.workoutReminderTime === currentTimeStr && gs.workoutNotifiedDate !== todayStr) {
                 gs.workoutNotifiedDate = todayStr;
                 await gs.save();
                 await sendTelegramMessage(`🏋️ *MONSTER WORKOUT TIME!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Gear up and crush your workout session right now!`);
             }
-            // Study Alert
             if (gs.studyReminderTime === currentTimeStr && gs.studyNotifiedDate !== todayStr) {
                 gs.studyNotifiedDate = todayStr;
                 await gs.save();
@@ -1217,9 +1211,7 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     res.json({ success: true, ...updatedXP });
 });
 
-// ============================================================================
-// 🎯 TARGETS API ROUTES (ADDED)
-// ============================================================================
+// 🎯 TARGETS API ROUTES
 app.get('/api/targets', requireAuth, async (req, res) => {
     try {
         let userId = req.session.userId || MASTER_USER_ID;
@@ -1279,9 +1271,7 @@ app.delete('/api/targets/:id', requireAuth, trackerApiGuard, async (req, res) =>
     }
 });
 
-// ============================================================================
-// 🤖 NEW: TELEGRAM INTERACTIVE AI BOT (WEBHOOK / COMMAND LISTENER)
-// ============================================================================
+// 🤖 TELEGRAM INTERACTIVE AI BOT
 app.post('/api/telegram-webhook', async (req, res) => {
     try {
         const update = req.body;
@@ -1333,7 +1323,7 @@ app.get('/api/monster-coach', async (req, res) => {
     }
 });
 
-// 🟢 AI COACH BOT API (ADDED)
+// 🟢 PREMIUM ELITE AI COACH BOT API (UPGRADED)
 app.post('/api/ai-coach/ask', async (req, res) => {
     try {
         const { prompt } = req.body;
@@ -1341,24 +1331,107 @@ app.post('/api/ai-coach/ask', async (req, res) => {
         
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const aiPrompt = `You are an aggressive, hardcore David Goggins style AI workout and discipline coach. Answer the user's question regarding fitness, form, penalties, or dream physique. Keep it punchy, intense, and strict. User query: "${prompt}"`;
+            
+            const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach. 
+            You combine the hardcore, no-excuse accountability of David Goggins with the elite sports science, biomechanics, and neurobiology of Andrew Huberman.
+            
+            User query: "${prompt}"
+
+            Rules for your response:
+            1. ACTIONABLE & SCIENTIFIC: If asked for a workout plan, macros, or form, give EXACT sets, reps, RPE, rest times, and biomechanical cues. Be incredibly detailed and scientific.
+            2. STRUCTURED: Use Markdown (**bold text**) for emphasis and formatting. Use bullet points or numbered lists. Do NOT output plain paragraphs.
+            3. NO FLUFF: Be direct, highly intelligent, and authoritative. Do not act like a basic chatbot.
+            4. BRUTAL ACCOUNTABILITY: End every single response with a strict, uncompromising, hardcore command to execute the plan immediately. No feelings, just execution.`;
+            
             const result = await model.generateContent(aiPrompt);
-            reply = result.response.text().trim().replace(/"/g, '');
+            reply = result.response.text().trim();
         } else {
             const query = (prompt || "").toLowerCase();
             if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
-                reply = "⚠️ Strictness Alert: Skipping workouts triggers an immediate streak reset, Telegram warning alert, and mandatory extra cardio assignment tomorrow!";
-            } else if (query.includes('physique') || query.includes('muscle') || query.includes('body')) {
-                reply = "🎯 Dream Physique Blueprint: Maintain progressive overload, hit your daily protein macro targets, and prioritize clean sleep cycles.";
+                reply = "**⚠️ STRICTNESS PROTOCOL INITIATED:**\n\nSkipping a scheduled execution vector triggers an immediate streak reset.\n\n**Penalties:**\n• You will run a mandatory 5km at 5:00 AM tomorrow.\n• No dopamine activities (music/social media) for 24 hours.\n\n**Do not let your mind control you. Get the work done.**";
+            } else if (query.includes('physique') || query.includes('routine') || query.includes('plan')) {
+                reply = "**🎯 ELITE HYPERTROPHY BLUEPRINT:**\n\nTo achieve maximum muscle synthesis:\n• **Push:** Bench Press (4x8), Overhead Press (3x10), Tricep Dips (3xF).\n• **Pull:** Barbell Rows (4x8), Pull-ups (3xF), Bicep Curls (3x12).\n• **Legs:** Squats (4x8), RDLs (3x10), Calf Raises (4x15).\n\n*Maintain 2 RIR (Reps in Reserve) and consume 1.8g protein per kg of bodyweight.*\n\n**The plan is set. The science is proven. Now shut up and lift.**";
             } else if (query.includes('form') || query.includes('exercise')) {
-                reply = "💡 Form Masterclass: Keep your core braced, control the eccentric (negative) phase for 3 seconds, and execute clean repetitions without ego lifting.";
+                reply = "💡 **BIOMECHANICAL MASTERY:**\n\nFor a perfect lift:\n• **Brace Your Core:** Imagine taking a punch to the stomach.\n• **Eccentric Control:** Take 3 full seconds on the way down.\n• **Concentric Explosiveness:** Explode on the way up.\n\n**Leave your ego at the door. Execute with perfect technique.**";
             }
         }
 
         res.json({ success: true, reply });
     } catch (err) {
-        res.json({ success: true, reply: "Execute your workout regardless of motivation. No excuses." });
+        res.json({ success: true, reply: "**SYSTEM WARNING:** Offline mode engaged.\n\nExecute your workout regardless of motivation. The iron does not care if the AI is disconnected. **GO LIFT.**" });
     }
+});
+
+// 🟢 OLED AUTO-SWITCH API
+app.get('/api/oled-status', (req, res) => {
+    let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    let istNow = new Date(istTimeStr);
+    let hour = istNow.getHours();
+    let isOledTime = (hour >= 22 || hour < 7);
+    res.json({ success: true, isOledTime });
+});
+
+// 🟢 DAILY MONSTER LOG APIs
+app.get('/api/monster-log', requireAuth, async (req, res) => {
+    let userId = req.session.userId || MASTER_USER_ID;
+    let today = getServerToday();
+    let log = await MonsterLog.findOne({ userId, date: today });
+    res.json({ success: true, log });
+});
+
+app.post('/api/monster-log', requireAuth, async (req, res) => {
+    const { content } = req.body;
+    let userId = req.session.userId || MASTER_USER_ID;
+    let today = getServerToday();
+    
+    let aiFeedback = "Execute blindly. No emotions.";
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const prompt = `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`;
+            const result = await model.generateContent(prompt);
+            aiFeedback = result.response.text().trim().replace(/"/g, '');
+        } catch(e) {}
+    }
+    
+    let log = await MonsterLog.findOne({ userId, date: today });
+    if (log) {
+        log.content = content;
+        log.aiFeedback = aiFeedback;
+        await log.save();
+    } else {
+        log = new MonsterLog({
+            id: 'ml_' + Date.now(),
+            userId,
+            date: today,
+            content,
+            aiFeedback,
+            createdAt: new Date().toISOString()
+        });
+        await log.save();
+    }
+    res.json({ success: true, log });
+});
+
+// 🟢 BADGES API
+app.get('/api/badges', requireAuth, async (req, res) => {
+    let userId = req.session.userId || MASTER_USER_ID;
+    let xpInfo = await getUserXP(userId);
+    let lvl = xpInfo.level;
+    
+    const allBadges = [
+        { id: 'b1', name: 'Novice Executor', icon: '🥉', levelRequired: 1 },
+        { id: 'b2', name: 'Discipline Initiate', icon: '🥈', levelRequired: 5 },
+        { id: 'b3', name: 'Apex Predator', icon: '🥇', levelRequired: 10 },
+        { id: 'b4', name: 'Iron Mindset', icon: '🏆', levelRequired: 20 },
+    ];
+    
+    const badges = allBadges.map(b => ({
+        ...b,
+        unlocked: lvl >= b.levelRequired
+    }));
+    
+    res.json({ success: true, badges });
 });
 
 // 🌦️ WEATHER API ROUTE (Ahmedabad)

@@ -478,7 +478,7 @@
             } catch (err) {}
         }
 
-        // 📜 2. DAILY MONSTER LOG SUBMISSION
+        // 📜 2. DAILY MONSTER LOG SUBMISSION (100% CLOUD)
         async function submitMonsterLog() {
             const content = document.getElementById('monsterLogInput').value.trim();
             if(!content) return;
@@ -488,6 +488,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content })
                 });
+                if(!res.ok) throw new Error();
                 const data = await res.json();
                 if(data.success && data.log) {
                     document.getElementById('aiLogFeedbackContainer').classList.remove('hidden');
@@ -495,13 +496,14 @@
                     showStatusMessage("📜 Log transmitted to neural core!", "success");
                 }
             } catch(e) {
-                showStatusMessage("❌ Failed to transmit log", "error");
+                showStatusMessage("❌ Failed to transmit log (Cloud Error)", "error");
             }
         }
 
         async function loadMonsterLog() {
             try {
                 const res = await fetch('/api/monster-log');
+                if(!res.ok) throw new Error();
                 const data = await res.json();
                 if(data.success && data.log) {
                     document.getElementById('monsterLogInput').value = data.log.content || '';
@@ -510,13 +512,16 @@
                         document.getElementById('aiLogFeedbackText').innerText = data.log.aiFeedback;
                     }
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Cloud Error: Could not fetch monster log.");
+            }
         }
 
         // 🏆 3. LOAD BADGES & UNLOCKABLES
         async function loadBadges() {
             try {
                 const res = await fetch('/api/badges');
+                if(!res.ok) throw new Error();
                 const data = await res.json();
                 const container = document.getElementById('badgesGridContainer');
                 if(!container) return;
@@ -532,7 +537,12 @@
                         </div>
                     `).join('');
                 }
-            } catch(e) {}
+            } catch(e) {
+                const container = document.getElementById('badgesGridContainer');
+                if(container) {
+                    container.innerHTML = `<p class="text-xs text-red-400 col-span-full">⚠️ Cloud Error: Could not fetch badges.</p>`;
+                }
+            }
         }
 
         // 🌦️ WEATHER API INTEGRATION
@@ -646,9 +656,7 @@
             overlay.classList.remove('flex');
             showStatusMessage("Lockdown aborted.", "error");
         }
-    </script>
 
-    <script>
         function applyGlobalTheme(theme) {
             let colorMap = {
                 red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
@@ -724,52 +732,22 @@
             if(modal) modal.remove();
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            verifyGlobalSystemLock();
-            checkOledAutoSwitch();
-            displayCurrentDateAndDay();
-            
-            let savedTheme = localStorage.getItem('monster_accent_theme') || 'solid';
-            if (savedTheme === 'gradient') {
-                const c1 = localStorage.getItem('monster_grad_1') || '#ef4444';
-                const c2 = localStorage.getItem('monster_grad_2') || '#b91c1c';
-                document.documentElement.style.setProperty('--theme-primary', c1);
-                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
-            } else {
-                const hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
-                document.documentElement.style.setProperty('--theme-primary', hex);
-                document.documentElement.style.setProperty('--theme-glow', hex + '40');
-            }
-
-            let savedMission = localStorage.getItem('monster_daily_mission') || '';
-            const missionInput = document.getElementById('dailyMissionInput');
-            if(missionInput) missionInput.value = savedMission;
-
-            loadWeather();
-            loadDashboardData();
-            loadDashboardSchedules();
-            loadDashboardTargets();
-            loadMonsterLog();
-            loadBadges();
-        });
-
-        // 🎯 TARGETS MANAGEMENT WIDGET
-        let fallbackTargets = JSON.parse(localStorage.getItem('monster_targets')) || [
-            { id: 101, name: "Launch Apex Predator System", date: "2026-09-14", completed: false },
-            { id: 102, name: "Clear AWS Certification", date: "2026-11-14", completed: false }
-        ];
-
+        // 🟢 100% CLOUD-ONLY DASHBOARD TARGETS FETCH
         async function loadDashboardTargets() {
             try {
                 const res = await fetch('/api/targets?t=' + new Date().getTime());
-                if(res.ok) {
-                    const data = await res.json();
-                    renderDashboardTargets(data.targets || []);
-                    return;
-                }
-                throw new Error('API fails');
+                if (!res.ok) throw new Error('API fails');
+                const data = await res.json();
+                renderDashboardTargets(data.targets || []);
             } catch(e) {
-                renderDashboardTargets(fallbackTargets);
+                console.error(e);
+                const container = document.getElementById('dashboardTargetsList');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                            <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
+                        </div>`;
+                }
             }
         }
 
@@ -795,14 +773,17 @@
             `).join('');
         }
 
-        function markTargetComplete(id) {
-            fallbackTargets = fallbackTargets.map(t => t.id == id ? { ...t, completed: true } : t);
-            localStorage.setItem('monster_targets', JSON.stringify(fallbackTargets));
-            renderDashboardTargets(fallbackTargets);
-            
-            showStatusMessage("🏆 Milestone Conquered!", "success");
-            
-            fetch(`/api/targets/${id}/complete`, { method: 'POST' }).catch(e=>{});
+        // 🟢 100% CLOUD-ONLY TARGET COMPLETE LOGIC
+        async function markTargetComplete(id) {
+            try {
+                const res = await fetch(`/api/targets/${id}/complete`, { method: 'POST' });
+                if (!res.ok) throw new Error("Cloud sync failed");
+                showStatusMessage("🏆 Milestone Conquered!", "success");
+                loadDashboardTargets();
+            } catch (err) {
+                console.error(err);
+                alert("❌ Connection Error: Could not sync milestone status with MongoDB Cloud.");
+            }
         }
 
         async function loadDashboardSchedules() {
@@ -818,6 +799,7 @@
             } catch (err) {}
         }
 
+        // 🟢 100% CLOUD-ONLY DASHBOARD DATA FETCH
         async function loadDashboardData() {
             try {
                 const ts = new Date().getTime();
@@ -873,7 +855,25 @@
                 renderCharts(habits, workouts, studyData, hydrationData);
                 loadMonsterCoach();
             } catch (err) {
-                console.error("Error loading dashboard data:", err);
+                console.error("Cloud Connection Error loading dashboard data:", err);
+                
+                // Show Zeroes & Error Status Instead of Fallback
+                document.getElementById('totalVectorsCount').innerText = 0;
+                document.getElementById('currentStreakDisplay').innerText = `0 Days`;
+                document.getElementById('dashWaterConsumed').innerText = `0 / 3000 ml`;
+                document.getElementById('dashWaterBar').style.width = `0%`;
+                document.getElementById('dashWaterStreak').innerText = `Offline`;
+                document.getElementById('yearlyProgressText').innerText = `0%`;
+                document.getElementById('yearlyBar').style.width = `0%`;
+                document.getElementById('energyCoreText').innerText = `0%`;
+                
+                document.getElementById('habitsCarouselContainer').innerHTML = `
+                    <p class="text-xs font-black uppercase tracking-widest text-red-400 text-center py-4">❌ Cloud Connection Failed</p>`;
+                    
+                document.getElementById('dashboardStudyList').innerHTML = `
+                    <div class="col-span-full glass-card p-4 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
+                    </div>`;
             }
         }
 
@@ -884,12 +884,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ completed: !currentState })
                 });
-                if (res.ok) { loadDashboardData(); loadBadges(); } 
-                else {
-                    const data = await res.json();
-                    if(data.error) alert("❌ " + data.error);
-                }
-            } catch (err) {}
+                if (!res.ok) throw new Error("Cloud Sync Failed");
+                loadDashboardData(); 
+                loadBadges(); 
+            } catch (err) {
+                console.error(err);
+                alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
+            }
         }
 
         // 🔥 HABITS CAROUSEL WITH STREAKS INCLUDED
@@ -1041,9 +1042,15 @@
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
                                     <span class="text-5xl animate-bounce">🛡️</span>
                                     <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED BY ADMIN</h2>
-                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">The entire tracker portal has been globally locked. All execution vectors are frozen.</p>
-                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">Access Denied</div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Gateway</button>
+                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                        The entire tracker portal has been globally locked by the administrator. All execution vectors are frozen.
+                                    </p>
+                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                        Access Denied / Contact Admin
+                                    </div>
+                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                        Return to Gateway
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -1054,12 +1061,40 @@
                         document.body.prepend(adminBanner);
                     }
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Lock verification failed", err);
+            }
         }
-    </script>
 
-    <!-- ⌨️ COMMAND PALETTE & 🎙️ VOICE SYSTEM LOGIC -->
-    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            verifyGlobalSystemLock();
+            checkOledAutoSwitch();
+            displayCurrentDateAndDay();
+            
+            let savedTheme = localStorage.getItem('monster_accent_theme') || 'solid';
+            if (savedTheme === 'gradient') {
+                const c1 = localStorage.getItem('monster_grad_1') || '#ef4444';
+                const c2 = localStorage.getItem('monster_grad_2') || '#b91c1c';
+                document.documentElement.style.setProperty('--theme-primary', c1);
+                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+            } else {
+                const hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
+                document.documentElement.style.setProperty('--theme-primary', hex);
+                document.documentElement.style.setProperty('--theme-glow', hex + '40');
+            }
+
+            let savedMission = localStorage.getItem('monster_daily_mission') || '';
+            const missionInput = document.getElementById('dailyMissionInput');
+            if(missionInput) missionInput.value = savedMission;
+
+            loadWeather();
+            loadDashboardData();
+            loadDashboardSchedules();
+            loadDashboardTargets();
+            loadMonsterLog();
+            loadBadges();
+        });
+
         const cmdOverlay = document.getElementById('commandPaletteOverlay');
         const cmdInput = document.getElementById('commandInput');
 
@@ -1149,6 +1184,19 @@
             recognition.onerror = (event) => {
                 btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white');
             };
+        }
+        
+        function showStatusMessage(message, type = 'success') {
+            const host = document.getElementById('inlineStatusNotification');
+            if (!host) return;
+            host.innerHTML = '';
+            const icon = type === 'success' ? '✓' : '✕';
+            const toast = document.createElement('div');
+            toast.className = `status-toast ${type === 'success' ? 'success' : 'error'}`;
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            host.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
     </script>
 </body>

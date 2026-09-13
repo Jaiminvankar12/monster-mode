@@ -99,6 +99,10 @@
 
             <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
 
+            <div id="hygieneStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
+                Loading status...
+            </div>
+
             <button onclick="triggerSundayTelegram()" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer flex items-center justify-center gap-2">
                 <span>🤖</span> Dispatch Sunday Checklist to Telegram
             </button>
@@ -110,7 +114,7 @@
                 <span>✨</span> Daily Hygiene Routine
             </h3>
             <div id="dailyTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Loading daily tasks...</div>
+                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Connecting to Cloud Server...</div>
             </div>
         </div>
 
@@ -120,7 +124,7 @@
                 <span>🧔</span> Sunday Special Care Vectors
             </h3>
             <div id="sundayTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Loading Sunday tasks...</div>
+                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Connecting to Cloud Server...</div>
             </div>
         </div>
 
@@ -150,6 +154,7 @@
             }
         }
 
+        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
         async function fetchHygieneData(dateStr = "") {
             const todayStr = new Date().toISOString().split('T')[0];
             if (!dateStr) dateStr = todayStr;
@@ -164,66 +169,88 @@
             try {
                 let url = '/api/hygiene?t=' + new Date().getTime() + `&date=${dateStr}`;
                 const res = await fetch(url, { cache: 'no-store' });
+                
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
                     return;
                 }
+
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
                         document.getElementById('hygieneStreakLabel').innerText = `${data.hygieneStreak || 0} Days`;
-                        renderTasks(data.tasks || []);
-                        return;
+                        updateStatusBanner(data.allDone ? 'DONE' : 'UNLOCKED', dateInput.value);
+                        renderTasks(data.tasks || [], dateInput.value);
+                    } else {
+                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
+                } else {
+                    throw new Error("Server Response Error");
                 }
             } catch (err) {
-                console.log("API fetch failed, checking LocalStorage fallback...");
+                console.error("Cloud Connection Error:", err);
+                document.getElementById('hygieneStreakLabel').innerText = "0 Days";
+                updateStatusBanner('ERROR', dateInput.value);
+                
+                const errorHTML = `
+                    <div class="col-span-full glass-card p-12 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
+                        <span class="text-4xl mb-4 block">⚠️</span>
+                        <p class="text-red-400 text-sm font-black uppercase tracking-widest">Cloud Connection Failed</p>
+                        <p class="text-slate-400 text-xs mt-2">Cannot reach MongoDB. Please check if your backend server is running.</p>
+                    </div>`;
+                    
+                document.getElementById('dailyTasksContainer').innerHTML = errorHTML;
+                document.getElementById('sundayTasksContainer').innerHTML = errorHTML;
             }
-
-            // LocalStorage Fallback for Control Panel sync
-            let localTasks = [];
-            try {
-                localTasks = JSON.parse(localStorage.getItem('monster_hygiene_tasks') || localStorage.getItem('hygiene_tasks') || '[]');
-            } catch(e) {
-                localTasks = [];
-            }
-
-            const formattedTasks = localTasks.map(t => ({
-                id: t.id || Math.random().toString(),
-                name: t.name || t.taskName || 'Untitled Hygiene Routine',
-                frequency: t.frequency || 'daily',
-                completed: t.completed || false
-            }));
-
-            document.getElementById('hygieneStreakLabel').innerText = "0 Days";
-            renderTasks(formattedTasks);
         }
 
-        function renderTasks(tasks) {
+        function updateStatusBanner(status, targetDate) {
+            const badge = document.getElementById('hygieneStatusBadge');
+            if (!badge) return;
+            
+            if (status === 'ERROR') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
+                badge.innerText = "❌ SERVER OFFLINE";
+            } else if (targetDate < LAUNCH_DATE) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode";
+            } else if (status === 'DONE') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
+                badge.innerText = "⚡ ALL TASKS CONQUERED";
+            } else {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 whitespace-nowrap";
+                badge.innerText = "🔥 ROUTINE IN PROGRESS";
+            }
+        }
+
+        function renderTasks(tasks, viewingDate) {
             const dailyContainer = document.getElementById('dailyTasksContainer');
             const sundayContainer = document.getElementById('sundayTasksContainer');
 
             const dailyTasks = tasks.filter(t => t.frequency === 'daily');
             const sundayTasks = tasks.filter(t => t.frequency === 'sunday');
 
-            dailyContainer.innerHTML = dailyTasks.length === 0 ? `<p class="text-xs text-zinc-500">No daily tasks found. Add from Control Panel.</p>` : dailyTasks.map(t => taskCardHTML(t)).join('');
-            sundayContainer.innerHTML = sundayTasks.length === 0 ? `<p class="text-xs text-zinc-500">No Sunday tasks found.</p>` : sundayTasks.map(t => taskCardHTML(t, true)).join('');
+            dailyContainer.innerHTML = dailyTasks.length === 0 ? `<p class="text-xs text-zinc-500 col-span-full">No daily tasks deployed in the cloud.</p>` : dailyTasks.map(t => taskCardHTML(t, false, viewingDate)).join('');
+            sundayContainer.innerHTML = sundayTasks.length === 0 ? `<p class="text-xs text-zinc-500 col-span-full">No Sunday tasks deployed in the cloud.</p>` : sundayTasks.map(t => taskCardHTML(t, true, viewingDate)).join('');
         }
 
-        function taskCardHTML(t, isSunday = false) {
+        function taskCardHTML(t, isSunday = false, viewingDate) {
+            const isNotStarted = viewingDate < LAUNCH_DATE;
+            
             return `
                 <div class="glass-card p-5 rounded-2xl flex items-center justify-between border ${isSunday ? 'border-amber-500/20 bg-amber-500/5' : 'border-cyan-500/20 bg-cyan-500/5'} gap-3">
                     <div class="min-w-0">
                         <h4 class="font-extrabold text-white text-base tracking-wide truncate">${t.name}</h4>
                         <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold truncate block">${(t.frequency || 'daily').toUpperCase()} ROUTINE</span>
                     </div>
-                    <button onclick="toggleTask('${t.id}', ${!t.completed})" class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shrink-0 ${t.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-cyan-500/10 hover:text-cyan-400'}">
+                    <button ${isNotStarted ? 'disabled' : ''} onclick="toggleTask('${t.id}', ${!t.completed})" class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shrink-0 ${isNotStarted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (t.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-cyan-500/10 hover:text-cyan-400')}">
                         ${t.completed ? '✓ Complete' : '○ Pending'}
                     </button>
                 </div>
             `;
         }
 
+        // 🟢 100% CLOUD-ONLY TOGGLE FUNCTION
         async function toggleTask(id, completed) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {
@@ -232,21 +259,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ completed, date: targetDate })
                 });
+                
                 if (!res.ok) {
-                    const data = await res.json();
-                    alert(data.error || "Action rejected.");
-                    return;
+                    throw new Error("Cloud update failed");
                 }
+                
+                fetchHygieneData(targetDate);
             } catch (err) {
-                console.log("Offline toggle fallback...");
-                let localTasks = JSON.parse(localStorage.getItem('monster_hygiene_tasks') || '[]');
-                let task = localTasks.find(t => t.id == id);
-                if(task) {
-                    task.completed = completed;
-                    localStorage.setItem('monster_hygiene_tasks', JSON.stringify(localTasks));
-                }
+                console.error(err);
+                alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
             }
-            fetchHygieneData(targetDate);
         }
 
         async function triggerSundayTelegram() {

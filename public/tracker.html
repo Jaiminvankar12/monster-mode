@@ -119,7 +119,7 @@
 
     <script>
         let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-13";
+        const LAUNCH_DATE = "2026-09-14";
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(LAUNCH_DATE);
@@ -188,7 +188,7 @@
                 
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.success && data.habits && data.habits.length > 0) {
+                    if (data.success && data.habits) {
                         document.getElementById('habitStreakLabel').innerText = `${data.habitStreak || data.currentStreak || 0} Days`;
                         updateLockBanner(data.dateStatus || 'UNLOCKED');
                         renderHabits(data.habits, dateInput.value);
@@ -207,6 +207,7 @@
                 localHabits = [];
             }
 
+            // Map local format to tracker format if needed
             const formattedHabits = localHabits.map(h => ({
                 id: h.id || Math.random().toString(),
                 name: h.name || h.habitName || 'Untitled Habit',
@@ -272,7 +273,8 @@
 
         async function toggleTrackerNote(id) {
             try {
-                await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST' });
+                const res = await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST' });
+                if (!res.ok) throw new Error("Cloud Sync Failed");
             } catch (err) {
                 let localNotes = JSON.parse(localStorage.getItem('monster_notes') || '[]');
                 let note = localNotes.find(n => n.id == id);
@@ -287,11 +289,12 @@
         async function toggleHabit(id, completed) {
              const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
              try {
-                await fetch(`/api/habits/${id}/toggle`, {
+                const res = await fetch(`/api/habits/${id}/toggle`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ date: targetDate, completed })
                 });
+                if (!res.ok) throw new Error("Cloud Sync Failed");
              } catch (err) {
                  // Offline Toggle Fallback
                  let localHabits = JSON.parse(localStorage.getItem('monster_habits') || '[]');
@@ -368,9 +371,7 @@
         }
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
-            try {
-                await fetch('/api/auth/logout', { method: 'POST' });
-            } catch(e) {}
+            await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = 'index.html';
         });
 

@@ -885,19 +885,11 @@
                 }
             } catch (err) {
                 const container = document.getElementById('targetsListContainer');
-                let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
-                if(fallback.length > 0) {
-                    container.innerHTML = fallback.map(t => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>
-                            </div>
-                            <button onclick="confirmAndDeleteTarget('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                        </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+                if (container) {
+                    container.innerHTML = `
+                        <div class="bg-[#030408] border border-red-500/20 p-4 rounded-2xl flex items-center justify-center gap-4">
+                            <p class="text-xs font-black uppercase tracking-widest text-red-400">⚠️ Cloud Connection Failed</p>
+                        </div>`;
                 }
             }
         }
@@ -920,14 +912,11 @@
                             showStatusMessage("Milestone deployed successfully!", "success");
                             targetForm.reset();
                             loadTargets();
+                        } else {
+                            showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
                         }
                     } catch (err) { 
-                        let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
-                        fallback.push({id: Date.now(), name, date, completed: false});
-                        localStorage.setItem('monster_targets', JSON.stringify(fallback));
-                        showStatusMessage("Milestone deployed successfully!", "success");
-                        targetForm.reset();
-                        loadTargets();
+                        showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
                     }
                 });
             });
@@ -944,13 +933,11 @@
                     if (res.ok) {
                         showStatusMessage("Milestone deleted successfully.", "success");
                         loadTargets();
+                    } else {
+                        showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
                     }
                 } catch (err) {
-                    let fallback = JSON.parse(localStorage.getItem('monster_targets')) || [];
-                    fallback = fallback.filter(t => t.id != id);
-                    localStorage.setItem('monster_targets', JSON.stringify(fallback));
-                    showStatusMessage("Milestone deleted successfully.", "success");
-                    loadTargets();
+                    showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
                 }
             });
         }
@@ -1007,6 +994,8 @@
                             noteForm.reset();
                             togglePanelTimerFields();
                             loadNotesReminders();
+                        } else {
+                            showStatusMessage("Connection error", "error");
                         }
                     } catch (err) { showStatusMessage("Connection error", "error"); }
                 });
@@ -1024,6 +1013,8 @@
                     if (res.ok) {
                         showStatusMessage("Entry deleted successfully.", "success");
                         loadNotesReminders();
+                    } else {
+                        showStatusMessage("Connection error", "error");
                     }
                 } catch (err) { showStatusMessage("Connection error", "error"); }
             });
