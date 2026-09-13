@@ -756,15 +756,34 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
 
         let reply = "I have analyzed all operational parameters, sir.";
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            let aiGenerated = false;
+            
+            // Attempt 1: Try with gemini-pro
             try {
-                // Using gemini-1.5-flash as the primary stable model
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
                 const result = await model.generateContent(systemContext);
                 const response = await result.response;
                 reply = response.text().trim();
-            } catch (aiErr) {
-                console.error("Gemini API Actual Error:", aiErr);
-                reply = `**JARVIS NEURAL ERROR:** ${aiErr.message || 'API request rejected'}\n\n• Level: ${xpInfo.level}\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
+                aiGenerated = true;
+            } catch (err1) {
+                console.log("Model gemini-pro failed, trying alternative...");
+            }
+
+            // Attempt 2: If first fails, try with gemini-1.5-flash
+            if (!aiGenerated) {
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const resFlash = await modelFlash.generateContent(systemContext);
+                    reply = resFlash.response.text().trim();
+                    aiGenerated = true;
+                } catch (err2) {
+                    console.log("Model gemini-1.5-flash failed too.");
+                }
+            }
+
+            // Fallback: If both models fail due to SDK or network limits, show formatted system stats safely
+            if (!aiGenerated) {
+                reply = `**JARVIS STATUS REPORT (Operational Core Active):**\n• Level: ${xpInfo.level} (${xpInfo.xp} XP)\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• Workouts Status: ${syncResult.allWorkoutsDone ? 'Completed' : 'Pending'}\n• Study Progress: ${syncResult.totalStudiedMinutes} / ${syncResult.totalTargetMinutes} mins\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
             }
         }
 
@@ -773,7 +792,8 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         console.error("Jarvis Query Error:", err);
         res.status(500).json({ error: "Jarvis encountered a neural network anomaly while retrieving system records." });
     }
-});// 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
+});
+// 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
