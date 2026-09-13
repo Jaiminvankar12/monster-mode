@@ -228,7 +228,7 @@
         let isPomoRunning = false;
         let isBreakMode = false;
         
-        const LAUNCH_DATE = "2026-09-13";
+        const LAUNCH_DATE = "2026-09-14";
 
         let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
         let pomoDurationMinutes = savedDefaultMins;
@@ -276,6 +276,22 @@
                                 </div>
                             </div>
                         `;
+                    }
+                }
+
+                // Check Individual Lock for Study
+                if (data.studyLocked) {
+                    const pomoBtn = document.getElementById('pomoStartBtn');
+                    const logBtn = document.querySelector('#logSessionForm button[type="submit"]');
+                    if (pomoBtn) {
+                        pomoBtn.disabled = true;
+                        pomoBtn.className = "w-full sm:w-auto px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-500 font-extrabold rounded-xl text-xs uppercase tracking-widest cursor-not-allowed opacity-50";
+                        pomoBtn.innerHTML = "🔒 LOCKED";
+                    }
+                    if (logBtn) {
+                        logBtn.disabled = true;
+                        logBtn.className = "w-full py-3 bg-zinc-900 border border-zinc-800 text-zinc-500 font-extrabold uppercase tracking-wider text-xs rounded-xl transition cursor-not-allowed opacity-50";
+                        logBtn.innerHTML = "🔒 MATRIX LOCKED";
                     }
                 }
             } catch (err) {
@@ -630,7 +646,14 @@
                     })
                 });
                 
-                if (!res.ok) throw new Error("Cloud Sync Failed");
+                if (!res.ok) {
+                    if (res.status === 403) {
+                         const errData = await res.json();
+                         alert(errData.error || "System Locked.");
+                         return;
+                    }
+                    throw new Error("Cloud Sync Failed");
+                }
                 
                 const data = await res.json();
                 if (data.success) {
@@ -658,7 +681,14 @@
                     body: JSON.stringify({ categoryId, topic, durationMinutes })
                 });
                 
-                if (!res.ok) throw new Error("Cloud Sync Failed");
+                if (!res.ok) {
+                    if (res.status === 403) {
+                         const errData = await res.json();
+                         alert(errData.error || "System Locked.");
+                         return;
+                    }
+                    throw new Error("Cloud Sync Failed");
+                }
                 
                 const data = await res.json();
                 if (data.success) {

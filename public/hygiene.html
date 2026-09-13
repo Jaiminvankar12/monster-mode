@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONSTER MODE ON — Personal Hygiene & Grooming Tracker</title>
+    <title>MONSTER MODE — Hydration Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" href="images/dragon 1.png">
@@ -12,10 +12,38 @@
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
-        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.7) 0%, rgba(10, 13, 20, 0.8) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
-        .glow-cyan { box-shadow: 0 0 30px rgba(6, 182, 212, 0.15); }
+        .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .water-glow { box-shadow: 0 0 50px rgba(59, 130, 246, 0.25); }
+        
+        /* 💧 PERFECT WATER DROP SHAPE CSS 💧 */
+        .drop-shape {
+            border-radius: 50% 0 50% 50%;
+            transform: rotate(-45deg);
+        }
+        
+        .drop-liquid-wrapper {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        .liquid-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(6, 182, 212, 0.8) 0%, rgba(59, 130, 246, 0.6) 100%);
+            box-shadow: inset 0 10px 20px rgba(255, 255, 255, 0.15);
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         :root {
-            --accent-primary: #ef4444; 
+            --accent-primary: #ef4444;
             --accent-glow: rgba(239, 68, 68, 0.15);
         }
         .dynamic-accent { color: var(--accent-primary) !important; }
@@ -24,121 +52,148 @@
         .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row selection:bg-cyan-500 selection:text-white overflow-x-hidden">
+<body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
 
     <!-- Pre-Launch / Locked Notice Banner Overlay -->
     <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
-        <div class="glass-card p-8 rounded-3xl border-2 border-cyan-500/50 max-w-xl w-full glow-cyan space-y-4">
+        <div class="glass-card p-8 rounded-3xl border-2 border-blue-500/50 max-w-xl w-full water-glow space-y-4">
             <span class="text-4xl">🔒</span>
-            <h2 class="text-2xl font-black uppercase tracking-wider text-cyan-400">System Locked: Pre-Launch Mode</h2>
+            <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Hygiene and grooming protocols are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Hydration tracking and fluid matrix are currently in read-only planning preview.
             </p>
-            <div class="text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
+            <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
             </div>
         </div>
     </div>
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full lg:w-64 bg-[#0c0e15] border-b lg:border-b-0 lg:border-r border-[#1a1f30] flex flex-col justify-between p-6 shrink-0 lg:fixed lg:h-full z-50">
-        <div>
-            <div class="mb-6 lg:mb-8 flex items-center gap-3">
-                <span class="text-2xl">🧼</span>
-                <div>
-                    <h1 class="text-sm font-black uppercase tracking-wider text-white">MONSTER MODE</h1>
-                    <p class="text-[9px] text-cyan-400 uppercase tracking-widest font-bold">Self-Care Mode</p>
-                </div>
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-black text-lg">💧</div>
+            <div>
+                <h1 class="text-sm font-black tracking-wider uppercase text-white">MONSTER MODE <span class="text-blue-400">HYDRATION</span></h1>
+                <p class="text-[10px] text-zinc-400 font-semibold tracking-widest uppercase">Fluid Matrix</p>
             </div>
-            <nav class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 text-xs font-semibold uppercase tracking-wider scrollbar-none">
-                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📊 Dashboard</a>
-                <a href="tracker.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🔥 Habit Tracker</a>
-                <a href="workout.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">🏋️ Workout Tracker</a>
-                <a href="study.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">📚 Study Tracker</a>
-                <a href="hygiene.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-cyan-600 text-white font-extrabold shadow-lg shadow-cyan-600/30 whitespace-nowrap">🧼 Hygiene Tracker</a>
-                <a href="hydration.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#131622] text-slate-300 hover:bg-[#1a1f30] hover:text-white transition whitespace-nowrap">💧 Hydration Matrix</a>
-            </nav>
         </div>
-        <div class="hidden lg:block pt-6">
-            <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-cyan-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                Log Out
-            </button>
-        </div>
-    </aside>
+        <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
+            <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
+            <!-- Added optional Logout button here seamlessly for consistency -->
+            <button onclick="logoutUser()" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ml-2">Log Out</button>
+        </nav>
+    </header>
 
     <!-- Main Container -->
-    <main class="flex-1 lg:ml-64 flex flex-col p-4 sm:p-6 lg:p-10 overflow-y-auto">
+    <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
-        <!-- Header & Streak Badge -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-[#1a1f30]">
-            <div>
-                <span class="text-xs font-black tracking-widest text-cyan-400 uppercase bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">🧼 Personal Care Matrix</span>
-                <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Grooming & Cleanliness</h2>
-                <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
-            </div>
-            <!-- Streak Badge -->
-            <div class="glass-card px-5 py-3 rounded-2xl border border-cyan-500/30 flex items-center gap-3 glow-cyan bg-cyan-500/5 whitespace-nowrap w-full sm:w-auto justify-center sm:justify-start">
-                <span class="text-2xl">🔥</span>
+        <!-- Hydration Streak Badge/Card -->
+        <div class="bg-[#121520] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl animate-pulse">🔥</span>
                 <div>
-                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Hygiene Streak</span>
-                    <span id="hygieneStreakLabel" class="text-lg font-black text-cyan-400 tracking-wider">0 Days</span>
+                    <h4 class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Hydration Streak</h4>
+                    <p id="hydrationStreakText" class="text-base font-black text-white">0 Days</p>
                 </div>
             </div>
+            <span class="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Goal Met = Streak+</span>
         </div>
 
-        <!-- Date Shift & Sunday Trigger Toolbar -->
-        <div class="glass-card p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev Day</button>
-                <div class="text-center px-2">
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
-                </div>
-                <button onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next Day →</button>
-            </div>
-
-            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
-
-            <div id="hygieneStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
-                Loading status...
-            </div>
-
-            <button onclick="triggerSundayTelegram()" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-blue-600/25 transition cursor-pointer flex items-center justify-center gap-2">
-                <span>🤖</span> Dispatch Sunday Checklist to Telegram
+        <!-- Bottom / Top Navigation Switcher (Today vs History) -->
+        <div class="grid grid-cols-2 gap-2 bg-[#121520] p-1.5 rounded-2xl border border-white/5">
+            <button onclick="switchMainTab('today')" id="tabTodayBtn" class="py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20">
+                💧 Today
+            </button>
+            <button onclick="switchMainTab('history')" id="tabHistoryBtn" class="py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                📊 History
             </button>
         </div>
 
-        <!-- Daily Tasks Section -->
-        <div class="mb-8">
-            <h3 class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-4 flex items-center gap-2">
-                <span>✨</span> Daily Hygiene Routine
-            </h3>
-            <div id="dailyTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Connecting to Cloud Server...</div>
+        <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
+        <div id="viewToday" class="flex flex-col items-center justify-center text-center py-4 space-y-6">
+            <div class="mt-2">
+                <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Daily Water Target</span>
+                <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-3">Today</h2>
             </div>
-        </div>
 
-        <!-- Sunday Grooming Section -->
-        <div id="sundaySection" class="mb-8">
-            <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-4 flex items-center gap-2">
-                <span>🧔</span> Sunday Special Care Vectors
-            </h3>
-            <div id="sundayTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-sm">Connecting to Cloud Server...</div>
+            <!-- 💧 GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center mt-10 mb-6">
+                
+                <div class="absolute inset-0 drop-shape water-glow bg-blue-500/5 border-2 border-blue-500/40 overflow-hidden">
+                    <div class="drop-liquid-wrapper">
+                        <div id="liquidFill" class="liquid-wave" style="height: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="z-10 flex flex-col items-center justify-center mt-12 sm:mt-16">
+                    <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-lg">0 ml</span>
+                    <span id="goalSubLabel" class="text-xs text-blue-200 font-black uppercase tracking-widest mt-2 drop-shadow-md">Goal: 3000 ml</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Mobile Logout Button -->
-        <div class="block lg:hidden pt-4 pb-8">
-            <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-cyan-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                Log Out
+            <!-- Progress Bar -->
+            <div class="w-full glass-card p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between text-xs font-extrabold uppercase">
+                    <span id="percentLabel" class="text-blue-400">0% Progress</span>
+                    <span id="remainingLabel" class="text-zinc-400">3000 ml Left</span>
+                </div>
+                <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
+                    <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-full w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <!-- DRINK BUTTON -->
+            <button id="drinkBtn" onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
+                + DRINK (<span id="glassSizeDisplay">250 ml</span>)
             </button>
         </div>
+
+        <!-- SECTION 2: HISTORY MATRIX -->
+        <div id="viewHistory" class="hidden space-y-6">
+            
+            <div class="flex bg-[#121520] p-1.5 rounded-2xl border border-white/5 gap-1 text-center">
+                <button onclick="setHistoryFilter('day')" id="filterDay" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Day</button>
+                <button onclick="setHistoryFilter('week')" id="filterWeek" class="flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Week</button>
+                <button onclick="setHistoryFilter('month')" id="filterMonth" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Month</button>
+                <button onclick="setHistoryFilter('year')" id="filterYear" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Year</button>
+            </div>
+
+            <div class="glass-card p-6 rounded-3xl space-y-6">
+                
+                <div class="flex justify-between items-center text-zinc-400 text-xs font-black uppercase tracking-widest border-b border-white/5 pb-3">
+                    <span id="historyRangeTitle" class="text-white font-extrabold text-sm">This Week</span>
+                    <span>Unit (L)</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
+                    <div>
+                        <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Average</p>
+                        <h3 id="historyAvgStat" class="text-2xl font-black text-white mt-1">0.00 L</h3>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold">Total</p>
+                        <h3 id="historyTotalStat" class="text-2xl font-black text-blue-400 mt-1">0.00 L</h3>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-zinc-400">Activity Breakdown</h4>
+                    <div id="historyBarsContainer" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        <p class="text-xs text-zinc-500 text-center py-6">No records found for this period.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </main>
 
     <script>
-        let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-13";
+        let currentGoal = 3000;
+        let currentGlass = 250;
+        let hydrationHistoryLogs = {};
+        
+        const LAUNCH_DATE = "2026-09-14";
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(LAUNCH_DATE);
@@ -154,21 +209,37 @@
             }
         }
 
+        function switchMainTab(tab) {
+            if (tab === 'today') {
+                document.getElementById('viewToday').classList.remove('hidden');
+                document.getElementById('viewHistory').classList.add('hidden');
+                document.getElementById('tabTodayBtn').className = "py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20";
+                document.getElementById('tabHistoryBtn').className = "py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            } else {
+                document.getElementById('viewToday').classList.add('hidden');
+                document.getElementById('viewHistory').classList.remove('hidden');
+                document.getElementById('tabHistoryBtn').className = "py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20";
+                document.getElementById('tabTodayBtn').className = "py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                setHistoryFilter('week');
+            }
+        }
+
+        function setHistoryFilter(filter) {
+            ['day', 'week', 'month', 'year'].forEach(f => {
+                document.getElementById(`filter${f.charAt(0).toUpperCase() + f.slice(1)}`).className = "flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            });
+            document.getElementById(`filter${filter.charAt(0).toUpperCase() + filter.slice(1)}`).className = "flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            
+            const titles = { day: 'Today', week: 'This Week', month: 'This Month', year: 'This Year' };
+            document.getElementById('historyRangeTitle').innerText = titles[filter];
+            calculateHistoryStats(filter);
+        }
+
         // 🟢 100% CLOUD-ONLY FETCH FUNCTION
-        async function fetchHygieneData(dateStr = "") {
-            const todayStr = new Date().toISOString().split('T')[0];
-            if (!dateStr) dateStr = todayStr;
-
-            currentSelectedDate = dateStr;
-            const dateInput = document.getElementById('targetDateInput');
-            if (!dateInput.value) dateInput.value = dateStr;
-
-            document.getElementById('serverDateDisplay').innerText = `Server Date: ${dateStr}`;
-            document.getElementById('activeDateLabel').innerText = dateInput.value;
-
+        async function fetchHydrationData() {
             try {
-                let url = '/api/hygiene?t=' + new Date().getTime() + `&date=${dateStr}`;
-                const res = await fetch(url, { cache: 'no-store' });
+                const ts = new Date().getTime();
+                const res = await fetch('/api/hydration?t=' + ts, { cache: 'no-store' });
                 
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
@@ -178,9 +249,20 @@
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
-                        document.getElementById('hygieneStreakLabel').innerText = `${data.hygieneStreak || 0} Days`;
-                        updateStatusBanner(data.allDone ? 'DONE' : 'UNLOCKED', dateInput.value);
-                        renderTasks(data.tasks || [], dateInput.value);
+                        currentGoal = data.goal;
+                        currentGlass = data.glassSize;
+                        hydrationHistoryLogs = data.history || {};
+
+                        document.getElementById('consumedLabel').innerText = `${data.consumed} ml`;
+                        document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
+                        document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
+                        document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
+                        document.getElementById('progressBarFill').style.width = `${data.percent}%`;
+                        
+                        document.getElementById('liquidFill').style.height = `${data.percent}%`;
+
+                        document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
+                        document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
                     } else {
                         throw new Error(data.error || "Failed to fetch from Cloud");
                     }
@@ -189,115 +271,76 @@
                 }
             } catch (err) {
                 console.error("Cloud Connection Error:", err);
-                document.getElementById('hygieneStreakLabel').innerText = "0 Days";
-                updateStatusBanner('ERROR', dateInput.value);
-                
-                const errorHTML = `
-                    <div class="col-span-full glass-card p-12 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                        <span class="text-4xl mb-4 block">⚠️</span>
-                        <p class="text-red-400 text-sm font-black uppercase tracking-widest">Cloud Connection Failed</p>
-                        <p class="text-slate-400 text-xs mt-2">Cannot reach MongoDB. Please check if your backend server is running.</p>
-                    </div>`;
-                    
-                document.getElementById('dailyTasksContainer').innerHTML = errorHTML;
-                document.getElementById('sundayTasksContainer').innerHTML = errorHTML;
+                document.getElementById('consumedLabel').innerText = `0 ml`;
+                document.getElementById('goalSubLabel').innerText = `Cloud Error`;
+                document.getElementById('percentLabel').innerText = `0% Progress`;
+                document.getElementById('remainingLabel').innerText = `Offline`;
+                document.getElementById('progressBarFill').style.width = `0%`;
+                document.getElementById('liquidFill').style.height = `0%`;
+                document.getElementById('glassSizeDisplay').innerText = `--- ml`;
+                document.getElementById('hydrationStreakText').innerText = `0 Days`;
             }
         }
 
-        function updateStatusBanner(status, targetDate) {
-            const badge = document.getElementById('hygieneStatusBadge');
-            if (!badge) return;
-            
-            if (status === 'ERROR') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
-                badge.innerText = "❌ SERVER OFFLINE";
-            } else if (targetDate < LAUNCH_DATE) {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
-                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode";
-            } else if (status === 'DONE') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "⚡ ALL TASKS CONQUERED";
-            } else {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 whitespace-nowrap";
-                badge.innerText = "🔥 ROUTINE IN PROGRESS";
-            }
-        }
-
-        function renderTasks(tasks, viewingDate) {
-            const dailyContainer = document.getElementById('dailyTasksContainer');
-            const sundayContainer = document.getElementById('sundayTasksContainer');
-
-            const dailyTasks = tasks.filter(t => t.frequency === 'daily');
-            const sundayTasks = tasks.filter(t => t.frequency === 'sunday');
-
-            dailyContainer.innerHTML = dailyTasks.length === 0 ? `<p class="text-xs text-zinc-500 col-span-full">No daily tasks deployed in the cloud.</p>` : dailyTasks.map(t => taskCardHTML(t, false, viewingDate)).join('');
-            sundayContainer.innerHTML = sundayTasks.length === 0 ? `<p class="text-xs text-zinc-500 col-span-full">No Sunday tasks deployed in the cloud.</p>` : sundayTasks.map(t => taskCardHTML(t, true, viewingDate)).join('');
-        }
-
-        function taskCardHTML(t, isSunday = false, viewingDate) {
-            const isNotStarted = viewingDate < LAUNCH_DATE;
-            
-            return `
-                <div class="glass-card p-5 rounded-2xl flex items-center justify-between border ${isSunday ? 'border-amber-500/20 bg-amber-500/5' : 'border-cyan-500/20 bg-cyan-500/5'} gap-3">
-                    <div class="min-w-0">
-                        <h4 class="font-extrabold text-white text-base tracking-wide truncate">${t.name}</h4>
-                        <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-bold truncate block">${(t.frequency || 'daily').toUpperCase()} ROUTINE</span>
-                    </div>
-                    <button ${isNotStarted ? 'disabled' : ''} onclick="toggleTask('${t.id}', ${!t.completed})" class="px-4 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer shrink-0 ${isNotStarted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (t.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-cyan-500/10 hover:text-cyan-400')}">
-                        ${t.completed ? '✓ Complete' : '○ Pending'}
-                    </button>
-                </div>
-            `;
-        }
-
-        // 🟢 100% CLOUD-ONLY TOGGLE FUNCTION
-        async function toggleTask(id, completed) {
-            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+        // 🟢 100% CLOUD-ONLY DRINK FUNCTION
+        async function addDrink() {
             try {
-                const res = await fetch(`/api/hygiene/${id}/toggle`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ completed, date: targetDate })
-                });
-                
+                const res = await fetch('/api/hydration/drink', { method: 'POST' });
                 if (!res.ok) {
+                    if (res.status === 403) {
+                         const errData = await res.json();
+                         alert(errData.error || "System Locked.");
+                         return;
+                    }
                     throw new Error("Cloud update failed");
                 }
-                
-                fetchHygieneData(targetDate);
+                const data = await res.json();
+                if (data.success) {
+                    fetchHydrationData();
+                } else if (data.error) {
+                    alert("❌ " + data.error);
+                }
             } catch (err) {
                 console.error(err);
-                alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
+                alert("❌ Connection Error: Could not log drink to MongoDB Cloud.");
             }
         }
 
-        async function triggerSundayTelegram() {
-            try {
-                alert("✨ Sunday hygiene checklist functionality is handled by background server process!");
-            } catch (err) {
-                alert("Action not available.");
+        function calculateHistoryStats(filter) {
+            const container = document.getElementById('historyBarsContainer');
+            const dates = Object.keys(hydrationHistoryLogs).sort().reverse();
+
+            if (dates.length === 0) {
+                document.getElementById('historyAvgStat').innerText = `0.00 L`;
+                document.getElementById('historyTotalStat').innerText = `0.00 L`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No historical records available.</p>`;
+                return;
             }
-        }
 
-        function shiftDate(days) {
-            const dateInput = document.getElementById('targetDateInput');
-            let currentDate = new Date(dateInput.value || currentSelectedDate);
-            currentDate.setDate(currentDate.getDate() + days);
-            const newDateStr = currentDate.toISOString().split('T')[0];
-            dateInput.value = newDateStr;
-            fetchHygieneData(newDateStr);
-        }
+            let totalMl = 0;
+            dates.forEach(d => totalMl += hydrationHistoryLogs[d]);
+            let avgMl = Math.round(totalMl / dates.length);
 
-        function onDateChange() {
-            const chosenDate = document.getElementById('targetDateInput').value;
-            if (chosenDate) fetchHygieneData(chosenDate);
-        }
+            document.getElementById('historyAvgStat').innerText = `${(avgMl / 1000).toFixed(2)} L`;
+            document.getElementById('historyTotalStat').innerText = `${(totalMl / 1000).toFixed(2)} L`;
 
-        async function logoutUser() {
-            try {
-                await fetch('/api/auth/logout', { method: 'POST' });
-            } catch (e) {}
-            window.location.href = 'index.html';
+            container.innerHTML = dates.map(date => {
+                let ml = hydrationHistoryLogs[date];
+                let liters = (ml / 1000).toFixed(2);
+                let achieved = ml >= currentGoal;
+                return `
+                    <div class="bg-[#0c0e15] border border-white/5 p-3 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">${achieved ? '✅' : '💧'}</span>
+                            <span class="text-xs font-extrabold text-white">${date}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-black text-blue-400">${liters} L</span>
+                            <span class="text-[10px] text-zinc-500 block">Goal: ${(currentGoal/1000).toFixed(1)}L</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function verifyGlobalSystemLock() {
@@ -335,15 +378,34 @@
                         document.body.prepend(adminBanner);
                     }
                 }
+
+                // Check Individual Lock for Hydration
+                if (data.hydrationLocked) {
+                    const drinkBtn = document.getElementById('drinkBtn');
+                    if(drinkBtn) {
+                         drinkBtn.disabled = true;
+                         drinkBtn.className = "w-full py-5 bg-zinc-900 border border-zinc-800 text-zinc-500 font-black rounded-2xl text-base uppercase tracking-widest transition cursor-not-allowed opacity-50";
+                         drinkBtn.innerHTML = "🔒 MATRIX LOCKED";
+                    }
+                }
+
             } catch (err) {
                 console.error("Lock verification failed", err);
             }
         }
 
+        // Added logout function for the new header button
+        async function logoutUser() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+            } catch(e) {}
+            window.location.href = 'index.html';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             checkPreLaunchLock();
-            fetchHygieneData();
+            fetchHydrationData();
         });
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();

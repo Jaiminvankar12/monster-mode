@@ -185,7 +185,7 @@
 
     <script>
         let currentSelectedDate = "";
-        const MONSTER_LAUNCH_DATE = "2026-09-13";
+        const MONSTER_LAUNCH_DATE = "2026-09-14";
 
         // 🤖 PREMIUM REAL AI COACH BOT LOGIC (Connected to Real Generative AI Backend API Endpoint)
         function quickAskAI(type) {
@@ -355,24 +355,26 @@
 
         function updateStatusBanner(status, allDone, targetDate) {
             const badge = document.getElementById('workoutStatusBadge');
+            const todayStr = new Date().toISOString().split('T')[0];
+
             if (status === 'ERROR') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
                 badge.innerText = "❌ SERVER OFFLINE";
             } else if (targetDate < MONSTER_LAUNCH_DATE) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
                 badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
-            } else if (status === 'LOCKED') {
+            } else if (status === 'LOCKED' || targetDate < todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
-            } else if (status === 'FUTURE') {
+            } else if (status === 'FUTURE' || targetDate > todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
                 badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
             } else if (allDone) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "⚡ ALL WORKOUTS CONQUERED";
             } else {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
-                badge.innerText = "🔥 BATTLE IN PROGRESS";
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
+                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
             }
         }
 
@@ -383,9 +385,12 @@
                 return;
             }
 
-            // 🔒 PROBLEM 2 FIX: Strict lockdown enforcement where BOTH future dates AND past dates/active dates are completely locked when battle is in progress or when date status requires restriction.
+            // 🔒 EXACT DATE LOCKING FIX (Matching Habit Tracker Rules):
+            // - Future dates -> Locked & Not Editable
+            // - Past dates -> Locked & Not Editable (Immutable)
+            // - Active date (Today) -> Unlocked & Editable
             const todayStr = new Date().toISOString().split('T')[0];
-            const isBattleInProgressOrRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE');
+            const isRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE');
 
             container.innerHTML = workouts.map(w => `
                 <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group">
@@ -398,7 +403,7 @@
                         <h3 class="text-xl font-extrabold text-white tracking-wide group-hover:text-red-400 transition truncate">${w.name}</h3>
                     </div>
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
-                        <button ${isBattleInProgressOrRestricted ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isBattleInProgressOrRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
+                        <button ${isRestricted ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
                             ${w.completed ? '✓ Done' : '○ Pending'}
                         </button>
                     </div>
