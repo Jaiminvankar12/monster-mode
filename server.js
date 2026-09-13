@@ -755,12 +755,17 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
         `;
 
         let reply = "I have analyzed all operational parameters, sir.";
-        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+        
+        // 🟢 FIX: Supporting both GEMINI_API_KEY and Gemini_API_KEY
+        const activeApiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY || "AQ.Ab8RN6IoB331bfmhIN1oiBhB86g5FtO7U9ffKe1nhBGcLx7mxQ";
+
+        if (activeApiKey && activeApiKey !== "YOUR_GEMINI_API_KEY") {
             let aiGenerated = false;
+            const dynamicGenAI = new GoogleGenerativeAI(activeApiKey);
             
             // Attempt 1: Try with gemini-pro
             try {
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const model = dynamicGenAI.getGenerativeModel({ model: "gemini-pro" });
                 const result = await model.generateContent(systemContext);
                 const response = await result.response;
                 reply = response.text().trim();
@@ -772,7 +777,7 @@ app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
             // Attempt 2: If first fails, try with gemini-1.5-flash
             if (!aiGenerated) {
                 try {
-                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const modelFlash = dynamicGenAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                     const resFlash = await modelFlash.generateContent(systemContext);
                     reply = resFlash.response.text().trim();
                     aiGenerated = true;
