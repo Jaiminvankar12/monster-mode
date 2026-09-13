@@ -136,7 +136,7 @@ initDB();
 
 app.set('trust proxy', 1);
 
-const MONSTER_LAUNCH_DATE = "2026-09-14";
+const MONSTER_LAUNCH_DATE = "2026-09-13";
 const MASTER_USER_ID = "admin_master_user";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
