@@ -651,6 +651,124 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     await gs.save();
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
+// 🤖 ALL-KNOWING JARVIS UNIVERSAL DATA ASSISTANT API (SECURE & COMPREHENSIVE)
+app.post('/api/jarvis/ask', requireAuth, async (req, res) => {
+    try {
+        const { question } = req.body;
+        if (!question) return res.status(400).json({ error: "Question is required." });
+
+        let userId = MASTER_USER_ID;
+        let today = getServerToday();
+
+        // 1. Fetch system operational data (Strictly excluding Passwords, Hashes & Master Keys)
+        let lockStatus = await getSystemLockStatus();
+        let xpInfo = await getUserXP(userId);
+        let ud = await UserData.findOne({ userId }).select('-__v'); // Exclude mongoose internal fields if any
+        let syncResult = await runServerSyncEngine(userId, today);
+        let hydData = await getHydrationData(userId);
+        let consumedHydration = hydData.logs[today] || 0;
+        let sanctuary = await getSanctuaryData(userId);
+        let nuclearState = await getNuclearState(userId);
+        let examData = await getExamModeData(userId);
+
+        // Fetch tracker documents (excluding internal database IDs and sensitive metadata)
+        let habits = await Habit.find({ userId }).select('name category -_id');
+        let habitLogs = await HabitLog.find({ userId, date: today }).select('habitId completed -_id');
+        let workouts = await Workout.find({ userId }).select('name sets value unit -_id');
+        let workoutLogs = await WorkoutLog.find({ userId, date: today }).select('workoutId completed -_id');
+        let studyCategories = await StudyCategory.find({ userId }).select('name dailyTargetMinutes -_id');
+        let studySessions = await StudySession.find({ userId, date: today }).select('categoryId topic durationMinutes -_id');
+        let hygieneTasks = await HygieneTask.find({ userId }).select('name frequency -_id');
+        let hygieneLogs = await HygieneLog.find({ userId, date: today }).select('taskId completed -_id');
+        let targets = await Target.find({ userId }).select('name completed date -_id');
+        let notesReminders = await NoteReminder.find({ userId }).select('title description isReminder date time completed -_id');
+
+        // Summarizing Habits status safely
+        let habitSummary = habits.map(h => {
+            return `- ${h.name} [${h.category}]`;
+        }).join('\n        ');
+
+        // Summarizing Workouts status safely
+        let workoutSummary = workouts.map(w => {
+            return `- ${w.name} (${w.sets} sets, ${w.value} ${w.unit})`;
+        }).join('\n        ');
+
+        // Summarizing Study status safely
+        let studySummary = studyCategories.map(c => {
+            let sessions = studySessions.filter(s => s.categoryId === c.id);
+            let mins = sessions.reduce((acc, s) => acc + s.durationMinutes, 0);
+            return `- ${c.name} (Target: ${c.dailyTargetMinutes}m): Studied ${mins}m today`;
+        }).join('\n        ');
+
+        // Summarizing Hygiene status safely
+        let hygieneSummary = hygieneTasks.map(t => {
+            return `- ${t.name} (${t.frequency})`;
+        }).join('\n        ');
+
+        // Summarizing Targets & Reminders safely
+        let pendingTargets = targets.filter(t => !t.completed).length;
+        let pendingReminders = notesReminders.filter(n => n.isReminder && !n.completed).length;
+
+        // 2. Build 100% Comprehensive System State Context (Zero Passwords / Zero Master Keys)
+        const systemContext = `
+        You are 'JARVIS', an elite, highly intelligent AI assistant embedded in the 'Monster Mode' discipline and productivity tracking system.
+        Here is the complete live operational database state for the user today (${today}):
+
+        === 🛡️ SYSTEM & SECURITY STATUS ===
+        - Global System Locked: ${lockStatus.locked ? 'YES (LOCKED)' : 'NO (UNLOCKED)'}
+        - Module Locks: Habits(${lockStatus.habitsLocked}), Workouts(${lockStatus.workoutsLocked}), Study(${lockStatus.studyLocked}), Hydration(${lockStatus.hydrationLocked}), Hygiene(${lockStatus.hygieneLocked})
+        - Sanctuary Mode Active: ${sanctuary.enabled ? 'YES (Reason: ' + sanctuary.reason + ')' : 'NO'}
+        - Hardcore Lockdown / Penalties: ${nuclearState.hardcoreLocked ? 'ACTIVE' : 'NONE'} (Strikes: ${nuclearState.strikes}, Discipline Debt: ${nuclearState.disciplineDebt})
+
+        === 🔥 USER PROGRESS & PROFILE ===
+        - User Level & XP: Level ${xpInfo.level} (${xpInfo.xp} XP)
+        - Lifelines Remaining (this month): ${ud ? ud.lifelinesRemaining : 5} / 5 (Reset month: ${ud ? ud.lastLifelineMonth : 'N/A'})
+        - Exam Mode Enabled: ${examData.enabled ? 'YES (Target: ' + examData.targetMinutes + 'm)' : 'NO'}
+
+        === 🏋️ WORKOUT STATUS (${syncResult.allWorkoutsDone ? 'ALL DONE' : 'PENDING'}) ===
+        ${workoutSummary || 'No workouts defined.'}
+
+        === 📚 STUDY STATUS (${syncResult.studyDone ? 'DONE' : 'PENDING'}) ===
+        - Total Studied: ${syncResult.totalStudiedMinutes} / ${syncResult.totalTargetMinutes} minutes
+        - Categories & Sessions:
+        ${studySummary || 'No study categories defined.'}
+
+        === 💧 HYDRATION STATUS (${syncResult.hydrationDone ? 'DONE' : 'PENDING'}) ===
+        - Consumed: ${consumedHydration} ml / ${hydData.goal} ml (Goal)
+
+        === 🌱 HABITS STATUS ===
+        ${habitSummary || 'No habits defined.'}
+
+        === 🧼 HYGIENE STATUS ===
+        ${hygieneSummary || 'No hygiene tasks defined.'}
+
+        === 📌 TARGETS & REMINDERS ===
+        - Pending Milestones/Targets: ${pendingTargets}
+        - Pending Reminders/Notes: ${pendingReminders}
+
+        User's Question: "${question}"
+
+        Instructions:
+        1. Answer the user's question accurately using the exact operational data provided above.
+        2. Keep the tone sharp, professional, authoritative, and intelligent (like Jarvis from Iron Man).
+        3. Use Markdown formatting (**bold text**, bullet points) for clarity. Be direct and concise. Never mention passwords or security credentials.
+        `;
+
+        let reply = "I have analyzed all operational parameters, sir.";
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(systemContext);
+            reply = result.response.text().trim();
+        } else {
+            reply = `**JARVIS STATUS REPORT:**\n• Level: ${xpInfo.level}\n• Lifelines: ${ud ? ud.lifelinesRemaining : 5}/5\n• System Lock: ${lockStatus.locked ? 'LOCKED' : 'UNLOCKED'}`;
+        }
+
+        res.json({ success: true, reply });
+    } catch (err) {
+        console.error("Jarvis Query Error:", err);
+        res.status(500).json({ error: "Jarvis encountered a neural network anomaly while retrieving system records." });
+    }
+});
 
 // 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
