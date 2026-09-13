@@ -79,6 +79,8 @@
         </div>
         <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
             <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
+            <!-- Added optional Logout button here seamlessly for consistency -->
+            <button onclick="logoutUser()" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap ml-2">Log Out</button>
         </nav>
     </header>
 
@@ -253,8 +255,35 @@
 
                     document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
                     document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
+                    return; // Added return to skip fallback if successful
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.log("API fetch failed, checking LocalStorage fallback...");
+            }
+            
+            // --- LocalStorage Fallback Added Here ---
+            const todayStr = new Date().toISOString().split('T')[0];
+            currentGoal = parseInt(localStorage.getItem('monster_hydration_goal')) || 3000;
+            currentGlass = parseInt(localStorage.getItem('monster_hydration_glass')) || 250;
+            
+            try {
+                hydrationHistoryLogs = JSON.parse(localStorage.getItem('monster_hydration_logs') || '{}');
+            } catch(e) {
+                hydrationHistoryLogs = {};
+            }
+
+            let consumed = hydrationHistoryLogs[todayStr] || 0;
+            let percent = Math.min(Math.round((consumed / currentGoal) * 100), 100);
+
+            document.getElementById('consumedLabel').innerText = `${consumed} ml`;
+            document.getElementById('goalSubLabel').innerText = `Goal: ${currentGoal} ml`;
+            document.getElementById('percentLabel').innerText = `${percent}% Progress`;
+            document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - consumed)} ml Left`;
+            document.getElementById('progressBarFill').style.width = `${percent}%`;
+            document.getElementById('liquidFill').style.height = `${percent}%`;
+            document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
+            document.getElementById('hydrationStreakText').innerText = `0 Days`;
+            // -----------------------------------------
         }
 
         async function addDrink() {
@@ -263,10 +292,34 @@
                 const data = await res.json();
                 if (data.success) {
                     fetchHydrationData();
+                    return; // Added return to skip fallback
                 } else if (data.error) {
                     alert("❌ " + data.error);
+                    return; // Added return to skip fallback
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.log("Offline drink log...");
+            }
+            
+            // --- LocalStorage Fallback Added Here ---
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (todayStr < LAUNCH_DATE) {
+                alert("⏳ Pre-Launch Phase! Tracking officially begins on 14-09-2026.");
+                return;
+            }
+            
+            try {
+                hydrationHistoryLogs = JSON.parse(localStorage.getItem('monster_hydration_logs') || '{}');
+            } catch(e) {
+                hydrationHistoryLogs = {};
+            }
+            
+            let current = hydrationHistoryLogs[todayStr] || 0;
+            hydrationHistoryLogs[todayStr] = current + currentGlass;
+            localStorage.setItem('monster_hydration_logs', JSON.stringify(hydrationHistoryLogs));
+            
+            fetchHydrationData();
+            // -----------------------------------------
         }
 
         function calculateHistoryStats(filter) {
@@ -344,6 +397,14 @@
             } catch (err) {
                 console.error("Lock verification failed", err);
             }
+        }
+
+        // Added logout function for the new header button
+        async function logoutUser() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+            } catch(e) {}
+            window.location.href = 'index.html';
         }
 
         window.addEventListener('DOMContentLoaded', () => {
