@@ -1,3 +1,7 @@
+let systemSleepData = {
+    failedAttempts: 0,
+    lockedUntil: null
+};
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
@@ -151,6 +155,72 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 const processedRemindersLock = new Set();
 let isCronRunning = false;
+
+// 🛡️ SYSTEM SLEEP GUARD MIDAS/MIDDLEWARE (Blocks even Admin if 3 strikes reached)
+const checkSystemSleep = (req, res, next) => {
+    if (systemSleepData.lockedUntil && Date.now() < systemSleepData.lockedUntil) {
+        const remainingMins = Math.ceil((systemSleepData.lockedUntil - Date.now()) / 60000);
+        return res.status(423).json({
+            success: false,
+            error: `💤 SYSTEM IS ASLEEP: Maximum security threshold breached. Locked for another ${remainingMins} minutes. (Even Admin is restricted).`
+        });
+    }
+    next();
+};
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Apply system sleep check to all API routes
+app.use('/api/', checkSystemSleep);
+
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'monster_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 24 }
+}));
+
+app.use(async (req, res, next) => {
+    const trackerPages = ['/dashboard', '/dashboard.html', '/tracker', '/tracker.html', '/workout', '/workout.html', '/study', '/study.html', '/hygiene', '/hygiene.html', '/hydration', '/hydration.html'];
+    const isTrackerPage = trackerPages.some(page => req.path === page);
+
+    if (isTrackerPage) {
+        if (!req.session || !req.session.userId) {
+            return res.redirect('/index.html');
+        }
+    }
+    next();
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+function requireAuth(req, res, next) {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: "🔒 Unauthorized access. Please log in first." });
+    }
+    next();
+}
+
+async function trackerApiGuard(req, res, next) {
+    next();
+}
+
+// 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
+async function moduleApiGuard(moduleName) {
+    return async (req, res, next) => {
+        let lockStatus = await getSystemLockStatus();
+        if (lockStatus.locked) {
+            return res.status(403).json({ error: "🛡️ HARDCORE LOCK: System is totally locked." });
+        }
+        if (moduleName === 'habits' && lockStatus.habitsLocked) return res.status(403).json({ error: "🔒 Habit Tracker is locked by Admin." });
+        if (moduleName === 'workouts' && lockStatus.workoutsLocked) return res.status(403).json({ error: "🔒 Workout Tracker is locked by Admin." });
+        if (moduleName === 'study' && lockStatus.studyLocked) return res.status(403).json({ error: "🔒 Study Tracker is locked by Admin." });
+        if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
+        if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
+        next();
+    };
+}
 
 async function sendTelegramNotification(message) {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
@@ -322,57 +392,6 @@ async function getNuclearState(userId = MASTER_USER_ID) {
         await state.save();
     }
     return state;
-}
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'monster_secret_key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 1000 * 60 * 60 * 24 }
-}));
-
-app.use(async (req, res, next) => {
-    const trackerPages = ['/dashboard', '/dashboard.html', '/tracker', '/tracker.html', '/workout', '/workout.html', '/study', '/study.html', '/hygiene', '/hygiene.html', '/hydration', '/hydration.html'];
-    const isTrackerPage = trackerPages.some(page => req.path === page);
-
-    if (isTrackerPage) {
-        if (!req.session || !req.session.userId) {
-            return res.redirect('/index.html');
-        }
-    }
-    next();
-});
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-function requireAuth(req, res, next) {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: "🔒 Unauthorized access. Please log in first." });
-    }
-    next();
-}
-
-async function trackerApiGuard(req, res, next) {
-    next();
-}
-
-// 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
-async function moduleApiGuard(moduleName) {
-    return async (req, res, next) => {
-        let lockStatus = await getSystemLockStatus();
-        if (lockStatus.locked) {
-            return res.status(403).json({ error: "🛡️ HARDCORE LOCK: System is totally locked." });
-        }
-        if (moduleName === 'habits' && lockStatus.habitsLocked) return res.status(403).json({ error: "🔒 Habit Tracker is locked by Admin." });
-        if (moduleName === 'workouts' && lockStatus.workoutsLocked) return res.status(403).json({ error: "🔒 Workout Tracker is locked by Admin." });
-        if (moduleName === 'study' && lockStatus.studyLocked) return res.status(403).json({ error: "🔒 Study Tracker is locked by Admin." });
-        if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
-        if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
-        next();
-    };
 }
 
 console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.");
@@ -638,14 +657,29 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
-// 🟢 TRACKER PORTAL LOGIN (With Telegram OTP Step 1)
+// 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
 
     if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
-        return res.status(401).json({ error: "Wrong Password! Invalid email or password." });
+        systemSleepData.failedAttempts += 1;
+        const attemptsLeft = 3 - systemSleepData.failedAttempts;
+
+        if (systemSleepData.failedAttempts >= 3) {
+            systemSleepData.lockedUntil = Date.now() + 30 * 60 * 1000; // 30 minutes deep sleep
+            return res.status(423).json({
+                success: false,
+                error: "🚨 3 FAILED ATTEMPTS DETECTED. SYSTEM ENTERING 30-MINUTE DEEP SLEEP LOCKDOWN. ADMIN ACCESS REVOKED TEMPORARILY."
+            });
+        }
+
+        return res.status(401).json({ error: `Wrong Password! Invalid email or password. (${attemptsLeft} attempts remaining before 30-min system sleep.)` });
     }
+
+    // Success -> Reset failed attempts
+    systemSleepData.failedAttempts = 0;
+    systemSleepData.lockedUntil = null;
 
     const now = Date.now();
     if (req.session.pendingAuth && req.session.pendingAuth.email === user.email && req.session.pendingAuth.sentAt && (now - req.session.pendingAuth.sentAt < 10000)) {
@@ -664,8 +698,23 @@ app.post('/api/control-panel/login', async (req, res) => {
     let user = await User.findOne({ email, role: 'ADMIN' });
 
     if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
-        return res.status(401).json({ error: "🔒 Access Denied! Invalid Admin credentials." });
+        systemSleepData.failedAttempts += 1;
+        const attemptsLeft = 3 - systemSleepData.failedAttempts;
+
+        if (systemSleepData.failedAttempts >= 3) {
+            systemSleepData.lockedUntil = Date.now() + 30 * 60 * 1000; // 30 minutes deep sleep
+            return res.status(423).json({
+                success: false,
+                error: "🚨 3 FAILED ATTEMPTS DETECTED. SYSTEM ENTERING 30-MINUTE DEEP SLEEP LOCKDOWN. ADMIN ACCESS REVOKED TEMPORARILY."
+            });
+        }
+
+        return res.status(401).json({ error: `🔒 Access Denied! Invalid Admin credentials. (${attemptsLeft} attempts remaining before 30-min system sleep.)` });
     }
+
+    // Success -> Reset failed attempts
+    systemSleepData.failedAttempts = 0;
+    systemSleepData.lockedUntil = null;
 
     const now = Date.now();
     if (req.session.pendingAuth && req.session.pendingAuth.email === user.email && req.session.pendingAuth.sentAt && (now - req.session.pendingAuth.sentAt < 10000)) {
@@ -1427,6 +1476,25 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
         await log.save();
     }
     res.json({ success: true, log });
+});
+
+// TELEGRAM ACHIEVEMENT NOTIFICATION ROUTE
+app.post('/api/send-telegram', async (req, res) => {
+    try {
+        const { message } = req.body;
+        const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+        const CHAT_ID = process.env.TELEGRAM_CHAT_ID || 'YOUR_CHAT_ID_HERE';
+        
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
+        });
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Telegram Notification Error:", e);
+        res.json({ success: false });
+    }
 });
 
 // 🟢 BADGES API

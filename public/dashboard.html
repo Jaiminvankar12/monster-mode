@@ -95,6 +95,11 @@
         .habits-carousel-track:hover {
             animation-play-state: paused;
         }
+
+        /* Scrollbar customization for Modal */
+        .scrollbar-thin::-webkit-scrollbar { width: 5px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -141,20 +146,25 @@
         🎧
     </button>
 
-    <!-- Pre-Launch Banner -->
+    <!-- Pre-Launch Banner (HIDDEN BY DEFAULT NOW) -->
     <div id="prelaunchBanner" class="hidden fixed inset-0 bg-[#07090f]/95 z-[9999] flex flex-col items-center justify-center p-6 text-center">
-        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full dynamic-glow space-y-4">
-            <span class="text-4xl">🔒</span>
-            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
-            <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Trackers and editing are currently in read-only planning preview.
-            </p>
-            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
-                Status: Immutable / Not Editable Yet
+        <!-- Neutralized -->
+    </div>
+
+    <!-- 🏆 ALL BADGES MODAL (INFINITE SCROLL) -->
+    <div id="allBadgesModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex-col items-center pt-10 sm:pt-20 p-4 transition-opacity">
+        <div class="w-full max-w-5xl bg-[#07090f] border border-white/20 rounded-2xl overflow-hidden flex flex-col h-[85vh]">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                <div>
+                    <h2 class="text-xl font-black uppercase text-amber-400 flex items-center gap-2"><span>🏆</span> The Road to Apex God</h2>
+                    <p class="text-xs text-slate-400 font-medium">Unique Badges Earned Every 5 Levels</p>
+                </div>
+                <button onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
             </div>
-            <button onclick="document.getElementById('prelaunchBanner').classList.add('hidden')" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
-                Enter Read-Only View
-            </button>
+            <!-- Scrollable Container -->
+            <div id="allBadgesScrollContainer" class="p-6 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 scrollbar-thin">
+                <!-- Badges will be injected here chunk by chunk -->
+            </div>
         </div>
     </div>
 
@@ -197,7 +207,6 @@
                 </div>
                 <p class="text-xs text-slate-400 mt-1">Operational matrix active. Real-time analytics and performance overview.</p>
                 
-                <!-- 📅 DATE & 🌦️ WEATHER MATRIX ADDED HERE -->
                 <div class="flex flex-wrap items-center gap-4 mt-2">
                     <div id="currentDateDayDisplay" class="text-xs font-extrabold text-amber-400 flex items-center gap-2">
                         <span>📅</span> <span>Loading Date & Day...</span>
@@ -207,7 +216,6 @@
                         <span class="animate-pulse">🛰️</span> <span id="weatherText">AHM: Scanning...</span>
                     </div>
                 </div>
-
             </div>
             <div class="flex flex-col sm:items-end gap-3">
                 <div id="userEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 whitespace-nowrap">
@@ -262,7 +270,7 @@
                     <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Master Goals Overview</p>
                 </div>
             </div>
-            <div id="dashboardTargetsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2">
+            <div id="dashboardTargetsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                 <p class="text-xs text-slate-500 py-2">Loading targets...</p>
             </div>
         </div>
@@ -288,7 +296,7 @@
             </div>
         </div>
 
-        <!-- 🏆 NEW: GAMIFICATION BADGES & UNLOCKABLES WIDGET -->
+        <!-- 🏆 NEW: GAMIFICATION BADGES (SHOWING ONLY 3 + VIEW ALL) -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -298,8 +306,12 @@
                         <p class="text-[9px] text-slate-400 uppercase tracking-widest">Level up your APEX status through discipline.</p>
                     </div>
                 </div>
+                <button onclick="openAllBadgesModal()" class="text-xs text-amber-500 hover:text-amber-400 font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl transition cursor-pointer">
+                    View All ➔
+                </button>
             </div>
-            <div id="badgesGridContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <!-- Grid displaying only 3 elements -->
+            <div id="badgesGridContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <p class="text-xs text-slate-500 col-span-full">Loading achievements matrix...</p>
             </div>
         </div>
@@ -467,52 +479,33 @@
     <div id="inlineStatusNotification"></div>
     
     <script>
-        // ☢️ NUCLEAR PROTOCOL: Send Heartbeat every 5 minutes to prevent inactivity strikes
-        setInterval(async () => {
-            try {
-                await fetch('/api/user-heartbeat', { method: 'POST' });
-            } catch (e) {}
-        }, 5 * 60 * 1000);
+        // ☢️ NUCLEAR PROTOCOL
+        setInterval(async () => { try { await fetch('/api/user-heartbeat', { method: 'POST' }); } catch (e) {} }, 5 * 60 * 1000);
 
-        // 🌐 NUCLEAR PROTOCOL: Check Specific Internet Block (1 PM - 3 PM)
         async function checkNuclearInternetBlock() {
             try {
                 const res = await fetch('/api/internet-block-status');
                 const data = await res.json();
                 if (data.isInternetBlocked) {
-                    document.body.innerHTML = `
-                        <div class="fixed inset-0 bg-black z-[999999] flex flex-col items-center justify-center p-6 text-center text-white">
-                            <span class="text-6xl animate-bounce mb-4">🌐🚫</span>
-                            <h1 class="text-3xl font-black uppercase text-red-500 tracking-wider">INTERNET BLOCKED (1 PM - 3 PM)</h1>
-                            <p class="text-sm text-slate-300 mt-2 max-w-md">Penalty Active: ${data.lockReason}. All external network traffic is restricted during this core window.</p>
-                        </div>
-                    `;
+                    document.body.innerHTML = `<div class="fixed inset-0 bg-black z-[999999] flex flex-col items-center justify-center p-6 text-center text-white"><span class="text-6xl animate-bounce mb-4">🌐🚫</span><h1 class="text-3xl font-black uppercase text-red-500 tracking-wider">INTERNET BLOCKED (1 PM - 3 PM)</h1><p class="text-sm text-slate-300 mt-2 max-w-md">Penalty Active: ${data.lockReason}. All external network traffic is restricted during this core window.</p></div>`;
                 }
             } catch (e) {}
         }
         checkNuclearInternetBlock();
 
-        // 🌙 1. OLED AUTO-SWITCH LOGIC (10 PM to 7 AM)
         async function checkOledAutoSwitch() {
             try {
                 const res = await fetch('/api/oled-status');
                 const data = await res.json();
-                if (data.success && data.isOledTime) {
-                    document.body.style.backgroundColor = "#000000";
-                }
+                if (data.success && data.isOledTime) document.body.style.backgroundColor = "#000000";
             } catch (err) {}
         }
 
-        // 📜 2. DAILY MONSTER LOG SUBMISSION (100% CLOUD)
         async function submitMonsterLog() {
             const content = document.getElementById('monsterLogInput').value.trim();
             if(!content) return;
             try {
-                const res = await fetch('/api/monster-log', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content })
-                });
+                const res = await fetch('/api/monster-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
                 if(!res.ok) throw new Error();
                 const data = await res.json();
                 if(data.success && data.log) {
@@ -537,38 +530,141 @@
                         document.getElementById('aiLogFeedbackText').innerText = data.log.aiFeedback;
                     }
                 }
-            } catch(e) {
-                console.error("Cloud Error: Could not fetch monster log.");
+            } catch(e) {}
+        }
+
+        // 🏆 PROCEDURAL BADGE GENERATOR (EVERY 5 LEVELS)
+        let userApexLevel = 1;
+        let allBadgesData = [];
+        let currentBadgeRenderIndex = 0;
+        const BADGE_CHUNK_SIZE = 40; 
+
+        function getDynamicBadgeName(level) {
+            if (level === 1) return { name: "The Awakening", icon: "🌱" };
+            if (level >= 1000) return { name: "THE APEX GOD", icon: "👑" };
+            
+            const materials = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Obsidian", "Void", "Astral", "Cosmic", "Ascended"];
+            const titles = ["Initiate", "Striker", "Warrior", "Vanguard", "Sentinel", "Assassin", "Gladiator", "Commander", "Warlord", "Conqueror", "Titan", "Phantom", "Entity"];
+            const icons = ["🥉","🥈","🥇","🏅","🎖️","🏆","💎","🧿","🔮","⚡","🔥"];
+            
+            let matIdx = Math.floor(level / 100) % materials.length;
+            let titleIdx = Math.floor(level / 5) % titles.length;
+            let iconIdx = Math.floor(level / 100) % icons.length;
+            
+            return { 
+                name: `${materials[matIdx]} ${titles[titleIdx]}`, 
+                icon: icons[iconIdx] 
+            };
+        }
+
+        function generateUniqueBadges() {
+            allBadgesData = [];
+            // Add level 1
+            allBadgesData.push({ levelRequired: 1, ...getDynamicBadgeName(1), unlocked: 1 <= userApexLevel });
+            
+            // Add badges every 5 levels
+            for (let i = 5; i <= 1000; i += 5) {
+                let badgeInfo = getDynamicBadgeName(i);
+                allBadgesData.push({
+                    levelRequired: i,
+                    name: badgeInfo.name,
+                    icon: badgeInfo.icon,
+                    unlocked: i <= userApexLevel
+                });
             }
         }
 
-        // 🏆 3. LOAD BADGES & UNLOCKABLES
-        async function loadBadges() {
-            try {
-                const res = await fetch('/api/badges');
-                if(!res.ok) throw new Error();
-                const data = await res.json();
-                const container = document.getElementById('badgesGridContainer');
-                if(!container) return;
-                if(data.success && data.badges) {
-                    container.innerHTML = data.badges.map(b => `
-                        <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-white/5 opacity-50'} p-4 rounded-2xl flex flex-col items-center text-center gap-2">
-                            <span class="text-3xl">${b.icon}</span>
-                            <div>
-                                <h4 class="font-extrabold text-xs text-white">${b.name}</h4>
-                                <span class="text-[9px] ${b.unlocked ? 'text-amber-400 font-bold' : 'text-zinc-500'} uppercase">Lvl ${b.levelRequired} Required</span>
-                            </div>
-                            <span class="text-[9px] mt-1 px-2 py-0.5 rounded-md uppercase font-black ${b.unlocked ? 'bg-amber-500/20 text-amber-300' : 'bg-zinc-800 text-zinc-400'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
-                        </div>
-                    `).join('');
-                }
-            } catch(e) {
-                const container = document.getElementById('badgesGridContainer');
-                if(container) {
-                    container.innerHTML = `<p class="text-xs text-red-400 col-span-full">⚠️ Cloud Error: Could not fetch badges.</p>`;
-                }
+        function createBadgeHTML(b) {
+            return `
+                <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-white/5 opacity-50'} p-5 rounded-2xl flex flex-col items-center text-center gap-3 transition hover:scale-105 hover:border-amber-500/60 cursor-default">
+                    <span class="text-4xl filter drop-shadow-lg">${b.icon}</span>
+                    <div class="space-y-1 w-full">
+                        <h4 class="font-extrabold text-sm text-white tracking-wide">${b.name}</h4>
+                        <div class="w-full h-[1px] bg-white/10 my-1"></div>
+                        <span class="text-[9px] ${b.unlocked ? 'text-amber-400' : 'text-zinc-500'} font-bold uppercase tracking-widest block">Lvl ${b.levelRequired} Reqd</span>
+                    </div>
+                    <span class="text-[10px] px-3 py-1 mt-1 rounded-lg uppercase font-black tracking-widest ${b.unlocked ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
+                </div>
+            `;
+        }
+
+        function loadBadges() {
+            generateUniqueBadges();
+            const container = document.getElementById('badgesGridContainer');
+            
+            // Find closest index for top 3
+            let startIndex = allBadgesData.findIndex(b => b.levelRequired >= userApexLevel);
+            if (startIndex === -1 || startIndex > allBadgesData.length - 3) {
+                startIndex = Math.max(0, allBadgesData.length - 3);
+            } else if (startIndex > 0 && allBadgesData[startIndex].levelRequired > userApexLevel) {
+                startIndex -= 1; // Show the one just unlocked
+            }
+            
+            const top3 = allBadgesData.slice(startIndex, startIndex + 3);
+            container.innerHTML = top3.map(b => createBadgeHTML(b)).join('');
+        }
+
+        // 📱 TELEGRAM NOTIFICATION LOGIC
+        async function checkTelegramUnlocks() {
+            let lastNotifiedLevel = parseInt(localStorage.getItem('monster_last_badge_level') || '1');
+            
+            if (userApexLevel > lastNotifiedLevel) {
+                let unlockedBadges = allBadgesData.filter(b => b.levelRequired > lastNotifiedLevel && b.levelRequired <= userApexLevel);
+                
+                unlockedBadges.forEach(async (b) => {
+                    let msg = `🏆 *ACHIEVEMENT UNLOCKED!*\n\n*Level:* ${b.levelRequired}\n*Title:* ${b.name} ${b.icon}\n\nThe Apex journey continues. 🐉`;
+                    try {
+                        await fetch('/api/send-telegram', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: msg })
+                        });
+                    } catch(e) { console.log("Telegram API Call Failed", e); }
+                });
+                
+                localStorage.setItem('monster_last_badge_level', userApexLevel.toString());
             }
         }
+
+        // INFINITE SCROLL MODAL LOGIC
+        let isRenderingChunk = false;
+        function openAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.remove('hidden');
+            document.getElementById('allBadgesModal').classList.add('flex');
+            
+            currentBadgeRenderIndex = 0;
+            document.getElementById('allBadgesScrollContainer').innerHTML = '';
+            renderNextBadgeChunk();
+        }
+
+        function closeAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.add('hidden');
+            document.getElementById('allBadgesModal').classList.remove('flex');
+        }
+
+        function renderNextBadgeChunk() {
+            isRenderingChunk = true;
+            const container = document.getElementById('allBadgesScrollContainer');
+            const end = Math.min(currentBadgeRenderIndex + BADGE_CHUNK_SIZE, allBadgesData.length);
+            
+            let htmlStr = "";
+            for(let i = currentBadgeRenderIndex; i < end; i++) {
+                htmlStr += createBadgeHTML(allBadgesData[i]);
+            }
+            container.insertAdjacentHTML('beforeend', htmlStr);
+            currentBadgeRenderIndex = end;
+            setTimeout(() => isRenderingChunk = false, 100);
+        }
+
+        // Fixed Infinite Scroll Threshold
+        document.getElementById('allBadgesScrollContainer').addEventListener('scroll', function() {
+            // Trigger 300px before bottom
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 300) {
+                if (currentBadgeRenderIndex < allBadgesData.length && !isRenderingChunk) {
+                    renderNextBadgeChunk();
+                }
+            }
+        });
 
         // 🌦️ WEATHER API INTEGRATION
         async function loadWeather() {
@@ -577,15 +673,10 @@
                 const data = await res.json();
                 const weatherText = document.getElementById('weatherText');
                 if (weatherText) {
-                    if(data.success) {
-                        weatherText.innerText = `AHM: ${data.temp}°C | ${data.condition} ☀️`;
-                    } else {
-                        weatherText.innerText = "AHM: 32°C | CLEAR SKY ☀️";
-                    }
+                    if(data.success) weatherText.innerText = `AHM: ${data.temp}°C | ${data.condition} ☀️`;
+                    else weatherText.innerText = "AHM: 32°C | CLEAR SKY ☀️";
                 }
-            } catch (err) {
-                console.error("Weather load failed", err);
-            }
+            } catch (err) {}
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -594,8 +685,7 @@
             try {
                 const osc = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
                 gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
@@ -617,82 +707,46 @@
         }
 
         document.addEventListener('click', function(e) {
-            if (e.target.closest('button') || e.target.tagName.toLowerCase() === 'button') {
-                playCyberClick();
-            }
+            if (e.target.closest('button') || e.target.tagName.toLowerCase() === 'button') playCyberClick();
         });
 
-        // 🎧 Lo-Fi Player Logic
         function toggleLofi() {
             const player = document.getElementById('lofiPlayer');
-            if (player.classList.contains('translate-y-[150%]')) {
-                player.classList.remove('translate-y-[150%]', 'opacity-0');
-            } else {
-                player.classList.add('translate-y-[150%]', 'opacity-0');
-            }
+            if (player.classList.contains('translate-y-[150%]')) player.classList.remove('translate-y-[150%]', 'opacity-0');
+            else player.classList.add('translate-y-[150%]', 'opacity-0');
         }
 
-        // 🕳️ The Void Logic
         function burnTheVoid() {
             const input = document.getElementById('voidInput');
             if(!input.value.trim()) return;
-            
             input.classList.add('burn-anim');
-            setTimeout(() => {
-                input.value = '';
-                input.classList.remove('burn-anim');
-                showStatusMessage("Thoughts incinerated.", "success");
-            }, 1500);
+            setTimeout(() => { input.value = ''; input.classList.remove('burn-anim'); showStatusMessage("Thoughts incinerated.", "success"); }, 1500);
         }
 
-        // ☠️ Lockdown Kill Switch Logic
         let lockdownInterval;
         function initiateLockdown() {
             const mission = document.getElementById('dailyMissionInput').value || "CONQUER YOUR DEMONS";
             document.getElementById('lockdownMissionText').innerText = mission;
-            
             const overlay = document.getElementById('lockdownOverlay');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
+            overlay.classList.remove('hidden'); overlay.classList.add('flex');
             
-            let timeLeft = 60 * 60; // 60 minutes
+            let timeLeft = 60 * 60;
             const timerEl = document.getElementById('lockdownTimer');
-            
             clearInterval(lockdownInterval);
             lockdownInterval = setInterval(() => {
                 let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
                 let s = (timeLeft % 60).toString().padStart(2, '0');
                 timerEl.innerText = `${m}:${s}`;
-                
-                if(timeLeft <= 0) {
-                    clearInterval(lockdownInterval);
-                    timerEl.innerText = "00:00";
-                    playBeepSound();
-                } else {
-                    timeLeft--;
-                }
+                if(timeLeft <= 0) { clearInterval(lockdownInterval); timerEl.innerText = "00:00"; playBeepSound(); } 
+                else { timeLeft--; }
             }, 1000);
         }
 
         function exitLockdown() {
             clearInterval(lockdownInterval);
             const overlay = document.getElementById('lockdownOverlay');
-            overlay.classList.add('hidden');
-            overlay.classList.remove('flex');
+            overlay.classList.add('hidden'); overlay.classList.remove('flex');
             showStatusMessage("Lockdown aborted.", "error");
-        }
-
-        function applyGlobalTheme(theme) {
-            let colorMap = {
-                red: { primary: '#ef4444', glow: 'rgba(239, 68, 68, 0.15)' },
-                blue: { primary: '#3b82f6', glow: 'rgba(59, 130, 246, 0.15)' },
-                emerald: { primary: '#10b981', glow: 'rgba(16, 185, 129, 0.15)' },
-                amber: { primary: '#f59e0b', glow: 'rgba(245, 158, 11, 0.15)' },
-                purple: { primary: '#a855f7', glow: 'rgba(168, 85, 247, 0.15)' }
-            };
-            let cfg = colorMap[theme] || colorMap['red'];
-            document.documentElement.style.setProperty('--theme-primary', cfg.primary);
-            document.documentElement.style.setProperty('--theme-glow', cfg.glow);
         }
 
         const LAUNCH_DATE = "2026-09-14";
@@ -710,13 +764,10 @@
 
             const diffTime = today - launchDateObj;
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
             const dayCounterEl = document.getElementById('monsterDayCounter');
-            const prelaunchBanner = document.getElementById('prelaunchBanner');
             
             if (diffDays < 1) {
                 if (dayCounterEl) dayCounterEl.innerHTML = `⏳ Pre-Launch Phase`;
-                if (prelaunchBanner) prelaunchBanner.classList.remove('hidden');
             } else {
                 if (dayCounterEl) dayCounterEl.innerHTML = `🔥 DAY ${diffDays}`;
             }
@@ -757,7 +808,6 @@
             if(modal) modal.remove();
         }
 
-        // 🟢 100% CLOUD-ONLY DASHBOARD TARGETS FETCH
         async function loadDashboardTargets() {
             try {
                 const res = await fetch('/api/targets?t=' + new Date().getTime());
@@ -765,13 +815,9 @@
                 const data = await res.json();
                 renderDashboardTargets(data.targets || []);
             } catch(e) {
-                console.error(e);
                 const container = document.getElementById('dashboardTargetsList');
                 if (container) {
-                    container.innerHTML = `
-                        <div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                            <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
-                        </div>`;
+                    container.innerHTML = `<div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5"><p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p></div>`;
                 }
             }
         }
@@ -780,7 +826,7 @@
             const container = document.getElementById('dashboardTargetsList');
             if (!container) return;
             if(targets.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">No active targets defined. Head to the control panel to set your vision.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">No active targets defined.</p>`;
                 return;
             }
 
@@ -798,17 +844,13 @@
             `).join('');
         }
 
-        // 🟢 100% CLOUD-ONLY TARGET COMPLETE LOGIC
         async function markTargetComplete(id) {
             try {
                 const res = await fetch(`/api/targets/${id}/complete`, { method: 'POST' });
                 if (!res.ok) throw new Error("Cloud sync failed");
                 showStatusMessage("🏆 Milestone Conquered!", "success");
                 loadDashboardTargets();
-            } catch (err) {
-                console.error(err);
-                alert("❌ Connection Error: Could not sync milestone status with MongoDB Cloud.");
-            }
+            } catch (err) { alert("❌ Connection Error"); }
         }
 
         async function loadDashboardSchedules() {
@@ -828,11 +870,6 @@
         async function loadDashboardData() {
             try {
                 const ts = new Date().getTime();
-                
-                const bgRes = await fetch('/api/dashboard-bg?t=' + ts, { cache: 'no-store' });
-                const bgData = await bgRes.json();
-                if (bgData.success && bgData.color) { document.body.style.backgroundColor = bgData.color; }
-
                 const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                 if(sessionRes.status === 401 || sessionRes.status === 403) { window.location.href = 'index.html'; return; }
                 const sessionData = await sessionRes.json();
@@ -880,25 +917,8 @@
                 renderCharts(habits, workouts, studyData, hydrationData);
                 loadMonsterCoach();
             } catch (err) {
-                console.error("Cloud Connection Error loading dashboard data:", err);
-                
-                // Show Zeroes & Error Status Instead of Fallback
-                document.getElementById('totalVectorsCount').innerText = 0;
-                document.getElementById('currentStreakDisplay').innerText = `0 Days`;
-                document.getElementById('dashWaterConsumed').innerText = `0 / 3000 ml`;
-                document.getElementById('dashWaterBar').style.width = `0%`;
-                document.getElementById('dashWaterStreak').innerText = `Offline`;
-                document.getElementById('yearlyProgressText').innerText = `0%`;
-                document.getElementById('yearlyBar').style.width = `0%`;
-                document.getElementById('energyCoreText').innerText = `0%`;
-                
-                document.getElementById('habitsCarouselContainer').innerHTML = `
-                    <p class="text-xs font-black uppercase tracking-widest text-red-400 text-center py-4">❌ Cloud Connection Failed</p>`;
-                    
-                document.getElementById('dashboardStudyList').innerHTML = `
-                    <div class="col-span-full glass-card p-4 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
-                    </div>`;
+                console.error("Cloud Connection Error:", err);
+                document.getElementById('habitsCarouselContainer').innerHTML = `<p class="text-xs font-black uppercase tracking-widest text-red-400 text-center py-4">❌ Cloud Connection Failed</p>`;
             }
         }
 
@@ -909,16 +929,19 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ completed: !currentState })
                 });
-                if (!res.ok) throw new Error("Cloud Sync Failed");
+                if (!res.ok) {
+                    if (res.status === 403) {
+                         const errData = await res.json();
+                         alert(errData.error || "System Locked.");
+                         return;
+                    }
+                    throw new Error("Cloud Sync Failed");
+                }
                 loadDashboardData(); 
-                loadBadges(); 
-            } catch (err) {
-                console.error(err);
-                alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
-            }
+            } catch (err) { alert("❌ Connection Error: Could not sync with MongoDB Cloud."); }
         }
 
-        // 🔥 HABITS CAROUSEL WITH STREAKS INCLUDED
+        // 🔥 ACTIVE HABITS CAROUSEL
         function renderActiveHabitsCarousel(habits) {
             const container = document.getElementById('habitsCarouselContainer');
             if (!habits || habits.length === 0) {
@@ -926,10 +949,16 @@
                 return;
             }
 
+            const todayStr = new Date().toISOString().split('T')[0];
+
             const habitsHtml = habits.map(h => {
-                let strk = h.streak || Math.floor(Math.random() * 15);
+                let strk = h.streak || 0; 
                 let badge = strk >= 30 ? '🏆' : (strk >= 14 ? '🥇' : (strk >= 7 ? '🥈' : '🥉'));
                 
+                const startDateStr = h.startDate || LAUNCH_DATE;
+                const isNotStarted = todayStr < startDateStr;
+                const isDisabled = isNotStarted || window.isHabitsLocked; 
+
                 return `
                 <div class="glass-card p-4 rounded-2xl min-w-[280px] flex items-center justify-between gap-4 border border-white/10 shrink-0 transition hover:border-white/20">
                     <div class="min-w-0 flex-1">
@@ -939,8 +968,8 @@
                             <span class="text-[9px] text-orange-400 font-black uppercase tracking-widest">🔥 ${strk} Days ${badge}</span>
                         </div>
                     </div>
-                    <button onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition cursor-pointer shrink-0 ${h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'}">
-                        ${h.completedToday ? 'DONE' : 'DO IT'}
+                    <button ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition shrink-0 ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer')}">
+                        ${isDisabled ? '🔒' : (h.completedToday ? 'DONE' : 'DO IT')}
                     </button>
                 </div>
             `}).join('');
@@ -998,7 +1027,13 @@
                     const data = await res.json();
                     if (data.success) {
                         document.getElementById('monsterCoachMessage').innerText = `"${data.coachMessage || "Discipline equals absolute freedom."}"`;
-                        if (data.xp) { document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`; }
+                        if (data.xp) { 
+                            userApexLevel = data.xp.level || 1;
+                            document.getElementById('monsterLevelBadge').innerText = `Level ${data.xp.level} Apex (${data.xp.xp} XP)`; 
+                            
+                            loadBadges();
+                            checkTelegramUnlocks(); // Send notification if new level achieved
+                        }
                     }
                 }
             } catch (err) {}
@@ -1051,12 +1086,15 @@
             });
         }
 
+        window.isHabitsLocked = false;
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
                 const data = await res.json();
                 
+                window.isHabitsLocked = data.habitsLocked || false; // Store state for carousel buttons
+
                 if (data.locked) {
                     const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                     const sessionData = await sessionRes.json();
@@ -1086,9 +1124,7 @@
                         document.body.prepend(adminBanner);
                     }
                 }
-            } catch (err) {
-                console.error("Lock verification failed", err);
-            }
+            } catch (err) {}
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1117,7 +1153,6 @@
             loadDashboardSchedules();
             loadDashboardTargets();
             loadMonsterLog();
-            loadBadges();
         });
 
         const cmdOverlay = document.getElementById('commandPaletteOverlay');
@@ -1126,23 +1161,17 @@
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
-                cmdOverlay.classList.remove('hidden');
-                cmdOverlay.classList.add('flex');
-                cmdInput.value = '> ';
-                cmdInput.focus();
+                cmdOverlay.classList.remove('hidden'); cmdOverlay.classList.add('flex');
+                cmdInput.value = '> '; cmdInput.focus();
             }
             if (e.key === 'Escape' && !cmdOverlay.classList.contains('hidden')) {
-                cmdOverlay.classList.add('hidden');
-                cmdOverlay.classList.remove('flex');
+                cmdOverlay.classList.add('hidden'); cmdOverlay.classList.remove('flex');
             }
         });
 
         if (cmdInput) {
             cmdInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    executeCommand(cmdInput.value);
-                }
+                if (e.key === 'Enter') { e.preventDefault(); executeCommand(cmdInput.value); }
             });
         }
 
@@ -1150,25 +1179,19 @@
             let command = cmd.replace('>', '').trim().toLowerCase();
             playCyberClick();
             
-            if (command === 'lockdown' || command === 'kill') {
-                initiateLockdown();
-            } else if (command === 'music' || command === 'lofi' || command === 'play') {
-                toggleLofi();
-            } else if (command === 'surge' || command === 'emergency') {
-                triggerEmergencySurge();
-            } else if (command === 'void') {
+            if (command === 'lockdown' || command === 'kill') initiateLockdown();
+            else if (command === 'music' || command === 'lofi' || command === 'play') toggleLofi();
+            else if (command === 'surge' || command === 'emergency') triggerEmergencySurge();
+            else if (command === 'void') {
                 document.getElementById('voidInput').scrollIntoView({ behavior: 'smooth' });
                 document.getElementById('voidInput').focus();
             } else if (command.startsWith('mission ')) {
                 let missionText = cmd.replace('>', '').trim().substring(8).trim();
                 document.getElementById('dailyMissionInput').value = missionText;
                 saveDailyMissionBtn();
-            } else {
-                return;
             }
             
-            cmdOverlay.classList.add('hidden');
-            cmdOverlay.classList.remove('flex');
+            cmdOverlay.classList.add('hidden'); cmdOverlay.classList.remove('flex');
             cmdInput.value = '';
         }
 
@@ -1181,34 +1204,22 @@
             playBeepSound();
 
             const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
+            recognition.lang = 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
             recognition.start();
 
             recognition.onresult = (event) => {
                 const speechResult = event.results[0][0].transcript.toLowerCase();
-                if (speechResult.includes('lock') || speechResult.includes('kill')) {
-                    initiateLockdown();
-                } else if (speechResult.includes('music') || speechResult.includes('lofi') || speechResult.includes('play')) {
-                    toggleLofi();
-                } else if (speechResult.includes('emergency') || speechResult.includes('surge')) {
-                    triggerEmergencySurge();
-                } else if (speechResult.includes('void') || speechResult.includes('dump')) {
+                if (speechResult.includes('lock') || speechResult.includes('kill')) initiateLockdown();
+                else if (speechResult.includes('music') || speechResult.includes('lofi') || speechResult.includes('play')) toggleLofi();
+                else if (speechResult.includes('emergency') || speechResult.includes('surge')) triggerEmergencySurge();
+                else if (speechResult.includes('void') || speechResult.includes('dump')) {
                     document.getElementById('voidInput').scrollIntoView({ behavior: 'smooth' });
                     document.getElementById('voidInput').focus();
                 }
             };
 
-            recognition.onspeechend = () => {
-                recognition.stop();
-                btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white');
-            };
-
-            recognition.onerror = (event) => {
-                btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white');
-            };
+            recognition.onspeechend = () => { recognition.stop(); btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white'); };
+            recognition.onerror = () => { btn.classList.remove('animate-pulse', 'bg-blue-600', 'text-white'); };
         }
         
         function showStatusMessage(message, type = 'success') {
