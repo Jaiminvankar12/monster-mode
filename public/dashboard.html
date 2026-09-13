@@ -467,6 +467,31 @@
     <div id="inlineStatusNotification"></div>
     
     <script>
+        // ☢️ NUCLEAR PROTOCOL: Send Heartbeat every 5 minutes to prevent inactivity strikes
+        setInterval(async () => {
+            try {
+                await fetch('/api/user-heartbeat', { method: 'POST' });
+            } catch (e) {}
+        }, 5 * 60 * 1000);
+
+        // 🌐 NUCLEAR PROTOCOL: Check Specific Internet Block (1 PM - 3 PM)
+        async function checkNuclearInternetBlock() {
+            try {
+                const res = await fetch('/api/internet-block-status');
+                const data = await res.json();
+                if (data.isInternetBlocked) {
+                    document.body.innerHTML = `
+                        <div class="fixed inset-0 bg-black z-[999999] flex flex-col items-center justify-center p-6 text-center text-white">
+                            <span class="text-6xl animate-bounce mb-4">🌐🚫</span>
+                            <h1 class="text-3xl font-black uppercase text-red-500 tracking-wider">INTERNET BLOCKED (1 PM - 3 PM)</h1>
+                            <p class="text-sm text-slate-300 mt-2 max-w-md">Penalty Active: ${data.lockReason}. All external network traffic is restricted during this core window.</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {}
+        }
+        checkNuclearInternetBlock();
+
         // 🌙 1. OLED AUTO-SWITCH LOGIC (10 PM to 7 AM)
         async function checkOledAutoSwitch() {
             try {

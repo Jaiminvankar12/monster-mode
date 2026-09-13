@@ -71,6 +71,19 @@ const monsterLogSchema = new mongoose.Schema({
 });
 const MonsterLog = mongoose.model('MonsterLog', monsterLogSchema);
 
+// ☢️ NUCLEAR DISCIPLINE STATE SCHEMA (ADDED)
+const nuclearProtocolSchema = new mongoose.Schema({
+    userId: String,
+    strikes: { type: Number, default: 0 },
+    lastActiveAt: { type: String, default: () => new Date().toISOString() },
+    hardcoreLocked: { type: Boolean, default: false },
+    lockReason: { type: String, default: "" },
+    overtimeRequiredMinutes: { type: Number, default: 0 },
+    overtimeCompletedMinutes: { type: Number, default: 0 },
+    disciplineDebt: { type: Number, default: 0 }
+});
+const NuclearState = mongoose.model('NuclearState', nuclearProtocolSchema);
+
 const userSchema = new mongoose.Schema({ id: String, email: String, passwordHash: String, role: String });
 const User = mongoose.model('User', userSchema);
 
@@ -287,6 +300,15 @@ async function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     return { allWorkoutsDone, studyDone, hydrationDone, totalStudiedMinutes, totalTargetMinutes };
 }
 
+async function getNuclearState(userId = MASTER_USER_ID) {
+    let state = await NuclearState.findOne({ userId });
+    if (!state) {
+        state = new NuclearState({ userId });
+        await state.save();
+    }
+    return state;
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -375,6 +397,77 @@ cron.schedule('59 23 * * *', async () => {
     }
 }, { timezone: 'Asia/Kolkata' });
 
+// ☢️ 1. 2-Hour Inactivity Interceptor & Strike System (Cron Job every 10 mins)
+cron.schedule('*/10 * * * *', async () => {
+    try {
+        let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+        let istNow = new Date(istTimeStr);
+        let hour = istNow.getHours();
+
+        // Execution Window: 7:00 AM to 10:00 PM
+        if (hour >= 7 && hour < 22) {
+            let userId = MASTER_USER_ID;
+            let state = await getNuclearState(userId);
+
+            if (!state.hardcoreLocked) {
+                let lastActive = new Date(state.lastActiveAt);
+                let diffMs = istNow - lastActive;
+                let diffHours = diffMs / (1000 * 60 * 60);
+
+                if (diffHours >= 2) {
+                    state.strikes += 1;
+                    state.lastActiveAt = istNow.toISOString();
+                    
+                    if (state.strikes >= 3) {
+                        state.hardcoreLocked = true;
+                        state.lockReason = "3-Strike Death Rule Triggered (Procrastination)";
+                        state.overtimeRequiredMinutes = 120;
+                        await sendTelegramNotification(`🚨 *NUCLEAR LOCKDOWN ACTIVATED*\n\n3 Strikes reached due to zero activity. Total Hardcore Lockdown deployed! Internet blocked between 1 PM - 3 PM.`);
+                    }
+                    await state.save();
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Nuclear Inactivity Cron Error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
+
+// 🌙 2. Midnight / 10:00 PM Execution & Permanent Streak Wipeout (Zero Mercy Reset)
+cron.schedule('0 22 * * *', async () => {
+    try {
+        let userId = MASTER_USER_ID;
+        let today = getServerToday();
+        let syncResult = await runServerSyncEngine(userId, today);
+        let sanctuary = await getSanctuaryData(userId);
+        let state = await getNuclearState(userId);
+
+        let targetsFailed = (!syncResult.allWorkoutsDone || !syncResult.studyDone || !syncResult.hydrationDone);
+
+        if (targetsFailed && !sanctuary.enabled) {
+            let ud = await UserData.findOne({ userId });
+            if (ud) {
+                ud.xp = 0;
+                ud.level = 1;
+                await ud.save();
+            }
+
+            state.hardcoreLocked = true;
+            state.lockReason = "Daily Targets Missed by 10:00 PM (Zero Mercy Reset)";
+            state.overtimeRequiredMinutes = 180;
+            state.disciplineDebt += 1;
+            await state.save();
+
+            await sendTelegramNotification(`🩸 *BLOODMOON / ZERO MERCY PROTOCOL*\n\n⚠️ Day failed! Your entire Streak & XP Level have been WIPED OUT to 0 (Level 1 reset).\n\n🔒 Hardcore Lockdown active. Internet blocked (1 PM - 3 PM). Mandatory overtime required.`);
+        } else {
+            state.strikes = 0;
+            await state.save();
+        }
+    } catch (err) {
+        console.error("Midnight Execution Error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
+
 async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
@@ -438,7 +531,7 @@ app.post('/api/system-lock', requireAuth, async (req, res) => {
     const { locked, adminPassword, password } = req.body;
     const pwdToVerify = adminPassword || password;
     
-    if (pwdToVerify !== "Jay_monster_mode_on") {
+    if (pwdToVerify !== "monster_mode_on_Jay" && pwdToVerify !== "Jay_monster_mode_on") {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
     
@@ -556,6 +649,7 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
 
+// 🟢 TRACKER PORTAL LOGIN (With Telegram OTP Step 1)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
@@ -577,7 +671,7 @@ app.post('/api/auth/login', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     req.session.pendingAuth = { userId: user.id, role: user.role, email: user.email, otp: otp, isAdminPortal: false, sentAt: now };
 
-    await sendTelegramNotification(`🔐 *SECURITY ALERT: LOGIN ATTEMPT*\n\nPortal: *TRACKER*\nUser: \`${user.email}\`\n\nYour Authorization Code is: \`${otp}\``);
+    await sendTelegramNotification(`🔐 *SECURITY ALERT: TRACKER LOGIN ATTEMPT*\n\nUser: \`${user.email}\`\n\nYour Authorization Code is: \`${otp}\``);
     res.json({ success: true, requireOtp: true, message: "Authorization code sent to your Telegram." });
 });
 
@@ -601,6 +695,7 @@ app.post('/api/control-panel/login', async (req, res) => {
     res.json({ success: true, requireOtp: true, message: "Admin authorization code sent to your Telegram." });
 });
 
+// 🟢 VERIFY OTP (Requiring 3FA Master Key `monster_mode_on_Jay` for both Portals)
 app.post('/api/auth/verify-otp', async (req, res) => {
     const { otp, portal } = req.body;
 
@@ -612,33 +707,17 @@ app.post('/api/auth/verify-otp', async (req, res) => {
         return res.status(401).json({ error: "❌ Incorrect OTP Code! Access Denied." });
     }
 
-    if (portal === 'admin' && !req.session.pendingAuth.isAdminPortal) {
-        delete req.session.pendingAuth;
-        return res.status(403).json({ error: "❌ Security Breach Detected! Invalid portal execution flow." });
-    }
-
     let lockStatus = await getSystemLockStatus();
     if (lockStatus.locked && portal !== 'admin') {
         delete req.session.pendingAuth;
         return res.status(403).json({ error: "🛑 HARDCORE LOCK: Portal is currently locked by Admin. Correct OTP Denied.", locked: true });
     }
 
-    if (portal === 'admin') {
-        req.session.pendingAuth.otpVerified = true;
-        return res.json({ success: true, require3fa: true, message: "OTP Verified. Awaiting Master Control Key." });
-    } else {
-        req.session.userId = req.session.pendingAuth.userId;
-        req.session.role = req.session.pendingAuth.role;
-        req.session.email = req.session.pendingAuth.email;
-        const emailToLog = req.session.email;
-        
-        delete req.session.pendingAuth;
-
-        await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *TRACKER PORTAL LOGIN SUCCESSFUL*\nUser: \`${emailToLog}\`\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-        return res.json({ success: true, message: "Login successful!" });
-    }
+    req.session.pendingAuth.otpVerified = true;
+    return res.json({ success: true, require3fa: true, message: "OTP Verified. Awaiting Master Security Key." });
 });
 
+// 🔐 3FA MASTER KEY VERIFICATION (`monster_mode_on_Jay`)
 app.post('/api/control-panel/verify-3fa', async (req, res) => {
     const { masterKey } = req.body;
 
@@ -646,7 +725,7 @@ app.post('/api/control-panel/verify-3fa', async (req, res) => {
         return res.status(400).json({ error: "Invalid security flow. OTP verification required first." });
     }
 
-    if (masterKey !== "Jay_monster_mode_on") {
+    if (masterKey !== "monster_mode_on_Jay" && masterKey !== "Jay_monster_mode_on") {
         return res.status(401).json({ error: "❌ Invalid Master Key! 3FA Access Denied." });
     }
 
@@ -656,11 +735,12 @@ app.post('/api/control-panel/verify-3fa', async (req, res) => {
     req.session.controlPanelAuth = true;
 
     const emailToLog = req.session.email;
+    const userRoleLog = req.session.role;
     delete req.session.pendingAuth;
 
-    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *ADMIN PANEL LOGIN SUCCESSFUL (3FA VERIFIED)*\nUser: \`${emailToLog}\`\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
+    await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🟢 *PORTAL LOGIN SUCCESSFUL (3FA VERIFIED)*\nUser: \`${emailToLog}\`\nRole: \`${userRoleLog}\`\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
 
-    res.json({ success: true, message: "Admin Login full clearance granted." });
+    res.json({ success: true, message: "Full clearance granted." });
 });
 
 app.post('/api/auth/logout', async (req, res) => {
@@ -1269,6 +1349,48 @@ app.delete('/api/targets/:id', requireAuth, trackerApiGuard, async (req, res) =>
     } catch (err) {
         res.status(500).json({ error: "Failed to delete target." });
     }
+});
+
+// 🌐 4. Specific Internet Block API (1:00 PM to 3:00 PM Enforcement)
+app.get('/api/internet-block-status', requireAuth, async (req, res) => {
+    let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    let istNow = new Date(istTimeStr);
+    let hour = istNow.getHours();
+    
+    let state = await getNuclearState(req.session.userId || MASTER_USER_ID);
+    let isInternetBlocked = state.hardcoreLocked && (hour >= 13 && hour < 15);
+
+    res.json({ success: true, isInternetBlocked, lockReason: state.lockReason });
+});
+
+// 💀 5. Forced Overtime Status & Progress API
+app.get('/api/nuclear/status', requireAuth, async (req, res) => {
+    let state = await getNuclearState(req.session.userId || MASTER_USER_ID);
+    res.json({ success: true, ...state.toObject() });
+});
+
+app.post('/api/nuclear/log-overtime', requireAuth, async (req, res) => {
+    let { minutes } = req.body;
+    let state = await getNuclearState(req.session.userId || MASTER_USER_ID);
+    
+    state.overtimeCompletedMinutes += parseInt(minutes) || 30;
+    if (state.overtimeCompletedMinutes >= state.overtimeRequiredMinutes) {
+        state.hardcoreLocked = false;
+        state.strikes = 0;
+        state.overtimeRequiredMinutes = 0;
+        state.overtimeCompletedMinutes = 0;
+        await sendTelegramNotification(`🔓 *LOCKDOWN LIFTED*\n\nUser successfully completed required overtime punishment. Systems restored.`);
+    }
+    await state.save();
+    res.json({ success: true, ...state.toObject() });
+});
+
+// User activity heartbeat to track inactivity
+app.post('/api/user-heartbeat', requireAuth, async (req, res) => {
+    let state = await getNuclearState(req.session.userId || MASTER_USER_ID);
+    state.lastActiveAt = new Date().toISOString();
+    await state.save();
+    res.json({ success: true });
 });
 
 // 🤖 TELEGRAM INTERACTIVE AI BOT
