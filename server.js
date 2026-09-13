@@ -1693,7 +1693,7 @@ app.get('/api/badges', requireAuth, async (req, res) => {
 // 🌦️ WEATHER API ROUTE (Ahmedabad)
 app.get('/api/weather', async (req, res) => {
     try {
-        const apiKey = process.env.WEATHER_API_KEY || "YOUR_OPENWEATHER_API_KEY"; 
+        const apiKey = process.env.WEATHER_API_KEY || "91765ab33e096c422ccec03ab5977a6e"; 
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Ahmedabad&units=metric&appid=${apiKey}`);
         const data = await response.json();
         if (data.main) {
