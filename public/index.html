@@ -135,13 +135,13 @@
                 <form id="step3Form" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">🔐</span>
-                        <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mt-2">3FA Admin Clearance</h3>
+                        <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mt-2">3FA Security Clearance</h3>
                         <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Master Security Key Required</p>
                     </div>
 
                     <div>
                         <div class="relative">
-                            <input type="password" id="masterKeyInput" class="w-full bg-[#07090f] border border-purple-500/50 rounded-xl px-4 py-4 pr-12 text-white text-sm focus:outline-none focus:border-purple-400 transition shadow-[0_0_15px_rgba(168,85,247,0.2)]" placeholder="Enter Admin Master Key..." autocomplete="off">
+                            <input type="password" id="masterKeyInput" class="w-full bg-[#07090f] border border-purple-500/50 rounded-xl px-4 py-4 pr-12 text-white text-sm focus:outline-none focus:border-purple-400 transition shadow-[0_0_15px_rgba(168,85,247,0.2)]" placeholder="Enter Master Security Key..." autocomplete="off">
                             <button type="button" onclick="togglePasswordVisibility('masterKeyInput', 'eyeIcon3')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-transform active:scale-90 cursor-pointer p-1">
                                 <svg id="eyeIcon3" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -154,7 +154,7 @@
                     <div id="step3ErrorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold text-center"></div>
 
                     <button type="submit" id="verify3faBtn" class="w-full py-4 mt-2 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30 transition">
-                        AUTHORIZE ADMIN ACCESS
+                        AUTHORIZE ACCESS
                     </button>
                     
                     <button type="button" onclick="cancelAuthFlow()" class="w-full py-3 mt-2 text-slate-500 font-bold hover:text-white text-xs uppercase tracking-widest transition cursor-pointer">
@@ -279,7 +279,7 @@
                     errDiv.classList.remove('hidden');
                 } else if (data.locked) {
                     errDiv.textContent = "🛡️ SYSTEM LOCKED BY ADMIN: Entire portal is locked.";
-                    errDiv.classList.remove('hidden');
+                    errDiv.classList.add('hidden');
                 } else if (data.requireOtp) {
                     document.getElementById('authForm').classList.add('hidden');
                     document.getElementById('portalTabs').classList.add('hidden');
@@ -317,7 +317,13 @@
                 } else {
                     document.getElementById('verifyOtpBtn').innerText = "VERIFIED! ENTERING...";
                     document.getElementById('verifyOtpBtn').classList.replace('bg-blue-600', 'bg-emerald-600');
-                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                    setTimeout(() => { 
+                        if (currentPortal === 'admin') {
+                            window.location.href = 'control-panel.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }, 800);
                 }
             } catch (err) {
                 otpErrDiv.textContent = "Connection error verifying OTP.";
@@ -345,7 +351,15 @@
                 } else {
                     document.getElementById('verify3faBtn').innerText = "CLEARANCE GRANTED";
                     document.getElementById('verify3faBtn').classList.replace('bg-purple-600', 'bg-emerald-600');
-                    setTimeout(() => { window.location.href = 'control-panel.html'; }, 800);
+                    
+                    // 🟢 CORRECTED REDIRECTION BASED ON PORTAL (Tracker -> dashboard.html, Admin -> control-panel.html)
+                    setTimeout(() => { 
+                        if (currentPortal === 'admin') {
+                            window.location.href = 'control-panel.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
+                    }, 800);
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error verifying Master Key.";
@@ -374,7 +388,6 @@
         } catch(e) {}
     }
 
-    // આખા પેજ પર કોઈ પણ બટન પર ક્લિક થાય એટલે સાઉન્ડ વાગશે
     document.addEventListener('click', function(e) {
         if (e.target.closest('button')) {
             playCyberClick();
