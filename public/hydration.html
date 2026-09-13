@@ -6,9 +6,9 @@
     <title>MONSTER MODE — Hydration Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-      <link rel="icon" href="images/dragon 1.png">
-      <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ef4444">
+    <link rel="icon" href="images/dragon 1.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ef4444">
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
@@ -17,13 +17,10 @@
         
         /* 💧 PERFECT WATER DROP SHAPE CSS 💧 */
         .drop-shape {
-            /* Top right corner becomes the tip of the drop */
             border-radius: 50% 0 50% 50%;
-            /* Rotate to point the tip straight upwards */
             transform: rotate(-45deg);
         }
         
-        /* Wrapper to counter-rotate the water inside so it stays flat */
         .drop-liquid-wrapper {
             position: absolute;
             width: 150%;
@@ -63,7 +60,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Hydration tracking and fluid matrix are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Hydration tracking and fluid matrix are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -112,23 +109,20 @@
 
         <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
         <div id="viewToday" class="flex flex-col items-center justify-center text-center py-4 space-y-6">
-            <div>
+            <div class="mt-2">
                 <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Daily Water Target</span>
-                <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-2">Today</h2>
+                <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-3">Today</h2>
             </div>
 
-            <!-- 💧 NEW GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
-            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center mt-6 mb-6">
+            <!-- 💧 GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center mt-10 mb-6">
                 
-                <!-- Drop Shape Mask / Outline -->
                 <div class="absolute inset-0 drop-shape water-glow bg-blue-500/5 border-2 border-blue-500/40 overflow-hidden">
-                    <!-- Liquid Wrapper (Counter-Rotated to keep water flat) -->
                     <div class="drop-liquid-wrapper">
                         <div id="liquidFill" class="liquid-wave" style="height: 0%;"></div>
                     </div>
                 </div>
 
-                <!-- Labels (Shifted down slightly to stay in the round belly of the drop) -->
                 <div class="z-10 flex flex-col items-center justify-center mt-12 sm:mt-16">
                     <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-lg">0 ml</span>
                     <span id="goalSubLabel" class="text-xs text-blue-200 font-black uppercase tracking-widest mt-2 drop-shadow-md">Goal: 3000 ml</span>
@@ -155,7 +149,6 @@
         <!-- SECTION 2: HISTORY MATRIX -->
         <div id="viewHistory" class="hidden space-y-6">
             
-            <!-- Day / Week / Month / Year Filter Pills -->
             <div class="flex bg-[#121520] p-1.5 rounded-2xl border border-white/5 gap-1 text-center">
                 <button onclick="setHistoryFilter('day')" id="filterDay" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Day</button>
                 <button onclick="setHistoryFilter('week')" id="filterWeek" class="flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Week</button>
@@ -163,7 +156,6 @@
                 <button onclick="setHistoryFilter('year')" id="filterYear" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Year</button>
             </div>
 
-            <!-- History Main Card Container -->
             <div class="glass-card p-6 rounded-3xl space-y-6">
                 
                 <div class="flex justify-between items-center text-zinc-400 text-xs font-black uppercase tracking-widest border-b border-white/5 pb-3">
@@ -199,8 +191,7 @@
         let currentGlass = 250;
         let hydrationHistoryLogs = {};
         
-        // Locked strictly to launch date September 13, 2026
-        const LAUNCH_DATE = "2026-09-13";
+        const LAUNCH_DATE = "2026-09-14";
 
         function checkPreLaunchLock() {
             const launchDateObj = new Date(LAUNCH_DATE);
@@ -315,7 +306,7 @@
             }).join('');
         }
 
-       async function verifyGlobalSystemLock() {
+        async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
@@ -360,29 +351,28 @@
             checkPreLaunchLock();
             fetchHydrationData();
         });
-// 🔊 Global Cyberpunk Click Sound
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playCyberClick() {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        try {
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        } catch(e) {}
-    }
 
-    // આખા પેજ પર કોઈ પણ બટન પર ક્લિક થાય એટલે સાઉન્ડ વાગશે
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('button')) {
-            playCyberClick();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
         }
-    });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
+        });
     </script>
 </body>
 </html>

@@ -147,7 +147,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Trackers and editing are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Trackers and editing are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -662,7 +662,7 @@
             document.documentElement.style.setProperty('--theme-glow', cfg.glow);
         }
 
-        const LAUNCH_DATE = "2026-09-13";
+        const LAUNCH_DATE = "2026-09-14";
 
         function displayCurrentDateAndDay() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -755,8 +755,8 @@
 
         // 🎯 TARGETS MANAGEMENT WIDGET
         let fallbackTargets = JSON.parse(localStorage.getItem('monster_targets')) || [
-            { id: 101, name: "Launch Apex Predator System", date: "2026-09-13", completed: false },
-            { id: 102, name: "Clear AWS Certification", date: "2026-11-20", completed: false }
+            { id: 101, name: "Launch Apex Predator System", date: "2026-09-14", completed: false },
+            { id: 102, name: "Clear AWS Certification", date: "2026-11-14", completed: false }
         ];
 
         async function loadDashboardTargets() {

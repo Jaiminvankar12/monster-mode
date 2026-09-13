@@ -8,14 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" href="images/dragon 1.png">
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ef4444">
+    <meta name="theme-color" content="#ef4444">
     <style>
         * { font-family: 'Outfit', sans-serif; }
         body { background-color: #07090f; color: #f3f4f6; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
         .glow-blue { box-shadow: 0 0 35px rgba(59, 130, 246, 0.2); }
         
-        /* 🟢 Futuristic Cyber Pulse & Neon Glow Animations */
         @keyframes cyberPulse {
             0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1); }
             50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), inset 0 0 25px rgba(59, 130, 246, 0.2); }
@@ -54,7 +53,7 @@
             <span class="text-4xl">🔒</span>
             <h2 class="text-2xl font-black uppercase tracking-wider text-blue-400">System Locked: Pre-Launch Mode</h2>
             <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                Monster Mode is globally locked until <strong class="text-white">September 13, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
+                Monster Mode is globally locked until <strong class="text-white">September 14, 2026</strong>. Study tracking and deep-work core are currently in read-only planning preview.
             </p>
             <div class="text-xs bg-blue-500/10 border border-blue-500/20 text-blue-400 py-2.5 px-4 rounded-xl font-bold uppercase tracking-widest">
                 Status: Immutable / Not Editable Yet
@@ -108,30 +107,24 @@
             </div>
         </div>
 
-        <!-- 🟢 FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
+        <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Workout HUD Widget -->
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Execution Time</h3>
                     <div id="dashWorkoutTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
                 </div>
-                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">
-                    ⚡
-                </div>
+                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">⚡</div>
             </div>
 
-            <!-- Study HUD Widget -->
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md inline-block">📚 Study Core Vector</span>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Session Time</h3>
                     <div id="dashStudyTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
                 </div>
-                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl animate-pulse">
-                    🛰️
-                </div>
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl animate-pulse">🛰️</div>
             </div>
         </div>
 
@@ -145,12 +138,10 @@
             </div>
             
             <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <!-- Clock Display -->
                 <div class="text-5xl sm:text-6xl font-black text-white tracking-wider font-mono" id="pomoTimerDisplay">
                     25:00
                 </div>
 
-                <!-- Controls & Custom Minute Input -->
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                     <div class="flex items-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto">
                         <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Mins:</span>
@@ -188,8 +179,6 @@
 
         <!-- Grid Layout: Log Session & Active Subjects -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Left Column: Log Study Session Form -->
             <div class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
@@ -197,7 +186,7 @@
                         <div>
                             <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Select Subject</label>
                             <select id="sessionCategorySelect" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
-                                <option value="">Loading subjects from Control Panel...</option>
+                                <option value="">Loading subjects...</option>
                             </select>
                         </div>
                         <div>
@@ -215,9 +204,7 @@
                 </div>
             </div>
 
-            <!-- Right Column: Active Subjects & Today's Logged Sessions -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Subject Categories List -->
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Subjects (Managed by Control Panel)</h3>
                     <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -225,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- Today's Logged Sessions -->
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📖 Today's Study Sessions</h3>
                     <div id="sessionsList" class="space-y-3">
@@ -233,7 +219,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -243,7 +228,7 @@
         let isPomoRunning = false;
         let isBreakMode = false;
         
-        const LAUNCH_DATE = "2026-09-13";
+        const LAUNCH_DATE = "2026-09-14";
 
         let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
         let pomoDurationMinutes = savedDefaultMins;
@@ -298,7 +283,6 @@
             fetchStudyData();
         });
 
-        // 🟢 LOAD SCHEDULE TIMES
         async function loadDashboardSchedules() {
             try {
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store' });
@@ -328,6 +312,7 @@
         }
 
         async function fetchStudyData() {
+            const todayStr = new Date().toISOString().split('T')[0];
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' });
@@ -335,33 +320,66 @@
                     window.location.href = 'index.html';
                     return;
                 }
-                const data = await res.json();
-                if (data.success) {
-                    categoriesData = data.categories;
-                    document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate}`;
-                    
-                    document.getElementById('targetTimeLabel').innerText = formatMinutes(data.totalTargetMinutes);
-                    document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes);
-                    document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
-                    
-                    document.getElementById('progressPercentText').innerText = `${data.progressPercent}%`;
-                    document.getElementById('progressBarFill').style.width = `${data.progressPercent}%`;
-                    document.getElementById('sessionCountText').innerText = `${data.sessions.length} Sessions Logged`;
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        categoriesData = data.categories || [];
+                        document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate || todayStr}`;
+                        
+                        document.getElementById('targetTimeLabel').innerText = formatMinutes(data.totalTargetMinutes || 0);
+                        document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes || 0);
+                        document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
+                        
+                        document.getElementById('progressPercentText').innerText = `${data.progressPercent || 0}%`;
+                        document.getElementById('progressBarFill').style.width = `${data.progressPercent || 0}%`;
+                        document.getElementById('sessionCountText').innerText = `${(data.sessions || []).length} Sessions Logged`;
 
-                    const badge = document.getElementById('studyStatusBadge');
-                    if (data.isDone) {
-                        badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                        badge.innerText = "✅ STATUS: DONE (TARGET MET)";
-                    } else {
-                        badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
-                        badge.innerText = "⏳ STATUS: IN PROGRESS";
+                        const badge = document.getElementById('studyStatusBadge');
+                        if (data.isDone) {
+                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                            badge.innerText = "✅ STATUS: DONE (TARGET MET)";
+                        } else {
+                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
+                            badge.innerText = "⏳ STATUS: IN PROGRESS";
+                        }
+
+                        renderCategories(categoriesData);
+                        renderSessions(data.sessions || [], categoriesData);
+                        populateSelects(categoriesData);
+                        return;
                     }
-
-                    renderCategories(data.categories);
-                    renderSessions(data.sessions, data.categories);
-                    populateSelects(data.categories);
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.log("API fetch failed, checking LocalStorage fallback...");
+            }
+
+            // LocalStorage Fallback for Control Panel sync
+            let localCategories = [];
+            let localSessions = [];
+            try {
+                localCategories = JSON.parse(localStorage.getItem('monster_study_categories') || localStorage.getItem('study_categories') || '[]');
+                localSessions = JSON.parse(localStorage.getItem('monster_study_sessions') || localStorage.getItem('study_sessions') || '[]');
+            } catch(e) {
+                localCategories = [];
+                localSessions = [];
+            }
+
+            categoriesData = localCategories;
+            document.getElementById('serverDateDisplay').innerText = `Server Date: ${todayStr}`;
+            document.getElementById('targetTimeLabel').innerText = "0h 00m";
+            document.getElementById('studiedTimeLabel').innerText = "0h 00m";
+            document.getElementById('studyStreakLabel').innerText = "🔥 0 Days";
+            document.getElementById('progressPercentText').innerText = "0%";
+            document.getElementById('progressBarFill').style.width = "0%";
+            document.getElementById('sessionCountText').innerText = `${localSessions.length} Sessions Logged`;
+
+            const badge = document.getElementById('studyStatusBadge');
+            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
+            badge.innerText = "⏳ STATUS: IN PROGRESS";
+
+            renderCategories(localCategories);
+            renderSessions(localSessions, localCategories);
+            populateSelects(localCategories);
         }
 
         function formatMinutes(totalMins) {
@@ -372,8 +390,8 @@
 
         function renderCategories(categories) {
             const container = document.getElementById('categoriesList');
-            if (categories.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No active subjects found. Contact Control Panel to add subjects.</p>`;
+            if (!categories || categories.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500">No active subjects found. Add from Control Panel.</p>`;
                 return;
             }
             container.innerHTML = categories.map(c => `
@@ -387,7 +405,7 @@
 
         function renderSessions(sessions, categories) {
             const container = document.getElementById('sessionsList');
-            if (sessions.length === 0) {
+            if (!sessions || sessions.length === 0) {
                 container.innerHTML = `<p class="text-xs text-zinc-500">No study sessions recorded for today.</p>`;
                 return;
             }
@@ -410,7 +428,7 @@
             const select1 = document.getElementById('sessionCategorySelect');
             const select2 = document.getElementById('pomoCategorySelect');
 
-            if (categories.length === 0) {
+            if (!categories || categories.length === 0) {
                 select1.innerHTML = `<option value="">No subjects available</option>`;
                 select2.innerHTML = `<option value="">No subjects available</option>`;
                 return;
@@ -641,40 +659,34 @@
                                 </div>
                             </div>
                         `;
-                    } else {
-                        const adminBanner = document.createElement('div');
-                        adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
-                        adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
-                        document.body.prepend(adminBanner);
                     }
                 }
             } catch (err) {
                 console.error("Lock verification failed", err);
             }
         }
-        // 🔊 Global Cyberpunk Click Sound
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playCyberClick() {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        try {
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        } catch(e) {}
-    }
 
-    // આખા પેજ પર કોઈ પણ બટન પર ક્લિક થાય એટલે સાઉન્ડ વાગશે
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('button')) {
-            playCyberClick();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
         }
-    });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
+        });
     </script>
 </body>
 </html>
