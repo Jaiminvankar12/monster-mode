@@ -41,7 +41,20 @@ const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 const studyCategorySchema = new mongoose.Schema({ id: String, userId: String, name: String, dailyTargetMinutes: Number, startDate: String, endDate: String, createdAt: String });
 const StudyCategory = mongoose.model('StudyCategory', studyCategorySchema);
 
-const studySessionSchema = new mongoose.Schema({ id: String, userId: String, categoryId: String, topic: String, durationMinutes: Number, date: String, createdAt: String });
+// 🟢 STUDY SESSIONS SCHEMA UPDATED WITH START & END TIME SUPPORT
+const studySessionSchema = new mongoose.Schema({ 
+    id: String, 
+    userId: String, 
+    categoryId: String, 
+    topic: String, 
+    durationMinutes: Number, 
+    date: String, 
+    startTime: { type: String, default: "" }, 
+    endTime: { type: String, default: "" },     
+    startNotified: { type: Boolean, default: false },
+    endNotified: { type: Boolean, default: false },
+    createdAt: String 
+});
 const StudySession = mongoose.model('StudySession', studySessionSchema);
 
 const hygieneTaskSchema = new mongoose.Schema({ id: String, userId: String, name: String, frequency: String, startDate: String });
@@ -607,7 +620,7 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
-// 🟢 CRON: Reminders + Workout/Study Timed Alerts (With Specific Days support)
+// 🟢 CRON: Reminders + Workout/Study Timed Alerts + Study Session Start & End Telegram Notifications
 cron.schedule('* * * * *', async () => {
     if (isCronRunning) return;
     isCronRunning = true;
@@ -663,6 +676,21 @@ cron.schedule('* * * * *', async () => {
                 gs.studyNotifiedDate = todayStr;
                 await gs.save();
                 await sendTelegramMessage(`📚 *MONSTER STUDY SESSION!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Deep work mode ON. Dominate your targets!`);
+            }
+        }
+
+        // 3. 🟢 Study Sessions Start & End Time Telegram Notifications
+        const activeSessionsToday = await StudySession.find({ date: todayStr });
+        for (let session of activeSessionsToday) {
+            if (session.startTime && session.startTime === currentTimeStr && !session.startNotified) {
+                session.startNotified = true;
+                await session.save();
+                await sendTelegramMessage(`📚 *STUDY SESSION STARTED*\n\n🎯 Topic: *${session.topic}*\n⏰ Time: ${session.startTime} - ${session.endTime || 'N/A'}\n🔥 Focus locked. Let's execute!`);
+            }
+            if (session.endTime && session.endTime === currentTimeStr && !session.endNotified) {
+                session.endNotified = true;
+                await session.save();
+                await sendTelegramMessage(`🏁 *STUDY SESSION FINISHED*\n\n🎯 Topic: *${session.topic}*\n⏱️ Your session time is finished! Great work executing.`);
             }
         }
 
@@ -1329,7 +1357,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
     if(moduleLock !== true) return; // Locked response already sent by guard
 
-    const { categoryId, topic, durationMinutes, date } = req.body;
+    const { categoryId, topic, durationMinutes, date, startTime, endTime } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     
     const today = getServerToday();
@@ -1338,7 +1366,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     try {
         const newSession = new StudySession({
             id: Date.now().toString(), userId: MASTER_USER_ID, categoryId, topic: topic || "Deep Work",
-            durationMinutes: parseInt(durationMinutes), date: targetDate, createdAt: new Date().toISOString()
+            durationMinutes: parseInt(durationMinutes), date: targetDate, startTime: startTime || "", endTime: endTime || "", startNotified: false, endNotified: false, createdAt: new Date().toISOString()
         });
         await newSession.save();
 

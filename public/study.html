@@ -33,7 +33,6 @@
             overflow: hidden;
         }
         .study-hud { animation: cyberPulse 4s infinite ease-in-out; border-color: rgba(59, 130, 246, 0.4); }
-        .workout-hud { animation: workoutPulse 4s infinite ease-in-out; border-color: rgba(239, 68, 68, 0.4); }
 
         :root {
             --accent-primary: #ef4444; 
@@ -228,14 +227,7 @@
 
         <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Execution Time</h3>
-                    <div id="dashWorkoutTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
-                </div>
-                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">⚡</div>
-            </div>
+            
 
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
@@ -437,9 +429,7 @@
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
-                    const workoutEl = document.getElementById('dashWorkoutTime');
                     const studyEl = document.getElementById('dashStudyTime');
-                    if (workoutEl) workoutEl.innerText = data.workoutReminderTime ? data.workoutReminderTime : "NOT SET";
                     if (studyEl) studyEl.innerText = data.studyReminderTime ? data.studyReminderTime : "NOT SET";
                 }
             } catch (err) {}
@@ -603,6 +593,7 @@
                 <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
+                        ${c.startTime && c.endTime ? `<span class="text-[10px] text-blue-400 font-bold uppercase block mt-1">⏰ Time Block: ${c.startTime} - ${c.endTime}</span>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -624,7 +615,7 @@
                         <div class="min-w-0">
                             <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
-                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes</p>
+                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes ${s.startTime && s.endTime ? '| (' + s.startTime + ' - ' + s.endTime + ')' : ''}</p>
                         </div>
                         ${!isRestricted ? `<button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>` : ''}
                     </div>
@@ -643,7 +634,7 @@
             }
 
             const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
-                <option value="${c.id}">${c.name}</option>
+                <option value="${c.id}">${c.name} ${c.startTime ? '(' + c.startTime + ')' : ''}</option>
             `).join('');
 
             select1.innerHTML = optionsHtml;
@@ -805,6 +796,10 @@
             const dur = parseInt(localStorage.getItem('pomo_duration')) || pomoDurationMinutes;
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             
+            const selectedCat = categoriesData.find(c => c.id === categoryId);
+            const startTime = selectedCat ? selectedCat.startTime || "" : "";
+            const endTime = selectedCat ? selectedCat.endTime || "" : "";
+
             localStorage.removeItem('pomo_categoryId');
             localStorage.removeItem('pomo_topic');
             localStorage.removeItem('pomo_duration');
@@ -821,7 +816,9 @@
                         categoryId: categoryId,
                         topic: `Deep Work Focus (${dur}m)`,
                         durationMinutes: dur,
-                        date: targetDate
+                        date: targetDate,
+                        startTime,
+                        endTime
                     })
                 });
                 
@@ -853,6 +850,10 @@
             const durationMinutes = document.getElementById('sessionDuration').value;
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
 
+            const selectedCat = categoriesData.find(c => c.id === categoryId);
+            const startTime = selectedCat ? selectedCat.startTime || "" : "";
+            const endTime = selectedCat ? selectedCat.endTime || "" : "";
+
             // 🚀 TRIGGER OVERLAY ANIMATION ON SUCCESS 🚀
             playSuccessAnimation();
 
@@ -861,7 +862,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ categoryId, topic, durationMinutes, date: targetDate })
+                    body: JSON.stringify({ categoryId, topic, durationMinutes, date: targetDate, startTime, endTime })
                 });
                 
                 if (!res.ok) {

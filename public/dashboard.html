@@ -950,9 +950,7 @@
         }
 
         async function markTargetComplete(id) {
-            // TRIGGER OVERLAY ANIMATION ON SUCCESS
             playSuccessAnimation();
-
             try {
                 const res = await fetch(`/api/targets/${id}/complete`, { method: 'POST', credentials: 'include' });
                 if (!res.ok) throw new Error("Cloud sync failed");
@@ -1025,7 +1023,6 @@
                 document.getElementById('yearlyProgressText').innerText = `${yearlyPct}%`;
                 document.getElementById('yearlyBar').style.width = `${yearlyPct}%`;
                 
-                // 🟢 UPDATE REALISTIC VITALITY SVG RING HERE
                 let vitPct = Math.min(100, Math.max(10, yearlyPct * 2));
                 document.getElementById('energyCoreText').innerHTML = `${vitPct}<span class="text-lg text-emerald-400">%</span>`;
                 let svgCircle = document.getElementById('vitalitySvgCircle');
@@ -1124,6 +1121,7 @@
                                 <span class="text-[10px] font-extrabold text-blue-400">Target: ${targetMins}m/day</span>
                             </div>
                             <h4 class="font-extrabold text-sm text-white mt-2">${c.name}</h4>
+                            ${c.startTime && c.endTime ? `<span class="text-[9px] text-blue-400 font-bold block mt-1">⏰ ${c.startTime} - ${c.endTime}</span>` : ''}
                         </div>
                         <div class="bg-black/30 p-3 rounded-xl border border-white/5 space-y-2 text-[10px]">
                             <div>

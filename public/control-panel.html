@@ -216,373 +216,417 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs Bar -->
-        <div class="flex flex-wrap gap-2 mb-8 bg-[#070a12] p-2.5 rounded-2xl border border-white/10 shadow-inner">
-            <button type="button" onclick="switchTab('habits')" id="tabHabits" class="flex-1 min-w-[110px] py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🔥 Habits</button>
-            <button type="button" onclick="switchTab('workouts')" id="tabWorkouts" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🏋️ Workouts</button>
-            <button type="button" onclick="switchTab('study')" id="tabStudy" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">📚 Study</button>
-            <button type="button" onclick="switchTab('targets')" id="tabTargets" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎯 Targets '26</button>
+        <!-- 🚀 HORIZONTAL SPLIT LAYOUT (LEFT: VERTICAL NAVIGATION TABS, RIGHT: ACTIVE PANEL) 🚀 -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             
-            <button type="button" onclick="switchTab('hygiene')" id="tabHygiene" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🧼 Hygiene</button>
-            <!-- Reminders/Notes Tabs Hidden (as per instruction) -->
-            <button type="button" onclick="switchTab('hydration')" id="tabHydration" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">💧 Hydration</button>
-            <button type="button" onclick="switchTab('examMode')" id="tabExamMode" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">⚡ Exam</button>
-            <button type="button" onclick="switchTab('sanctuary')" id="tabSanctuary" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🛡️ Sanctuary</button>
-            <button type="button" onclick="switchTab('landingBg')" id="tabLandingBg" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🖼️ Gateway</button>
-            <button type="button" onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Dash BG</button>
-            <button type="button" onclick="switchTab('theme')" id="tabTheme" class="flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">🎨 Custom Theme</button>
-        </div>
+            <!-- LEFT COLUMN: VERTICAL NAVIGATION TABS -->
+            <div class="lg:col-span-1 glass-card p-4 rounded-3xl flex flex-col gap-2 shadow-2xl sticky top-24">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-3 py-1">Command Navigation</span>
+                <button type="button" onclick="switchTab('habits')" id="tabHabits" class="w-full text-left px-4 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🔥 Habits <span>➔</span></button>
+                <button type="button" onclick="switchTab('workouts')" id="tabWorkouts" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🏋️ Workouts <span>➔</span></button>
+                <button type="button" onclick="switchTab('study')" id="tabStudy" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">📚 Study <span>➔</span></button>
+                <button type="button" onclick="switchTab('targets')" id="tabTargets" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🎯 Targets '26 <span>➔</span></button>
+                <button type="button" onclick="switchTab('hygiene')" id="tabHygiene" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🧼 Hygiene <span>➔</span></button>
+                <button type="button" onclick="switchTab('hydration')" id="tabHydration" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">💧 Hydration <span>➔</span></button>
+                <button type="button" onclick="switchTab('examMode')" id="tabExamMode" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">⚡ Exam Mode <span>➔</span></button>
+                <button type="button" onclick="switchTab('sanctuary')" id="tabSanctuary" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🛡️ Sanctuary <span>➔</span></button>
+                <button type="button" onclick="switchTab('landingBg')" id="tabLandingBg" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🖼️ Gateway <span>➔</span></button>
+                <button type="button" onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🎨 Dash BG <span>➔</span></button>
+                <button type="button" onclick="switchTab('theme')" id="tabTheme" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🎨 Theme <span>➔</span></button>
+            </div>
 
-        <!-- TAB 1: HABITS -->
-        <div id="sectionHabits" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="habitFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>➕</span> Add / Edit Habit Vector</h3>
-                <form id="createHabitForm" class="space-y-4">
-                    <input type="hidden" id="editHabitId">
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label><input type="text" id="habitName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label><input type="text" id="habitCategory" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description</label><input type="text" id="habitDesc" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Date</label><input type="date" id="habitStartDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner"></div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" id="habitSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Habit</button>
-                        <button type="button" onclick="resetHabitForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Habits</h3>
-                <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
-            </div>
-        </div>
+            <!-- RIGHT COLUMN: ACTIVE PANEL CONTENT -->
+            <div class="lg:col-span-3 w-full space-y-8">
 
-        <!-- TAB: TARGETS '26 -->
-        <div id="sectionTargets" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="targetFormTitle" class="text-sm font-black uppercase tracking-wider text-purple-500 mb-6 flex items-center gap-2"><span>🎯</span> Define 2026 Milestone</h3>
-                <form id="createTargetForm" class="space-y-4">
-                    <input type="hidden" id="editTargetId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Milestone Name</label>
-                        <input type="text" id="targetName" required placeholder="e.g., Launch Apex Predator System" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none focus:border-purple-500 transition shadow-inner">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Launch Date</label>
-                        <input type="date" id="targetDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner">
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" class="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30">Deploy Milestone</button>
-                        <button type="button" onclick="resetTargetForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>🚀</span> Master Goals Timeline</h3>
-                <div id="targetsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading milestones...</p></div>
-            </div>
-        </div>
-
-        <!-- TAB 2: WORKOUTS -->
-        <div id="sectionWorkouts" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="workoutFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🏋️</span> Deploy / Edit Workout</h3>
-                <form id="createWorkoutForm" class="space-y-4">
-                    <input type="hidden" id="editWorkoutId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Name</label>
-                        <input type="text" id="workoutName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
-                            <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
-                                <button type="button" onclick="adjustWorkoutInput('workoutSets', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                                </button>
-                                <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
-                                <button type="button" onclick="adjustWorkoutInput('workoutSets', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
-                                </button>
+                <!-- TAB 1: HABITS -->
+                <div id="sectionHabits" class="grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 id="habitFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>➕</span> Add / Edit Habit Vector</h3>
+                        <form id="createHabitForm" class="space-y-4">
+                            <input type="hidden" id="editHabitId">
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label><input type="text" id="habitName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label><input type="text" id="habitCategory" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description</label><input type="text" id="habitDesc" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Date</label><input type="date" id="habitStartDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner"></div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" id="habitSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Habit</button>
+                                <button type="button" onclick="resetHabitForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
-                            <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
-                                <button type="button" onclick="adjustWorkoutInput('workoutValue', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                                </button>
-                                <input type="number" id="workoutValue" value="10" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
-                                <button type="button" onclick="adjustWorkoutInput('workoutValue', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
-                                </button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label>
-                        <select id="workoutUnit" class="w-full bg-[#030408] border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
-                            <option value="reps">Reps</option>
-                            <option value="mins">Mins</option>
-                            <option value="secs">Secs</option>
-                        </select>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Habits</h3>
+                        <div id="habitsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
                     </div>
-
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Workout</button>
-                        <button type="button" onclick="resetWorkoutForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Workouts</h3>
-                <div id="workoutsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
-            </div>
-        </div>
-
-        <!-- TAB 3: STUDY CORE -->
-        <div id="sectionStudy" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2"><span>📚</span> Create / Edit Study Subject</h3>
-                <form id="createStudyForm" class="space-y-4">
-                    <input type="hidden" id="editStudyId">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
-                        <input type="text" id="studyName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., Web Dev / DSA">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
-                        <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                        <input type="date" id="studyStartDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
-                        <input type="date" id="studyEndDate" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
-                            Deploy / Update Study Vector
-                        </button>
-                        <button type="button" onclick="resetStudyForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Study Categories</h3>
-                <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 4: HYGIENE -->
-        <div id="sectionHygiene" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 id="hygieneFormTitle" class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-6 flex items-center gap-2"><span>🧼</span> Add / Edit Grooming Task</h3>
-                <form id="createHygieneForm" class="space-y-4">
-                    <input type="hidden" id="editHygieneId">
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Name</label><input type="text" id="hygieneName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Frequency</label><select id="hygieneFreq" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"><option value="daily">Daily Routine</option><option value="sunday">Sunday Special</option></select></div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" id="hygieneSubmitBtn" class="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">Deploy / Update Task</button>
-                        <button type="button" onclick="resetHygieneForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Hygiene Tasks</h3>
-                <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
-            </div>
-        </div>
-
-        <!-- TAB 6: HYDRATION -->
-        <div id="sectionHydration" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2"><span>💧</span> Configure Hydration</h3>
-                <form id="updateHydrationForm" class="space-y-4">
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Glass Size (ml)</label><select id="configGlassSize" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"><option value="150">150 ml</option><option value="250">250 ml</option><option value="350">350 ml</option><option value="500">500 ml</option></select></div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Goal (ml)</label><input type="number" id="configGoal" value="3000" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                    <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Save Hydration Config</button>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🌊</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Control</h3><p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass size.</p></div>
-        </div>
-
-        <!-- TAB 7: EXAM MODE -->
-        <div id="sectionExamMode" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2"><span>⚡</span> Configure Exam Mode</h3>
-                <form id="updateExamModeForm" class="space-y-4">
-                    <div class="flex items-center justify-between bg-[#030408] border border-white/10 p-4 rounded-xl">
-                        <div><label class="block text-xs font-black text-white uppercase tracking-wider cursor-pointer">Enable Exam Mode</label></div>
-                        <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
-                    </div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label><input type="number" id="examModeTarget" value="90" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                    <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Save Exam Mode</button>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">📝</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Exam Mode Matrix</h3></div>
-        </div>
-
-        <!-- TAB 8: SANCTUARY -->
-        <div id="sectionSanctuary" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6 flex items-center gap-2"><span>🛡️</span> Sanctuary Protocol</h3>
-                <form id="updateSanctuaryForm" class="space-y-4">
-                    <div class="flex items-center justify-between bg-[#030408] border border-white/10 p-4 rounded-xl">
-                        <div><label class="block text-xs font-black text-white uppercase tracking-wider cursor-pointer">Enable Sanctuary</label></div>
-                        <input type="checkbox" id="sanctuaryEnabled" class="w-6 h-6 rounded-lg accent-purple-500 cursor-pointer">
-                    </div>
-                    <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reason</label><input type="text" id="sanctuaryReason" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., Severe fever"></div>
-                    <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/30">Update Sanctuary</button>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🛌</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Sanctuary Safe-Haven</h3></div>
-        </div>
-
-        <!-- TAB 9: GATEWAY SETTINGS -->
-        <div id="sectionLandingBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
-                <!-- Image Update -->
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2"><span>🖼️</span> Update Gateway Image</h3>
-                    <form id="updateLandingBgForm" class="space-y-3">
-                        <div>
-                            <input type="url" id="landingBgUrlInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="https://i.pinimg.com/736x/...jpg">
-                        </div>
-                        <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy Image</button>
-                    </form>
-                </div>
-                
-                <hr class="border-white/5">
-
-                <!-- Text Update -->
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-500 mb-4 flex items-center gap-2"><span>📝</span> Customize Gateway Text</h3>
-                    <form id="updateGatewayTextForm" class="space-y-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Big Headline (Use &lt;br&gt; for new line)</label>
-                            <input type="text" id="gatewayHeadlineInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="BECOME A MONSTER.">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Small Subtext</label>
-                            <input type="text" id="gatewaySubtextInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Pure discipline.">
-                        </div>
-                        <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Update Text</button>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">⚡</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Live Gateway Sync</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Instantly updates the login gateway visual aesthetics across all connected terminals.</p>
-            </div>
-        </div>
-
-        <!-- TAB 9.5: DASHBOARD BACKGROUND COLOR MANAGEMENT -->
-        <div id="sectionDashboardBg" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-6 flex items-center gap-2"><span>🎨</span> Update Dashboard Background Color</h3>
-                <form id="updateDashboardBgForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Background Color (Hex Code or CSS Color)</label>
-                        <input type="text" id="dashboardBgColorInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="#07090f or #111827">
-                    </div>
-                    <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-emerald-600/30">
-                        Apply Dashboard Background Color
-                    </button>
-                </form>
-            </div>
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-5xl mb-4 animate-pulse">🌟</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Instant UI Tone Sync</h3>
-                <p class="text-xs text-slate-400 max-w-xs">Instantly shifts the dashboard portal background shade to match your desired aesthetic.</p>
-            </div>
-        </div>
-
-        <!-- TAB 10: UNLIMITED THEME MATRIX -->
-        <div id="sectionTheme" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Unlimited Theme Matrix</h3>
-                    <p class="text-xs text-slate-400">Choose between a Single Solid Color or a Smooth Two-Color Gradient.</p>
                 </div>
 
-                <!-- Theme Mode Switcher Tabs -->
-                <div class="flex bg-[#030408] p-1 rounded-xl border border-white/10">
-                    <button type="button" id="modeSolidBtn" onclick="setThemeMode('solid')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white">Single Color</button>
-                    <button type="button" id="modeGradientBtn" onclick="setThemeMode('gradient')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white">Gradient Color</button>
-                </div>
-
-                <!-- Form Controls -->
-                <form onsubmit="handleCustomThemeSubmit(event)" class="space-y-4">
-                    
-                    <!-- Solid Color Controls -->
-                    <div id="solidControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
-                        <div class="flex items-center justify-between">
+                <!-- TAB: TARGETS '26 -->
+                <div id="sectionTargets" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 id="targetFormTitle" class="text-sm font-black uppercase tracking-wider text-purple-500 mb-6 flex items-center gap-2"><span>🎯</span> Define 2026 Milestone</h3>
+                        <form id="createTargetForm" class="space-y-4">
+                            <input type="hidden" id="editTargetId">
                             <div>
-                                <label class="block text-xs font-bold text-white uppercase tracking-wider">Solid Color Picker</label>
-                                <span class="text-[10px] text-slate-400">Pick exact hue</span>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Milestone Name</label>
+                                <input type="text" id="targetName" required placeholder="e.g., Launch Apex Predator System" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none focus:border-purple-500 transition shadow-inner">
                             </div>
-                            <input type="color" id="solidColorPicker" value="#ef4444" oninput="syncSolidHex(this.value)" class="w-12 h-12 bg-transparent rounded-xl cursor-pointer border-0">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Launch Date</label>
+                                <input type="date" id="targetDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner">
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" class="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30">Deploy Milestone</button>
+                                <button type="button" onclick="resetTargetForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>🚀</span> Master Goals Timeline</h3>
+                        <div id="targetsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading milestones...</p></div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: WORKOUTS -->
+                <div id="sectionWorkouts" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 id="workoutFormTitle" class="text-sm font-black uppercase tracking-wider text-red-500 mb-6 flex items-center gap-2"><span>🏋️</span> Deploy / Edit Workout</h3>
+                        <form id="createWorkoutForm" class="space-y-4">
+                            <input type="hidden" id="editWorkoutId">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Name</label>
+                                <input type="text" id="workoutName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Sets</label>
+                                    <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
+                                        <button type="button" onclick="adjustWorkoutInput('workoutSets', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                                        </button>
+                                        <input type="number" id="workoutSets" value="3" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
+                                        <button type="button" onclick="adjustWorkoutInput('workoutSets', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Value</label>
+                                    <div class="relative flex items-center bg-[#030408] border border-white/10 rounded-xl overflow-hidden shadow-inner group focus-within:border-red-500 transition">
+                                        <button type="button" onclick="adjustWorkoutInput('workoutValue', -1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                                        </button>
+                                        <input type="number" id="workoutValue" value="10" min="1" class="w-full bg-transparent text-center text-white text-sm font-bold outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all duration-150">
+                                        <button type="button" onclick="adjustWorkoutInput('workoutValue', 1)" class="w-10 h-12 bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-white flex items-center justify-center font-black transition-all active:scale-90 cursor-pointer select-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit</label>
+                                <select id="workoutUnit" class="w-full bg-[#030408] border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none shadow-inner focus:border-red-500 transition">
+                                    <option value="reps">Reps</option>
+                                    <option value="mins">Mins</option>
+                                    <option value="secs">Secs</option>
+                                </select>
+                            </div>
+
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" id="workoutSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Workout</button>
+                                <button type="button" onclick="resetWorkoutForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Workouts</h3>
+                        <div id="workoutsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: STUDY CORE (UPDATED WITH START TIME & END TIME FOR MULTI-SESSION TIME BLOCKING) -->
+                <div id="sectionStudy" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2"><span>📚</span> Create / Edit Study Subject & Time Blocks</h3>
+                        <form id="createStudyForm" class="space-y-4">
+                            <input type="hidden" id="editStudyId">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
+                                <input type="text" id="studyName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., Web Dev / DSA">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time ⏰</label>
+                                    <input type="time" id="studyStartTime" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time 🏁</label>
+                                    <input type="time" id="studyEndTime" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Target (Minutes)</label>
+                                <input type="number" id="studyTarget" value="120" min="15" step="15" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
+                                <input type="date" id="studyStartDate" value="2026-09-14" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
+                                <input type="date" id="studyEndDate" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
+                                    Deploy / Update Study Vector
+                                </button>
+                                <button type="button" onclick="resetStudyForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Study Categories & Time Blocks</h3>
+                        <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                            <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
                         </div>
-                        <hr class="border-white/5">
+                    </div>
+                </div>
+
+                <!-- TAB 4: HYGIENE -->
+                <div id="sectionHygiene" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 id="hygieneFormTitle" class="text-sm font-black uppercase tracking-wider text-cyan-400 mb-6 flex items-center gap-2"><span>🧼</span> Add / Edit Grooming Task</h3>
+                        <form id="createHygieneForm" class="space-y-4">
+                            <input type="hidden" id="editHygieneId">
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Name</label><input type="text" id="hygieneName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Frequency</label><select id="hygieneFreq" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"><option value="daily">Daily Routine</option><option value="sunday">Sunday Special</option></select></div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" id="hygieneSubmitBtn" class="flex-1 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-cyan-600/30">Deploy / Update Task</button>
+                                <button type="button" onclick="resetHygieneForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Hygiene Tasks</h3>
+                        <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: HYDRATION -->
+                <div id="sectionHydration" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2"><span>💧</span> Configure Hydration</h3>
+                        <form id="updateHydrationForm" class="space-y-4">
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Glass Size (ml)</label><select id="configGlassSize" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"><option value="150">150 ml</option><option value="250">250 ml</option><option value="350">350 ml</option><option value="500">500 ml</option></select></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Daily Goal (ml)</label><input type="number" id="configGoal" value="3000" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
+                            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Save Hydration Config</button>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🌊</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Control</h3><p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass size.</p></div>
+                </div>
+
+                <!-- TAB 7: EXAM MODE -->
+                <div id="sectionExamMode" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2"><span>⚡</span> Configure Exam Mode</h3>
+                        <form id="updateExamModeForm" class="space-y-4">
+                            <div class="flex items-center justify-between bg-[#030408] border border-white/10 p-4 rounded-xl">
+                                <div><label class="block text-xs font-black text-white uppercase tracking-wider cursor-pointer">Enable Exam Mode</label></div>
+                                <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label><input type="number" id="examModeTarget" value="90" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
+                            <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Save Exam Mode</button>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">📝</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Exam Mode Matrix</h3></div>
+                </div>
+
+                <!-- TAB 8: SANCTUARY -->
+                <div id="sectionSanctuary" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 mb-6 flex items-center gap-2"><span>🛡️</span> Sanctuary Protocol</h3>
+                        <form id="updateSanctuaryForm" class="space-y-4">
+                            <div class="flex items-center justify-between bg-[#030408] border border-white/10 p-4 rounded-xl">
+                                <div><label class="block text-xs font-black text-white uppercase tracking-wider cursor-pointer">Enable Sanctuary</label></div>
+                                <input type="checkbox" id="sanctuaryEnabled" class="w-6 h-6 rounded-lg accent-purple-500 cursor-pointer">
+                            </div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Reason</label><input type="text" id="sanctuaryReason" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., Severe fever"></div>
+                            <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-600/30">Update Sanctuary</button>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🛌</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Sanctuary Safe-Haven</h3></div>
+                </div>
+
+                <!-- TAB 9: GATEWAY SETTINGS -->
+                <div id="sectionLandingBg" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+                        <!-- Image Update -->
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hex Code</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">#</span>
-                                <input type="text" id="solidHexInput" maxlength="7" placeholder="ef4444" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pl-8 text-white font-mono text-sm uppercase focus:border-red-500 outline-none transition shadow-inner" oninput="syncSolidPicker(this.value)">
-                            </div>
+                            <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2"><span>🖼️</span> Update Gateway Image</h3>
+                            <form id="updateLandingBgForm" class="space-y-3">
+                                <div>
+                                    <input type="url" id="landingBgUrlInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="https://i.pinimg.com/736x/...jpg">
+                                </div>
+                                <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy Image</button>
+                            </form>
+                        </div>
+                        
+                        <hr class="border-white/5">
+
+                        <!-- Text Update -->
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-wider text-amber-500 mb-4 flex items-center gap-2"><span>📝</span> Customize Gateway Text</h3>
+                            <form id="updateGatewayTextForm" class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Big Headline (Use &lt;br&gt; for new line)</label>
+                                    <input type="text" id="gatewayHeadlineInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="BECOME A MONSTER.">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Small Subtext</label>
+                                    <input type="text" id="gatewaySubtextInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Pure discipline.">
+                                </div>
+                                <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Update Text</button>
+                            </form>
                         </div>
                     </div>
+                    
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                        <span class="text-5xl mb-4 animate-pulse">⚡</span>
+                        <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Live Gateway Sync</h3>
+                        <p class="text-xs text-slate-400 max-w-xs">Instantly updates the login gateway visual aesthetics across all connected terminals.</p>
+                    </div>
+                </div>
 
-                    <!-- Gradient Color Controls -->
-                    <div id="gradientControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4 hidden">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Color</label>
-                                <div class="flex items-center gap-3">
-                                    <input type="color" id="gradColor1" value="#ef4444" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
-                                    <input type="text" id="gradHex1" value="EF4444" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
-                                </div>
+                <!-- TAB 9.5: DASHBOARD BACKGROUND COLOR MANAGEMENT -->
+                <div id="sectionDashboardBg" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-6 flex items-center gap-2"><span>🎨</span> Update Dashboard Background Color</h3>
+                        <form id="updateDashboardBgForm" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Background Color (Hex Code or CSS Color)</label>
+                                <input type="text" id="dashboardBgColorInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="#07090f or #111827">
                             </div>
-                            <div class="space-y-2">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">End Color</label>
-                                <div class="flex items-center gap-3">
-                                    <input type="color" id="gradColor2" value="#b91c1c" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
-                                    <input type="text" id="gradHex2" value="B91C1C" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
-                                </div>
-                            </div>
+                            <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-emerald-600/30">
+                                Apply Dashboard Background Color
+                            </button>
+                        </form>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                        <span class="text-5xl mb-4 animate-pulse">🌟</span>
+                        <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Instant UI Tone Sync</h3>
+                        <p class="text-xs text-slate-400 max-w-xs">Instantly shifts the dashboard portal background shade to match your desired aesthetic.</p>
+                    </div>
+                </div>
+
+                <!-- TAB 10: UNLIMITED THEME MATRIX -->
+                <div id="sectionTheme" class="hidden grid grid-cols-1 gap-8">
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-2 flex items-center gap-2"><span>🎨</span> Unlimited Theme Matrix</h3>
+                            <p class="text-xs text-slate-400">Choose between a Single Solid Color or a Smooth Two-Color Gradient.</p>
                         </div>
+
+                        <!-- Theme Mode Switcher Tabs -->
+                        <div class="flex bg-[#030408] p-1 rounded-xl border border-white/10">
+                            <button type="button" id="modeSolidBtn" onclick="setThemeMode('solid')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white">Single Color</button>
+                            <button type="button" id="modeGradientBtn" onclick="setThemeMode('gradient')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white">Gradient Color</button>
+                        </div>
+
+                        <!-- Form Controls -->
+                        <form onsubmit="handleCustomThemeSubmit(event)" class="space-y-4">
+                            
+                            <!-- Solid Color Controls -->
+                            <div id="solidControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="block text-xs font-bold text-white uppercase tracking-wider">Solid Color Picker</label>
+                                        <span class="text-[10px] text-slate-400">Pick exact hue</span>
+                                    </div>
+                                    <input type="color" id="solidColorPicker" value="#ef4444" oninput="syncSolidHex(this.value)" class="w-12 h-12 bg-transparent rounded-xl cursor-pointer border-0">
+                                </div>
+                                <hr class="border-white/5">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Hex Code</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">#</span>
+                                        <input type="text" id="solidHexInput" maxlength="7" placeholder="ef4444" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pl-8 text-white font-mono text-sm uppercase focus:border-red-500 outline-none transition shadow-inner" oninput="syncSolidPicker(this.value)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gradient Color Controls -->
+                            <div id="gradientControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4 hidden">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Color</label>
+                                        <div class="flex items-center gap-3">
+                                            <input type="color" id="gradColor1" value="#ef4444" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
+                                            <input type="text" id="gradHex1" value="EF4444" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">End Color</label>
+                                        <div class="flex items-center gap-3">
+                                            <input type="color" id="gradColor2" value="#b91c1c" class="w-10 h-10 bg-transparent rounded-xl cursor-pointer border-0">
+                                            <input type="text" id="gradHex2" value="B91C1C" maxlength="7" class="w-full bg-[#07090f] border border-white/10 rounded-lg px-2 py-2 text-white font-mono text-xs uppercase outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-3">
+                                <button type="submit" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform active:scale-95">
+                                    🚀 Deploy Theme
+                                </button>
+                                <button type="button" onclick="setRandomTheme()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                                    🎲 Random
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex gap-3">
-                        <button type="submit" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform active:scale-95">
-                            🚀 Deploy Theme
-                        </button>
-                        <button type="button" onclick="setRandomTheme()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                            🎲 Random
-                        </button>
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
+                        <span class="text-6xl mb-4 animate-bounce">🎨</span>
+                        <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Absolute Freedom</h3>
+                        <p class="text-xs text-slate-400 max-w-xs">No preset restrictions. Solid colors or stunning gradients at your command.</p>
                     </div>
-                </form>
+                </div>
+
             </div>
 
-            <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center">
-                <span class="text-6xl mb-4 animate-bounce">🎨</span>
-                <h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Absolute Freedom</h3>
-                <p class="text-xs text-slate-400 max-w-xs">No preset restrictions. Solid colors or stunning gradients at your command.</p>
-            </div>
         </div>
 
     </main>
 
+    <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
     <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
+        }
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
+        });
+    </script>
+
+    <script>
+        let pendingActionCallback = null;
         let currentActionType = 'add'; 
         let currentThemeMode = 'solid';
 
@@ -619,7 +663,6 @@
             }, 150);
         }
 
-        let pendingActionCallback = null;
         function requestSecureAuthorization(actionType, callback) {
             currentActionType = actionType;
             pendingActionCallback = callback;
@@ -793,12 +836,12 @@
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
-                if (btn) btn.className = "flex-1 min-w-[110px] py-3.5 text-slate-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+                if (btn) btn.className = "w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
             });
             const targetSec = document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
             const targetBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
             if (targetSec) targetSec.classList.remove('hidden');
-            if (targetBtn) targetBtn.className = "flex-1 min-w-[110px] py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer";
+            if (targetBtn) targetBtn.className = "w-full text-left px-4 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
             
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
@@ -1052,30 +1095,36 @@
                 if (data.success && data.categories.length > 0) {
                     container.innerHTML = data.categories.map(c => `
                         <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${c.name}</h4><span class="text-[10px] text-blue-400 uppercase tracking-widest">Target: ${c.dailyTargetMinutes}m/day | Start: ${c.startDate || '2026-09-14'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span></div>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="editStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
+                            <div>
+                                <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
+                                <span class="text-[10px] text-blue-400 uppercase tracking-widest block mt-1">Target: ${c.dailyTargetMinutes}m/day ${c.startTime && c.endTime ? '| ⏰ ' + c.startTime + ' - ' + c.endTime : ''}</span>
+                                <span class="text-[9px] text-slate-400 uppercase tracking-wider block">Start: ${c.startDate || '2026-09-14'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button type="button" onclick="editStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}', '${c.startTime || ''}', '${c.endTime || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
                                 <button type="button" onclick="confirmAndDeleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
                             </div>
                         </div>
                     `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study subjects found.</p>`; }
+                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No study subjects found.</p>`; }
             } catch (err) {}
         }
 
-        function editStudy(id, name, target, startDate, endDate) {
+        function editStudy(id, name, target, startDate, endDate, startTime, endTime) {
             document.getElementById('editStudyId').value = id;
             document.getElementById('studyName').value = name;
             document.getElementById('studyTarget').value = target;
             document.getElementById('studyStartDate').value = startDate || "2026-09-14";
             document.getElementById('studyEndDate').value = endDate || "";
-            document.getElementById('studyFormTitle').innerText = "✏️ Edit Study Subject";
+            document.getElementById('studyStartTime').value = startTime || "";
+            document.getElementById('studyEndTime').value = endTime || "";
+            document.getElementById('studyFormTitle').innerText = "✏️ Edit Study Subject & Time Block";
         }
 
         function resetStudyForm() {
             document.getElementById('createStudyForm').reset();
             document.getElementById('editStudyId').value = '';
-            document.getElementById('studyFormTitle').innerText = "📚 Create Study Subject";
+            document.getElementById('studyFormTitle').innerText = "📚 Create Study Subject & Time Blocks";
         }
 
         const studyForm = document.getElementById('createStudyForm');
@@ -1089,10 +1138,12 @@
                     const dailyTargetMinutes = document.getElementById('studyTarget').value;
                     const startDate = document.getElementById('studyStartDate').value || "2026-09-14";
                     const endDate = document.getElementById('studyEndDate').value;
+                    const startTime = document.getElementById('studyStartTime').value;
+                    const endTime = document.getElementById('studyEndTime').value;
                     try {
                         let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, password }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, startTime, endTime, password }) });
                         const data = await res.json();
                         if (res.ok) { showStatusMessage(editId ? "Subject updated successfully!" : "Subject added successfully!", "success"); resetStudyForm(); loadStudy(); }
                         else { alert("❌ " + data.error); }
@@ -1416,7 +1467,7 @@
             loadModuleLocksStatus();
         });
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playCyberClick() {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             try {
