@@ -376,17 +376,28 @@
                                 <button type="button" onclick="resetStudyForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
                             </div>
                         </form>
-                        <div class="grid grid-cols-2 gap-4">
-    <div>
-        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Hours</label>
-        <input type="number" id="studyTargetHours" value="7" min="0" max="24" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Hours">
-    </div>
-    <div>
-        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label>
-        <input type="number" id="studyTargetMins" value="0" min="0" max="59" step="5" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Minutes">
-    </div>
-</div>
                     </div>
+
+                    <!-- Separate Dedicated Card for Global Daily Study Target Hours & Minutes -->
+                    <div class="glass-card p-6 sm:p-8 rounded-3xl border border-blue-500/30">
+                        <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2"><span>🎯</span> Fixed Daily Study Target Hours</h3>
+                        <form id="fixedDailyTargetForm" onsubmit="handleFixedDailyTargetSubmit(event)" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Hours</label>
+                                    <input type="number" id="studyTargetHours" value="7" min="0" max="24" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Hours">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label>
+                                    <input type="number" id="studyTargetMins" value="0" min="0" max="59" step="5" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Minutes">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
+                                Deploy Target Hours
+                            </button>
+                        </form>
+                    </div>
+
                     <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                         <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Study Categories</h3>
                         <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -913,15 +924,35 @@
                 document.documentElement.style.setProperty('--theme-glow', c1 + '40');
                 showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
             }
-        }// Form submit event ni andar aa rite calculation karo:
-const hoursInput = document.getElementById('studyTargetHours');
-const minsInput = document.getElementById('studyTargetMins');
+        }
 
-const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
-const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
+        function handleFixedDailyTargetSubmit(e) {
+            e.preventDefault();
+            const hoursInput = document.getElementById('studyTargetHours');
+            const minsInput = document.getElementById('studyTargetMins');
 
-// Total daily target minutes calculate thase (e.g., 7 hours = 420 mins)
-const dailyTargetMinutes = (hours * 60) + minutes;
+            const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
+            const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
+            const dailyTargetMinutes = (hours * 60) + minutes;
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/study/global-target', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ dailyTargetMinutes, password })
+                    });
+                    if (res.ok) {
+                        showStatusMessage(`✅ Daily Target Hours Set to ${hours}h ${minutes}m (${dailyTargetMinutes} mins)!`, "success");
+                    } else {
+                        showStatusMessage("❌ Failed to update global target hours", "error");
+                    }
+                } catch (err) {
+                    showStatusMessage("❌ Connection error", "error");
+                }
+            });
+        }
 
         function setRandomTheme() {
             if (currentThemeMode === 'solid') {
