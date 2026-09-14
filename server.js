@@ -223,7 +223,8 @@ async function trackerApiGuard(req, res, next) {
 }
 
 // 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
-async function moduleApiGuard(moduleName) {
+ // 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
+function moduleApiGuard(moduleName) { // <-- 1. Remove 'async' from here
     return async (req, res, next) => {
         let lockStatus = await getSystemLockStatus();
         if (lockStatus.locked) {
@@ -234,7 +235,8 @@ async function moduleApiGuard(moduleName) {
         if (moduleName === 'study' && lockStatus.studyLocked) return res.status(403).json({ error: "🔒 Study Tracker is locked by Admin." });
         if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
         if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
-        next();
+        
+        return next(); // <-- 2. Add 'return' here so it evaluates to true
     };
 }
 
