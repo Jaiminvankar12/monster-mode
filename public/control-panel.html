@@ -347,7 +347,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: STUDY CORE (ONLY SUBJECTS AND TARGETS) -->
+                <!-- TAB 3: STUDY CORE -->
                 <div id="sectionStudy" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl">
                         <h3 id="studyFormTitle" class="text-sm font-black uppercase tracking-wider text-blue-400 mb-6 flex items-center gap-2"><span>📚</span> Create / Edit Study Subject</h3>
@@ -405,27 +405,27 @@
                     </div>
                 </div>
 
-                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS, MULTI-STUDY SESSIONS WITH SESSION NAME, SUBJECT NAME, START/END TIME, & NOTES / REMINDERS) 🟢 -->
+                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS WITH DATE, MULTI-STUDY SESSIONS, & NOTES/REMINDERS) 🟢 -->
                 <div id="sectionSchedules" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
                         <h3 class="text-sm font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-2"><span>⏰</span> Time Management & Sessions Matrix</h3>
-                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule, multiple timed study sessions (with Session Name, Subject Name, and Start/End time), and notes/reminders.</p>
+                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule (with Date & Time), multiple timed study sessions, and notes/reminders.</p>
                         
-                        <!-- 1. Workout & Study Timed Alerts Form -->
+                        <!-- 1. Workout Timed Alerts Form (Updated with Date) -->
                         <form id="updateSchedulesForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
-                            <h4 class="text-xs font-black uppercase text-red-400">⚡ Execution Timed Alerts</h4>
+                            <h4 class="text-xs font-black uppercase text-red-400">⚡ Workout Execution Schedule</h4>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">🏋️ Workout Reminder Time</label>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">📅 Workout Date</label>
+                                <input type="date" id="workoutReminderDateInput" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">⏰ Workout Time</label>
                                 <input type="time" id="workoutReminderTimeInput" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">📚 General Study Reminder Time</label>
-                                <input type="time" id="studyReminderTimeInput" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                            </div>
-                            <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Execution Schedules</button>
+                            <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Workout Schedule</button>
                         </form>
 
-                        <!-- 2. Multiple Study Sessions Scheduler (Session Name, Subject Name, Start & End Time) -->
+                        <!-- 2. Multiple Study Sessions Scheduler (Start & End Time) -->
                         <form id="createStudySessionScheduleForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-blue-400">📚 Schedule Specific Study Session Time-Block</h4>
                             <div>
@@ -1035,7 +1035,6 @@
             });
         }
 
-        // 🟢 SUBMIT SCHEDULED STUDY TIME BLOCK FROM TIME MANAGEMENT TAB (With Session Name & Subject Name)
         const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
         if (studySessionScheduleForm) {
             studySessionScheduleForm.addEventListener('submit', async (e) => {
@@ -1090,6 +1089,7 @@
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
+                    document.getElementById('workoutReminderDateInput').value = data.workoutReminderDate || "";
                     document.getElementById('workoutReminderTimeInput').value = data.workoutReminderTime || "";
                     document.getElementById('studyReminderTimeInput').value = data.studyReminderTime || "";
                 }
@@ -1101,6 +1101,7 @@
             schedulesForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 requestSecureAuthorization('edit', async (password) => {
+                    const workoutReminderDate = document.getElementById('workoutReminderDateInput').value;
                     const workoutReminderTime = document.getElementById('workoutReminderTimeInput').value;
                     const studyReminderTime = document.getElementById('studyReminderTimeInput').value;
                     try {
@@ -1108,11 +1109,11 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ workoutReminderTime, studyReminderTime, password })
+                            body: JSON.stringify({ workoutReminderDate, workoutReminderTime, studyReminderTime, password })
                         });
                         const data = await res.json();
                         if (res.ok) {
-                            showStatusMessage("Time management schedules updated successfully!", "success");
+                            showStatusMessage("Workout schedule and time management updated successfully!", "success");
                         } else {
                             alert("❌ " + data.error);
                         }
@@ -1718,6 +1719,28 @@
             loadStudy(); 
             loadHygiene();
             loadModuleLocksStatus();
+        });
+
+         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
         });
     </script>
 </body>

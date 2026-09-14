@@ -313,7 +313,7 @@
             </div>
         </header>
 
-        <!-- 🟢 HUD WIDGET (UPDATED WITH WORKOUT TIME LEFT COUNTDOWN) -->
+        <!-- 🟢 HUD WIDGET (WITH LIVE COUNTDOWN TIMERS) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
@@ -353,7 +353,7 @@
             </div>
         </div>
 
-        <!-- 📚 NEW LARGE STUDY SCHEDULE CARD (WITH SESSION NAME, SUBJECT NAME & TIMING) -->
+        <!-- 📚 STUDY SCHEDULE CARD -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-blue-500 dynamic-glow">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -379,7 +379,7 @@
             </div>
         </div>
 
-        <!-- 📌 NEW LARGE NOTES & REMINDER CARD (SMART DATE FILTERING & DAYS LEFT) -->
+        <!-- 📌 NOTES & REMINDERS WIDGET (SMART DATE FILTERING & DAYS LEFT) -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -1292,7 +1292,6 @@
                                 <span class="text-[10px] font-extrabold text-blue-400">Target: ${targetMins}m/day</span>
                             </div>
                             <h4 class="font-extrabold text-sm text-white mt-2">${c.name}</h4>
-                            ${c.startTime && c.endTime ? `<span class="text-[9px] text-blue-400 font-bold block mt-1">⏰ ${c.startTime} - ${c.endTime}</span>` : ''}
                         </div>
                         <div class="bg-black/30 p-3 rounded-xl border border-white/5 space-y-2 text-[10px]">
                             <div>
