@@ -715,6 +715,8 @@
                 playCyberClick();
             }
         });
+        const dateInput = document.getElementById('workoutReminderDateInput');
+const workoutReminderDate = dateInput ? dateInput.value : "";
 
         let pendingActionCallback = null;
         let currentActionType = 'add'; 
