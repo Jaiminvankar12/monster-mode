@@ -125,8 +125,19 @@ const globalSettingsSchema = new mongoose.Schema({
     dashboardBgColor: { type: String, default: "#07090f" },
     gatewayHeadline: { type: String, default: "BECOME A<br>MONSTER.<br>DOMINATE REALITY." },
     gatewaySubtext: { type: String, default: "Pure discipline. Zero excuses. Absolute control." },
+    
     workoutReminderTime: { type: String, default: "" },
+    workoutReminderFreq: { type: String, default: "daily" },
+    workoutReminderDays: { type: [String], default: [] },
+    workoutReminderDate: { type: String, default: "" },
+    
     studyReminderTime: { type: String, default: "" },
+    studyReminderFreq: { type: String, default: "daily" },
+    studyReminderDays: { type: [String], default: [] },
+    studyReminderDate: { type: String, default: "" },
+    
+    masterTargetHours: { type: Number, default: 8 },
+
     workoutNotifiedDate: { type: String, default: "" },
     studyNotifiedDate: { type: String, default: "" }
 });
@@ -199,7 +210,6 @@ app.use(async (req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 function requireAuth(req, res, next) {
-    // 🟢 SEAMLESS SESSION ASSIGNMENT FOR TRUSTED TOKENS (Fixes data store issue)
     if (!req.session || !req.session.userId) {
         req.session = req.session || {};
         req.session.userId = MASTER_USER_ID;
@@ -481,7 +491,7 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
-// 🟢 CRON: Reminders + Workout/Study Timed Alerts
+// 🟢 CRON: Reminders + Workout/Study Timed Alerts (With Specific Days support)
 cron.schedule('* * * * *', async () => {
     if (isCronRunning) return;
     isCronRunning = true;
@@ -494,6 +504,9 @@ cron.schedule('* * * * *', async () => {
         let currentHours = String(istNow.getHours()).padStart(2, '0');
         let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
         let currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+        let daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let currentDayName = daysMap[istNow.getDay()];
 
         // 1. Note Reminders
         const reminders = await NoteReminder.find({ isReminder: true, notifiedToday: false, date: todayStr, time: currentTimeStr });
@@ -512,12 +525,25 @@ cron.schedule('* * * * *', async () => {
         // 2. Workout & Study Timed Alerts
         let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
         if (gs) {
-            if (gs.workoutReminderTime === currentTimeStr && gs.workoutNotifiedDate !== todayStr) {
+            let wFreq = gs.workoutReminderFreq || 'daily';
+            let shouldPingWorkout = false;
+            if (wFreq === 'daily') shouldPingWorkout = true;
+            else if (wFreq === 'specific_days' && (gs.workoutReminderDays || []).includes(currentDayName)) shouldPingWorkout = true;
+            else if (wFreq === 'custom' && gs.workoutReminderDate === todayStr) shouldPingWorkout = true;
+
+            if (gs.workoutReminderTime === currentTimeStr && gs.workoutNotifiedDate !== todayStr && shouldPingWorkout) {
                 gs.workoutNotifiedDate = todayStr;
                 await gs.save();
                 await sendTelegramMessage(`🏋️ *MONSTER WORKOUT TIME!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Gear up and crush your workout session right now!`);
             }
-            if (gs.studyReminderTime === currentTimeStr && gs.studyNotifiedDate !== todayStr) {
+
+            let sFreq = gs.studyReminderFreq || 'daily';
+            let shouldPingStudy = false;
+            if (sFreq === 'daily') shouldPingStudy = true;
+            else if (sFreq === 'specific_days' && (gs.studyReminderDays || []).includes(currentDayName)) shouldPingStudy = true;
+            else if (sFreq === 'custom' && gs.studyReminderDate === todayStr) shouldPingStudy = true;
+
+            if (gs.studyReminderTime === currentTimeStr && gs.studyNotifiedDate !== todayStr && shouldPingStudy) {
                 gs.studyNotifiedDate = todayStr;
                 await gs.save();
                 await sendTelegramMessage(`📚 *MONSTER STUDY SESSION!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Deep work mode ON. Dominate your targets!`);
@@ -612,17 +638,36 @@ app.get('/api/schedules', async (req, res) => {
     res.json({ 
         success: true, 
         workoutReminderTime: gs ? gs.workoutReminderTime : "", 
-        studyReminderTime: gs ? gs.studyReminderTime : "" 
+        workoutReminderFreq: gs ? gs.workoutReminderFreq : "daily",
+        workoutReminderDays: gs ? gs.workoutReminderDays : [],
+        workoutReminderDate: gs ? gs.workoutReminderDate : "",
+        studyReminderTime: gs ? gs.studyReminderTime : "", 
+        studyReminderFreq: gs ? gs.studyReminderFreq : "daily",
+        studyReminderDays: gs ? gs.studyReminderDays : [],
+        studyReminderDate: gs ? gs.studyReminderDate : "",
+        masterTargetHours: gs ? gs.masterTargetHours : 8
     });
 });
 
 app.post('/api/control-panel/schedules', requireAuth, async (req, res) => {
-    const { workoutReminderTime, studyReminderTime } = req.body;
+    const { 
+        workoutReminderTime, workoutReminderFreq, workoutReminderDays, workoutReminderDate, 
+        studyReminderTime, studyReminderFreq, studyReminderDays, studyReminderDate, 
+        masterTargetHours 
+    } = req.body;
+    
     let gs = await GlobalSettings.findOneAndUpdate(
         { key: 'GLOBAL' },
         { 
             workoutReminderTime: workoutReminderTime !== undefined ? workoutReminderTime : "", 
-            studyReminderTime: studyReminderTime !== undefined ? studyReminderTime : "" 
+            workoutReminderFreq: workoutReminderFreq || "daily",
+            workoutReminderDays: workoutReminderDays || [],
+            workoutReminderDate: workoutReminderDate || "",
+            studyReminderTime: studyReminderTime !== undefined ? studyReminderTime : "", 
+            studyReminderFreq: studyReminderFreq || "daily",
+            studyReminderDays: studyReminderDays || [],
+            studyReminderDate: studyReminderDate || "",
+            masterTargetHours: masterTargetHours !== undefined ? parseFloat(masterTargetHours) : 8
         },
         { new: true, upsert: true }
     );
@@ -1439,7 +1484,7 @@ app.post('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) 
 });
 
 app.post('/api/notes-reminders/:id/toggle', requireAuth, trackerApiGuard, async (req, res) => {
-    let item = await NoteReminder.findOne({ id: req.params.id });
+    let item = await NoteReminder.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!item) return res.status(404).json({ error: "Item not found." });
     
     item.completed = !item.completed;
@@ -1448,7 +1493,7 @@ app.post('/api/notes-reminders/:id/toggle', requireAuth, trackerApiGuard, async 
 });
 
 app.delete('/api/notes-reminders/:id', requireAuth, trackerApiGuard, async (req, res) => {
-    await NoteReminder.deleteOne({ id: req.params.id });
+    await NoteReminder.deleteOne({ id: req.params.id, userId: MASTER_USER_ID });
     res.json({ success: true, message: "Item deleted." });
 });
 
