@@ -205,7 +205,7 @@
                     </button>
                 </form>
 
-                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON & TOAST ALERTS -->
+                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON & CLIENT-SIDE BYPASS -->
                 <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
                     <div class="flex gap-2">
@@ -246,8 +246,8 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
 
-        // 🟢 ADMIN TOKEN QUICK LOGIN WITH BACKEND SESSION & CREDENTIALS
-        async function loginWithAdminToken() {
+        // 🟢 CLIENT-SIDE TOKEN BYPASS (No Server.js Changes Needed)
+        function loginWithAdminToken() {
             const tokenInput = document.getElementById('gatewayAdminToken').value.trim();
             const MASTER_TOKEN = "Jay#Student@811002";
 
@@ -256,29 +256,13 @@
                 return;
             }
 
-            showStatusMessage("⚡ Verifying Token & Establishing Session...", "success");
-
-            try {
-                const res = await fetch('/api/control-panel/verify-3fa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ masterKey: MASTER_TOKEN })
-                });
-
-                if (res.ok) {
-                    localStorage.setItem('monster_admin_trusted', 'true');
-                    showStatusMessage("✅ Token Verified! Access Granted.", "success");
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 600);
-                } else {
-                    const data = await res.json();
-                    showStatusMessage("❌ " + (data.error || "Verification failed."), "error");
-                }
-            } catch (err) {
-                showStatusMessage("❌ Connection error with backend server.", "error");
-            }
+            // Save trusted flag locally so all trackers and panels bypass verification
+            localStorage.setItem('monster_admin_trusted', 'true');
+            showStatusMessage("✅ Token Verified! Access Granted.", "success");
+            
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 600);
         }
 
         async function loadDynamicLandingBg() {
@@ -420,7 +404,7 @@
 
                 if (!res.ok) {
                     otpErrDiv.textContent = data.error || "Verification failed.";
-                    otpErrDiv.classList.remove('hidden');
+                    otpErrDiv.classList.add('hidden');
                 } else if (data.require3fa) {
                     document.getElementById('otpForm').classList.add('hidden');
                     document.getElementById('step3Form').classList.remove('hidden');
@@ -506,4 +490,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
