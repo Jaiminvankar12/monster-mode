@@ -316,51 +316,52 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         async function sendPromptToAiCoach() {
-            const input = document.getElementById('aiCoachInput');
-            const chatBox = document.getElementById('aiCoachChatBox');
-            const prompt = input.value.trim();
-            if(!prompt) return;
+    const input = document.getElementById('aiCoachInput');
+    const chatBox = document.getElementById('aiCoachChatBox');
+    const prompt = input.value.trim();
+    if(!prompt) return;
 
-            chatBox.innerHTML = `
-                <div class="flex items-center gap-3 text-red-400 p-2">
-                    <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol via AI Cloud...</span>
-                </div>`;
-            
-            try {
-                const res = await fetch('/api/apex-ai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ prompt })
-                });
-                const data = await res.json();
-                
-                const replyText = data.reply || data.message || (data.success ? data.text : null);
-
-                if (res.ok && replyText) {
-                    let formattedReply = replyText
-                        .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
-                        .replace(/\n/g, '<br>')
-                        .replace(/\*\s/g, '• ');
-
-                    chatBox.innerHTML = `<div class="text-slate-300 whitespace-pre-wrap">${formattedReply}</div>`;
-                } else {
-                    chatBox.innerHTML = `<div class="text-red-400 font-bold">Execute your workout regardless of motivation. No excuses.</div>`;
-                }
-            } catch(err) {
-                chatBox.innerHTML = `<div class="text-red-400 font-bold">System offline. Push through the barrier on your own.</div>`;
-            }
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendPromptToAiCoach();
-            }
+    chatBox.innerHTML = `
+        <div class="flex items-center gap-3 text-red-400 p-2">
+            <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol via AI Cloud...</span>
+        </div>`;
+    
+    try {
+        // 🟢 FIX: Correct endpoint URL mapped with backend (/api/ai-coach/ask)
+        const res = await fetch('/api/ai-coach/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ prompt })
         });
+        const data = await res.json();
+        
+        const replyText = data.reply || data.message || (data.success ? data.text : null);
+
+        if (res.ok && replyText) {
+            let formattedReply = replyText
+                .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\s/g, '• ');
+
+            chatBox.innerHTML = `<div class="text-slate-300 whitespace-pre-wrap">${formattedReply}</div>`;
+        } else {
+            chatBox.innerHTML = `<div class="text-red-400 font-bold">Execute your workout regardless of motivation. No excuses.</div>`;
+        }
+    } catch(err) {
+        chatBox.innerHTML = `<div class="text-red-400 font-bold">System offline. Push through the barrier on your own.</div>`;
+    }
+    input.value = '';
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendPromptToAiCoach();
+    }
+});
 
         async function verifyGlobalSystemLock() {
             try {

@@ -1354,6 +1354,24 @@ app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =>
     
     res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, currentStreak, studyStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
+// 🟢 GLOBAL STUDY TARGET API (Control Panel Mathi Target Set Karva Mate)
+app.post('/api/study/global-target', requireAuth, async (req, res) => {
+    const { dailyTargetMinutes, password } = req.body;
+    if (password !== "Jay#edit@monster" && password !== "Jay_monster_mode_on" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "❌ Unauthorized Password!" });
+    }
+    
+    let ud = await UserData.findOne({ userId: MASTER_USER_ID });
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+    
+    let today = getServerToday();
+    if (!ud.customDailyTargets) { ud.customDailyTargets = new Map(); }
+    ud.customDailyTargets.set(today, parseInt(dailyTargetMinutes) || 420);
+    ud.markModified('customDailyTargets');
+    await ud.save();
+
+    res.json({ success: true, message: `Global daily target updated to ${dailyTargetMinutes} minutes.` });
+});
 
 app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
