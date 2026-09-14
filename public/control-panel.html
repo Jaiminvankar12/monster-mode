@@ -686,1074 +686,1185 @@
 
     <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
     <script>
-            let audioCtx = null;
-        
-        function playCyberClick() {
-            try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                osc.connect(gainNode); 
-                gainNode.connect(audioCtx.destination);
-                osc.start(); 
-                osc.stop(audioCtx.currentTime + 0.05);
-            } catch(e) {}
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
+    let audioCtx = null;
+    
+    function playCyberClick() {
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-        });
-        const dateInput = document.getElementById('workoutReminderDateInput');
-const workoutReminderDate = dateInput ? dateInput.value : "";
-
-        let pendingActionCallback = null;
-        let currentActionType = 'add'; 
-        let currentThemeMode = 'solid';
-
-        function setThemeMode(mode) {
-            currentThemeMode = mode;
-            const solidBtn = document.getElementById('modeSolidBtn');
-            const gradBtn = document.getElementById('modeGradientBtn');
-            const solidCtrl = document.getElementById('solidControls');
-            const gradCtrl = document.getElementById('gradientControls');
-
-            if (mode === 'solid') {
-                solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
-                gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
-                solidCtrl.classList.remove('hidden');
-                gradCtrl.classList.add('hidden');
-            } else {
-                gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
-                solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
-                gradCtrl.classList.remove('hidden');
-                solidCtrl.classList.add('hidden');
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gainNode); 
+            gainNode.connect(audioCtx.destination);
+            osc.start(); 
+            osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {}
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('button')) {
+            playCyberClick();
+        }
+    });
+
+    const dateInput = document.getElementById('workoutReminderDateInput');
+    const workoutReminderDate = dateInput ? dateInput.value : "";
+
+    let pendingActionCallback = null;
+    let currentActionType = 'add'; 
+    let currentThemeMode = 'solid';
+
+    function setThemeMode(mode) {
+        currentThemeMode = mode;
+        const solidBtn = document.getElementById('modeSolidBtn');
+        const gradBtn = document.getElementById('modeGradientBtn');
+        const solidCtrl = document.getElementById('solidControls');
+        const gradCtrl = document.getElementById('gradientControls');
+
+        if (mode === 'solid') {
+            if (solidBtn) solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
+            if (gradBtn) gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
+            if (solidCtrl) solidCtrl.classList.remove('hidden');
+            if (gradCtrl) gradCtrl.classList.add('hidden');
+        } else {
+            if (gradBtn) gradBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white shadow-lg";
+            if (solidBtn) solidBtn.className = "flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white";
+            if (gradCtrl) gradCtrl.classList.remove('hidden');
+            if (solidCtrl) solidCtrl.classList.add('hidden');
+        }
+    }
+
+    function adjustWorkoutInput(elementId, amount) {
+        const input = document.getElementById(elementId);
+        if (!input) return;
+        let currentVal = parseInt(input.value) || 0;
+        let newVal = currentVal + amount;
+        if (newVal < 1) newVal = 1;
+        input.value = newVal;
+        input.classList.add('text-red-400', 'scale-110');
+        setTimeout(() => {
+            input.classList.remove('text-red-400', 'scale-110');
+        }, 150);
+    }
+
+    function requestSecureAuthorization(actionType, callback) {
+        currentActionType = actionType;
+        pendingActionCallback = callback;
+        const modal = document.getElementById('secureActionModal');
+        const input = document.getElementById('actionSecurityPasswordInput');
+        const subtitle = document.getElementById('modalActionSubtitle');
+        if (modal && input) {
+            input.value = '';
+            input.type = 'password';
+            if (subtitle) subtitle.innerText = `${actionType.toUpperCase()} OPERATION VECTOR`;
+            modal.classList.remove('hidden');
+            input.focus();
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const input = document.getElementById('actionSecurityPasswordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+        if (!input || !eyeIcon) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
+        } else {
+            input.type = 'password';
+            eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+        }
+    }
+
+    function closeSecureActionModal() {
+        const modal = document.getElementById('secureActionModal');
+        if (modal) modal.classList.add('hidden');
+        pendingActionCallback = null;
+    }
+
+    async function handleSecureActionSubmit(e) {
+        e.preventDefault();
+        const passwordInput = document.getElementById('actionSecurityPasswordInput');
+        const password = passwordInput ? passwordInput.value : '';
+        let validPassword = "";
+        if (currentActionType === 'lock') validPassword = "Jay_monster_mode_on";
+        else if (currentActionType === 'add') validPassword = "Jay#add@monster";
+        else if (currentActionType === 'edit') validPassword = "Jay#edit@monster";
+        else if (currentActionType === 'delete') validPassword = "Jay#del@monster";
+
+        if (password !== validPassword) {
+            showStatusMessage(`❌ Wrong Password! Incorrect password for ${currentActionType.toUpperCase()} action.`, "error");
+            return;
         }
 
-        function adjustWorkoutInput(elementId, amount) {
-            const input = document.getElementById(elementId);
-            if (!input) return;
-            let currentVal = parseInt(input.value) || 0;
-            let newVal = currentVal + amount;
-            if (newVal < 1) newVal = 1;
-            input.value = newVal;
-            input.classList.add('text-red-400', 'scale-110');
-            setTimeout(() => {
-                input.classList.remove('text-red-400', 'scale-110');
-            }, 150);
+        if (pendingActionCallback) {
+            await pendingActionCallback(password);
         }
 
-        function requestSecureAuthorization(actionType, callback) {
-            currentActionType = actionType;
-            pendingActionCallback = callback;
-            const modal = document.getElementById('secureActionModal');
-            const input = document.getElementById('actionSecurityPasswordInput');
-            const subtitle = document.getElementById('modalActionSubtitle');
-            if (modal && input) {
-                input.value = '';
-                input.type = 'password';
-                if (subtitle) subtitle.innerText = `${actionType.toUpperCase()} OPERATION VECTOR`;
-                modal.classList.remove('hidden');
-                input.focus();
-            }
+        closeSecureActionModal();
+        showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
+    }
+
+    async function verifyAdminSession() {
+        if (localStorage.getItem('monster_admin_trusted') === 'true') {
+            return; 
         }
+        try {
+            const res = await fetch('/api/control-panel/session?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (!data.authenticated) window.location.href = 'index.html';
+        } catch (err) { window.location.href = 'index.html'; }
+    }
+    verifyAdminSession();
 
-        function togglePasswordVisibility() {
-            const input = document.getElementById('actionSecurityPasswordInput');
-            const eyeIcon = document.getElementById('eyeIcon');
-            if (!input || !eyeIcon) return;
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
-            } else {
-                input.type = 'password';
-                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
-            }
+    function applySavedTheme() {
+        const savedMode = localStorage.getItem('monster_accent_theme') || 'solid';
+        currentThemeMode = savedMode;
+
+        if (savedMode === 'gradient') {
+            setThemeMode('gradient');
+            const c1 = localStorage.getItem('monster_grad_1') || '#ef4444';
+            const c2 = localStorage.getItem('monster_grad_2') || '#b91c1c';
+            document.documentElement.style.setProperty('--theme-primary', c1);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+
+            const g1 = document.getElementById('gradColor1');
+            const gh1 = document.getElementById('gradHex1');
+            const g2 = document.getElementById('gradColor2');
+            const gh2 = document.getElementById('gradHex2');
+            if (g1) g1.value = c1;
+            if (gh1) gh1.value = c1.replace('#', '');
+            if (g2) g2.value = c2;
+            if (gh2) gh2.value = c2.replace('#', '');
+        } else {
+            setThemeMode('solid');
+            const hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
+            document.documentElement.style.setProperty('--theme-primary', hex);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', hex + '40');
+
+            const picker = document.getElementById('solidColorPicker');
+            const hexInput = document.getElementById('solidHexInput');
+            if (picker) picker.value = hex;
+            if (hexInput) hexInput.value = hex.replace('#', '');
         }
+    }
+    applySavedTheme();
 
-        function closeSecureActionModal() {
-            const modal = document.getElementById('secureActionModal');
-            if (modal) modal.classList.add('hidden');
-            pendingActionCallback = null;
+    function syncSolidHex(val) {
+        const hexInput = document.getElementById('solidHexInput');
+        if (hexInput) hexInput.value = val.replace('#', '').toUpperCase();
+    }
+
+    function syncSolidPicker(val) {
+        let clean = val.trim().replace('#', '');
+        if (clean.length === 3 || clean.length === 6) {
+            const picker = document.getElementById('solidColorPicker');
+            if (picker) picker.value = '#' + clean;
         }
+    }
 
-        async function handleSecureActionSubmit(e) {
-            e.preventDefault();
-            const password = document.getElementById('actionSecurityPasswordInput').value;
-            let validPassword = "";
-            if (currentActionType === 'lock') validPassword = "Jay_monster_mode_on";
-            else if (currentActionType === 'add') validPassword = "Jay#add@monster";
-            else if (currentActionType === 'edit') validPassword = "Jay#edit@monster";
-            else if (currentActionType === 'delete') validPassword = "Jay#del@monster";
-
-            if (password !== validPassword) {
-                showStatusMessage(`❌ Wrong Password! Incorrect password for ${currentActionType.toUpperCase()} action.`, "error");
+    function handleCustomThemeSubmit(e) {
+        e.preventDefault();
+        if (currentThemeMode === 'solid') {
+            const hexInput = document.getElementById('solidHexInput');
+            if (!hexInput) return;
+            let hex = hexInput.value.trim();
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
+                showStatusMessage("❌ Invalid Hex Code!", "error");
                 return;
             }
-
-            if (pendingActionCallback) {
-                await pendingActionCallback(password);
-            }
-
-            closeSecureActionModal();
-            showStatusMessage(`✅ ${currentActionType.toUpperCase()} Authorized Successfully!`, "success");
+            localStorage.setItem('monster_accent_theme', 'solid');
+            localStorage.setItem('monster_custom_hex', hex);
+            document.documentElement.style.setProperty('--theme-primary', hex);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', hex + '40');
+            showStatusMessage(`✅ Solid Theme Deployed: ${hex.toUpperCase()}`, 'success');
+        } else {
+            const gh1 = document.getElementById('gradHex1');
+            const gh2 = document.getElementById('gradHex2');
+            if (!gh1 || !gh2) return;
+            let c1 = gh1.value.trim();
+            let c2 = gh2.value.trim();
+            if (!c1.startsWith('#')) c1 = '#' + c1;
+            if (!c2.startsWith('#')) c2 = '#' + c2;
+            localStorage.setItem('monster_accent_theme', 'gradient');
+            localStorage.setItem('monster_grad_1', c1);
+            localStorage.setItem('monster_grad_2', c2);
+            document.documentElement.style.setProperty('--theme-primary', c1);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+            showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
         }
+    }
 
-        async function verifyAdminSession() {
-            if (localStorage.getItem('monster_admin_trusted') === 'true') {
-                return; 
-            }
-            try {
-                const res = await fetch('/api/control-panel/session?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (!data.authenticated) window.location.href = 'index.html';
-            } catch (err) { window.location.href = 'index.html'; }
+    function setRandomTheme() {
+        if (currentThemeMode === 'solid') {
+            const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            const picker = document.getElementById('solidColorPicker');
+            const hexInput = document.getElementById('solidHexInput');
+            if (picker) picker.value = randomHex;
+            if (hexInput) hexInput.value = randomHex.replace('#', '').toUpperCase();
+            localStorage.setItem('monster_accent_theme', 'solid');
+            localStorage.setItem('monster_custom_hex', randomHex);
+            document.documentElement.style.setProperty('--theme-primary', randomHex);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${randomHex} 0%, #b91c1c 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', randomHex + '40');
+            showStatusMessage(`🎲 Random Solid Theme: ${randomHex.toUpperCase()}`, 'success');
+        } else {
+            const c1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            const c2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            const g1 = document.getElementById('gradColor1');
+            const gh1 = document.getElementById('gradHex1');
+            const g2 = document.getElementById('gradColor2');
+            const gh2 = document.getElementById('gradHex2');
+            if (g1) g1.value = c1;
+            if (gh1) gh1.value = c1.replace('#', '').toUpperCase();
+            if (g2) g2.value = c2;
+            if (gh2) gh2.value = c2.replace('#', '').toUpperCase();
+            localStorage.setItem('monster_accent_theme', 'gradient');
+            localStorage.setItem('monster_grad_1', c1);
+            localStorage.setItem('monster_grad_2', c2);
+            document.documentElement.style.setProperty('--theme-primary', c1);
+            document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+            document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+            showStatusMessage(`🎲 Random Gradient Theme Deployed!`, 'success');
         }
-        verifyAdminSession();
+    }
 
-        function applySavedTheme() {
-            const savedMode = localStorage.getItem('monster_accent_theme') || 'solid';
-            currentThemeMode = savedMode;
+    function switchTab(tab) {
+        ['habits', 'workouts', 'study', 'targets', 'hygiene', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
+            const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
+            const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+            if (sec) sec.classList.add('hidden');
+            if (btn) btn.className = "w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
+        });
+        const targetSec = document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+        const targetBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+        if (targetSec) targetSec.classList.remove('hidden');
+        if (targetBtn) targetBtn.className = "w-full text-left px-4 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
+        
+        if (tab === 'schedules') { loadSchedulesConfig(); loadNotesReminders(); }
+        if (tab === 'hydration') loadHydrationConfig();
+        if (tab === 'examMode') loadExamModeConfig();
+        if (tab === 'sanctuary') loadSanctuaryConfig();
+        if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
+        if (tab === 'dashboardBg') loadDashboardBgConfig();
+        if (tab === 'targets') loadTargets();
+    }
 
-            if (savedMode === 'gradient') {
-                setThemeMode('gradient');
-                const c1 = localStorage.getItem('monster_grad_1') || '#ef4444';
-                const c2 = localStorage.getItem('monster_grad_2') || '#b91c1c';
-                document.documentElement.style.setProperty('--theme-primary', c1);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+    function showStatusMessage(message, type = 'success') {
+        const host = document.getElementById('inlineStatusNotification');
+        if (!host) return;
+        host.innerHTML = '';
+        const icon = type === 'success' ? '✓' : '✕';
+        const toast = document.createElement('div');
+        toast.className = `status-toast ${type === 'success' ? 'success' : 'error'}`;
+        toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+        host.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
+    }
 
-                document.getElementById('gradColor1').value = c1;
-                document.getElementById('gradHex1').value = c1.replace('#', '');
-                document.getElementById('gradColor2').value = c2;
-                document.getElementById('gradHex2').value = c2.replace('#', '');
-            } else {
-                setThemeMode('solid');
-                const hex = localStorage.getItem('monster_custom_hex') || '#ef4444';
-                document.documentElement.style.setProperty('--theme-primary', hex);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', hex + '40');
-
-                const picker = document.getElementById('solidColorPicker');
-                const hexInput = document.getElementById('solidHexInput');
-                if (picker) picker.value = hex;
-                if (hexInput) hexInput.value = hex.replace('#', '');
-            }
+    function togglePanelTimerFields() {
+        const checkbox = document.getElementById('panelIsReminder');
+        const container = document.getElementById('panelTimerFieldsContainer');
+        if (!checkbox || !container) return;
+        if (checkbox.checked) {
+            container.classList.remove('hidden');
+            const reminderDate = document.getElementById('panelReminderDate');
+            if (reminderDate) reminderDate.value = new Date().toISOString().split('T')[0];
+        } else {
+            container.classList.add('hidden');
         }
-        applySavedTheme();
+    }
 
-        function syncSolidHex(val) {
-            document.getElementById('solidHexInput').value = val.replace('#', '').toUpperCase();
-        }
-
-        function syncSolidPicker(val) {
-            let clean = val.trim().replace('#', '');
-            if (clean.length === 3 || clean.length === 6) {
-                document.getElementById('solidColorPicker').value = '#' + clean;
-            }
-        }
-
-        function handleCustomThemeSubmit(e) {
-            e.preventDefault();
-            if (currentThemeMode === 'solid') {
-                let hex = document.getElementById('solidHexInput').value.trim();
-                if (!hex.startsWith('#')) hex = '#' + hex;
-                if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
-                    showStatusMessage("❌ Invalid Hex Code!", "error");
-                    return;
-                }
-                localStorage.setItem('monster_accent_theme', 'solid');
-                localStorage.setItem('monster_custom_hex', hex);
-                document.documentElement.style.setProperty('--theme-primary', hex);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', hex + '40');
-                showStatusMessage(`✅ Solid Theme Deployed: ${hex.toUpperCase()}`, 'success');
-            } else {
-                let c1 = document.getElementById('gradHex1').value.trim();
-                let c2 = document.getElementById('gradHex2').value.trim();
-                if (!c1.startsWith('#')) c1 = '#' + c1;
-                if (!c2.startsWith('#')) c2 = '#' + c2;
-                localStorage.setItem('monster_accent_theme', 'gradient');
-                localStorage.setItem('monster_grad_1', c1);
-                localStorage.setItem('monster_grad_2', c2);
-                document.documentElement.style.setProperty('--theme-primary', c1);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
-                showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
-            }
-        }
-
-        function setRandomTheme() {
-            if (currentThemeMode === 'solid') {
-                const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-                document.getElementById('solidColorPicker').value = randomHex;
-                document.getElementById('solidHexInput').value = randomHex.replace('#', '').toUpperCase();
-                localStorage.setItem('monster_accent_theme', 'solid');
-                localStorage.setItem('monster_custom_hex', randomHex);
-                document.documentElement.style.setProperty('--theme-primary', randomHex);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${randomHex} 0%, #b91c1c 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', randomHex + '40');
-                showStatusMessage(`🎲 Random Solid Theme: ${randomHex.toUpperCase()}`, 'success');
-            } else {
-                const c1 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-                const c2 = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-                document.getElementById('gradColor1').value = c1;
-                document.getElementById('gradHex1').value = c1.replace('#', '').toUpperCase();
-                document.getElementById('gradColor2').value = c2;
-                document.getElementById('gradHex2').value = c2.replace('#', '').toUpperCase();
-                localStorage.setItem('monster_accent_theme', 'gradient');
-                localStorage.setItem('monster_grad_1', c1);
-                localStorage.setItem('monster_grad_2', c2);
-                document.documentElement.style.setProperty('--theme-primary', c1);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
-                showStatusMessage(`🎲 Random Gradient Theme Deployed!`, 'success');
-            }
-        }
-
-        function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'targets', 'hygiene', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
-                const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
-                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
-                if (sec) sec.classList.add('hidden');
-                if (btn) btn.className = "w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
-            });
-            const targetSec = document.getElementById(`section${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
-            const targetBtn = document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetBtn) targetBtn.className = "w-full text-left px-4 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
-            
-            if (tab === 'schedules') { loadSchedulesConfig(); loadNotesReminders(); }
-            if (tab === 'hydration') loadHydrationConfig();
-            if (tab === 'examMode') loadExamModeConfig();
-            if (tab === 'sanctuary') loadSanctuaryConfig();
-            if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
-            if (tab === 'dashboardBg') loadDashboardBgConfig();
-            if (tab === 'targets') loadTargets();
-        }
-
-        function showStatusMessage(message, type = 'success') {
-            const host = document.getElementById('inlineStatusNotification');
-            if (!host) return;
-            host.innerHTML = '';
-            const icon = type === 'success' ? '✓' : '✕';
-            const toast = document.createElement('div');
-            toast.className = `status-toast ${type === 'success' ? 'success' : 'error'}`;
-            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-            host.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
-        }
-
-        function togglePanelTimerFields() {
-            const checkbox = document.getElementById('panelIsReminder');
-            const container = document.getElementById('panelTimerFieldsContainer');
-            if (!checkbox || !container) return;
-            if (checkbox.checked) {
-                container.classList.remove('hidden');
-                document.getElementById('panelReminderDate').value = new Date().toISOString().split('T')[0];
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
-        async function loadNotesReminders() {
-            try {
-                const res = await fetch('/api/notes-reminders?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('notesListContainer');
-                if (!container) return;
-                if (data.success && data.items && data.items.length > 0) {
-                    container.innerHTML = data.items.map(item => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
-                                    ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : `<span class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-md font-bold">📝 Note</span>`}
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
+    async function loadNotesReminders() {
+        try {
+            const res = await fetch('/api/notes-reminders?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('notesListContainer');
+            if (!container) return;
+            if (data.success && data.items && data.items.length > 0) {
+                container.innerHTML = data.items.map(item => `
+                    <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
+                                ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : `<span class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-md font-bold">📝 Note</span>`}
                             </div>
-                            <button type="button" onclick="confirmAndDeleteNote('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                            <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
                         </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
-                }
-            } catch (err) {}
-        }
+                        <button type="button" onclick="confirmAndDeleteNote('${item.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+            }
+        } catch (err) {}
+    }
 
-        const noteForm = document.getElementById('createNoteForm');
-        if (noteForm) {
-            noteForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('add', async (password) => {
-                    const title = document.getElementById('noteTitle').value;
-                    const description = document.getElementById('noteDesc').value;
-                    const isReminder = document.getElementById('panelIsReminder').checked;
-                    const date = document.getElementById('panelReminderDate').value;
-                    const time = document.getElementById('panelReminderTime').value;
+    const noteForm = document.getElementById('createNoteForm');
+    if (noteForm) {
+        noteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titleEl = document.getElementById('noteTitle');
+            const descEl = document.getElementById('noteDesc');
+            const reminderEl = document.getElementById('panelIsReminder');
+            const dateEl = document.getElementById('panelReminderDate');
+            const timeEl = document.getElementById('panelReminderTime');
 
-                    try {
-                        const res = await fetch('/api/notes-reminders', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ title, description, isReminder, date, time, password })
-                        });
-                        if (res.ok) {
-                            showStatusMessage("Note/Reminder deployed successfully!", "success");
-                            noteForm.reset();
-                            togglePanelTimerFields();
-                            loadNotesReminders();
-                        } else {
-                            showStatusMessage("Connection error", "error");
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
-                });
-            });
-        }
+            const title = titleEl ? titleEl.value : '';
+            const description = descEl ? descEl.value : '';
+            const isReminder = reminderEl ? reminderEl.checked : false;
+            const date = dateEl ? dateEl.value : '';
+            const time = timeEl ? timeEl.value : '';
 
-        function confirmAndDeleteNote(id) {
-            requestSecureAuthorization('delete', async (password) => {
+            requestSecureAuthorization('add', async (password) => {
                 try {
-                    const res = await fetch(`/api/notes-reminders/${id}`, { 
-                        method: 'DELETE',
+                    const res = await fetch('/api/notes-reminders', {
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ password })
+                        body: JSON.stringify({ title, description, isReminder, date, time, password })
                     });
                     if (res.ok) {
-                        showStatusMessage("Entry deleted successfully.", "success");
+                        showStatusMessage("Note/Reminder deployed successfully!", "success");
+                        noteForm.reset();
+                        togglePanelTimerFields();
                         loadNotesReminders();
                     } else {
                         showStatusMessage("Connection error", "error");
                     }
                 } catch (err) { showStatusMessage("Connection error", "error"); }
             });
-        }
+        });
+    }
 
-        const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
-        if (studySessionScheduleForm) {
-            studySessionScheduleForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('add', async (password) => {
-                    const sessionName = document.getElementById('schedStudySessionName').value;
-                    const subjectName = document.getElementById('schedStudySubjectName').value;
-                    const topic = document.getElementById('schedStudyTopic').value || sessionName;
-                    const startTime = document.getElementById('schedStudyStart').value;
-                    const endTime = document.getElementById('schedStudyEnd').value;
-                    const date = document.getElementById('schedStudyDate').value;
-                    const durationMinutes = document.getElementById('schedStudyDuration').value;
-
-                    try {
-                        const catRes = await fetch('/api/study/categories', { credentials: 'include' });
-                        const catData = await catRes.json();
-                        let categoryId = "";
-                        if (catData.success && catData.categories.length > 0) {
-                            categoryId = catData.categories[0].id;
-                        } else {
-                            const newCatRes = await fetch('/api/study/categories', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
-                                body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
-                            });
-                            const newCatData = await newCatRes.json();
-                            categoryId = newCatData.category.id;
-                        }
-
-                        const res = await fetch('/api/study/sessions', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime, endTime })
-                        });
-
-                        if (res.ok) {
-                            showStatusMessage("Study session time-block scheduled successfully!", "success");
-                            studySessionScheduleForm.reset();
-                            document.getElementById('schedStudyDate').value = new Date().toISOString().split('T')[0];
-                        } else {
-                            showStatusMessage("Failed to schedule study session", "error");
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
-                });
-            });
-        }
-
-        async function loadSchedulesConfig() {
+    function confirmAndDeleteNote(id) {
+        requestSecureAuthorization('delete', async (password) => {
             try {
-                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('workoutReminderDateInput').value = data.workoutReminderDate || "";
-                    document.getElementById('workoutReminderTimeInput').value = data.workoutReminderTime || "";
-                    document.getElementById('studyReminderTimeInput').value = data.studyReminderTime || "";
-                }
-            } catch (err) {}
-        }
-
-        const schedulesForm = document.getElementById('updateSchedulesForm');
-        if (schedulesForm) {
-            schedulesForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const workoutReminderDate = document.getElementById('workoutReminderDateInput').value;
-                    const workoutReminderTime = document.getElementById('workoutReminderTimeInput').value;
-                    const studyReminderTime = document.getElementById('studyReminderTimeInput').value;
-                    try {
-                        const res = await fetch('/api/control-panel/schedules', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ workoutReminderDate, workoutReminderTime, studyReminderTime, password })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            showStatusMessage("Workout schedule and time management updated successfully!", "success");
-                        } else {
-                            alert("❌ " + data.error);
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                const res = await fetch(`/api/notes-reminders/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ password })
                 });
-            });
-        }
-
-        async function loadTargets() {
-            try {
-                const res = await fetch('/api/targets?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('targetsListContainer');
-                if (!container) return;
-                
-                if (data.success && data.targets && data.targets.length > 0) {
-                    container.innerHTML = data.targets.map(t => `
-                        <div class="bg-[#030408] border ${t.completed ? 'border-emerald-500/20 completed-glow-anim' : 'border-white/5'} p-4 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>
-                            </div>
-                            <button type="button" onclick="confirmAndDeleteTarget('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
-                        </div>
-                    `).join('');
+                if (res.ok) {
+                    showStatusMessage("Entry deleted successfully.", "success");
+                    loadNotesReminders();
                 } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+                    showStatusMessage("Connection error", "error");
                 }
-            } catch (err) {
-                const container = document.getElementById('targetsListContainer');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="bg-[#030408] border border-red-500/20 p-4 rounded-2xl flex items-center justify-center gap-4">
-                            <p class="text-xs font-black uppercase tracking-widest text-red-400">⚠️ Cloud Connection Failed</p>
-                        </div>`;
-                }
-            }
-        }
+            } catch (err) { showStatusMessage("Connection error", "error"); }
+        });
+    }
 
-        const targetForm = document.getElementById('createTargetForm');
-        if (targetForm) {
-            targetForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('add', async (password) => {
-                    const name = document.getElementById('targetName').value;
-                    const date = document.getElementById('targetDate').value;
+    const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
+    if (studySessionScheduleForm) {
+        studySessionScheduleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sessionNameEl = document.getElementById('schedStudySessionName');
+            const subjectNameEl = document.getElementById('schedStudySubjectName');
+            const topicEl = document.getElementById('schedStudyTopic');
+            const startEl = document.getElementById('schedStudyStart');
+            const endEl = document.getElementById('schedStudyEnd');
+            const dateEl = document.getElementById('schedStudyDate');
+            const durationEl = document.getElementById('schedStudyDuration');
 
-                    try {
-                        const res = await fetch('/api/targets', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ name, date, password })
-                        });
-                        if (res.ok) {
-                            showStatusMessage("Milestone deployed successfully!", "success");
-                            targetForm.reset();
-                            loadTargets();
-                        } else {
-                            showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
-                        }
-                    } catch (err) { 
-                        showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
-                    }
-                });
-            });
-        }
+            const sessionName = sessionNameEl ? sessionNameEl.value : '';
+            const subjectName = subjectNameEl ? subjectNameEl.value : '';
+            const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
+            const startTime = startEl ? startEl.value : '';
+            const endTime = endEl ? endEl.value : '';
+            const date = dateEl ? dateEl.value : '';
+            const durationMinutes = durationEl ? durationEl.value : '';
 
-        function confirmAndDeleteTarget(id) {
-            requestSecureAuthorization('delete', async (password) => {
+            requestSecureAuthorization('add', async (password) => {
                 try {
-                    const res = await fetch(`/api/targets/${id}`, { 
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ password })
-                    });
-                    if (res.ok) {
-                        showStatusMessage("Milestone deleted successfully.", "success");
-                        loadTargets();
+                    const catRes = await fetch('/api/study/categories', { credentials: 'include' });
+                    const catData = await catRes.json();
+                    let categoryId = "";
+                    if (catData.success && catData.categories.length > 0) {
+                        categoryId = catData.categories[0].id;
                     } else {
-                        showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
+                        const newCatRes = await fetch('/api/study/categories', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
+                        });
+                        const newCatData = await newCatRes.json();
+                        categoryId = newCatData.category.id;
                     }
-                } catch (err) {
-                    showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
-                }
-            });
-        }
-        
-        function resetTargetForm() {
-            document.getElementById('createTargetForm').reset();
-            document.getElementById('editTargetId').value = '';
-        }
 
-        async function loadHabits() {
-            try {
-                const res = await fetch('/api/habits?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('habitsListContainer');
-                if (!container) return;
-                if (data.success && data.habits.length > 0) {
-                    container.innerHTML = data.habits.map(h => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-15'}</span></div>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="editHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}', '${(h.category || '').replace(/'/g, "\\'")}', '${(h.description || '').replace(/'/g, "\\'")}', '${h.startDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button type="button" onclick="confirmAndDeleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`; }
-            } catch (err) {}
-        }
-
-        function editHabit(id, name, category, desc, startDate) {
-            document.getElementById('editHabitId').value = id;
-            document.getElementById('habitName').value = name;
-            document.getElementById('habitCategory').value = category;
-            document.getElementById('habitDesc').value = desc;
-            document.getElementById('habitStartDate').value = startDate || "2026-09-15";
-            document.getElementById('habitFormTitle').innerText = "✏️ Edit Habit Vector";
-        }
-
-        function resetHabitForm() {
-            document.getElementById('createHabitForm').reset();
-            document.getElementById('editHabitId').value = '';
-            document.getElementById('habitFormTitle').innerText = "➕ Add Habit Vector";
-        }
-
-        const habitForm = document.getElementById('createHabitForm');
-        if (habitForm) {
-            habitForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('editHabitId').value;
-                const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async (password) => {
-                    const name = document.getElementById('habitName').value;
-                    const category = document.getElementById('habitCategory').value || 'General';
-                    const description = document.getElementById('habitDesc').value;
-                    const startDate = document.getElementById('habitStartDate').value || "2026-09-15";
-                    try {
-                        let url = editId ? `/api/habits/${editId}` : '/api/habits';
-                        let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, category, description, startDate, password }) });
-                        if (res.ok) { showStatusMessage(editId ? "Habit updated successfully!" : "Habit added successfully!", "success"); resetHabitForm(); loadHabits(); }
-                    } catch (err) {}
-                });
-            });
-        }
-
-        function confirmAndDeleteHabit(id) {
-            requestSecureAuthorization('delete', async (password) => {
-                const res = await fetch(`/api/habits/${id}`, { 
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                if (res.ok) { showStatusMessage("Habit deleted successfully", "success"); loadHabits(); }
-            });
-        }
-
-        async function loadWorkouts() {
-            try {
-                const res = await fetch('/api/workouts?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('workoutsListContainer');
-                if (!container) return;
-                if (data.success && data.workouts.length > 0) {
-                    container.innerHTML = data.workouts.map(w => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${w.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || 10} ${w.unit || 'reps'}</span></div>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="editWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}', '${w.sets}', '${w.value || 10}', '${w.unit || 'reps'}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button type="button" onclick="confirmAndDeleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No workouts found.</p>`; }
-            } catch (err) {}
-        }
-
-        function editWorkout(id, name, sets, value, unit) {
-            document.getElementById('editWorkoutId').value = id;
-            document.getElementById('workoutName').value = name;
-            document.getElementById('workoutSets').value = sets;
-            document.getElementById('workoutValue').value = value;
-            document.getElementById('workoutUnit').value = unit;
-            document.getElementById('workoutFormTitle').innerText = "✏️ Edit Workout";
-        }
-
-        function resetWorkoutForm() {
-            document.getElementById('createWorkoutForm').reset();
-            document.getElementById('editWorkoutId').value = '';
-            document.getElementById('workoutFormTitle').innerText = "🏋️ Deploy Workout";
-        }
-
-        const workoutForm = document.getElementById('createWorkoutForm');
-        if (workoutForm) {
-            workoutForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('editWorkoutId').value;
-                const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async (password) => {
-                    const name = document.getElementById('workoutName').value;
-                    const sets = document.getElementById('workoutSets').value;
-                    const value = document.getElementById('workoutValue').value;
-                    const unit = document.getElementById('workoutUnit').value;
-                    try {
-                        let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
-                        let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-15", password }) });
-                        if (res.ok) { showStatusMessage(editId ? "Workout updated successfully!" : "Workout added successfully!", "success"); resetWorkoutForm(); loadWorkouts(); }
-                    } catch (err) {}
-                });
-            });
-        }
-
-        function confirmAndDeleteWorkout(id) {
-            requestSecureAuthorization('delete', async (password) => {
-                const res = await fetch(`/api/workouts/${id}`, { 
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                if (res.ok) { showStatusMessage("Workout deleted successfully", "success"); loadWorkouts(); }
-            });
-        }
-
-        async function loadStudy() {
-            try {
-                const res = await fetch('/api/study/categories?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('studyListContainer');
-                if (!container) return;
-                if (data.success && data.categories.length > 0) {
-                    container.innerHTML = data.categories.map(c => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
-                                <span class="text-[10px] text-blue-400 uppercase tracking-widest block mt-1">Target: ${c.dailyTargetMinutes}m/day</span>
-                                <span class="text-[9px] text-slate-400 uppercase tracking-wider block">Start: ${c.startDate || '2026-09-15'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                <button type="button" onclick="editStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button type="button" onclick="confirmAndDeleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study subjects found.</p>`; }
-            } catch (err) {}
-        }
-
-        function editStudy(id, name, target, startDate, endDate) {
-            document.getElementById('editStudyId').value = id;
-            document.getElementById('studyName').value = name;
-            document.getElementById('studyTarget').value = target;
-            document.getElementById('studyStartDate').value = startDate || "2026-09-15";
-            document.getElementById('studyEndDate').value = endDate || "";
-            document.getElementById('studyFormTitle').innerText = "✏️ Edit Study Subject";
-        }
-
-        function resetStudyForm() {
-            document.getElementById('createStudyForm').reset();
-            document.getElementById('editStudyId').value = '';
-            document.getElementById('studyFormTitle').innerText = "📚 Create Study Subject";
-        }
-
-        const studyForm = document.getElementById('createStudyForm');
-        if (studyForm) {
-            studyForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('editStudyId').value;
-                const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async (password) => {
-                    const name = document.getElementById('studyName').value;
-                    const dailyTargetMinutes = document.getElementById('studyTarget').value;
-                    const startDate = document.getElementById('studyStartDate').value || "2026-09-15";
-                    const endDate = document.getElementById('studyEndDate').value;
-                    try {
-                        let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
-                        let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, password }) });
-                        const data = await res.json();
-                        if (res.ok) { showStatusMessage(editId ? "Subject updated successfully!" : "Subject added successfully!", "success"); resetStudyForm(); loadStudy(); }
-                        else { alert("❌ " + data.error); }
-                    } catch (err) {}
-                });
-            });
-        }
-
-        function confirmAndDeleteStudy(id) {
-            requestSecureAuthorization('delete', async (password) => {
-                const res = await fetch(`/api/study/categories/${id}`, { 
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                if (res.ok) { showStatusMessage("Subject deleted successfully", "success"); loadStudy(); }
-            });
-        }
-
-        async function loadHygiene() {
-            try {
-                const res = await fetch('/api/hygiene?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                const container = document.getElementById('hygieneListContainer');
-                if (!container) return;
-                if (data.success && data.tasks.length > 0) {
-                    container.innerHTML = data.tasks.map(t => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${t.name}</h4><span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span></div>
-                            <div class="flex gap-2">
-                                <button type="button" onclick="editHygiene('${t.id}', '${t.name.replace(/'/g, "\\'")}', '${t.frequency}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
-                                <button type="button" onclick="confirmAndDeleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
-                            </div>
-                        </div>
-                    `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`; }
-            } catch (err) {}
-        }
-
-        function editHygiene(id, name, frequency) {
-            document.getElementById('editHygieneId').value = id;
-            document.getElementById('hygieneName').value = name;
-            document.getElementById('hygieneFreq').value = frequency;
-            document.getElementById('hygieneFormTitle').innerText = "✏️ Edit Grooming Task";
-        }
-
-        function resetHygieneForm() {
-            document.getElementById('createHygieneForm').reset();
-            document.getElementById('editHygieneId').value = '';
-            document.getElementById('hygieneFormTitle').innerText = "🧼 Add Grooming Task";
-        }
-
-        const hygieneForm = document.getElementById('createHygieneForm');
-        if (hygieneForm) {
-            hygieneForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('editHygieneId').value;
-                const actionType = editId ? 'edit' : 'add';
-                requestSecureAuthorization(actionType, async (password) => {
-                    const name = document.getElementById('hygieneName').value;
-                    const frequency = document.getElementById('hygieneFreq').value;
-                    try {
-                        let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
-                        let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, frequency, startDate: "2026-09-15", password }) });
-                        if (res.ok) { showStatusMessage(editId ? "Task updated successfully!" : "Hygiene task added successfully!", "success"); resetHygieneForm(); loadHygiene(); }
-                    } catch (err) {}
-                });
-            });
-        }
-
-        function confirmAndDeleteHygiene(id) {
-            requestSecureAuthorization('delete', async (password) => {
-                const res = await fetch(`/api/hygiene/${id}`, { 
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ password })
-                });
-                if (res.ok) { showStatusMessage("Task deleted successfully", "success"); loadHygiene(); }
-            });
-        }
-
-        async function loadHydrationConfig() {
-            try {
-                const res = await fetch('/api/hydration?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('configGlassSize').value = data.glassSize || 250;
-                    document.getElementById('configGoal').value = data.goal || 3000;
-                }
-            } catch (err) {}
-        }
-
-        const hydrationForm = document.getElementById('updateHydrationForm');
-        if (hydrationForm) {
-            hydrationForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const glassSize = document.getElementById('configGlassSize').value;
-                    const goal = document.getElementById('configGoal').value;
-                    try {
-                        const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ glassSize, goal, password }) });
-                        if (res.ok) showStatusMessage("Hydration updated successfully!", "success");
-                    } catch (err) {}
-                });
-            });
-        }
-
-        async function loadExamModeConfig() {
-            try {
-                const res = await fetch('/api/exam-mode?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('examModeEnabled').checked = data.enabled;
-                    document.getElementById('examModeTarget').value = data.targetMinutes || 90;
-                }
-            } catch (err) {}
-        }
-
-        const examForm = document.getElementById('updateExamModeForm');
-        if (examForm) {
-            examForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const enabled = document.getElementById('examModeEnabled').checked;
-                    const targetMinutes = document.getElementById('examModeTarget').value;
-                    try {
-                        const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, targetMinutes, password }) });
-                        if (res.ok) showStatusMessage("Exam mode updated successfully!", "success");
-                    } catch (err) {}
-                });
-            });
-        }
-
-        async function loadSanctuaryConfig() {
-            try {
-                const res = await fetch('/api/sanctuary?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('sanctuaryEnabled').checked = data.enabled;
-                    document.getElementById('sanctuaryReason').value = data.reason || "";
-                }
-            } catch (err) {}
-        }
-
-        const sanctuaryForm = document.getElementById('updateSanctuaryForm');
-        if (sanctuaryForm) {
-            sanctuaryForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const enabled = document.getElementById('sanctuaryEnabled').checked;
-                    const reason = document.getElementById('sanctuaryReason').value;
-                    try {
-                        const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, reason, password }) });
-                        if (res.ok) showStatusMessage("Sanctuary updated successfully!", "success");
-                    } catch (err) {}
-                });
-            });
-        }
-
-        async function loadLandingBgConfig() {
-            try {
-                const res = await fetch('/api/landing-bg?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success && data.url) {
-                    document.getElementById('landingBgUrlInput').value = data.url;
-                }
-            } catch (err) {}
-        }
-
-        async function loadGatewayTextConfig() {
-            try {
-                const res = await fetch('/api/gateway-text?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('gatewayHeadlineInput').value = data.headline || "";
-                    document.getElementById('gatewaySubtextInput').value = data.subtext || "";
-                }
-            } catch (err) {}
-        }
-
-        const bgForm = document.getElementById('updateLandingBgForm');
-        if (bgForm) {
-            bgForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const url = document.getElementById('landingBgUrlInput').value;
-                    try {
-                        const res = await fetch('/api/control-panel/landing-bg', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ url, password })
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                            showStatusMessage("Gateway background updated successfully!", "success");
-                        } else {
-                            alert("❌ " + data.error);
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
-                });
-            });
-        }
-
-        const textForm = document.getElementById('updateGatewayTextForm');
-        if (textForm) {
-            textForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                requestSecureAuthorization('edit', async (password) => {
-                    const headline = document.getElementById('gatewayHeadlineInput').value;
-                    const subtext = document.getElementById('gatewaySubtextInput').value;
-                    try {
-                        const res = await fetch('/api/control-panel/gateway-text', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ headline, subtext, password })
-                        });
-                        if (res.ok) showStatusMessage("Gateway text updated!", "success");
-                    } catch (err) {}
-                });
-            });
-        }
-
-        async function adminLogout() {
-            localStorage.removeItem('monster_admin_trusted');
-            await fetch('/api/control-panel/logout', { method: 'POST', credentials: 'include' });
-            window.location.href = 'index.html';
-        }
-
-        let pendingLockState = false;
-        function requestSystemLockAuth(shouldLock) {
-            pendingLockState = shouldLock;
-            requestSecureAuthorization('lock', () => {
-                executeSystemLock(pendingLockState);
-            });
-        }
-
-        async function executeSystemLock(shouldLock) {
-            const adminPassword = document.getElementById('actionSecurityPasswordInput').value;
-            try {
-                const res = await fetch('/api/system-lock', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    credentials: 'include',
-                    body: JSON.stringify({ locked: shouldLock, adminPassword }) 
-                });
-                const data = await res.json();
-                if (res.ok) { 
-                    showStatusMessage("✅ " + data.message, "success"); 
-                    closeSecureActionModal();
-                    setTimeout(() => location.reload(), 1000);
-                } else { 
-                    showStatusMessage("❌ " + (data.error || "Wrong Password! Incorrect System Lock Password."), "error"); 
-                }
-            } catch (err) {
-                showStatusMessage("❌ Connection error", "error");
-            }
-        }
-
-        async function loadModuleLocksStatus() {
-            try {
-                const res = await fetch('/api/module-locks', { credentials: 'include' });
-                const data = await res.json();
-                if(data.success) {
-                    updateLockBtnUI('habits', data.habitsLocked);
-                    updateLockBtnUI('workouts', data.workoutsLocked);
-                    updateLockBtnUI('study', data.studyLocked);
-                    updateLockBtnUI('hydration', data.hydrationLocked);
-                    updateLockBtnUI('hygiene', data.hygieneLocked);
-                }
-            } catch(e) {}
-        }
-
-        async function toggleModuleLock(moduleKey) {
-            requestSecureAuthorization('edit', async (password) => {
-                try {
-                    const resStatus = await fetch('/api/module-locks', { credentials: 'include' });
-                    const statusData = await resStatus.json();
-                    let currentLocked = statusData[moduleKey + 'Locked'] || false;
-
-                    const res = await fetch('/api/control-panel/module-lock', {
+                    const res = await fetch('/api/study/sessions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ moduleKey, locked: !currentLocked, password })
+                        body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime, endTime })
+                    });
+
+                    if (res.ok) {
+                        showStatusMessage("Study session time-block scheduled successfully!", "success");
+                        studySessionScheduleForm.reset();
+                        const sDate = document.getElementById('schedStudyDate');
+                        if (sDate) sDate.value = new Date().toISOString().split('T')[0];
+                    } else {
+                        showStatusMessage("Failed to schedule study session", "error");
+                    }
+                } catch (err) { showStatusMessage("Connection error", "error"); }
+            });
+        });
+    }
+
+    async function loadSchedulesConfig() {
+        try {
+            const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                const wrd = document.getElementById('workoutReminderDateInput');
+                const wrt = document.getElementById('workoutReminderTimeInput');
+                const srt = document.getElementById('studyReminderTimeInput');
+                if (wrd) wrd.value = data.workoutReminderDate || "";
+                if (wrt) wrt.value = data.workoutReminderTime || "";
+                if (srt) srt.value = data.studyReminderTime || "";
+            }
+        } catch (err) {}
+    }
+
+    const schedulesForm = document.getElementById('updateSchedulesForm');
+    if (schedulesForm) {
+        schedulesForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const wrd = document.getElementById('workoutReminderDateInput');
+            const wrt = document.getElementById('workoutReminderTimeInput');
+            const srt = document.getElementById('studyReminderTimeInput');
+
+            const workoutReminderDate = wrd ? wrd.value : "";
+            const workoutReminderTime = wrt ? wrt.value : "";
+            const studyReminderTime = srt ? srt.value : "";
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/control-panel/schedules', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ workoutReminderDate, workoutReminderTime, studyReminderTime, password })
                     });
                     const data = await res.json();
-                    if(res.ok) {
-                        showStatusMessage(`✅ ${moduleKey.toUpperCase()} lock status updated!`, 'success');
-                        loadModuleLocksStatus();
+                    if (res.ok) {
+                        showStatusMessage("Workout schedule and time management updated successfully!", "success");
                     } else {
-                        showStatusMessage("❌ " + data.error, "error");
+                        alert("❌ " + data.error);
                     }
-                } catch(e) {
-                    showStatusMessage("❌ Connection error", "error");
+                } catch (err) { showStatusMessage("Connection error", "error"); }
+            });
+        });
+    }
+
+    async function loadTargets() {
+        try {
+            const res = await fetch('/api/targets?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('targetsListContainer');
+            if (!container) return;
+            
+            if (data.success && data.targets && data.targets.length > 0) {
+                container.innerHTML = data.targets.map(t => `
+                    <div class="bg-[#030408] border ${t.completed ? 'border-emerald-500/20 completed-glow-anim' : 'border-white/5'} p-4 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300">
+                        <div>
+                            <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>
+                        </div>
+                        <button type="button" onclick="confirmAndDeleteTarget('${t.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+            }
+        } catch (err) {
+            const container = document.getElementById('targetsListContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="bg-[#030408] border border-red-500/20 p-4 rounded-2xl flex items-center justify-center gap-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-red-400">⚠️ Cloud Connection Failed</p>
+                    </div>`;
+            }
+        }
+    }
+
+    const targetForm = document.getElementById('createTargetForm');
+    if (targetForm) {
+        targetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nameEl = document.getElementById('targetName');
+            const dateEl = document.getElementById('targetDate');
+            const name = nameEl ? nameEl.value : '';
+            const date = dateEl ? dateEl.value : '';
+
+            requestSecureAuthorization('add', async (password) => {
+                try {
+                    const res = await fetch('/api/targets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name, date, password })
+                    });
+                    if (res.ok) {
+                        showStatusMessage("Milestone deployed successfully!", "success");
+                        targetForm.reset();
+                        loadTargets();
+                    } else {
+                        showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
+                    }
+                } catch (err) { 
+                    showStatusMessage("❌ Connection error: Could not deploy to Cloud", "error");
                 }
             });
-        }
-
-        function updateLockBtnUI(moduleKey, isLocked) {
-            const btn = document.getElementById(`btnLock${moduleKey.charAt(0).toUpperCase() + moduleKey.slice(1)}`);
-            if(!btn) return;
-            if(isLocked) {
-                btn.className = "p-4 bg-red-600/20 border border-red-500/50 rounded-2xl text-xs font-black uppercase tracking-wider text-red-400 transition cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.2)]";
-                btn.innerText = `🔒 ${moduleKey.toUpperCase()}: LOCKED`;
-            } else {
-                btn.className = "p-4 bg-[#030408] border border-white/10 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-300 transition cursor-pointer hover:border-white/30";
-                btn.innerText = `🟢 ${moduleKey.toUpperCase()}: ACTIVE`;
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadHabits(); 
-            loadWorkouts(); 
-            loadStudy(); 
-            loadHygiene();
-            loadModuleLocksStatus();
         });
+    }
 
-         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playCyberClick() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+    function confirmAndDeleteTarget(id) {
+        requestSecureAuthorization('delete', async (password) => {
             try {
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } catch(e) {}
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
+                const res = await fetch(`/api/targets/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ password })
+                });
+                if (res.ok) {
+                    showStatusMessage("Milestone deleted successfully.", "success");
+                    loadTargets();
+                } else {
+                    showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
+                }
+            } catch (err) {
+                showStatusMessage("❌ Connection error: Could not delete from Cloud", "error");
             }
         });
-       
+    }
     
-    </script>
+    function resetTargetForm() {
+        const tForm = document.getElementById('createTargetForm');
+        const editTargetId = document.getElementById('editTargetId');
+        if (tForm) tForm.reset();
+        if (editTargetId) editTargetId.value = '';
+    }
+
+    async function loadHabits() {
+        try {
+            const res = await fetch('/api/habits?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('habitsListContainer');
+            if (!container) return;
+            if (data.success && data.habits.length > 0) {
+                container.innerHTML = data.habits.map(h => `
+                    <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-15'}</span></div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="editHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}', '${(h.category || '').replace(/'/g, "\\'")}', '${(h.description || '').replace(/'/g, "\\'")}', '${h.startDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
+                            <button type="button" onclick="confirmAndDeleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`; }
+        } catch (err) {}
+    }
+
+    function editHabit(id, name, category, desc, startDate) {
+        const ehId = document.getElementById('editHabitId');
+        const hName = document.getElementById('habitName');
+        const hCat = document.getElementById('habitCategory');
+        const hDesc = document.getElementById('habitDesc');
+        const hStart = document.getElementById('habitStartDate');
+        const hTitle = document.getElementById('habitFormTitle');
+
+        if (ehId) ehId.value = id;
+        if (hName) hName.value = name;
+        if (hCat) hCat.value = category;
+        if (hDesc) hDesc.value = desc;
+        if (hStart) hStart.value = startDate || "2026-09-15";
+        if (hTitle) hTitle.innerText = "✏️ Edit Habit Vector";
+    }
+
+    function resetHabitForm() {
+        const hForm = document.getElementById('createHabitForm');
+        const ehId = document.getElementById('editHabitId');
+        const hTitle = document.getElementById('habitFormTitle');
+        if (hForm) hForm.reset();
+        if (ehId) ehId.value = '';
+        if (hTitle) hTitle.innerText = "➕ Add Habit Vector";
+    }
+
+    const habitForm = document.getElementById('createHabitForm');
+    if (habitForm) {
+        habitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editIdEl = document.getElementById('editHabitId');
+            const nameEl = document.getElementById('habitName');
+            const categoryEl = document.getElementById('habitCategory');
+            const descEl = document.getElementById('habitDesc');
+            const startDateEl = document.getElementById('habitStartDate');
+
+            const editId = editIdEl ? editIdEl.value : '';
+            const name = nameEl ? nameEl.value : '';
+            const category = categoryEl ? (categoryEl.value || 'General') : 'General';
+            const description = descEl ? descEl.value : '';
+            const startDate = startDateEl ? (startDateEl.value || "2026-09-15") : "2026-09-15";
+            const actionType = editId ? 'edit' : 'add';
+
+            requestSecureAuthorization(actionType, async (password) => {
+                try {
+                    let url = editId ? `/api/habits/${editId}` : '/api/habits';
+                    let method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, category, description, startDate, password }) });
+                    if (res.ok) { showStatusMessage(editId ? "Habit updated successfully!" : "Habit added successfully!", "success"); resetHabitForm(); loadHabits(); }
+                } catch (err) {}
+            });
+        });
+    }
+
+    function confirmAndDeleteHabit(id) {
+        requestSecureAuthorization('delete', async (password) => {
+            const res = await fetch(`/api/habits/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) { showStatusMessage("Habit deleted successfully", "success"); loadHabits(); }
+        });
+    }
+
+    async function loadWorkouts() {
+        try {
+            const res = await fetch('/api/workouts?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('workoutsListContainer');
+            if (!container) return;
+            if (data.success && data.workouts.length > 0) {
+                container.innerHTML = data.workouts.map(w => `
+                    <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div><h4 class="font-extrabold text-sm text-white">${w.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">${w.sets} Sets × ${w.value || 10} ${w.unit || 'reps'}</span></div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="editWorkout('${w.id}', '${w.name.replace(/'/g, "\\'")}', '${w.sets}', '${w.value || 10}', '${w.unit || 'reps'}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
+                            <button type="button" onclick="confirmAndDeleteWorkout('${w.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No workouts found.</p>`; }
+        } catch (err) {}
+    }
+
+    function editWorkout(id, name, sets, value, unit) {
+        const ewId = document.getElementById('editWorkoutId');
+        const wName = document.getElementById('workoutName');
+        const wSets = document.getElementById('workoutSets');
+        const wVal = document.getElementById('workoutValue');
+        const wUnit = document.getElementById('workoutUnit');
+        const wTitle = document.getElementById('workoutFormTitle');
+
+        if (ewId) ewId.value = id;
+        if (wName) wName.value = name;
+        if (wSets) wSets.value = sets;
+        if (wVal) wVal.value = value;
+        if (wUnit) wUnit.value = unit;
+        if (wTitle) wTitle.innerText = "✏️ Edit Workout";
+    }
+
+    function resetWorkoutForm() {
+        const wForm = document.getElementById('createWorkoutForm');
+        const ewId = document.getElementById('editWorkoutId');
+        const wTitle = document.getElementById('workoutFormTitle');
+        if (wForm) wForm.reset();
+        if (ewId) ewId.value = '';
+        if (wTitle) wTitle.innerText = "🏋️ Deploy Workout";
+    }
+
+    const workoutForm = document.getElementById('createWorkoutForm');
+    if (workoutForm) {
+        workoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editIdEl = document.getElementById('editWorkoutId');
+            const nameEl = document.getElementById('workoutName');
+            const setsEl = document.getElementById('workoutSets');
+            const valueEl = document.getElementById('workoutValue');
+            const unitEl = document.getElementById('workoutUnit');
+
+            const editId = editIdEl ? editIdEl.value : '';
+            const name = nameEl ? nameEl.value : '';
+            const sets = setsEl ? setsEl.value : '';
+            const value = valueEl ? valueEl.value : '';
+            const unit = unitEl ? unitEl.value : '';
+            const actionType = editId ? 'edit' : 'add';
+
+            requestSecureAuthorization(actionType, async (password) => {
+                try {
+                    let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
+                    let method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-15", password }) });
+                    if (res.ok) { showStatusMessage(editId ? "Workout updated successfully!" : "Workout added successfully!", "success"); resetWorkoutForm(); loadWorkouts(); }
+                } catch (err) {}
+            });
+        });
+    }
+
+    function confirmAndDeleteWorkout(id) {
+        requestSecureAuthorization('delete', async (password) => {
+            const res = await fetch(`/api/workouts/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) { showStatusMessage("Workout deleted successfully", "success"); loadWorkouts(); }
+        });
+    }
+
+    async function loadStudy() {
+        try {
+            const res = await fetch('/api/study/categories?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('studyListContainer');
+            if (!container) return;
+            if (data.success && data.categories.length > 0) {
+                container.innerHTML = data.categories.map(c => `
+                    <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div>
+                            <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
+                            <span class="text-[10px] text-blue-400 uppercase tracking-widest block mt-1">Target: ${c.dailyTargetMinutes}m/day</span>
+                            <span class="text-[9px] text-slate-400 uppercase tracking-wider block">Start: ${c.startDate || '2026-09-15'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
+                        </div>
+                        <div class="flex gap-2 shrink-0">
+                            <button type="button" onclick="editStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
+                            <button type="button" onclick="confirmAndDeleteStudy('${c.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study subjects found.</p>`; }
+        } catch (err) {}
+    }
+
+    function editStudy(id, name, target, startDate, endDate) {
+        const esId = document.getElementById('editStudyId');
+        const sName = document.getElementById('studyName');
+        const sTarget = document.getElementById('studyTarget');
+        const sStart = document.getElementById('studyStartDate');
+        const sEnd = document.getElementById('studyEndDate');
+        const sTitle = document.getElementById('studyFormTitle');
+
+        if (esId) esId.value = id;
+        if (sName) sName.value = name;
+        if (sTarget) sTarget.value = target;
+        if (sStart) sStart.value = startDate || "2026-09-15";
+        if (sEnd) sEnd.value = endDate || "";
+        if (sTitle) sTitle.innerText = "✏️ Edit Study Subject";
+    }
+
+    function resetStudyForm() {
+        const sForm = document.getElementById('createStudyForm');
+        const esId = document.getElementById('editStudyId');
+        const sTitle = document.getElementById('studyFormTitle');
+        if (sForm) sForm.reset();
+        if (esId) esId.value = '';
+        if (sTitle) sTitle.innerText = "📚 Create Study Subject";
+    }
+
+    const studyForm = document.getElementById('createStudyForm');
+    if (studyForm) {
+        studyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editIdEl = document.getElementById('editStudyId');
+            const nameEl = document.getElementById('studyName');
+            const targetEl = document.getElementById('studyTarget');
+            const startDateEl = document.getElementById('studyStartDate');
+            const endDateEl = document.getElementById('studyEndDate');
+
+            const editId = editIdEl ? editIdEl.value : '';
+            const name = nameEl ? nameEl.value : '';
+            const dailyTargetMinutes = targetEl ? targetEl.value : '';
+            const startDate = startDateEl ? (startDateEl.value || "2026-09-15") : "2026-09-15";
+            const endDate = endDateEl ? endDateEl.value : '';
+            const actionType = editId ? 'edit' : 'add';
+
+            requestSecureAuthorization(actionType, async (password) => {
+                try {
+                    let url = editId ? `/api/study/categories/${editId}` : '/api/study/categories';
+                    let method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, dailyTargetMinutes, startDate, endDate, password }) });
+                    const data = await res.json();
+                    if (res.ok) { showStatusMessage(editId ? "Subject updated successfully!" : "Subject added successfully!", "success"); resetStudyForm(); loadStudy(); }
+                    else { alert("❌ " + data.error); }
+                } catch (err) {}
+            });
+        });
+    }
+
+    function confirmAndDeleteStudy(id) {
+        requestSecureAuthorization('delete', async (password) => {
+            const res = await fetch(`/api/study/categories/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) { showStatusMessage("Subject deleted successfully", "success"); loadStudy(); }
+        });
+    }
+
+    async function loadHygiene() {
+        try {
+            const res = await fetch('/api/hygiene?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            const container = document.getElementById('hygieneListContainer');
+            if (!container) return;
+            if (data.success && data.tasks.length > 0) {
+                container.innerHTML = data.tasks.map(t => `
+                    <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div><h4 class="font-extrabold text-sm text-white">${t.name}</h4><span class="text-[10px] text-cyan-400 uppercase tracking-widest">Freq: ${t.frequency}</span></div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="editHygiene('${t.id}', '${t.name.replace(/'/g, "\\'")}', '${t.frequency}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
+                            <button type="button" onclick="confirmAndDeleteHygiene('${t.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`; }
+        } catch (err) {}
+    }
+
+    function editHygiene(id, name, frequency) {
+        const ehId = document.getElementById('editHygieneId');
+        const hName = document.getElementById('hygieneName');
+        const hFreq = document.getElementById('hygieneFreq');
+        const hTitle = document.getElementById('hygieneFormTitle');
+
+        if (ehId) ehId.value = id;
+        if (hName) hName.value = name;
+        if (hFreq) hFreq.value = frequency;
+        if (hTitle) hTitle.innerText = "✏️ Edit Grooming Task";
+    }
+
+    function resetHygieneForm() {
+        const hForm = document.getElementById('createHygieneForm');
+        const ehId = document.getElementById('editHygieneId');
+        const hTitle = document.getElementById('hygieneFormTitle');
+        if (hForm) hForm.reset();
+        if (ehId) ehId.value = '';
+        if (hTitle) hTitle.innerText = "🧼 Add Grooming Task";
+    }
+
+    const hygieneForm = document.getElementById('createHygieneForm');
+    if (hygieneForm) {
+        hygieneForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editIdEl = document.getElementById('editHygieneId');
+            const nameEl = document.getElementById('hygieneName');
+            const freqEl = document.getElementById('hygieneFreq');
+
+            const editId = editIdEl ? editIdEl.value : '';
+            const name = nameEl ? nameEl.value : '';
+            const frequency = freqEl ? freqEl.value : '';
+            const actionType = editId ? 'edit' : 'add';
+
+            requestSecureAuthorization(actionType, async (password) => {
+                try {
+                    let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
+                    let method = editId ? 'PUT' : 'POST';
+                    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, frequency, startDate: "2026-09-15", password }) });
+                    if (res.ok) { showStatusMessage(editId ? "Task updated successfully!" : "Hygiene task added successfully!", "success"); resetHygieneForm(); loadHygiene(); }
+                } catch (err) {}
+            });
+        });
+    }
+
+    function confirmAndDeleteHygiene(id) {
+        requestSecureAuthorization('delete', async (password) => {
+            const res = await fetch(`/api/hygiene/${id}`, { 
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ password })
+            });
+            if (res.ok) { showStatusMessage("Task deleted successfully", "success"); loadHygiene(); }
+        });
+    }
+
+    async function loadHydrationConfig() {
+        try {
+            const res = await fetch('/api/hydration?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                const gs = document.getElementById('configGlassSize');
+                const g = document.getElementById('configGoal');
+                if (gs) gs.value = data.glassSize || 250;
+                if (g) g.value = data.goal || 3000;
+            }
+        } catch (err) {}
+    }
+
+    const hydrationForm = document.getElementById('updateHydrationForm');
+    if (hydrationForm) {
+        hydrationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const glassSizeEl = document.getElementById('configGlassSize');
+            const goalEl = document.getElementById('configGoal');
+            const glassSize = glassSizeEl ? glassSizeEl.value : '';
+            const goal = goalEl ? goalEl.value : '';
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/hydration/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ glassSize, goal, password }) });
+                    if (res.ok) showStatusMessage("Hydration updated successfully!", "success");
+                } catch (err) {}
+            });
+        });
+    }
+
+    async function loadExamModeConfig() {
+        try {
+            const res = await fetch('/api/exam-mode?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                const emd = document.getElementById('examModeEnabled');
+                const emt = document.getElementById('examModeTarget');
+                if (emd) emd.checked = data.enabled;
+                if (emt) emt.value = data.targetMinutes || 90;
+            }
+        } catch (err) {}
+    }
+
+    const examForm = document.getElementById('updateExamModeForm');
+    if (examForm) {
+        examForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const enabledEl = document.getElementById('examModeEnabled');
+            const targetMinutesEl = document.getElementById('examModeTarget');
+            const enabled = enabledEl ? enabledEl.checked : false;
+            const targetMinutes = targetMinutesEl ? targetMinutesEl.value : '';
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, targetMinutes, password }) });
+                    if (res.ok) showStatusMessage("Exam mode updated successfully!", "success");
+                } catch (err) {}
+            });
+        });
+    }
+
+    async function loadSanctuaryConfig() {
+        try {
+            const res = await fetch('/api/sanctuary?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                const se = document.getElementById('sanctuaryEnabled');
+                const sr = document.getElementById('sanctuaryReason');
+                if (se) se.checked = data.enabled;
+                if (sr) sr.value = data.reason || "";
+            }
+        } catch (err) {}
+    }
+
+    const sanctuaryForm = document.getElementById('updateSanctuaryForm');
+    if (sanctuaryForm) {
+        sanctuaryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const enabledEl = document.getElementById('sanctuaryEnabled');
+            const reasonEl = document.getElementById('sanctuaryReason');
+            const enabled = enabledEl ? enabledEl.checked : false;
+            const reason = reasonEl ? reasonEl.value : '';
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, reason, password }) });
+                    if (res.ok) showStatusMessage("Sanctuary updated successfully!", "success");
+                } catch (err) {}
+            });
+        });
+    }
+
+    async function loadLandingBgConfig() {
+        try {
+            const res = await fetch('/api/landing-bg?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success && data.url) {
+                const lb = document.getElementById('landingBgUrlInput');
+                if (lb) lb.value = data.url;
+            }
+        } catch (err) {}
+    }
+
+    async function loadGatewayTextConfig() {
+        try {
+            const res = await fetch('/api/gateway-text?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                const ghi = document.getElementById('gatewayHeadlineInput');
+                const gsi = document.getElementById('gatewaySubtextInput');
+                if (ghi) ghi.value = data.headline || "";
+                if (gsi) gsi.value = data.subtext || "";
+            }
+        } catch (err) {}
+    }
+
+    const bgForm = document.getElementById('updateLandingBgForm');
+    if (bgForm) {
+        bgForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlEl = document.getElementById('landingBgUrlInput');
+            const url = urlEl ? urlEl.value : '';
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/control-panel/landing-bg', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ url, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showStatusMessage("Gateway background updated successfully!", "success");
+                    } else {
+                        alert("❌ " + data.error);
+                    }
+                } catch (err) { showStatusMessage("Connection error", "error"); }
+            });
+        });
+    }
+
+    const textForm = document.getElementById('updateGatewayTextForm');
+    if (textForm) {
+        textForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const headlineEl = document.getElementById('gatewayHeadlineInput');
+            const subtextEl = document.getElementById('gatewaySubtextInput');
+            const headline = headlineEl ? headlineEl.value : '';
+            const subtext = subtextEl ? subtextEl.value : '';
+
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    const res = await fetch('/api/control-panel/gateway-text', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ headline, subtext, password })
+                    });
+                    if (res.ok) showStatusMessage("Gateway text updated!", "success");
+                } catch (err) {}
+            });
+        });
+    }
+
+    async function adminLogout() {
+        localStorage.removeItem('monster_admin_trusted');
+        await fetch('/api/control-panel/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = 'index.html';
+    }
+
+    let pendingLockState = false;
+    function requestSystemLockAuth(shouldLock) {
+        pendingLockState = shouldLock;
+        requestSecureAuthorization('lock', () => {
+            executeSystemLock(pendingLockState);
+        });
+    }
+
+    async function executeSystemLock(shouldLock) {
+        const passwordInput = document.getElementById('actionSecurityPasswordInput');
+        const adminPassword = passwordInput ? passwordInput.value : '';
+        try {
+            const res = await fetch('/api/system-lock', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                credentials: 'include',
+                body: JSON.stringify({ locked: shouldLock, adminPassword }) 
+            });
+            const data = await res.json();
+            if (res.ok) { 
+                showStatusMessage("✅ " + data.message, "success"); 
+                closeSecureActionModal();
+                setTimeout(() => location.reload(), 1000);
+            } else { 
+                showStatusMessage("❌ " + (data.error || "Wrong Password! Incorrect System Lock Password."), "error"); 
+            }
+        } catch (err) {
+            showStatusMessage("❌ Connection error", "error");
+        }
+    }
+
+    async function loadModuleLocksStatus() {
+        try {
+            const res = await fetch('/api/module-locks', { credentials: 'include' });
+            const data = await res.json();
+            if(data.success) {
+                updateLockBtnUI('habits', data.habitsLocked);
+                updateLockBtnUI('workouts', data.workoutsLocked);
+                updateLockBtnUI('study', data.studyLocked);
+                updateLockBtnUI('hydration', data.hydrationLocked);
+                updateLockBtnUI('hygiene', data.hygieneLocked);
+            }
+        } catch(e) {}
+    }
+
+    async function toggleModuleLock(moduleKey) {
+        requestSecureAuthorization('edit', async (password) => {
+            try {
+                const resStatus = await fetch('/api/module-locks', { credentials: 'include' });
+                const statusData = await resStatus.json();
+                let currentLocked = statusData[moduleKey + 'Locked'] || false;
+
+                const res = await fetch('/api/control-panel/module-lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ moduleKey, locked: !currentLocked, password })
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    showStatusMessage(`✅ ${moduleKey.toUpperCase()} lock status updated!`, 'success');
+                    loadModuleLocksStatus();
+                } else {
+                    showStatusMessage("❌ " + data.error, "error");
+                }
+            } catch(e) {
+                showStatusMessage("❌ Connection error", "error");
+            }
+        });
+    }
+
+    function updateLockBtnUI(moduleKey, isLocked) {
+        const btn = document.getElementById(`btnLock${moduleKey.charAt(0).toUpperCase() + moduleKey.slice(1)}`);
+        if(!btn) return;
+        if(isLocked) {
+            btn.className = "p-4 bg-red-600/20 border border-red-500/50 rounded-2xl text-xs font-black uppercase tracking-wider text-red-400 transition cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.2)]";
+            btn.innerText = `🔒 ${moduleKey.toUpperCase()}: LOCKED`;
+        } else {
+            btn.className = "p-4 bg-[#030408] border border-white/10 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-300 transition cursor-pointer hover:border-white/30";
+            btn.innerText = `🟢 ${moduleKey.toUpperCase()}: ACTIVE`;
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadHabits(); 
+        loadWorkouts(); 
+        loadStudy(); 
+        loadHygiene();
+        loadModuleLocksStatus();
+    });
+</script>
 
 </body>
 </html>
