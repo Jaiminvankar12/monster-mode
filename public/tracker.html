@@ -26,7 +26,6 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
 
-
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -105,53 +104,58 @@
     </main>
 
     <script>
-        let currentSelectedDate = "";
-        const LAUNCH_DATE = "2026-09-14";
-        window.isHabitsLocked = false; // 🟢 Global variable for granular locking
+        // Proper Local Date String Getter (Avoids UTC shifting issues)
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
-        
+        let currentSelectedDate = getLocalDateString();
+        const LAUNCH_DATE = "2026-09-14";
+        window.isHabitsLocked = false;
 
         async function verifyGlobalSystemLock() {
-    try {
-        const ts = new Date().getTime();
-        const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
-        const data = await res.json();
-        
-        // Jo Global Lock hoy YA FIR Habits Lock hoy
-        if (data.locked || data.habitsLocked) {
-            const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
-            const sessionData = await sessionRes.json();
-            
-            if (sessionData.role !== 'ADMIN') {
-                document.body.innerHTML = `
-                    <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                            <span class="text-5xl animate-bounce">🛡️</span>
-                            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
-                                ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
-                            </p>
-                            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                Access Denied / Contact Admin
+            try {
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                
+                if (data.locked || data.habitsLocked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    
+                    if (sessionData.role !== 'ADMIN') {
+                        document.body.innerHTML = `
+                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                    <span class="text-5xl animate-bounce">🛡️</span>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
+                                        ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
+                                    </h2>
+                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                        This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
+                                    </p>
+                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                        Access Denied / Contact Admin
+                                    </div>
+                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                        Return to Gateway
+                                    </button>
+                                </div>
                             </div>
-                            <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                Return to Gateway
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return; // Code aagal nahi vadhe, data fetch nai thay
+                        `;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Lock verification failed", err);
             }
         }
-    } catch (err) {
-        console.error("Lock verification failed", err);
-    }
-}
 
         async function fetchHabits(dateStr = "") {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
             if (!dateStr) dateStr = todayStr;
             
             currentSelectedDate = dateStr;
@@ -170,16 +174,15 @@
                     const data = await res.json();
                     if (data.success && data.habits) {
                         document.getElementById('habitStreakLabel').innerText = `${data.habitStreak || data.currentStreak || 0} Days`;
-                        updateLockBanner(data.dateStatus || 'UNLOCKED');
+                        updateLockBanner(data.dateStatus || 'UNLOCKED', dateInput.value);
                         renderHabits(data.habits, dateInput.value, data.dateStatus || 'UNLOCKED');
-                        return; // Successfully fetched from API
+                        return;
                     }
                 }
             } catch (err) {
                 console.log("API fetch failed, checking LocalStorage fallback...");
             }
 
-            // Fallback: Check LocalStorage if API returns nothing or connection fails
             let localHabits = [];
             try {
                 localHabits = JSON.parse(localStorage.getItem('monster_habits') || localStorage.getItem('habits') || '[]');
@@ -187,7 +190,6 @@
                 localHabits = [];
             }
 
-            // Map local format to tracker format if needed
             const formattedHabits = localHabits.map(h => ({
                 id: h.id || Math.random().toString(),
                 name: h.name || h.habitName || 'Untitled Habit',
@@ -198,7 +200,7 @@
             }));
 
             document.getElementById('habitStreakLabel').innerText = "0 Days";
-            updateLockBanner('UNLOCKED');
+            updateLockBanner('UNLOCKED', dateInput.value);
             renderHabits(formattedHabits, dateInput.value, 'UNLOCKED');
         }
 
@@ -227,8 +229,6 @@
                     container.innerHTML = `<div class="glass-card p-6 rounded-2xl text-center text-zinc-500 text-xs font-medium">No notes or reminders deployed yet.</div>`;
                 }
             } catch (err) {
-                console.log("Fetching fallback notes...");
-                // Fallback for notes
                 const container = document.getElementById('trackerNotesContainer');
                 let localNotes = JSON.parse(localStorage.getItem('monster_notes') || '[]');
                 if(localNotes.length > 0) {
@@ -283,7 +283,6 @@
                     throw new Error("Cloud Sync Failed");
                 }
              } catch (err) {
-                  // Offline Toggle Fallback
                   let localHabits = JSON.parse(localStorage.getItem('monster_habits') || '[]');
                   let habit = localHabits.find(h => h.id == id);
                   if(habit) {
@@ -299,7 +298,7 @@
             let currentDate = new Date(dateInput.value || currentSelectedDate);
             currentDate.setDate(currentDate.getDate() + days);
             
-            const newDateStr = currentDate.toISOString().split('T')[0];
+            const newDateStr = getLocalDateString(currentDate);
             dateInput.value = newDateStr;
             fetchHabits(newDateStr);
         }
@@ -311,19 +310,24 @@
             }
         }
 
-        function updateLockBanner(status) {
+        function updateLockBanner(status, targetDate) {
             const badge = document.getElementById('dateStatusBadge');
-            if (status === 'LOCKED') {
+            const todayStr = getLocalDateString();
+
+            if (targetDate < LAUNCH_DATE) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
+            } else if (targetDate < todayStr || status === 'LOCKED') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
-            } else if (status === 'FUTURE') {
+            } else if (targetDate > todayStr || status === 'FUTURE') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ PLANNING MODE — Advance Deployment";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
             } else if (window.isHabitsLocked) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
                 badge.innerText = "🛑 SYSTEM ADMIN LOCK ACTIVE";
             } else {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "🟢 UNLOCKED — Active Execution Day";
             }
         }
@@ -335,9 +339,14 @@
                 return;
             }
 
-            const todayStr = new Date().toISOString().split('T')[0];
-            // 🔒 STRICT DATE LOCKING: Lock if it's a future date, past date, if dateStatus enforces locking, or via admin module lock
-            const isRestricted = (viewingDate !== todayStr) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE') || window.isHabitsLocked;
+            const todayStr = getLocalDateString();
+            
+            // STRICT DATE LOCKING CONDITIONS
+            const isPastDate = viewingDate < todayStr;
+            const isFutureDate = viewingDate > todayStr;
+            const isPreLaunch = viewingDate < LAUNCH_DATE;
+            
+            const isRestricted = isPastDate || isFutureDate || isPreLaunch || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE') || window.isHabitsLocked;
 
             container.innerHTML = habits.map(h => {
                 const startDateStr = h.startDate || LAUNCH_DATE;
@@ -357,7 +366,7 @@
                         </div>
                         <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
                             <button ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
-                                ${window.isHabitsLocked ? '🔒 LOCKED' : (h.completedToday ? '✓ Complete' : '○ Pending')}
+                                ${isDisabled ? '🔒 Locked' : (h.completedToday ? '✓ Complete' : '○ Pending')}
                             </button>
                         </div>
                     </div>
@@ -376,7 +385,6 @@
             fetchTrackerNotes();
         });
 
-        // 🔊 Global Cyberpunk Click Sound
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playCyberClick() {
             if(audioCtx.state === 'suspended') audioCtx.resume();

@@ -43,8 +43,6 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
 
-    
-
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -95,7 +93,7 @@
                 <span class="hidden sm:inline-block text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">Online</span>
             </div>
             
-            <!-- Dynamic Chat Response Area (Upgraded for Rich Text) -->
+            <!-- Dynamic Chat Response Area -->
             <div id="aiCoachChatBox" class="bg-[#05070b] border border-white/10 p-5 rounded-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-h-[300px] overflow-y-auto premium-scroll shadow-inner">
                 <div class="text-slate-400">
                     <span class="text-red-500 font-bold block mb-1">SYSTEM BOOT: APEX AI INITIATED</span>
@@ -130,7 +128,6 @@
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">⚡</div>
             </div>
-
         </div>
 
         <!-- Date Carousel Navigation Bar -->
@@ -164,10 +161,17 @@
     </main>
 
     <script>
-        let currentSelectedDate = "";
+        // Proper Local Date String Getter (Avoids UTC shifting issues)
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        let currentSelectedDate = getLocalDateString();
         const MONSTER_LAUNCH_DATE = "2026-09-14";
 
-        // 🤖 PREMIUM REAL AI COACH BOT LOGIC (Connected to Real Generative AI Backend API Endpoint)
         function quickAskAI(type) {
             const prompts = {
                 hypertrophy: "Generate an elite, science-based 4-week Push/Pull/Legs hypertrophy routine. Give exact sets, reps, and RPE for each exercise.",
@@ -192,7 +196,6 @@
                 </div>`;
             
             try {
-                // Upgraded to request real dynamic AI generation from backend generative endpoint
                 const res = await fetch('/api/apex-ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -200,7 +203,6 @@
                 });
                 const data = await res.json();
                 
-                // Supports response payloads from standard LLM integrations (data.reply or data.success)
                 const replyText = data.reply || data.message || (data.success ? data.text : null);
 
                 if (res.ok && replyText) {
@@ -227,46 +229,43 @@
             }
         });
 
-       
-
         async function verifyGlobalSystemLock() {
-    try {
-        const ts = new Date().getTime();
-        const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
-        const data = await res.json();
-        
-        // Jo Global Lock hoy YA FIR Habits Lock hoy
-        if (data.locked || data.workoutsLocked) {
-            const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
-            const sessionData = await sessionRes.json();
-            
-            if (sessionData.role !== 'ADMIN') {
-                document.body.innerHTML = `
-                    <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                            <span class="text-5xl animate-bounce">🛡️</span>
-                            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
-                                ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
-                            </p>
-                            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                Access Denied / Contact Admin
+            try {
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                
+                if (data.locked || data.workoutsLocked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    
+                    if (sessionData.role !== 'ADMIN') {
+                        document.body.innerHTML = `
+                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                    <span class="text-5xl animate-bounce">🛡️</span>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
+                                        ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
+                                    </h2>
+                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                        This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
+                                    </p>
+                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                        Access Denied / Contact Admin
+                                    </div>
+                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                        Return to Gateway
+                                    </button>
+                                </div>
                             </div>
-                            <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                Return to Gateway
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return; // Code aagal nahi vadhe, data fetch nai thay
+                        `;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Lock verification failed", err);
             }
         }
-    } catch (err) {
-        console.error("Lock verification failed", err);
-    }
-}
 
         async function loadDashboardSchedules() {
             try {
@@ -281,9 +280,8 @@
             } catch (err) {}
         }
 
-        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
         async function fetchWorkouts(dateStr = "") {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
             if (!dateStr) dateStr = todayStr;
             
             currentSelectedDate = dateStr;
@@ -333,7 +331,7 @@
             let currentDate = new Date(dateInput.value || currentSelectedDate);
             currentDate.setDate(currentDate.getDate() + days);
             
-            const newDateStr = currentDate.toISOString().split('T')[0];
+            const newDateStr = getLocalDateString(currentDate);
             dateInput.value = newDateStr;
             fetchWorkouts(newDateStr);
         }
@@ -347,7 +345,7 @@
 
         function updateStatusBanner(status, allDone, targetDate) {
             const badge = document.getElementById('workoutStatusBadge');
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
 
             if (status === 'ERROR') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
@@ -355,10 +353,10 @@
             } else if (targetDate < MONSTER_LAUNCH_DATE) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
                 badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
-            } else if (status === 'LOCKED' || targetDate < todayStr) {
+            } else if (targetDate < todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
-            } else if (status === 'FUTURE' || targetDate > todayStr) {
+            } else if (targetDate > todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
                 badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
             } else if (allDone) {
@@ -377,11 +375,9 @@
                 return;
             }
 
-            // 🔒 EXACT DATE LOCKING FIX (Matching Habit Tracker Rules):
-            // - Future dates -> Locked & Not Editable
-            // - Past dates -> Locked & Not Editable (Immutable)
-            // - Active date (Today) -> Unlocked & Editable
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
+            
+            // STRICT LOCK CONDITIONS:
             const isRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE');
 
             container.innerHTML = workouts.map(w => `
@@ -396,14 +392,13 @@
                     </div>
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
                         <button ${isRestricted ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
-                            ${w.completed ? '✓ Done' : '○ Pending'}
+                            ${isRestricted ? '🔒 Locked' : (w.completed ? '✓ Done' : '○ Pending')}
                         </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 🟢 100% CLOUD-ONLY TOGGLE FUNCTION
         async function toggleWorkout(id, completed) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {

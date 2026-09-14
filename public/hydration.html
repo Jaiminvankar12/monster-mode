@@ -80,10 +80,28 @@
             <span class="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Goal Met = Streak+</span>
         </div>
 
+        <!-- Date Carousel Navigation Bar -->
+        <div class="glass-card water-glow p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
+                <div class="text-center px-2">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                </div>
+                <button onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
+            </div>
+
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+
+            <div id="hydrationStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
+                Loading status...
+            </div>
+        </div>
+
         <!-- Bottom / Top Navigation Switcher (Today vs History) -->
         <div class="grid grid-cols-2 gap-2 bg-[#121520] p-1.5 rounded-2xl border border-white/5">
             <button onclick="switchMainTab('today')" id="tabTodayBtn" class="py-3 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-blue-600/20">
-                💧 Today
+                💧 Intake View
             </button>
             <button onclick="switchMainTab('history')" id="tabHistoryBtn" class="py-3 text-zinc-400 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
                 📊 History
@@ -93,10 +111,9 @@
         <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
         <div id="viewToday" class="flex flex-col items-center justify-center text-center py-4 w-full">
             
-            <!-- OVERLAP FIX: Added mb-16 (Margin Bottom 64px) to separate text from the rotated drop tip -->
-            <div class="mt-2 mb-16 sm:mb-20 relative z-20">
+            <div class="mt-2 mb-12 sm:mb-16 relative z-20">
                 <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 shadow-sm">Daily Water Target</span>
-                <h2 id="todayHeaderDate" class="text-3xl font-black uppercase text-white mt-4 tracking-widest drop-shadow-md">Today</h2>
+                <h2 id="todayHeaderDate" class="text-3xl font-black uppercase text-white mt-4 tracking-widest drop-shadow-md">Selected Date</h2>
             </div>
 
             <!-- 💧 GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
@@ -126,7 +143,7 @@
             </div>
 
             <!-- DRINK BUTTON -->
-            <button onclick="addDrink()" class="w-full mt-6 py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
+            <button id="drinkBtn" onclick="addDrink()" class="w-full mt-6 py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
                 + DRINK (<span id="glassSizeDisplay">250 ml</span>)
             </button>
         </div>
@@ -172,11 +189,20 @@
     </main>
 
     <script>
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        let currentSelectedDate = getLocalDateString();
         let currentGoal = 3000;
         let currentGlass = 250;
         let hydrationHistoryLogs = {};
         
         const LAUNCH_DATE = "2026-09-14";
+
         function switchMainTab(tab) {
             if (tab === 'today') {
                 document.getElementById('viewToday').classList.remove('hidden');
@@ -203,11 +229,20 @@
             calculateHistoryStats(filter);
         }
 
-        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
-        async function fetchHydrationData() {
+        async function fetchHydrationData(dateStr = "") {
+            const todayStr = getLocalDateString();
+            if (!dateStr) dateStr = todayStr;
+            
+            currentSelectedDate = dateStr;
+            const dateInput = document.getElementById('targetDateInput');
+            if (!dateInput.value) {
+                dateInput.value = dateStr;
+            }
+            document.getElementById('activeDateLabel').innerText = dateInput.value;
+
             try {
                 const ts = new Date().getTime();
-                const res = await fetch('/api/hydration?t=' + ts, { cache: 'no-store' });
+                const res = await fetch(`/api/hydration?t=${ts}&date=${dateStr}`, { cache: 'no-store' });
                 
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
@@ -226,11 +261,11 @@
                         document.getElementById('percentLabel').innerText = `${data.percent}% Progress`;
                         document.getElementById('remainingLabel').innerText = `${Math.max(0, currentGoal - data.consumed)} ml Left`;
                         document.getElementById('progressBarFill').style.width = `${data.percent}%`;
-                        
                         document.getElementById('liquidFill').style.height = `${data.percent}%`;
-
                         document.getElementById('glassSizeDisplay').innerText = `${currentGlass} ml`;
                         document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
+
+                        updateStatusBanner(data.dateStatus || 'UNLOCKED', dateInput.value);
                     } else {
                         throw new Error(data.error || "Failed to fetch from Cloud");
                     }
@@ -250,14 +285,80 @@
             }
         }
 
-        // 🟢 100% CLOUD-ONLY DRINK FUNCTION
+        function shiftDate(days) {
+            const dateInput = document.getElementById('targetDateInput');
+            let currentDate = new Date(dateInput.value || currentSelectedDate);
+            currentDate.setDate(currentDate.getDate() + days);
+            
+            const newDateStr = getLocalDateString(currentDate);
+            dateInput.value = newDateStr;
+            fetchHydrationData(newDateStr);
+        }
+
+        function onDateChange() {
+            const chosenDate = document.getElementById('targetDateInput').value;
+            if (chosenDate) {
+                fetchHydrationData(chosenDate);
+            }
+        }
+
+        function updateStatusBanner(status, targetDate) {
+            const badge = document.getElementById('hydrationStatusBadge');
+            const todayStr = getLocalDateString();
+            const drinkBtn = document.getElementById('drinkBtn');
+
+            const isPastDate = targetDate < todayStr;
+            const isFutureDate = targetDate > todayStr;
+            const isPreLaunch = targetDate < LAUNCH_DATE;
+            const isRestricted = isPastDate || isFutureDate || isPreLaunch || (status === 'LOCKED') || (status === 'FUTURE');
+
+            if (isRestricted) {
+                drinkBtn.disabled = true;
+                drinkBtn.style.opacity = "0.4";
+                drinkBtn.style.cursor = "not-allowed";
+            } else {
+                drinkBtn.disabled = false;
+                drinkBtn.style.opacity = "1";
+                drinkBtn.style.cursor = "pointer";
+            }
+
+            if (status === 'ERROR') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
+                badge.innerText = "❌ SERVER OFFLINE";
+            } else if (isPreLaunch) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
+            } else if (isPastDate || status === 'LOCKED') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
+                badge.innerText = "🔒 LOCKED — Immutable Past Record";
+            } else if (isFutureDate || status === 'FUTURE') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
+            } else {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
+                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
+            }
+        }
+
         async function addDrink() {
+            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {
-                const res = await fetch('/api/hydration/drink', { method: 'POST' });
-                if (!res.ok) throw new Error("Cloud update failed");
+                const res = await fetch('/api/hydration/drink', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: targetDate })
+                });
+                if (!res.ok) {
+                    if (res.status === 403) {
+                         const errData = await res.json();
+                         alert(errData.error || "System Locked.");
+                         return;
+                    }
+                    throw new Error("Cloud update failed");
+                }
                 const data = await res.json();
                 if (data.success) {
-                    fetchHydrationData();
+                    fetchHydrationData(targetDate);
                 } else if (data.error) {
                     alert("❌ " + data.error);
                 }
@@ -310,7 +411,6 @@
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
                 const data = await res.json();
                 
-                // Jo Global Lock hoy YA FIR Hydration Lock hoy
                 if (data.locked || data.hydrationLocked) {
                     const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
                     const sessionData = await sessionRes.json();

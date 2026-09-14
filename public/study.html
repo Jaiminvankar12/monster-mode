@@ -65,10 +65,10 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8">
+    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 space-y-8">
         
         <!-- Header & Target Overview -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
                 <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">🧠 Deep Work Matrix</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Academic & Skill Command</h2>
@@ -93,8 +93,26 @@
             </div>
         </div>
 
+        <!-- Date Carousel Navigation Bar -->
+        <div class="glass-card glow-blue p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
+                <div class="text-center px-2">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                </div>
+                <button onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
+            </div>
+
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+
+            <div id="studyStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
+                Loading status...
+            </div>
+        </div>
+
         <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
@@ -115,7 +133,7 @@
         </div>
 
         <!-- Pomodoro Focus Timer Matrix -->
-        <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-blue-500 glow-blue">
+        <div id="pomodoroCardWrapper" class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-500 glow-blue">
             <div class="flex items-center justify-between mb-4">
                 <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
                     <span>⏱️</span> Pomodoro Deep Work Focus Engine
@@ -147,24 +165,22 @@
         </div>
 
         <!-- Progress Bar & Status Section -->
-        <div class="glass-card p-6 rounded-2xl mb-8 space-y-4">
+        <div class="glass-card p-6 rounded-2xl space-y-4">
             <div class="flex justify-between items-center">
-                <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Today's Academic Progress</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Academic Progress</span>
                 <span id="progressPercentText" class="text-xs font-black text-blue-400">0%</span>
             </div>
             <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
                 <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-emerald-500 h-full w-0 transition-all duration-500"></div>
             </div>
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-2">
-                <div id="studyStatusBadge" class="px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-400 border border-white/5">
-                    Loading Status...
-                </div>
+                <div id="studyDateStatusText" class="text-xs text-zinc-400 font-semibold">Viewing active execution day</div>
                 <div class="text-xs text-zinc-500 font-semibold" id="sessionCountText">0 Sessions Logged</div>
             </div>
         </div>
 
         <!-- Grid Layout: Log Session & Active Subjects -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div id="studyLoggingSection" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
@@ -199,9 +215,9 @@
                 </div>
 
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📖 Today's Study Sessions</h3>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📖 Study Sessions for Selected Date</h3>
                     <div id="sessionsList" class="space-y-3">
-                        <p class="text-xs text-zinc-500">No study sessions recorded for today.</p>
+                        <p class="text-xs text-zinc-500">No study sessions recorded for this date.</p>
                     </div>
                 </div>
             </div>
@@ -209,6 +225,15 @@
     </main>
 
     <script>
+        // Proper Local Date String Getter (Avoids UTC shifting issues)
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        let currentSelectedDate = getLocalDateString();
         let categoriesData = [];
         let pomoTimer = null;
         let isPomoRunning = false;
@@ -220,45 +245,44 @@
         let pomoDurationMinutes = savedDefaultMins;
         let pomoSecondsLeft = pomoDurationMinutes * 60;
 
-
-       async function verifyGlobalSystemLock() {
-    try {
-        const ts = new Date().getTime();
-        const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
-        const data = await res.json();
-        
-        // Jo Global Lock hoy YA FIR Habits Lock hoy
-        if (data.locked || data.studyLocked) {
-            const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
-            const sessionData = await sessionRes.json();
-            
-            if (sessionData.role !== 'ADMIN') {
-                document.body.innerHTML = `
-                    <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                        <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                            <span class="text-5xl animate-bounce">🛡️</span>
-                            <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
-                                ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
-                            </p>
-                            <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                Access Denied / Contact Admin
+        async function verifyGlobalSystemLock() {
+            try {
+                const ts = new Date().getTime();
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const data = await res.json();
+                
+                if (data.locked || data.studyLocked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionData = await sessionRes.json();
+                    
+                    if (sessionData.role !== 'ADMIN') {
+                        document.body.innerHTML = `
+                            <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                                <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                    <span class="text-5xl animate-bounce">🛡️</span>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
+                                        ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
+                                    </h2>
+                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                        This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
+                                    </p>
+                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
+                                        Access Denied / Contact Admin
+                                    </div>
+                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                        Return to Gateway
+                                    </button>
+                                </div>
                             </div>
-                            <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                Return to Gateway
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return; // Code aagal nahi vadhe, data fetch nai thay
+                        `;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Lock verification failed", err);
             }
         }
-    } catch (err) {
-        console.error("Lock verification failed", err);
-    }
-}
+
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             loadDashboardSchedules();
@@ -290,7 +314,6 @@
                 updatePomoDisplay();
             }
 
-            // 100% Cloud-Only Fetch
             fetchStudyData();
         });
 
@@ -322,12 +345,21 @@
             } catch (e) {}
         }
 
-        // 🟢 100% CLOUD-ONLY FETCH FUNCTION
-        async function fetchStudyData() {
-            const todayStr = new Date().toISOString().split('T')[0];
+        async function fetchStudyData(dateStr = "") {
+            const todayStr = getLocalDateString();
+            if (!dateStr) dateStr = todayStr;
+            
+            currentSelectedDate = dateStr;
+            const dateInput = document.getElementById('targetDateInput');
+            if (!dateInput.value) {
+                dateInput.value = dateStr;
+            }
+            document.getElementById('serverDateDisplay').innerText = `Server Date: ${dateStr}`;
+            document.getElementById('activeDateLabel').innerText = dateInput.value;
+
             try {
                 const ts = new Date().getTime();
-                const res = await fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' });
+                const res = await fetch(`/api/study/sessions?t=${ts}&date=${dateStr}`, { cache: 'no-store' });
                 
                 if(res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
@@ -338,7 +370,6 @@
                     const data = await res.json();
                     if (data.success) {
                         categoriesData = data.categories || [];
-                        document.getElementById('serverDateDisplay').innerText = `Server Date: ${data.serverDate || todayStr}`;
                         
                         document.getElementById('targetTimeLabel').innerText = formatMinutes(data.totalTargetMinutes || 0);
                         document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes || 0);
@@ -348,17 +379,9 @@
                         document.getElementById('progressBarFill').style.width = `${data.progressPercent || 0}%`;
                         document.getElementById('sessionCountText').innerText = `${(data.sessions || []).length} Sessions Logged`;
 
-                        const badge = document.getElementById('studyStatusBadge');
-                        if (data.isDone) {
-                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                            badge.innerText = "✅ STATUS: DONE (TARGET MET)";
-                        } else {
-                            badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/30";
-                            badge.innerText = "⏳ STATUS: IN PROGRESS";
-                        }
-
+                        updateStatusBanner(data.dateStatus || 'UNLOCKED', dateInput.value);
                         renderCategories(categoriesData);
-                        renderSessions(data.sessions || [], categoriesData);
+                        renderSessions(data.sessions || [], categoriesData, dateInput.value);
                         populateSelects(categoriesData);
                     } else {
                         throw new Error(data.error || "Failed to fetch from Cloud");
@@ -369,8 +392,6 @@
             } catch (err) {
                 console.error("Cloud Connection Error:", err);
                 
-                // Cloud Error Display Instead of Fallback
-                document.getElementById('serverDateDisplay').innerText = `Server Date: ${todayStr}`;
                 document.getElementById('targetTimeLabel').innerText = "0h 00m";
                 document.getElementById('studiedTimeLabel').innerText = "0h 00m";
                 document.getElementById('studyStreakLabel').innerText = "🔥 0 Days";
@@ -378,9 +399,7 @@
                 document.getElementById('progressBarFill').style.width = "0%";
                 document.getElementById('sessionCountText').innerText = `0 Sessions Logged`;
 
-                const badge = document.getElementById('studyStatusBadge');
-                badge.className = "px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50";
-                badge.innerText = "❌ SERVER OFFLINE";
+                updateStatusBanner('ERROR', dateInput.value);
 
                 document.getElementById('categoriesList').innerHTML = `
                     <div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
@@ -392,6 +411,64 @@
                     </div>`;
                 
                 populateSelects([]);
+            }
+        }
+
+        function shiftDate(days) {
+            const dateInput = document.getElementById('targetDateInput');
+            let currentDate = new Date(dateInput.value || currentSelectedDate);
+            currentDate.setDate(currentDate.getDate() + days);
+            
+            const newDateStr = getLocalDateString(currentDate);
+            dateInput.value = newDateStr;
+            fetchStudyData(newDateStr);
+        }
+
+        function onDateChange() {
+            const chosenDate = document.getElementById('targetDateInput').value;
+            if (chosenDate) {
+                fetchStudyData(chosenDate);
+            }
+        }
+
+        function updateStatusBanner(status, targetDate) {
+            const badge = document.getElementById('studyStatusBadge');
+            const todayStr = getLocalDateString();
+            const loggingSection = document.getElementById('studyLoggingSection');
+            const pomoCardWrapper = document.getElementById('pomodoroCardWrapper');
+
+            const isPastDate = targetDate < todayStr;
+            const isFutureDate = targetDate > todayStr;
+            const isPreLaunch = targetDate < LAUNCH_DATE;
+            const isRestricted = isPastDate || isFutureDate || isPreLaunch || (status === 'LOCKED') || (status === 'FUTURE');
+
+            if (isRestricted) {
+                loggingSection.style.opacity = "0.5";
+                loggingSection.style.pointerEvents = "none";
+                pomoCardWrapper.style.opacity = "0.5";
+                pomoCardWrapper.style.pointerEvents = "none";
+            } else {
+                loggingSection.style.opacity = "1";
+                loggingSection.style.pointerEvents = "auto";
+                pomoCardWrapper.style.opacity = "1";
+                pomoCardWrapper.style.pointerEvents = "auto";
+            }
+
+            if (status === 'ERROR') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
+                badge.innerText = "❌ SERVER OFFLINE";
+            } else if (isPreLaunch) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
+            } else if (isPastDate || status === 'LOCKED') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
+                badge.innerText = "🔒 LOCKED — Immutable Past Record";
+            } else if (isFutureDate || status === 'FUTURE') {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
+                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
+            } else {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
+                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
             }
         }
 
@@ -416,10 +493,13 @@
             `).join('');
         }
 
-        function renderSessions(sessions, categories) {
+        function renderSessions(sessions, categories, viewingDate) {
             const container = document.getElementById('sessionsList');
+            const todayStr = getLocalDateString();
+            const isRestricted = viewingDate !== todayStr;
+
             if (!sessions || sessions.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500">No study sessions recorded for today.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500">No study sessions recorded for this date.</p>`;
                 return;
             }
             container.innerHTML = sessions.map(s => {
@@ -431,7 +511,7 @@
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
                             <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes</p>
                         </div>
-                        <button onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
+                        ${!isRestricted ? `<button onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>` : ''}
                     </div>
                 `;
             }).join('');
@@ -585,10 +665,10 @@
             document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
         }
 
-        // 🟢 100% CLOUD-ONLY POMO COMPLETE FUNCTION
         async function completePomodoroSession() {
             const categoryId = localStorage.getItem('pomo_categoryId') || document.getElementById('pomoCategorySelect').value;
             const dur = parseInt(localStorage.getItem('pomo_duration')) || pomoDurationMinutes;
+            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             
             localStorage.removeItem('pomo_categoryId');
             localStorage.removeItem('pomo_topic');
@@ -601,7 +681,8 @@
                     body: JSON.stringify({
                         categoryId: categoryId,
                         topic: `Deep Work Focus (${dur}m)`,
-                        durationMinutes: dur
+                        durationMinutes: dur,
+                        date: targetDate
                     })
                 });
                 
@@ -616,7 +697,7 @@
                 
                 const data = await res.json();
                 if (data.success) {
-                    fetchStudyData();
+                    fetchStudyData(targetDate);
                 } else {
                     alert("Error logging session: " + data.error);
                 }
@@ -626,18 +707,18 @@
             }
         }
 
-        // 🟢 100% CLOUD-ONLY LOG SESSION FUNCTION
         document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const categoryId = document.getElementById('sessionCategorySelect').value;
             const topic = document.getElementById('sessionTopic').value;
             const durationMinutes = document.getElementById('sessionDuration').value;
+            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
 
             try {
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoryId, topic, durationMinutes })
+                    body: JSON.stringify({ categoryId, topic, durationMinutes, date: targetDate })
                 });
                 
                 if (!res.ok) {
@@ -653,7 +734,7 @@
                 if (data.success) {
                     document.getElementById('logSessionForm').reset();
                     document.getElementById('sessionDuration').value = "45";
-                    fetchStudyData();
+                    fetchStudyData(targetDate);
                 } else {
                     alert(data.error || "Failed to log session.");
                 }
@@ -663,13 +744,13 @@
             }
         });
 
-        // 🟢 100% CLOUD-ONLY DELETE SESSION FUNCTION
         async function deleteSession(id) {
             if (!confirm("Delete this session?")) return;
+            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {
                 const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
                 if (!res.ok) throw new Error("Cloud Sync Failed");
-                fetchStudyData();
+                fetchStudyData(targetDate);
             } catch (err) {
                 console.error(err);
                 alert("❌ Connection Error: Could not delete session from MongoDB Cloud.");
