@@ -1722,15 +1722,16 @@
             }
         });
        
-        <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
- 
         let audioCtx = null;
+        
         function playCyberClick() {
             try {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 const osc = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 osc.type = 'square';
@@ -1744,7 +1745,7 @@
                 osc.stop(audioCtx.currentTime + 0.05);
             } catch(e) {}
         }
-        
+
         document.addEventListener('click', function(e) {
             if (e.target.closest('button')) {
                 playCyberClick();
