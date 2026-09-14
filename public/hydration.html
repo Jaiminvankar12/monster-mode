@@ -77,7 +77,7 @@
         /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
         @keyframes successGlow {
             0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
-            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
             100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
         }
 
@@ -86,9 +86,63 @@
             border-color: rgba(16, 185, 129, 0.6) !important;
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
+
+        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION (IMAGE 8888b6) 🚀 */
+        #successOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #25813e; /* PhonePe Solid Green */
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out;
+        }
+        #successOverlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .success-checkmark {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 6;
+            stroke: #25813e; /* Green checkmark */
+            background: #ffffff; /* White Circle */
+            stroke-miterlimit: 10;
+            animation: scale .3s ease-in-out .2s both;
+            box-shadow: 0 0 0 10px rgba(255,255,255,0.1), 0 0 0 20px rgba(255,255,255,0.05);
+        }
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #25813e;
+            animation: stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+        }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- 🚀 SUCCESS OVERLAY WIDGET -->
+    <div id="successOverlay">
+        <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <h2 class="text-xl sm:text-2xl font-bold text-white mt-8 tracking-wide drop-shadow-md">Goal completed</h2>
+        <p class="text-emerald-100 font-medium tracking-wide mt-1 text-sm" id="successDateText">Hydration goal reached</p>
+    </div>
 
     <!-- Top Navigation Bar -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
@@ -108,7 +162,7 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
-        <!-- 🟢 1. DATE / DAY MOVED TO THE TOP (ABOVE STREAK) -->
+        <!-- 🟢 DATE / DAY MOVED TO THE TOP -->
         <div class="text-center pb-2">
             <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3.5 py-1.5 rounded-full border border-blue-500/20">Daily Water Target</span>
             <h2 id="todayHeaderDate" class="text-xl sm:text-2xl font-black uppercase text-white mt-3">Monday, September 14, 2026</h2>
@@ -126,21 +180,20 @@
             <span class="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Goal Met = Streak+</span>
         </div>
 
-        <!-- Date Carousel Navigation Bar -->
-        <div class="glass-card water-glow p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
-                <div class="text-center px-2">
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">2026-09-14</span>
+        <!-- 🚀 UPDATED: FIXED HORIZONTAL IMAGE-1 STYLE DATE NAVIGATOR 🚀 -->
+        <div class="glass-card water-glow p-3 sm:p-5 rounded-2xl flex flex-row items-center justify-between gap-2 overflow-x-auto scrollbar-none w-full">
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer whitespace-nowrap">← Prev</button>
+                <div class="text-center px-1 sm:px-2 min-w-[85px] shrink-0">
+                    <span class="text-[9px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
+                    <span id="activeDateLabel" class="text-xs sm:text-sm font-black text-white tracking-wider whitespace-nowrap">2026-09-14</span>
                 </div>
-                <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
+                <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer whitespace-nowrap">Next →</button>
             </div>
 
-            <!-- 🟢 SET CURRENT DATE INITIALLY -->
             <input type="date" id="targetDateInput" value="2026-09-14" onchange="onDateChange()" class="hidden">
 
-            <div id="hydrationStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
+            <div id="hydrationStatusBadge" class="text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap shrink-0 ml-auto">
                 Loading status...
             </div>
         </div>
@@ -159,7 +212,7 @@
         <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
         <div id="viewToday" class="flex flex-col items-center justify-center text-center py-2 space-y-4">
             
-            <!-- 💧 GIANT WATER DROP SHAPE (NO OVERLAP AT ALL) -->
+            <!-- 💧 GIANT WATER DROP SHAPE -->
             <div class="relative w-52 h-52 sm:w-60 sm:h-60 mx-auto flex flex-col items-center justify-center my-4">
                 
                 <div class="absolute inset-0 drop-shape water-glow bg-blue-500/5 border-2 border-blue-500/40 overflow-hidden">
@@ -332,7 +385,7 @@
         }
 
         function onDateChange() {
-            const chosenDate = document.getElementById('targetDateInput').value;
+            const chosenDate = document.getElementById('targetDateInput');
             if (chosenDate) {
                 fetchHydrationData(chosenDate);
             }
@@ -347,14 +400,30 @@
             if (isPreLaunch) {
                 drinkBtn.disabled = true;
                 drinkBtn.style.opacity = "0.4";
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap shrink-0 ml-auto";
                 badge.innerText = "🔒 PRE-LAUNCH: Locked";
             } else {
                 drinkBtn.disabled = false;
                 drinkBtn.style.opacity = "1";
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
+                badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap shrink-0 ml-auto";
                 badge.innerText = "🟢 UNLOCKED — ACTIVE DAY";
             }
+        }
+
+        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
+        function playSuccessAnimation() {
+            const overlay = document.getElementById('successOverlay');
+            document.getElementById('successDateText').innerText = document.getElementById('targetDateInput').value;
+            overlay.classList.add('active');
+            
+            const check = overlay.querySelector('.success-checkmark__check');
+            check.style.animation = 'none';
+            void check.offsetWidth;
+            check.style.animation = 'stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards';
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 2500); 
         }
 
         async function addDrink() {
@@ -367,6 +436,13 @@
                     body: JSON.stringify({ date: targetDate })
                 });
                 if (res.ok) {
+                    let oldConsumedText = document.getElementById('consumedLabel').innerText;
+                    let oldConsumed = parseInt(oldConsumedText.replace(' ml', '')) || 0;
+                    let newConsumed = oldConsumed + currentGlass;
+                    if (oldConsumed < currentGoal && newConsumed >= currentGoal) {
+                        playSuccessAnimation();
+                    }
+                    
                     fetchHydrationData(targetDate);
                 }
             } catch (err) {

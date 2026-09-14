@@ -47,7 +47,7 @@
         /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
         @keyframes successGlow {
             0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
-            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
             100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
         }
 
@@ -56,9 +56,76 @@
             border-color: rgba(16, 185, 129, 0.6) !important;
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
+
+        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
+        #successOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 47, 46, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out;
+        }
+        #successOverlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .success-checkmark {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 4;
+            stroke: #10b981;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #10b981;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 4;
+            stroke-miterlimit: 10;
+            stroke: #10b981;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #fff;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
+        @keyframes fill {
+            100% { box-shadow: inset 0px 0px 0px 60px #10b981; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
+
+    <!-- 🚀 SUCCESS OVERLAY WIDGET -->
+    <div id="successOverlay">
+        <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <h2 class="text-3xl font-black text-white mt-6 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]">Execution Complete</h2>
+        <p class="text-emerald-300 font-bold tracking-widest mt-2 uppercase text-xs">Vector Synced Successfully</p>
+    </div>
 
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
@@ -320,6 +387,26 @@
             fetchTrackerNotes();
         }
 
+        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
+        function playSuccessAnimation() {
+            const overlay = document.getElementById('successOverlay');
+            overlay.classList.add('active');
+            
+            // Re-trigger SVG animation cleanly
+            const circle = overlay.querySelector('.success-checkmark__circle');
+            const check = overlay.querySelector('.success-checkmark__check');
+            circle.style.animation = 'none';
+            check.style.animation = 'none';
+            void circle.offsetWidth; // trigger reflow
+            void check.offsetWidth;
+            circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
+            check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 2500); // Overlay stays for 2.5 seconds before fading out
+        }
+
         async function toggleHabit(id, completed) {
              const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
              const todayStr = getLocalDateString();
@@ -327,6 +414,11 @@
              if (targetDate !== todayStr) {
                  alert("🔒 Action denied: Past or future dates are locked and immutable.");
                  return;
+             }
+
+             // TRIGGER OVERLAY IF WE ARE MARKING AS "DONE"
+             if (completed) {
+                 playSuccessAnimation();
              }
 
              try {

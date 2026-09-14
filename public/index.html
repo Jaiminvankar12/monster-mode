@@ -285,6 +285,12 @@
                 return;
             }
 
+            // 🔥 ADMIN TOKEN RESTRICTION LOGIC ADDED HERE 🔥
+            if (currentPortal === 'admin') {
+                showStatusMessage("⚠️ Admin token is only used for access tracker portal. If you want to login admin portal, follow steps and login.", "error");
+                return;
+            }
+
             showStatusMessage("⚡ Verifying Token & Bypassing Gateway...", "success");
             localStorage.setItem('monster_admin_trusted', 'true');
 

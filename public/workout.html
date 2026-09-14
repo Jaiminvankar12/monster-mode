@@ -74,9 +74,76 @@
             border-color: rgba(16, 185, 129, 0.6) !important;
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
+
+        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
+        #successOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 47, 46, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-out;
+        }
+        #successOverlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .success-checkmark {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 4;
+            stroke: #10b981;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px #10b981;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 4;
+            stroke-miterlimit: 10;
+            stroke: #10b981;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #fff;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes scale {
+            0%, 100% { transform: none; }
+            50% { transform: scale3d(1.1, 1.1, 1); }
+        }
+        @keyframes fill {
+            100% { box-shadow: inset 0px 0px 0px 60px #10b981; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
+
+    <!-- 🚀 SUCCESS OVERLAY WIDGET -->
+    <div id="successOverlay">
+        <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <h2 class="text-3xl font-black text-white mt-6 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]">Execution Complete</h2>
+        <p class="text-emerald-300 font-bold tracking-widest mt-2 uppercase text-xs">Vector Synced Successfully</p>
+    </div>
 
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
@@ -316,6 +383,53 @@
             } catch (err) {}
         }
 
+        // 🔥 NEW: DAILY MOTIVATION QUOTES FUNCTION 🔥
+        function initDailyWorkoutQuote() {
+            const dailyIronQuotes = [
+                "The body achieves what the mind believes. Push harder.",
+                "Pain is weakness leaving the body. Embrace the burn.",
+                "You don't find willpower, you create it.",
+                "Sweat is just fat crying. Make it pour.",
+                "Discipline is doing what needs to be done, even if you don't want to.",
+                "The only bad workout is the one that didn't happen.",
+                "Excuses don't build muscle. Reps do.",
+                "Your body can stand almost anything. It's your mind that you have to convince.",
+                "Obsessed is just a word the lazy use to describe the dedicated.",
+                "Sore today, strong tomorrow.",
+                "If it doesn't challenge you, it doesn't change you.",
+                "Doubt me, hate me, you're the inspiration I need.",
+                "Focus on your goals, not your obstacles.",
+                "A one-hour workout is 4% of your day. No excuses.",
+                "Tough times don't last. Tough people do.",
+                "Don't stop when you're tired. Stop when you're done.",
+                "Rome wasn't built in a day, but they worked on it every single day.",
+                "Motivation gets you started. Habit keeps you going.",
+                "The iron never lies. It is the ultimate measuring stick.",
+                "Be stronger than your strongest excuse.",
+                "Some people want it to happen, some wish it would happen, others make it happen.",
+                "Success starts with self-discipline.",
+                "What seems impossible today will one day become your warm-up.",
+                "Push yourself, because no one else is going to do it for you.",
+                "Great things never came from comfort zones.",
+                "Train insane or remain the same.",
+                "Wake up with determination. Go to bed with satisfaction.",
+                "It comes down to one simple thing: How bad do you want it?",
+                "If you still look cute after your workout, you didn't train hard enough.",
+                "Don't count the days, make the days count.",
+                "Your only limit is you. Break it."
+            ];
+            
+            const today = new Date().getDate(); // Returns day of month (1 to 31)
+            const quoteToDisplay = dailyIronQuotes[(today - 1) % dailyIronQuotes.length];
+            const banner = document.getElementById('quoteBanner');
+            
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.querySelector('span').innerText = "🔥 DAILY IRON COMMANDMENT";
+                banner.querySelector('p').innerText = '"' + quoteToDisplay + '"';
+            }
+        }
+
         async function fetchWorkouts(dateStr = "") {
             const todayStr = getLocalDateString();
             if (!dateStr) dateStr = todayStr;
@@ -441,8 +555,33 @@
             }).join('');
         }
 
+        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
+        function playSuccessAnimation() {
+            const overlay = document.getElementById('successOverlay');
+            overlay.classList.add('active');
+            
+            const circle = overlay.querySelector('.success-checkmark__circle');
+            const check = overlay.querySelector('.success-checkmark__check');
+            circle.style.animation = 'none';
+            check.style.animation = 'none';
+            void circle.offsetWidth;
+            void check.offsetWidth;
+            circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
+            check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 2500); 
+        }
+
         async function toggleWorkout(id, completed) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+
+            // TRIGGER OVERLAY IF WE ARE MARKING AS "DONE"
+            if (completed) {
+                playSuccessAnimation();
+            }
+
             try {
                 const res = await fetch(`/api/workouts/${id}/toggle`, {
                     method: 'POST',
@@ -470,30 +609,10 @@
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             loadDashboardSchedules();
+            initDailyWorkoutQuote(); // Initialize the Daily Motivation Quote
             fetchWorkouts();
         });
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playCyberClick() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            try {
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } catch(e) {}
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
-            }
-        });
     </script>
 </body>
 </html>
