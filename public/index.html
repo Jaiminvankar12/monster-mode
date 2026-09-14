@@ -75,6 +75,39 @@
             color: #f87171;
             box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
         }
+
+        /* ✨ CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW ✨ */
+        html {
+            scroll-behavior: smooth !important;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #05070b !important;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(245, 59, 59, 0.4) !important;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(245, 59, 59, 0.6), inset 0 0 5px rgba(245, 59, 59, 0.2) !important;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(245, 59, 59, 0.8) !important;
+            box-shadow: 0 0 15px rgba(245, 59, 59, 0.9), inset 0 0 8px rgba(245, 59, 59, 0.6) !important;
+        }
+
+        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
+        @keyframes successGlow {
+            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
+            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        }
+        .completed-glow-anim {
+            animation: successGlow 2.5s infinite ease-in-out;
+            border-color: rgba(16, 185, 129, 0.6) !important;
+            background-color: rgba(16, 185, 129, 0.05) !important;
+        }
     </style>
 </head>
 <body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">

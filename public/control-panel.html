@@ -84,6 +84,34 @@
         ::-webkit-scrollbar-track { background: #05070b; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--theme-primary, #ef4444); }
+
+        /* 🔥 NEW ADDITIONS: CYBERPUNK ULTRA-SMOOTH FLOW & GLOW ANIMATIONS 🔥 */
+        html {
+            scroll-behavior: smooth !important;
+        }
+
+        ::-webkit-scrollbar-track { background: #030408 !important; }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(59, 130, 246, 0.4) !important; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), inset 0 0 5px rgba(239, 68, 68, 0.4) !important;
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: rgba(239, 68, 68, 0.8) !important; 
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(59, 130, 246, 0.8) !important;
+        }
+
+        @keyframes successGlow {
+            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
+            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        }
+
+        .completed-glow-anim {
+            animation: successGlow 2.5s infinite ease-in-out;
+            border-color: rgba(16, 185, 129, 0.6) !important;
+            background-color: rgba(16, 185, 129, 0.05) !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
@@ -891,7 +919,7 @@
                 
                 if (data.success && data.targets && data.targets.length > 0) {
                     container.innerHTML = data.targets.map(t => `
-                        <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
+                        <div class="bg-[#030408] border ${t.completed ? 'border-emerald-500/20 completed-glow-anim' : 'border-white/5'} p-4 rounded-2xl flex items-center justify-between gap-4 transition-all duration-300">
                             <div>
                                 <h4 class="font-extrabold text-sm text-white ${t.completed ? 'line-through text-emerald-500' : ''}">${t.name}</h4>
                                 <span class="text-[10px] text-slate-400 uppercase tracking-widest">Deadline: ${t.date}</span>

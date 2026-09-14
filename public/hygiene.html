@@ -22,37 +22,42 @@
         .dynamic-accent { color: var(--accent-primary) !important; }
         .dynamic-bg { background-color: var(--accent-primary) !important; }
         .dynamic-border { border-color: var(--accent-primary) !important; }
+        
         /* ✨ SMOOTH SCROLLING FOR ENTIRE WEB APP ✨ */
-html {
-    scroll-behavior: smooth;
-}
+        html {
+            scroll-behavior: smooth !important;
+        }
 
-/* Custom Scrollbar for Infinite/Smooth Flow */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: #07090f;
-}
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(239, 68, 68, 0.5);
-}
+        /* 🌌 CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW (CYAN THEME) 🌌 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07090f !important;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(6, 182, 212, 0.4) !important;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.6), inset 0 0 5px rgba(239, 68, 68, 0.4) !important;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(239, 68, 68, 0.8) !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(6, 182, 212, 0.8) !important;
+        }
 
-/* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
-@keyframes successGlow {
-    0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
-    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
-    100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
-}
+        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
+        @keyframes successGlow {
+            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
+            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        }
 
-.completed-glow-anim {
-    animation: successGlow 2.5s infinite ease-in-out;
-    border-color: rgba(16, 185, 129, 0.5) !important;
-}
+        .completed-glow-anim {
+            animation: successGlow 2.5s infinite ease-in-out;
+            border-color: rgba(16, 185, 129, 0.6) !important;
+            background-color: rgba(16, 185, 129, 0.05) !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-cyan-500 selection:text-white">
