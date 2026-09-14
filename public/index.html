@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> MONSTER MODE ON</title>
+    <title>MONSTER MODE ON</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" href="images/dragon 1.png">
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ef4444">
+    <meta name="theme-color" content="#ef4444">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { font-family: 'Outfit', sans-serif; }
@@ -120,7 +120,7 @@
                         <input type="text" id="otpInput" class="w-full bg-[#07090f] border border-blue-500/50 rounded-xl px-4 py-4 text-white text-2xl tracking-[0.5em] text-center focus:outline-none focus:border-blue-400 transition shadow-[0_0_15px_rgba(59,130,246,0.2)]" placeholder="------" maxlength="6" autocomplete="off">
                     </div>
 
-                    <div id="otpErrorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-bold text-center"></div>
+                    <div id="otpErrorMessage" class="text-red-400 text-xs hidden bg-red-500/10 p-3 rounded-xl border border-blue-500/30 font-bold text-center"></div>
 
                     <button type="submit" id="verifyOtpBtn" class="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-500/30 transition">
                         VERIFY & PROCEED
@@ -162,6 +162,17 @@
                     </button>
                 </form>
 
+                <!-- 🟢 NEW: QUICK ADMIN TOKEN LOGIN WIDGET (ADDED) -->
+                <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
+                    <div class="flex gap-2">
+                        <input type="password" id="gatewayAdminToken" placeholder="Enter Admin Token..." class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-amber-500 transition shadow-inner">
+                        <button type="button" onclick="loginWithAdminToken()" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer whitespace-nowrap shadow-lg shadow-amber-600/30 transition">
+                            Login
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -170,6 +181,23 @@
     <script>
         let currentPortal = 'tracker';
         
+        // 🟢 ADMIN TOKEN QUICK LOGIN LOGIC
+        function loginWithAdminToken() {
+            const tokenInput = document.getElementById('gatewayAdminToken').value.trim();
+            const MASTER_TOKEN = "Jay#Student@811002";
+
+            if (tokenInput === MASTER_TOKEN) {
+                // Permanent trust token save thai jase (No time limit)
+                localStorage.setItem('monster_admin_trusted', 'true');
+                alert("✅ Admin Token Verified! 3FA Bypassed Permanently.");
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 500);
+            } else {
+                alert("❌ Invalid Admin Token!");
+            }
+        }
+
         async function loadDynamicLandingBg() {
             try {
                 const res = await fetch(`/api/landing-bg?t=${new Date().getTime()}`, { cache: 'no-store' });
@@ -178,8 +206,8 @@
                 if (heroDiv) {
                     let bgUrl = (data.success && data.url) ? data.url : '';
                     heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), 
-                                                     linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
-                                                     url('${bgUrl}')`;
+                                                    linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
+                                                    url('${bgUrl}')`;
                 }
             } catch (err) {}
         }
@@ -199,9 +227,7 @@
                         subtextEl.innerHTML = data.subtext;
                     }
                 }
-            } catch (err) {
-                console.error("Error loading gateway text:", err);
-            }
+            } catch (err) {}
         }
 
         function togglePasswordVisibility(inputId, iconId) {
@@ -352,7 +378,6 @@
                     document.getElementById('verify3faBtn').innerText = "CLEARANCE GRANTED";
                     document.getElementById('verify3faBtn').classList.replace('bg-purple-600', 'bg-emerald-600');
                     
-                    // 🟢 CORRECTED REDIRECTION BASED ON PORTAL (Tracker -> dashboard.html, Admin -> control-panel.html)
                     setTimeout(() => { 
                         if (currentPortal === 'admin') {
                             window.location.href = 'control-panel.html';
@@ -371,28 +396,28 @@
             loadDynamicLandingBg();
             loadGatewayText();
         });
-        // 🔊 Global Cyberpunk Click Sound
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playCyberClick() {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        try {
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        } catch(e) {}
-    }
 
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('button')) {
-            playCyberClick();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playCyberClick() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } catch(e) {}
         }
-    });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button')) {
+                playCyberClick();
+            }
+        });
     </script>
 </body>
 </html>
