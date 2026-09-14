@@ -162,12 +162,20 @@
                     </button>
                 </form>
 
-                <!-- 🟢 NEW: QUICK ADMIN TOKEN LOGIN WIDGET (ADDED) -->
+                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON (ADDED) -->
                 <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
                     <div class="flex gap-2">
-                        <input type="password" id="gatewayAdminToken" placeholder="Enter Admin Token..." class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3 text-white text-xs outline-none focus:border-amber-500 transition shadow-inner">
-                        <button type="button" onclick="loginWithAdminToken()" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer whitespace-nowrap shadow-lg shadow-amber-600/30 transition">
+                        <div class="relative w-full">
+                            <input type="password" id="gatewayAdminToken" placeholder="Enter Admin Token..." class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 pr-12 text-white text-xs outline-none focus:border-amber-500 transition shadow-inner">
+                            <button type="button" onclick="togglePasswordVisibility('gatewayAdminToken', 'eyeIconToken')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-transform active:scale-90 cursor-pointer p-1">
+                                <svg id="eyeIconToken" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button type="button" onclick="loginWithAdminToken()" class="px-5 py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer whitespace-nowrap shadow-lg shadow-amber-600/30 transition">
                             Login
                         </button>
                     </div>
@@ -315,7 +323,7 @@
 
             } catch (err) {
                 errDiv.textContent = "Connection error with backend server.";
-                errDiv.classList.remove('hidden');
+                errDiv.classList.add('hidden');
             }
         });
 
@@ -373,7 +381,7 @@
 
                 if (!res.ok) {
                     errDiv.textContent = data.error || "Verification failed.";
-                    errDiv.classList.remove('hidden');
+                    errDiv.classList.add('hidden');
                 } else {
                     document.getElementById('verify3faBtn').innerText = "CLEARANCE GRANTED";
                     document.getElementById('verify3faBtn').classList.replace('bg-purple-600', 'bg-emerald-600');
