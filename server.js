@@ -222,9 +222,8 @@ async function trackerApiGuard(req, res, next) {
     next();
 }
 
-// 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
- // 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS (Granular Tracker Locking)
-function moduleApiGuard(moduleName) { // <-- 1. Remove 'async' from here
+// 🛡️ API GUARD FOR INDIVIDUAL MODULE LOCKS
+function moduleApiGuard(moduleName) {
     return async (req, res, next) => {
         let lockStatus = await getSystemLockStatus();
         if (lockStatus.locked) {
@@ -236,7 +235,7 @@ function moduleApiGuard(moduleName) { // <-- 1. Remove 'async' from here
         if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
         if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
         
-        return next(); // <-- 2. Add 'return' here so it evaluates to true
+        return next(); // 🔥 FIX: `return` add karyu jethi moduleLock proper true thai.
     };
 }
 
