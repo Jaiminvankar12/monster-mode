@@ -375,6 +375,121 @@ async function calculateWorkoutStreak(userId = MASTER_USER_ID) {
     return streak;
 }
 
+// 🟢 NEW FUNCTION: Calculate overall habit streak
+async function calculateHabitStreak(userId = MASTER_USER_ID) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    const habits = await Habit.find({ userId });
+    const logs = await HabitLog.find({ userId });
+    if (habits.length === 0) return 0;
+    let sanctuary = await getSanctuaryData(userId);
+    let streak = 0;
+    let d = new Date();
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+            continue;
+        }
+        let dayDone = habits.every(h => {
+            let log = logs.find(l => l.habitId === h.id && l.date === dateStr);
+            return log ? log.completed : false;
+        });
+        if (dayDone) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1);
+                continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
+// 🟢 NEW FUNCTION: Calculate strict Study target streak
+async function calculateStudyStreak(userId = MASTER_USER_ID) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    const categories = await StudyCategory.find({ userId });
+    const allSessions = await StudySession.find({ userId });
+    if (categories.length === 0) return 0;
+    let examData = await getExamModeData(userId);
+    let baseTarget = examData.enabled ? (parseInt(examData.targetMinutes) || 90) : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
+    let sanctuary = await getSanctuaryData(userId);
+    let ud = await UserData.findOne({ userId });
+    let customTargets = ud && ud.customDailyTargets ? ud.customDailyTargets : new Map();
+
+    let streak = 0;
+    let d = new Date();
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++; d.setDate(d.getDate() - 1); continue;
+        }
+        let dailyTarget = customTargets.get ? customTargets.get(dateStr) : customTargets[dateStr];
+        if (!dailyTarget) dailyTarget = baseTarget;
+
+        let daySessions = allSessions.filter(s => s.date === dateStr);
+        let totalStudied = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
+        
+        let dayDone = dailyTarget > 0 && totalStudied >= dailyTarget && daySessions.length > 0;
+        if (dayDone) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1); continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
+// 🟢 NEW FUNCTION: Calculate strict Hygiene task streak (Daily & Sunday logic)
+async function calculateHygieneStreak(userId = MASTER_USER_ID) {
+    let todayStr = getServerToday();
+    if (todayStr < MONSTER_LAUNCH_DATE) return 0;
+    const tasks = await HygieneTask.find({ userId });
+    const logs = await HygieneLog.find({ userId });
+    if (tasks.length === 0) return 0;
+    let sanctuary = await getSanctuaryData(userId);
+    let streak = 0;
+    let d = new Date();
+    while (true) {
+        let dateStr = d.toISOString().split('T')[0];
+        if (dateStr < MONSTER_LAUNCH_DATE) break;
+        if (sanctuary.enabled && dateStr >= sanctuary.activatedAt) {
+            streak++; d.setDate(d.getDate() - 1); continue;
+        }
+        let targetDateObj = new Date(dateStr);
+        let isSunday = targetDateObj.getDay() === 0;
+        let applicableTasks = tasks.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
+        
+        let dayDone = applicableTasks.length > 0 && applicableTasks.every(t => {
+            let log = logs.find(l => l.taskId === t.id && l.date === dateStr);
+            return log ? log.completed : false;
+        });
+
+        if (dayDone) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        } else {
+            if (streak === 0 && dateStr === todayStr) {
+                d.setDate(d.getDate() - 1); continue;
+            }
+            break;
+        }
+    }
+    return streak;
+}
+
 async function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     const today = getServerToday();
     if (targetDate > today || targetDate < MONSTER_LAUNCH_DATE) {
@@ -897,7 +1012,7 @@ app.get('/api/hydration', requireAuth, trackerApiGuard, async (req, res) => {
     let consumed = hydData.logs[targetDate] || 0;
     let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
     let hydrationStreak = await calculateHydrationStreak(MASTER_USER_ID);
-    res.json({ success: true, goal: hydData.goal, glassSize: hydData.glassSize, consumed, percent, hydrationStreak, history: hydData.logs, serverDate: targetDate });
+    res.json({ success: true, goal: hydData.goal, glassSize: hydData.glassSize, consumed, percent, hydrationStreak, currentStreak: hydrationStreak, history: hydData.logs, serverDate: targetDate });
 });
 
 app.post('/api/hydration/drink', requireAuth, trackerApiGuard, async (req, res) => {
@@ -923,7 +1038,7 @@ app.post('/api/hydration/drink', requireAuth, trackerApiGuard, async (req, res) 
     let percent = Math.min(Math.round((newTotal / ud.hydrationGoal) * 100), 100);
     let hydrationStreak = await calculateHydrationStreak(MASTER_USER_ID);
     let xpInfo = await getUserXP(MASTER_USER_ID);
-    res.json({ success: true, consumed: newTotal, percent, hydrationStreak, ...xpInfo });
+    res.json({ success: true, consumed: newTotal, percent, hydrationStreak, currentStreak: hydrationStreak, ...xpInfo });
 });
 
 app.post('/api/hydration/settings', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1004,7 +1119,8 @@ app.get('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
         return { ...habit._doc, completedToday: targetLog ? targetLog.completed : false, streak: targetDate < MONSTER_LAUNCH_DATE ? 0 : habitLogs.length, serverToday: today };
     });
     let xpInfo = await getUserXP(MASTER_USER_ID);
-    res.json({ success: true, habits: habitsWithStatus, serverDate: targetDate, dateStatus, ...xpInfo });
+    const currentStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : await calculateHabitStreak(MASTER_USER_ID);
+    res.json({ success: true, habits: habitsWithStatus, currentStreak, habitStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
 
 app.post('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1059,7 +1175,8 @@ app.post('/api/habits/:id/toggle', requireAuth, trackerApiGuard, async (req, res
     
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 50);
-    res.json({ success: true, completed, ...updatedXP });
+    const currentStreak = await calculateHabitStreak(MASTER_USER_ID);
+    res.json({ success: true, completed, currentStreak, habitStreak: currentStreak, ...updatedXP });
 });
 
 app.get('/api/workouts', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1132,7 +1249,8 @@ app.post('/api/workouts/:id/toggle', requireAuth, trackerApiGuard, async (req, r
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 100);
     const syncResult = await runServerSyncEngine(MASTER_USER_ID, targetDate);
-    res.json({ success: true, allWorkoutsDone: syncResult.allWorkoutsDone, ...updatedXP });
+    const currentStreak = await calculateWorkoutStreak(MASTER_USER_ID);
+    res.json({ success: true, allWorkoutsDone: syncResult.allWorkoutsDone, currentStreak, ...updatedXP });
 });
 
 app.get('/api/study/categories', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1202,8 +1320,9 @@ app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =>
     const sessions = await StudySession.find({ date: targetDate, userId: MASTER_USER_ID });
     const syncResult = await runServerSyncEngine(MASTER_USER_ID, targetDate);
     let xpInfo = await getUserXP(MASTER_USER_ID);
+    const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
     
-    res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, serverDate: targetDate, dateStatus, ...xpInfo });
+    res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, currentStreak, studyStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
 
 app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1224,7 +1343,8 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
         await newSession.save();
 
         let updatedXP = await addXP(MASTER_USER_ID, parseInt(durationMinutes) * 2);
-        res.json({ success: true, session: newSession, ...updatedXP });
+        const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
+        res.json({ success: true, session: newSession, currentStreak, studyStreak: currentStreak, ...updatedXP });
     } catch (error) {
         console.error("MongoDB Save Error:", error);
         res.status(500).json({ error: "Failed to save session to database." });
@@ -1254,7 +1374,8 @@ app.get('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
     let applicableTasks = tasksWithStatus.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
     let allDone = applicableTasks.length > 0 && applicableTasks.every(t => t.completed);
     let xpInfo = await getUserXP(MASTER_USER_ID);
-    res.json({ success: true, tasks: tasksWithStatus, applicableTasks, allDone, serverDate: targetDate, dateStatus, ...xpInfo });
+    const currentStreak = await calculateHygieneStreak(MASTER_USER_ID);
+    res.json({ success: true, tasks: tasksWithStatus, applicableTasks, allDone, currentStreak, hygieneStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
 
 app.post('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
@@ -1303,7 +1424,8 @@ app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, re
     
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 40);
-    res.json({ success: true, ...updatedXP });
+    const currentStreak = await calculateHygieneStreak(MASTER_USER_ID);
+    res.json({ success: true, currentStreak, hygieneStreak: currentStreak, ...updatedXP });
 });
 
 // 🎯 TARGETS API ROUTES
