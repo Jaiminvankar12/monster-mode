@@ -50,6 +50,38 @@
         .dynamic-bg { background-color: var(--accent-primary) !important; }
         .dynamic-border { border-color: var(--accent-primary) !important; }
         .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
+        
+        /* ✨ SMOOTH SCROLLING FOR ENTIRE WEB APP ✨ */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar for Infinite/Smooth Flow */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07090f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
+        @keyframes successGlow {
+            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        }
+
+        .completed-glow-anim {
+            animation: successGlow 2.5s infinite ease-in-out;
+            border-color: rgba(16, 185, 129, 0.5) !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
@@ -242,7 +274,6 @@
             dateInput.value = dateStr;
             document.getElementById('activeDateLabel').innerText = dateInput.value;
 
-            // 🟢 DISPLAY DYNAMIC CURRENT DAY (e.g. Monday, September 14, 2026)
             const dateObj = new Date(dateStr + 'T00:00:00');
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('todayHeaderDate').innerText = dateObj.toLocaleDateString('en-US', options);
@@ -355,7 +386,7 @@
                 let ml = hydrationHistoryLogs[date];
                 let liters = (ml / 1000).toFixed(2);
                 return `
-                    <div class="bg-[#0c0e15] border border-white/5 p-3 rounded-xl flex items-center justify-between">
+                    <div class="bg-[#0c0e15] border border-white/5 p-3 rounded-xl flex items-center justify-between ${ml >= currentGoal ? 'completed-glow-anim bg-emerald-500/5' : ''}">
                         <span class="text-xs font-extrabold text-white">${date}</span>
                         <span class="text-xs font-black text-blue-400">${liters} L</span>
                     </div>

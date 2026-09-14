@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ef4444">
     <style>
-        * { font-family: 'Outfit', sans-serif; }
+        * { font-family: 'Outfit', sans-serif; scroll-behavior: smooth; }
         body { background-color: #07090f; color: #f3f4f6; transition: background-color 0.5s ease; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
         .glass-card:hover { border-color: rgba(255, 255, 255, 0.15); }
@@ -86,8 +86,8 @@
         }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #07090f; }
-        ::-webkit-scrollbar-thumb { background: #1a1f30; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #2a324a; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(239, 68, 68, 0.5); }
         
         @keyframes activeHabitsMarquee {
             0% { transform: translateX(0); }
@@ -112,6 +112,18 @@
         .scrollbar-thin::-webkit-scrollbar { width: 5px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+
+        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
+        @keyframes successGlow {
+            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        }
+
+        .completed-glow-anim {
+            animation: successGlow 2.5s infinite ease-in-out;
+            border-color: rgba(16, 185, 129, 0.5) !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
@@ -290,7 +302,7 @@
             </div>
             <textarea id="monsterLogInput" rows="3" class="w-full bg-[#030408] border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-cyan-500 transition resize-none shadow-inner" placeholder="Write today's victory or failure..."></textarea>
             <button type="button" onclick="submitMonsterLog()" class="w-full sm:w-auto px-6 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer">
-                Transmit Log to AI Neural Core
+                Transmit Log to Neural Core
             </button>
             <div id="aiLogFeedbackContainer" class="hidden mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs font-bold text-cyan-300">
                 <span class="block text-[9px] text-cyan-400 uppercase tracking-widest mb-1">🤖 AI Coach Verdict:</span>
@@ -390,12 +402,12 @@
         <div class="glass-card p-6 rounded-2xl mb-8 border-l-4 border-l-red-500 dynamic-glow" id="coachCard">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-black tracking-widest text-red-400 uppercase flex items-center gap-2">
-                    <span>🤖</span> AI Monster Coach Telemetry
+                    <span>🤖</span> Monster Coach Telemetry
                 </span>
                 <span id="monsterLevelBadge" class="text-[10px] bg-red-500/20 text-red-300 px-3 py-1 rounded-full font-extrabold uppercase">Level 1 Apex</span>
             </div>
             <p id="monsterCoachMessage" class="text-sm sm:text-base font-extrabold text-white tracking-wide italic">
-                "Connecting to neural discipline matrix... Fetching roast..."
+                "Connecting to neural discipline matrix... Fetching quote..."
             </p>
         </div>
 
@@ -479,6 +491,13 @@
     <div id="inlineStatusNotification"></div>
     
     <script>
+        function scrollToBottom() {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
         setInterval(async () => { try { await fetch('/api/user-heartbeat', { method: 'POST', credentials: 'include' }); } catch (e) {} }, 5 * 60 * 1000);
 
         async function checkNuclearInternetBlock() {
@@ -822,8 +841,7 @@
             }
 
             container.innerHTML = targets.map(t => `
-                <div class="bg-[#030408] border ${t.completed ? 'border-emerald-500/20' : 'border-purple-500/20'} p-5 rounded-2xl flex flex-col justify-between gap-3 group relative overflow-hidden transition hover:border-white/20">
-                    ${t.completed ? `<div class="absolute inset-0 bg-emerald-500/5 backdrop-blur-sm z-0"></div>` : ''}
+                <div class="bg-[#030408] border ${t.completed ? 'border-emerald-500/20 completed-glow-anim bg-emerald-500/5' : 'border-purple-500/20'} p-5 rounded-2xl flex flex-col justify-between gap-3 group relative overflow-hidden transition hover:border-white/20">
                     <div class="relative z-10">
                         <h4 class="font-extrabold text-sm ${t.completed ? 'text-emerald-500 line-through' : 'text-white'}">${t.name}</h4>
                         <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1 inline-block">🎯 Deadline: ${t.date}</span>
@@ -954,8 +972,10 @@
                 const isNotStarted = todayStr < startDateStr;
                 const isDisabled = isNotStarted || window.isHabitsLocked; 
 
+                const cardStyle = h.completedToday ? 'glass-card p-4 rounded-2xl min-w-[280px] flex items-center justify-between gap-4 completed-glow-anim bg-emerald-500/10 shrink-0 transition' : 'glass-card p-4 rounded-2xl min-w-[280px] flex items-center justify-between gap-4 border border-white/10 shrink-0 transition hover:border-white/20';
+
                 return `
-                <div class="glass-card p-4 rounded-2xl min-w-[280px] flex items-center justify-between gap-4 border border-white/10 shrink-0 transition hover:border-white/20">
+                <div class="${cardStyle}">
                     <div class="min-w-0 flex-1">
                         <span class="text-[9px] text-red-400 uppercase font-bold tracking-widest block truncate">${h.category || 'Discipline'}</span>
                         <h4 class="font-extrabold text-xs text-white mt-0.5 truncate">${h.name}</h4>
@@ -963,8 +983,8 @@
                             <span class="text-[9px] text-orange-400 font-black uppercase tracking-widest">🔥 ${strk} Days ${badge}</span>
                         </div>
                     </div>
-                    <button type="button" ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition shrink-0 ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer')}">
-                        ${isDisabled ? '🔒' : (h.completedToday ? 'DONE' : 'DO IT')}
+                    <button type="button" ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition shrink-0 ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer')}">
+                        ${isDisabled ? '🔒' : (h.completedToday ? 'DONE ✅' : 'DO IT')}
                     </button>
                 </div>
             `}).join('');
@@ -991,7 +1011,7 @@
                 let progressRate = Math.min(Math.round((totalStudiedMins / targetMins) * 100), 100);
 
                 return `
-                    <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3">
+                    <div class="glass-card p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3 ${progressRate >= 100 ? 'completed-glow-anim bg-emerald-500/5' : ''}">
                         <div>
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded font-black uppercase">Active Vector</span>
