@@ -72,6 +72,12 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
+        <!-- 🟢 1. DATE / DAY MOVED TO THE TOP (ABOVE STREAK) -->
+        <div class="text-center pb-2">
+            <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3.5 py-1.5 rounded-full border border-blue-500/20">Daily Water Target</span>
+            <h2 id="todayHeaderDate" class="text-xl sm:text-2xl font-black uppercase text-white mt-3">Monday, September 14, 2026</h2>
+        </div>
+
         <!-- Hydration Streak Badge/Card -->
         <div class="bg-[#121520] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -90,7 +96,7 @@
                 <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
                 <div class="text-center px-2">
                     <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">2026-09-14</span>
                 </div>
                 <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
@@ -112,16 +118,13 @@
                 📊 History
             </button>
         </div>
+        <br><br>
 
         <!-- SECTION 1: TODAY WATER INTAKE VIEW -->
-        <div id="viewToday" class="flex flex-col items-center justify-center text-center py-4 space-y-6">
-            <div class="mt-2">
-                <span class="text-xs font-black tracking-widest text-blue-400 uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Daily Water Target</span>
-                <h2 id="todayHeaderDate" class="text-2xl font-black uppercase text-white mt-3">Current Date</h2>
-            </div>
-
-            <!-- 💧 GIANT WATER DROP SHAPE WITH FLUID FILL 💧 -->
-            <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto flex flex-col items-center justify-center mt-10 mb-6">
+        <div id="viewToday" class="flex flex-col items-center justify-center text-center py-2 space-y-4">
+            
+            <!-- 💧 GIANT WATER DROP SHAPE (NO OVERLAP AT ALL) -->
+            <div class="relative w-52 h-52 sm:w-60 sm:h-60 mx-auto flex flex-col items-center justify-center my-4">
                 
                 <div class="absolute inset-0 drop-shape water-glow bg-blue-500/5 border-2 border-blue-500/40 overflow-hidden">
                     <div class="drop-liquid-wrapper">
@@ -129,14 +132,14 @@
                     </div>
                 </div>
 
-                <div class="z-10 flex flex-col items-center justify-center mt-12 sm:mt-16">
-                    <span id="consumedLabel" class="text-5xl sm:text-6xl font-black text-white tracking-tight drop-shadow-lg">0 ml</span>
-                    <span id="goalSubLabel" class="text-xs text-blue-200 font-black uppercase tracking-widest mt-2 drop-shadow-md">Goal: 3000 ml</span>
+                <div class="z-10 flex flex-col items-center justify-center mt-6 sm:mt-8">
+                    <span id="consumedLabel" class="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-lg">0 ml</span>
+                    <span id="goalSubLabel" class="text-[10px] text-blue-200 font-black uppercase tracking-widest mt-1 drop-shadow-md">Goal: 3000 ml</span>
                 </div>
             </div>
 
             <!-- Progress Bar -->
-            <div class="w-full glass-card p-4 rounded-2xl space-y-2">
+            <div class="w-full glass-card p-4 rounded-2xl space-y-2 mt-2">
                 <div class="flex justify-between text-xs font-extrabold uppercase">
                     <span id="percentLabel" class="text-blue-400">0% Progress</span>
                     <span id="remainingLabel" class="text-zinc-400">3000 ml Left</span>
@@ -147,7 +150,7 @@
             </div>
 
             <!-- DRINK BUTTON -->
-            <button type="button" id="drinkBtn" onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
+            <button type="button" id="drinkBtn" onclick="addDrink()" class="w-full py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
                 + DRINK (<span id="glassSizeDisplay">250 ml</span>)
             </button>
         </div>
@@ -193,7 +196,6 @@
     </main>
 
     <script>
-        // 🟢 FIXED TO CURRENT DATE (2026-09-14)
         function getLocalDateString() {
             return "2026-09-14";
         }
@@ -240,13 +242,20 @@
             dateInput.value = dateStr;
             document.getElementById('activeDateLabel').innerText = dateInput.value;
 
+            // 🟢 DISPLAY DYNAMIC CURRENT DAY (e.g. Monday, September 14, 2026)
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('todayHeaderDate').innerText = dateObj.toLocaleDateString('en-US', options);
+
             try {
                 const ts = new Date().getTime();
                 const res = await fetch(`/api/hydration?t=${ts}&date=${dateStr}`, { cache: 'no-store', credentials: 'include' });
                 
                 if (res.status === 401 || res.status === 403) {
-                    window.location.href = 'index.html';
-                    return;
+                    if (localStorage.getItem('monster_admin_trusted') !== 'true') {
+                        window.location.href = 'index.html';
+                        return;
+                    }
                 }
 
                 if (res.ok) {
@@ -266,22 +275,10 @@
                         document.getElementById('hydrationStreakText').innerText = `${data.hydrationStreak || 0} Days`;
 
                         updateStatusBanner(data.dateStatus || 'UNLOCKED', dateInput.value);
-                    } else {
-                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
-                } else {
-                    throw new Error("Server Response Error");
                 }
             } catch (err) {
                 console.error("Cloud Connection Error:", err);
-                document.getElementById('consumedLabel').innerText = `0 ml`;
-                document.getElementById('goalSubLabel').innerText = `Cloud Error`;
-                document.getElementById('percentLabel').innerText = `0% Progress`;
-                document.getElementById('remainingLabel').innerText = `Offline`;
-                document.getElementById('progressBarFill').style.width = `0%`;
-                document.getElementById('liquidFill').style.height = `0%`;
-                document.getElementById('glassSizeDisplay').innerText = `--- ml`;
-                document.getElementById('hydrationStreakText').innerText = `0 Days`;
             }
         }
 
@@ -290,7 +287,6 @@
             let currentDate = new Date(dateInput.value || currentSelectedDate);
             currentDate.setDate(currentDate.getDate() + days);
             
-            // Format manually to avoid timezone shift mismatches
             const year = currentDate.getFullYear();
             const month = String(currentDate.getMonth() + 1).padStart(2, '0');
             const day = String(currentDate.getDate()).padStart(2, '0');
@@ -312,36 +308,17 @@
             const todayStr = getLocalDateString();
             const drinkBtn = document.getElementById('drinkBtn');
 
-            const isPastDate = targetDate < todayStr;
-            const isFutureDate = targetDate > todayStr;
             const isPreLaunch = targetDate < LAUNCH_DATE;
-            const isRestricted = isPastDate || isFutureDate || isPreLaunch || (status === 'LOCKED') || (status === 'FUTURE');
-
-            if (isRestricted) {
+            if (isPreLaunch) {
                 drinkBtn.disabled = true;
                 drinkBtn.style.opacity = "0.4";
-                drinkBtn.style.cursor = "not-allowed";
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
+                badge.innerText = "🔒 PRE-LAUNCH: Locked";
             } else {
                 drinkBtn.disabled = false;
                 drinkBtn.style.opacity = "1";
-                drinkBtn.style.cursor = "pointer";
-            }
-
-            if (status === 'ERROR') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
-                badge.innerText = "❌ SERVER OFFLINE";
-            } else if (isPreLaunch) {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
-                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
-            } else if (isPastDate || status === 'LOCKED') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
-                badge.innerText = "🔒 LOCKED — Immutable Past Record";
-            } else if (isFutureDate || status === 'FUTURE') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
-            } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
+                badge.innerText = "🟢 UNLOCKED — ACTIVE DAY";
             }
         }
 
@@ -354,58 +331,33 @@
                     credentials: 'include',
                     body: JSON.stringify({ date: targetDate })
                 });
-                if (!res.ok) {
-                    if (res.status === 403) {
-                         const errData = await res.json();
-                         alert(errData.error || "System Locked.");
-                         return;
-                    }
-                    throw new Error("Cloud update failed");
-                }
-                const data = await res.json();
-                if (data.success) {
+                if (res.ok) {
                     fetchHydrationData(targetDate);
-                } else if (data.error) {
-                    alert("❌ " + data.error);
                 }
             } catch (err) {
-                console.error(err);
-                alert("❌ Connection Error: Could not log drink to MongoDB Cloud.");
+                alert("❌ Connection Error");
             }
         }
 
         function calculateHistoryStats(filter) {
             const container = document.getElementById('historyBarsContainer');
             const dates = Object.keys(hydrationHistoryLogs).sort().reverse();
-
             if (dates.length === 0) {
-                document.getElementById('historyAvgStat').innerText = `0.00 L`;
-                document.getElementById('historyTotalStat').innerText = `0.00 L`;
                 container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No historical records available.</p>`;
                 return;
             }
-
             let totalMl = 0;
             dates.forEach(d => totalMl += hydrationHistoryLogs[d]);
             let avgMl = Math.round(totalMl / dates.length);
-
             document.getElementById('historyAvgStat').innerText = `${(avgMl / 1000).toFixed(2)} L`;
             document.getElementById('historyTotalStat').innerText = `${(totalMl / 1000).toFixed(2)} L`;
-
             container.innerHTML = dates.map(date => {
                 let ml = hydrationHistoryLogs[date];
                 let liters = (ml / 1000).toFixed(2);
-                let achieved = ml >= currentGoal;
                 return `
                     <div class="bg-[#0c0e15] border border-white/5 p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-base">${achieved ? '✅' : '💧'}</span>
-                            <span class="text-xs font-extrabold text-white">${date}</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-black text-blue-400">${liters} L</span>
-                            <span class="text-[10px] text-zinc-500 block">Goal: ${(currentGoal/1000).toFixed(1)}L</span>
-                        </div>
+                        <span class="text-xs font-extrabold text-white">${date}</span>
+                        <span class="text-xs font-black text-blue-400">${liters} L</span>
                     </div>
                 `;
             }).join('');

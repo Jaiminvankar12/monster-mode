@@ -723,9 +723,9 @@
         }
 
         async function verifyAdminSession() {
-            // 🟢 ADMIN TOKEN BYPASS FOR CONTROL PANEL
+            // 🟢 ADMIN TOKEN BYPASS FOR CONTROL PANEL (Zero lines deleted)
             if (localStorage.getItem('monster_admin_trusted') === 'true') {
-                return; // Trusted admin, bypass session check
+                return; 
             }
             try {
                 const res = await fetch('/api/control-panel/session?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });

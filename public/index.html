@@ -149,7 +149,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 2: Telegram OTP Form -->
+                <!-- STEP 2: Telegram OTP Form (Hidden initially) -->
                 <form id="otpForm" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">📱</span>
@@ -172,7 +172,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 3: Admin Master Key Form -->
+                <!-- STEP 3: Admin Master Key Form (Hidden initially) -->
                 <form id="step3Form" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">🔐</span>
@@ -203,7 +203,7 @@
                     </button>
                 </form>
 
-                <!-- 🟢 INSTANT ADMIN TOKEN WIDGET (SEAMLESS SESSION ESTABLISHMENT) -->
+                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON & BYPASS -->
                 <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
                     <div class="flex gap-2">
@@ -243,7 +243,6 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
 
-        // 🟢 SEAMLESS CLIENT TOKEN LOGIN & SESSION ESTABLISHMENT
         async function loginWithAdminToken() {
             const tokenInput = document.getElementById('gatewayAdminToken').value.trim();
             const MASTER_TOKEN = "Jay#Student@811002";
@@ -254,11 +253,8 @@
             }
 
             showStatusMessage("⚡ Verifying Token & Bypassing Gateway...", "success");
-
-            // Set trusted flag locally so dashboard trusts the session instantly
             localStorage.setItem('monster_admin_trusted', 'true');
 
-            // Also hit server endpoint to establish session cookie if possible, but don't block on error
             try {
                 await fetch('/api/control-panel/verify-3fa', {
                     method: 'POST',
@@ -269,7 +265,7 @@
             } catch (e) {}
 
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+                window.location.href = currentPortal === 'admin' ? 'control-panel.html' : 'dashboard.html';
             }, 600);
         }
 
@@ -278,11 +274,8 @@
                 const res = await fetch(`/api/landing-bg?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const data = await res.json();
                 const heroDiv = document.getElementById('heroBgContainer');
-                if (heroDiv) {
-                    let bgUrl = (data.success && data.url) ? data.url : '';
-                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), 
-                                                    linear-gradient(90deg, rgba(5,7,11,0.05) 20%, rgba(5,7,11,0.6) 90%, #05070b 100%), 
-                                                    url('${bgUrl}')`;
+                if (heroDiv && data.success && data.url) {
+                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), url('${data.url}')`;
                 }
             } catch (err) {}
         }
@@ -292,15 +285,8 @@
                 const res = await fetch(`/api/gateway-text?t=${new Date().getTime()}`, { cache: 'no-store' });
                 const data = await res.json();
                 if (data.success) {
-                    const headlineEl = document.getElementById('gatewayHeadline');
-                    const subtextEl = document.getElementById('gatewaySubtext');
-                    
-                    if (headlineEl && data.headline) {
-                        headlineEl.innerHTML = data.headline;
-                    }
-                    if (subtextEl && data.subtext) {
-                        subtextEl.innerHTML = data.subtext;
-                    }
+                    if (data.headline) document.getElementById('gatewayHeadline').innerHTML = data.headline;
+                    if (data.subtext) document.getElementById('gatewaySubtext').innerHTML = data.subtext;
                 }
             } catch (err) {}
         }
@@ -309,7 +295,6 @@
             const input = document.getElementById(inputId);
             const eyeIcon = document.getElementById(iconId);
             if (!input || !eyeIcon) return;
-            
             if (input.type === 'password') {
                 input.type = 'text';
                 eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
@@ -324,7 +309,6 @@
             const tabTracker = document.getElementById('tabTracker');
             const tabAdmin = document.getElementById('tabAdmin');
             const submitBtn = document.getElementById('submitBtn');
-
             if (portal === 'tracker') {
                 tabTracker.className = "flex-1 py-3 red-glow-tab text-white font-extrabold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer";
                 tabAdmin.className = "flex-1 py-3 text-slate-400 font-bold rounded-xl text-xs uppercase tracking-wider hover:text-white flex items-center justify-center gap-2 transition cursor-pointer";
