@@ -487,7 +487,11 @@
             if (e.target.closest('button')) {
                 playCyberClick();
             }
-        });
+        });// 🟢 FRONT-END ADMIN BYPASS CHECK (Dashboard ane trackers mate)
+if (localStorage.getItem('monster_admin_trusted') !== 'true' && window.location.pathname.includes('dashboard.html')) {
+    // Jo trusted nathi to j login page par moklo, baaki allow karo
+    // window.location.href = 'index.html';
+}
     </script>
 </body>
 </html> 
