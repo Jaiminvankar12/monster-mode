@@ -60,7 +60,7 @@
         </div>
         <nav class="flex items-center gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 justify-start sm:justify-end scrollbar-none">
             <a href="dashboard.html" class="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition whitespace-nowrap">Dashboard</a>
-            <button id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
+            <button type="button" id="logoutBtn" class="text-xs font-bold uppercase tracking-wider bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-600/30 px-3 sm:px-4 py-2 rounded-xl transition cursor-pointer whitespace-nowrap">Log Out</button>
         </nav>
     </header>
 
@@ -96,12 +96,12 @@
         <!-- Date Carousel Navigation Bar -->
         <div class="glass-card glow-blue p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
+                <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
                 <div class="text-center px-2">
                     <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
                     <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
                 </div>
-                <button onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
+                <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
 
             <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
@@ -154,10 +154,10 @@
                     <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto">
                         <option value="">Select Subject for Pomo</option>
                     </select>
-                    <button onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
+                    <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
                         Start Focus
                     </button>
-                    <button onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                    <button type="button" onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
                         Reset
                     </button>
                 </div>
@@ -248,11 +248,11 @@
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
-                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 
                 if (data.locked || data.studyLocked) {
-                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
@@ -269,7 +269,7 @@
                                     <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
                                         Access Denied / Contact Admin
                                     </div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
                                         Return to Gateway
                                     </button>
                                 </div>
@@ -319,7 +319,7 @@
 
         async function loadDashboardSchedules() {
             try {
-                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store' });
+                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
                     const workoutEl = document.getElementById('dashWorkoutTime');
@@ -359,7 +359,7 @@
 
             try {
                 const ts = new Date().getTime();
-                const res = await fetch(`/api/study/sessions?t=${ts}&date=${dateStr}`, { cache: 'no-store' });
+                const res = await fetch(`/api/study/sessions?t=${ts}&date=${dateStr}`, { cache: 'no-store', credentials: 'include' });
                 
                 if(res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
@@ -511,7 +511,7 @@
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
                             <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes</p>
                         </div>
-                        ${!isRestricted ? `<button onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>` : ''}
+                        ${!isRestricted ? `<button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>` : ''}
                     </div>
                 `;
             }).join('');
@@ -678,6 +678,7 @@
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         categoryId: categoryId,
                         topic: `Deep Work Focus (${dur}m)`,
@@ -718,6 +719,7 @@
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ categoryId, topic, durationMinutes, date: targetDate })
                 });
                 
@@ -748,7 +750,7 @@
             if (!confirm("Delete this session?")) return;
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
             try {
-                const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE' });
+                const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (!res.ok) throw new Error("Cloud Sync Failed");
                 fetchStudyData(targetDate);
             } catch (err) {
@@ -759,7 +761,7 @@
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
             } catch(e) {}
             window.location.href = 'index.html';
         });

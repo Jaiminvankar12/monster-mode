@@ -49,7 +49,7 @@
         }
         @keyframes spinArc { 100% { transform: rotate(360deg); } }
 
-        /* 🟢 EMERALD MATRIX CORE CSS (System Vitality Unique Design) */
+        /* 🟢 EMERALD MATRIX CORE CSS */
         .matrix-core {
             position: relative; width: 60px; height: 60px; border-radius: 50%;
             box-shadow: 0 0 15px #10b981, inset 0 0 15px #10b981;
@@ -145,7 +145,7 @@
             60:00
         </div>
         <p class="text-slate-500 mt-12 text-xs md:text-sm uppercase tracking-widest font-bold">No Exit. No Distractions. Only Execution.</p>
-        <button ondblclick="exitLockdown()" class="absolute bottom-8 text-[#0a0a0a] hover:text-red-900/50 text-[10px] font-bold uppercase tracking-widest transition cursor-pointer select-none">
+        <button type="button" ondblclick="exitLockdown()" class="absolute bottom-8 text-[#0a0a0a] hover:text-red-900/50 text-[10px] font-bold uppercase tracking-widest transition cursor-pointer select-none">
             [Double-Click to Abort]
         </button>
     </div>
@@ -154,15 +154,15 @@
     <div id="lofiPlayer" class="fixed bottom-24 right-6 z-[98] glass-card p-4 rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center gap-3 transition-transform duration-500 translate-y-[150%] opacity-0">
         <div class="flex justify-between items-center w-full px-1">
             <span class="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2"><span>🎧</span> Neural Audio Core</span>
-            <button onclick="toggleLofi()" class="text-slate-400 hover:text-white cursor-pointer font-bold">✕</button>
+            <button type="button" onclick="toggleLofi()" class="text-slate-400 hover:text-white cursor-pointer font-bold">✕</button>
         </div>
         <iframe width="260" height="145" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1" title="Lofi Focus" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" class="rounded-xl border border-white/5"></iframe>
     </div>
-    <button onclick="toggleLofi()" class="fixed bottom-6 right-6 z-[99] w-14 h-14 bg-purple-600/80 hover:bg-purple-500 backdrop-blur-md rounded-full shadow-[0_0_25px_rgba(168,85,247,0.5)] flex items-center justify-center text-xl text-white transition-transform hover:scale-110 cursor-pointer border border-purple-400/30">
+    <button type="button" onclick="toggleLofi()" class="fixed bottom-6 right-6 z-[99] w-14 h-14 bg-purple-600/80 hover:bg-purple-500 backdrop-blur-md rounded-full shadow-[0_0_25px_rgba(168,85,247,0.5)] flex items-center justify-center text-xl text-white transition-transform hover:scale-110 cursor-pointer border border-purple-400/30">
         🎧
     </button>
 
-    <!-- 🏆 ALL BADGES MODAL (INFINITE SCROLL) -->
+    <!-- 🏆 ALL BADGES MODAL -->
     <div id="allBadgesModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex-col items-center pt-10 sm:pt-20 p-4 transition-opacity">
         <div class="w-full max-w-5xl bg-[#07090f] border border-white/20 rounded-2xl overflow-hidden flex flex-col h-[85vh]">
             <div class="p-5 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
@@ -170,7 +170,7 @@
                     <h2 class="text-xl font-black uppercase text-amber-400 flex items-center gap-2"><span>🏆</span> The Road to Apex God</h2>
                     <p class="text-xs text-slate-400 font-medium">Unique Badges Earned Every 5 Levels</p>
                 </div>
-                <button onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
+                <button type="button" onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
             </div>
             <div id="allBadgesScrollContainer" class="p-6 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 scrollbar-thin">
             </div>
@@ -197,7 +197,7 @@
             </nav>
         </div>
         <div class="hidden lg:block pt-6">
-            <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+            <button type="button" onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
                 Log Out
             </button>
         </div>
@@ -231,15 +231,14 @@
                     <div id="userEmailDisplay" class="text-xs font-bold text-red-400 bg-red-500/10 px-4 py-2 rounded-xl border border-red-500/20 whitespace-nowrap">
                         Verifying Session...
                     </div>
-                    <!-- ☠️ KILL SWITCH BUTTON -->
-                    <button onclick="initiateLockdown()" class="px-5 py-2.5 bg-red-700/20 border border-red-600 hover:bg-red-600 text-red-400 hover:text-white font-black rounded-xl text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.3)] transition-all cursor-pointer flex items-center gap-2">
+                    <button type="button" onclick="initiateLockdown()" class="px-5 py-2.5 bg-red-700/20 border border-red-600 hover:bg-red-600 text-red-400 hover:text-white font-black rounded-xl text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.3)] transition-all cursor-pointer flex items-center gap-2">
                         ☠️ Kill Switch
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- 🤖 GOD-TIER GOD UI: JARVIS AI SYSTEM ASSISTANT WIDGET -->
+        <!-- 🤖 JARVIS AI SYSTEM ASSISTANT WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-3xl mb-8 border-2 border-cyan-400 shadow-[0_0_50px_rgba(6,182,212,0.35)] relative overflow-hidden bg-gradient-to-br from-[#080c14] via-[#04060b] to-[#020408] transition-all duration-500 hover:shadow-[0_0_70px_rgba(6,182,212,0.6)]">
             <div class="absolute right-[-20px] bottom-[-20px] opacity-10 pointer-events-none">
                 <div class="arc-reactor arc-reactor-large" style="width: 250px; height: 250px;"></div>
@@ -255,9 +254,6 @@
                         </div>
                         <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Autonomous Universal Data Intelligence Assistant</p>
                     </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] text-slate-500 font-mono hidden sm:inline">SECURE-NODE://CONNECTED</span>
                 </div>
             </div>
 
@@ -278,14 +274,14 @@
                     <input type="text" id="jarvis-input" placeholder="Ask Jarvis anything (e.g., Status?, Lifelines?, Workout done?)..." class="w-full bg-[#03050a] border border-cyan-500/30 focus:border-cyan-400 text-white font-mono text-xs sm:text-sm rounded-xl pl-10 pr-4 py-3.5 outline-none transition shadow-inner placeholder:text-slate-600" autocomplete="off">
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="askJarvis()" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer flex items-center justify-center gap-2">
+                    <button type="button" onclick="askJarvis()" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer flex items-center justify-center gap-2">
                         <span>⚡</span> Transmit
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 🟢 FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
+        <!-- 🟢 HUD WIDGET -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
@@ -304,7 +300,6 @@
                 <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl animate-pulse">🛰️</div>
             </div>
             
-            <!-- 🔋 SYSTEM VITALITY (EMERALD MATRIX THEME - UPDATED DESIGN) -->
             <div class="glass-card p-6 rounded-3xl border-2 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.25)] flex items-center justify-between relative overflow-hidden bg-gradient-to-br from-[#042f2e] via-[#022c22] to-[#021a14] transition-all duration-500 hover:shadow-[0_0_50px_rgba(16,185,129,0.45)]">
                 <div class="absolute right-[-20px] top-[-20px] opacity-10 pointer-events-none"><div class="matrix-core" style="width: 150px; height: 150px;"></div></div>
                 <div class="space-y-1 z-10">
@@ -316,7 +311,7 @@
             </div>
         </div>
 
-        <!-- 🎯 2026 MILESTONES & TARGETS WIDGET -->
+        <!-- 🎯 MILESTONES & TARGETS WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-purple-500 dynamic-glow">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -329,7 +324,7 @@
             </div>
         </div>
 
-        <!-- 📜 NEW: DAILY MONSTER LOG / JOURNALING WIDGET -->
+        <!-- 📜 DAILY MONSTER LOG WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-cyan-500 dynamic-glow space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -340,8 +335,8 @@
                     </div>
                 </div>
             </div>
-            <textarea id="monsterLogInput" rows="3" class="w-full bg-[#030408] border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-cyan-500 transition resize-none shadow-inner" placeholder="Write today's victory or failure... (e.g., Crushed my workout, but lagged in study hours.)"></textarea>
-            <button onclick="submitMonsterLog()" class="w-full sm:w-auto px-6 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer">
+            <textarea id="monsterLogInput" rows="3" class="w-full bg-[#030408] border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-cyan-500 transition resize-none shadow-inner" placeholder="Write today's victory or failure..."></textarea>
+            <button type="button" onclick="submitMonsterLog()" class="w-full sm:w-auto px-6 py-3.5 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer">
                 Transmit Log to AI Neural Core
             </button>
             <div id="aiLogFeedbackContainer" class="hidden mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs font-bold text-cyan-300">
@@ -350,7 +345,7 @@
             </div>
         </div>
 
-        <!-- 🏆 NEW: GAMIFICATION BADGES (SHOWING ONLY 3 + VIEW ALL) -->
+        <!-- 🏆 BADGES WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -360,7 +355,7 @@
                         <p class="text-[9px] text-slate-400 uppercase tracking-widest">Level up your APEX status through discipline.</p>
                     </div>
                 </div>
-                <button onclick="openAllBadgesModal()" class="text-xs text-amber-500 hover:text-amber-400 font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl transition cursor-pointer">
+                <button type="button" onclick="openAllBadgesModal()" class="text-xs text-amber-500 hover:text-amber-400 font-black uppercase tracking-widest bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl transition cursor-pointer">
                     View All ➔
                 </button>
             </div>
@@ -402,12 +397,12 @@
                     <input type="text" id="dailyMissionInput" placeholder="e.g., Complete Web Dev module..." onchange="saveDailyMission(this.value)" class="w-full bg-transparent text-white text-sm font-bold mt-1 outline-none border-b border-white/10 focus:border-amber-500 pb-1 transition">
                 </div>
             </div>
-            <button onclick="saveDailyMissionBtn()" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-amber-600/30 transition cursor-pointer shrink-0">
+            <button type="button" onclick="saveDailyMissionBtn()" class="w-full sm:w-auto px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-amber-600/30 transition cursor-pointer shrink-0">
                 Lock Mission
             </button>
         </div>
 
-        <!-- 🕳️ THE VOID (Mind Dump) -->
+        <!-- 🕳️ THE VOID -->
         <div class="glass-card p-6 rounded-2xl mb-8 border border-slate-700 relative overflow-hidden flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-3">
@@ -419,12 +414,12 @@
                 </div>
             </div>
             <textarea id="voidInput" rows="2" class="w-full bg-black/50 border border-white/5 rounded-xl p-3 text-slate-400 text-sm focus:outline-none focus:border-slate-500 transition resize-none mb-3" placeholder="I am distracted by..."></textarea>
-            <button onclick="burnTheVoid()" class="w-full py-2.5 bg-slate-800/80 hover:bg-red-900/40 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer flex items-center justify-center gap-2">
+            <button type="button" onclick="burnTheVoid()" class="w-full py-2.5 bg-slate-800/80 hover:bg-red-900/40 text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 font-black rounded-xl text-xs uppercase tracking-widest transition cursor-pointer flex items-center justify-center gap-2">
                 🔥 Burn into the Void
             </button>
         </div>
 
-        <!-- Emergency "Panic Button" -->
+        <!-- Emergency Surge -->
         <div class="glass-card p-5 rounded-2xl mb-8 border-2 border-red-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 dynamic-glow bg-red-600/5">
             <div class="flex items-center gap-3">
                 <span class="text-2xl animate-pulse">⚡</span>
@@ -433,7 +428,7 @@
                     <p class="text-[10px] text-zinc-400">Trigger emergency psychological override and hardcore roast.</p>
                 </div>
             </div>
-            <button onclick="triggerEmergencySurge()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer animate-bounce">
+            <button type="button" onclick="triggerEmergencySurge()" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer animate-bounce">
                 🚨 EMERGENCY SURGE MODE
             </button>
         </div>
@@ -489,7 +484,7 @@
             </div>
         </div>
 
-        <!-- MULTI-VECTOR ANALYTICS CHARTS & PIE CHARTS -->
+        <!-- MULTI-VECTOR ANALYTICS CHARTS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div class="glass-card p-6 rounded-2xl">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">🔥 Habits Completion Ratio</h3>
@@ -522,22 +517,20 @@
 
         <!-- Mobile Logout -->
         <div class="block lg:hidden pt-4 pb-8">
-            <button onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+            <button type="button" onclick="logoutUser()" class="w-full py-3 bg-[#131622] border border-[#1a1f30] hover:border-red-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
                 Log Out
             </button>
         </div>
     </main>
 
-    <!-- 🔊 GLOBAL CYBERPUNK CLICK SOUND -->
     <div id="inlineStatusNotification"></div>
     
     <script>
-        // ☢️ NUCLEAR PROTOCOL
-        setInterval(async () => { try { await fetch('/api/user-heartbeat', { method: 'POST' }); } catch (e) {} }, 5 * 60 * 1000);
+        setInterval(async () => { try { await fetch('/api/user-heartbeat', { method: 'POST', credentials: 'include' }); } catch (e) {} }, 5 * 60 * 1000);
 
         async function checkNuclearInternetBlock() {
             try {
-                const res = await fetch('/api/internet-block-status');
+                const res = await fetch('/api/internet-block-status', { credentials: 'include' });
                 const data = await res.json();
                 if (data.isInternetBlocked) {
                     document.body.innerHTML = `<div class="fixed inset-0 bg-black z-[999999] flex flex-col items-center justify-center p-6 text-center text-white"><span class="text-6xl animate-bounce mb-4">🌐🚫</span><h1 class="text-3xl font-black uppercase text-red-500 tracking-wider">INTERNET BLOCKED (1 PM - 3 PM)</h1><p class="text-sm text-slate-300 mt-2 max-w-md">Penalty Active: ${data.lockReason}. All external network traffic is restricted during this core window.</p></div>`;
@@ -548,7 +541,7 @@
 
         async function checkOledAutoSwitch() {
             try {
-                const res = await fetch('/api/oled-status');
+                const res = await fetch('/api/oled-status', { credentials: 'include' });
                 const data = await res.json();
                 if (data.success && data.isOledTime) document.body.style.backgroundColor = "#000000";
             } catch (err) {}
@@ -558,7 +551,7 @@
             const content = document.getElementById('monsterLogInput').value.trim();
             if(!content) return;
             try {
-                const res = await fetch('/api/monster-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
+                const res = await fetch('/api/monster-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ content }) });
                 if(!res.ok) throw new Error();
                 const data = await res.json();
                 if(data.success && data.log) {
@@ -573,7 +566,7 @@
 
         async function loadMonsterLog() {
             try {
-                const res = await fetch('/api/monster-log');
+                const res = await fetch('/api/monster-log', { credentials: 'include' });
                 if(!res.ok) throw new Error();
                 const data = await res.json();
                 if(data.success && data.log) {
@@ -586,7 +579,6 @@
             } catch(e) {}
         }
 
-        // 🏆 PROCEDURAL BADGE GENERATOR (EVERY 5 LEVELS)
         let userApexLevel = 1;
         let allBadgesData = [];
         let currentBadgeRenderIndex = 0;
@@ -654,7 +646,6 @@
             container.innerHTML = top3.map(b => createBadgeHTML(b)).join('');
         }
 
-        // 📱 TELEGRAM NOTIFICATION LOGIC
         async function checkTelegramUnlocks() {
             let lastNotifiedLevel = parseInt(localStorage.getItem('monster_last_badge_level') || '1');
             
@@ -667,9 +658,10 @@
                         await fetch('/api/send-telegram', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
                             body: JSON.stringify({ message: msg })
                         });
-                    } catch(e) { console.log("Telegram API Call Failed", e); }
+                    } catch(e) {}
                 });
                 
                 localStorage.setItem('monster_last_badge_level', userApexLevel.toString());
@@ -713,10 +705,9 @@
             }
         });
 
-        // 🌦️ WEATHER API INTEGRATION
         async function loadWeather() {
             try {
-                const res = await fetch('/api/weather');
+                const res = await fetch('/api/weather', { credentials: 'include' });
                 const data = await res.json();
                 const weatherText = document.getElementById('weatherText');
                 if (weatherText) {
@@ -841,7 +832,7 @@
                         <div class="text-4xl animate-bounce">🚨</div>
                         <h2 class="text-xl font-black uppercase tracking-widest text-red-500">SYSTEM OVERRIDE ACTIVE</h2>
                         <p class="text-base sm:text-lg font-extrabold text-white tracking-wide italic">"${randomQuote}"</p>
-                        <button onclick="closeEmergencyModal()" class="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer">
+                        <button type="button" onclick="closeEmergencyModal()" class="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-red-600/40 transition cursor-pointer">
                             I AM LOCKED IN — RESUME MISSION
                         </button>
                     </div>
@@ -857,7 +848,7 @@
 
         async function loadDashboardTargets() {
             try {
-                const res = await fetch('/api/targets?t=' + new Date().getTime());
+                const res = await fetch('/api/targets?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 if (!res.ok) throw new Error('API fails');
                 const data = await res.json();
                 renderDashboardTargets(data.targets || []);
@@ -885,7 +876,7 @@
                         <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1 inline-block">🎯 Deadline: ${t.date}</span>
                     </div>
                     <div class="relative z-10 flex gap-2 mt-2">
-                        ${!t.completed ? `<button onclick="markTargetComplete('${t.id}')" class="w-full px-3 py-2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-black uppercase transition hover:bg-emerald-500/30 cursor-pointer shadow-lg">Conquer Target</button>` : `<div class="w-full px-3 py-2 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-black uppercase text-center border border-emerald-500/20">🏆 Conquered</div>`}
+                        ${!t.completed ? `<button type="button" onclick="markTargetComplete('${t.id}')" class="w-full px-3 py-2 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-black uppercase transition hover:bg-emerald-500/30 cursor-pointer shadow-lg">Conquer Target</button>` : `<div class="w-full px-3 py-2 bg-emerald-500/10 text-emerald-500 rounded-xl text-xs font-black uppercase text-center border border-emerald-500/20">🏆 Conquered</div>`}
                     </div>
                 </div>
             `).join('');
@@ -893,7 +884,7 @@
 
         async function markTargetComplete(id) {
             try {
-                const res = await fetch(`/api/targets/${id}/complete`, { method: 'POST' });
+                const res = await fetch(`/api/targets/${id}/complete`, { method: 'POST', credentials: 'include' });
                 if (!res.ok) throw new Error("Cloud sync failed");
                 showStatusMessage("🏆 Milestone Conquered!", "success");
                 loadDashboardTargets();
@@ -902,7 +893,7 @@
 
         async function loadDashboardSchedules() {
             try {
-                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store' });
+                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
                     const workoutEl = document.getElementById('dashWorkoutTime');
@@ -916,17 +907,17 @@
         async function loadDashboardData() {
             try {
                 const ts = new Date().getTime();
-                const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 if(sessionRes.status === 401 || sessionRes.status === 403) { window.location.href = 'index.html'; return; }
                 const sessionData = await sessionRes.json();
                 if (!sessionData.authenticated) { window.location.href = 'index.html'; return; }
                 document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
 
                 const [habitsRes, workoutsRes, hydrationRes, studyRes] = await Promise.all([
-                    fetch('/api/habits?t=' + ts, { cache: 'no-store' }),
-                    fetch('/api/workouts?t=' + ts, { cache: 'no-store' }),
-                    fetch('/api/hydration?t=' + ts, { cache: 'no-store' }),
-                    fetch('/api/study/sessions?t=' + ts, { cache: 'no-store' })
+                    fetch('/api/habits?t=' + ts, { cache: 'no-store', credentials: 'include' }),
+                    fetch('/api/workouts?t=' + ts, { cache: 'no-store', credentials: 'include' }),
+                    fetch('/api/hydration?t=' + ts, { cache: 'no-store', credentials: 'include' }),
+                    fetch('/api/study/sessions?t=' + ts, { cache: 'no-store', credentials: 'include' })
                 ]);
                 
                 const habitsData = await habitsRes.json();
@@ -973,6 +964,7 @@
                 const res = await fetch(`/api/habits/${id}/toggle`, { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ completed: !currentState })
                 });
                 if (!res.ok) {
@@ -1013,7 +1005,7 @@
                             <span class="text-[9px] text-orange-400 font-black uppercase tracking-widest">🔥 ${strk} Days ${badge}</span>
                         </div>
                     </div>
-                    <button ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition shrink-0 ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer')}">
+                    <button type="button" ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${h.completedToday})" class="px-3 py-2 rounded-xl text-xs font-bold uppercase transition shrink-0 ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer')}">
                         ${isDisabled ? '🔒' : (h.completedToday ? 'DONE' : 'DO IT')}
                     </button>
                 </div>
@@ -1065,7 +1057,6 @@
             }).join('');
         }
 
-        // 🤖 JARVIS QUERY HANDLER WITH GOD-TIER FEEDBACK
         async function askJarvis() {
             const questionInput = document.getElementById('jarvis-input');
             const responseBox = document.getElementById('jarvis-response');
@@ -1079,6 +1070,7 @@
                 const res = await fetch('/api/jarvis/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ question })
                 });
                 const data = await res.json();
@@ -1096,7 +1088,6 @@
             questionInput.value = "";
         }
 
-        // Allow pressing Enter in Jarvis input
         document.addEventListener('DOMContentLoaded', () => {
             const jInput = document.getElementById('jarvis-input');
             if (jInput) {
@@ -1111,7 +1102,7 @@
 
         async function loadMonsterCoach() {
             try {
-                const res = await fetch('/api/monster-coach?t=' + new Date().getTime(), { cache: 'no-store' });
+                const res = await fetch('/api/monster-coach?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 if(res.ok) {
                     const data = await res.json();
                     if (data.success) {
@@ -1129,7 +1120,9 @@
         }
 
         async function logoutUser() {
-            await fetch('/api/auth/logout', { method: 'POST' });
+            try {
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+            } catch(e) {}
             window.location.href = 'index.html';
         }
 
@@ -1179,13 +1172,13 @@
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
-                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 
                 window.isHabitsLocked = data.habitsLocked || false;
 
                 if (data.locked) {
-                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
@@ -1200,7 +1193,7 @@
                                     <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
                                         Access Denied / Contact Admin
                                     </div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
                                         Return to Gateway
                                     </button>
                                 </div>

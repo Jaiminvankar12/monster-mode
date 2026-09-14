@@ -87,12 +87,12 @@
         <!-- Date Carousel Navigation Bar -->
         <div class="glass-card water-glow p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <button onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
+                <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
                 <div class="text-center px-2">
                     <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
                     <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
                 </div>
-                <button onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
+                <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
 
             <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
@@ -146,7 +146,7 @@
             </div>
 
             <!-- DRINK BUTTON -->
-            <button id="drinkBtn" onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
+            <button type="button" id="drinkBtn" onclick="addDrink()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-95 text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl shadow-blue-500/25 transition cursor-pointer">
                 + DRINK (<span id="glassSizeDisplay">250 ml</span>)
             </button>
         </div>
@@ -155,10 +155,10 @@
         <div id="viewHistory" class="hidden space-y-6">
             
             <div class="flex bg-[#121520] p-1.5 rounded-2xl border border-white/5 gap-1 text-center">
-                <button onclick="setHistoryFilter('day')" id="filterDay" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Day</button>
-                <button onclick="setHistoryFilter('week')" id="filterWeek" class="flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Week</button>
-                <button onclick="setHistoryFilter('month')" id="filterMonth" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Month</button>
-                <button onclick="setHistoryFilter('year')" id="filterYear" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Year</button>
+                <button type="button" onclick="setHistoryFilter('day')" id="filterDay" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Day</button>
+                <button type="button" onclick="setHistoryFilter('week')" id="filterWeek" class="flex-1 py-2.5 bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Week</button>
+                <button type="button" onclick="setHistoryFilter('month')" id="filterMonth" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Month</button>
+                <button type="button" onclick="setHistoryFilter('year')" id="filterYear" class="flex-1 py-2.5 text-zinc-400 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">Year</button>
             </div>
 
             <div class="glass-card p-6 rounded-3xl space-y-6">
@@ -245,7 +245,7 @@
 
             try {
                 const ts = new Date().getTime();
-                const res = await fetch(`/api/hydration?t=${ts}&date=${dateStr}`, { cache: 'no-store' });
+                const res = await fetch(`/api/hydration?t=${ts}&date=${dateStr}`, { cache: 'no-store', credentials: 'include' });
                 
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = 'index.html';
@@ -349,6 +349,7 @@
                 const res = await fetch('/api/hydration/drink', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ date: targetDate })
                 });
                 if (!res.ok) {
@@ -411,11 +412,11 @@
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
-                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store' });
+                const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 
-                if (data.locked || data.hygieneLocked) {
-                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store' });
+                if (data.locked || data.hydrationLocked) {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                     const sessionData = await sessionRes.json();
                     
                     if (sessionData.role !== 'ADMIN') {
@@ -432,7 +433,7 @@
                                     <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
                                         Access Denied / Contact Admin
                                     </div>
-                                    <button onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
                                         Return to Gateway
                                     </button>
                                 </div>
@@ -448,7 +449,7 @@
 
         async function logoutUser() {
             try {
-                await fetch('/api/auth/logout', { method: 'POST' });
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
             } catch(e) {}
             window.location.href = 'index.html';
         }
