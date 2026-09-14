@@ -41,12 +41,14 @@ const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 const studyCategorySchema = new mongoose.Schema({ id: String, userId: String, name: String, dailyTargetMinutes: Number, startDate: String, endDate: String, createdAt: String });
 const StudyCategory = mongoose.model('StudyCategory', studyCategorySchema);
 
-// 🟢 STUDY SESSIONS SCHEMA UPDATED WITH START & END TIME SUPPORT
+// 🟢 STUDY SESSIONS SCHEMA UPDATED WITH SESSION NAME, SUBJECT NAME, START & END TIME SUPPORT
 const studySessionSchema = new mongoose.Schema({ 
     id: String, 
     userId: String, 
     categoryId: String, 
-    topic: String, 
+    topic: String,
+    sessionName: { type: String, default: "" },
+    subjectName: { type: String, default: "" },
     durationMinutes: Number, 
     date: String, 
     startTime: { type: String, default: "" }, 
@@ -679,18 +681,18 @@ cron.schedule('* * * * *', async () => {
             }
         }
 
-        // 3. 🟢 Study Sessions Start & End Time Telegram Notifications
+        // 3. 🟢 Study Sessions Start & End Time Telegram Notifications with Session & Subject Name
         const activeSessionsToday = await StudySession.find({ date: todayStr });
         for (let session of activeSessionsToday) {
             if (session.startTime && session.startTime === currentTimeStr && !session.startNotified) {
                 session.startNotified = true;
                 await session.save();
-                await sendTelegramMessage(`📚 *STUDY SESSION STARTED*\n\n🎯 Topic: *${session.topic}*\n⏰ Time: ${session.startTime} - ${session.endTime || 'N/A'}\n🔥 Focus locked. Let's execute!`);
+                await sendTelegramMessage(`📚 *STUDY SESSION STARTED*\n\n🎯 Session: *${session.sessionName || session.topic}*\n📖 Subject: *${session.subjectName || 'General'}*\n⏰ Time: ${session.startTime} - ${session.endTime || 'N/A'}\n🔥 Focus locked. Let's execute!`);
             }
             if (session.endTime && session.endTime === currentTimeStr && !session.endNotified) {
                 session.endNotified = true;
                 await session.save();
-                await sendTelegramMessage(`🏁 *STUDY SESSION FINISHED*\n\n🎯 Topic: *${session.topic}*\n⏱️ Your session time is finished! Great work executing.`);
+                await sendTelegramMessage(`🏁 *STUDY SESSION FINISHED*\n\n🎯 Session: *${session.sessionName || session.topic}*\n📖 Subject: *${session.subjectName || 'General'}*\n⏱️ Your session time is finished! Great work executing.`);
             }
         }
 
@@ -1357,7 +1359,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
     if(moduleLock !== true) return; // Locked response already sent by guard
 
-    const { categoryId, topic, durationMinutes, date, startTime, endTime } = req.body;
+    const { categoryId, topic, sessionName, subjectName, durationMinutes, date, startTime, endTime } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     
     const today = getServerToday();
@@ -1365,8 +1367,19 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
 
     try {
         const newSession = new StudySession({
-            id: Date.now().toString(), userId: MASTER_USER_ID, categoryId, topic: topic || "Deep Work",
-            durationMinutes: parseInt(durationMinutes), date: targetDate, startTime: startTime || "", endTime: endTime || "", startNotified: false, endNotified: false, createdAt: new Date().toISOString()
+            id: Date.now().toString(), 
+            userId: MASTER_USER_ID, 
+            categoryId, 
+            topic: topic || "Deep Work",
+            sessionName: sessionName || topic || "Study Session",
+            subjectName: subjectName || "General",
+            durationMinutes: parseInt(durationMinutes), 
+            date: targetDate, 
+            startTime: startTime || "", 
+            endTime: endTime || "", 
+            startNotified: false, 
+            endNotified: false, 
+            createdAt: new Date().toISOString()
         });
         await newSession.save();
 

@@ -110,7 +110,6 @@
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
 
-        /* ✨ CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW (RED THEME) ✨ */
         html {
             scroll-behavior: smooth !important;
         }
@@ -127,7 +126,6 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(59, 130, 246, 0.8) !important;
         }
 
-        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
         #successOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -315,13 +313,14 @@
             </div>
         </header>
 
-        <!-- 🟢 HUD WIDGET -->
+        <!-- 🟢 HUD WIDGET (UPDATED WITH WORKOUT TIME LEFT COUNTDOWN) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Execution Time</h3>
-                    <div id="dashWorkoutTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
+                    <div id="dashWorkoutTime" class="text-2xl sm:text-3xl font-black text-white tracking-widest mt-1">--:--</div>
+                    <div id="dashWorkoutCountdown" class="text-[10px] font-bold text-red-400 tracking-wider mt-1">Time Left: Calculating...</div>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">⚡</div>
             </div>
@@ -329,7 +328,8 @@
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md inline-block">📚 Study Core Vector</span>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Session Time</h3>
-                    <div id="dashStudyTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
+                    <div id="dashStudyTime" class="text-2xl sm:text-3xl font-black text-white tracking-widest mt-1">--:--</div>
+                    <div id="dashStudyCountdown" class="text-[10px] font-bold text-blue-400 tracking-wider mt-1">Time Left: Calculating...</div>
                 </div>
                 <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl animate-pulse">🛰️</div>
             </div>
@@ -353,6 +353,19 @@
             </div>
         </div>
 
+        <!-- 📚 NEW LARGE STUDY SCHEDULE CARD (WITH SESSION NAME, SUBJECT NAME & TIMING) -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-blue-500 dynamic-glow">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 flex items-center gap-2"><span>📚</span> Today's Priority Study Schedule</h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Active Time-Blocks & Session Focus</p>
+                </div>
+            </div>
+            <div id="dashboardTodayStudyCard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-xs text-slate-500 py-2">Loading today's study schedule...</p>
+            </div>
+        </div>
+
         <!-- 🎯 MILESTONES & TARGETS WIDGET -->
         <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-purple-500 dynamic-glow">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -363,6 +376,19 @@
             </div>
             <div id="dashboardTargetsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
                 <p class="text-xs text-slate-500 py-2">Loading targets...</p>
+            </div>
+        </div>
+
+        <!-- 📌 NEW LARGE NOTES & REMINDER CARD (SMART DATE FILTERING & DAYS LEFT) -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl mb-8 border-l-4 border-l-amber-500 dynamic-glow">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2"><span>📌</span> Today's Notes & Reminders Matrix</h3>
+                    <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Smart Date-Wise Auto-Filtering & Days Left Indicator</p>
+                </div>
+            </div>
+            <div id="dashboardNotesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin">
+                <p class="text-xs text-slate-500 py-2">Loading notes and reminders...</p>
             </div>
         </div>
 
@@ -930,7 +956,6 @@
             `).join('');
         }
 
-        // 🚀 PLAY SUCCESS ANIMATION FUNCTION 🚀
         function playSuccessAnimation() {
             const overlay = document.getElementById('successOverlay');
             overlay.classList.add('active');
@@ -959,15 +984,161 @@
             } catch (err) { alert("❌ Connection Error"); }
         }
 
+        // 🟢 LOAD DASHBOARD SCHEDULES & WORKOUT/STUDY COUNTDOWN TIMER
+        let globalWorkoutTime = "";
+        let globalStudyTime = "";
+
         async function loadDashboardSchedules() {
             try {
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
+                    globalWorkoutTime = data.workoutReminderTime || "";
+                    globalStudyTime = data.studyReminderTime || "";
+                    
                     const workoutEl = document.getElementById('dashWorkoutTime');
                     const studyEl = document.getElementById('dashStudyTime');
-                    if (workoutEl) workoutEl.innerText = data.workoutReminderTime ? data.workoutReminderTime : "NOT SET";
-                    if (studyEl) studyEl.innerText = data.studyReminderTime ? data.studyReminderTime : "NOT SET";
+                    if (workoutEl) workoutEl.innerText = globalWorkoutTime ? globalWorkoutTime : "NOT SET";
+                    if (studyEl) studyEl.innerText = globalStudyTime ? globalStudyTime : "NOT SET";
+                }
+            } catch (err) {}
+        }
+
+        // Countdown Timer Logic
+        setInterval(() => {
+            const now = new Date();
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentTotalMins = currentHours * 60 + currentMinutes;
+
+            // Workout Countdown
+            if (globalWorkoutTime) {
+                const [wH, wM] = globalWorkoutTime.split(':').map(Number);
+                let wTotalMins = wH * 60 + wM;
+                let diff = wTotalMins - currentTotalMins;
+                const cdEl = document.getElementById('dashWorkoutCountdown');
+                if (cdEl) {
+                    if (diff > 0) {
+                        let h = Math.floor(diff / 60);
+                        let m = diff % 60;
+                        cdEl.innerText = `Time Left: ${h > 0 ? h + 'h ' : ''}${m}m remaining`;
+                        cdEl.className = "text-[10px] font-bold text-red-400 tracking-wider mt-1";
+                    } else if (diff === 0) {
+                        cdEl.innerText = `🔥 HAPPENING NOW!`;
+                        cdEl.className = "text-[10px] font-black text-red-500 tracking-wider mt-1 animate-pulse";
+                    } else {
+                        cdEl.innerText = `⏰ Completed for Today`;
+                        cdEl.className = "text-[10px] font-bold text-slate-500 tracking-wider mt-1";
+                    }
+                }
+            }
+
+            // Study Countdown
+            if (globalStudyTime) {
+                const [sH, sM] = globalStudyTime.split(':').map(Number);
+                let sTotalMins = sH * 60 + sM;
+                let diff = sTotalMins - currentTotalMins;
+                const cdEl = document.getElementById('dashStudyCountdown');
+                if (cdEl) {
+                    if (diff > 0) {
+                        let h = Math.floor(diff / 60);
+                        let m = diff % 60;
+                        cdEl.innerText = `Time Left: ${h > 0 ? h + 'h ' : ''}${m}m remaining`;
+                        cdEl.className = "text-[10px] font-bold text-blue-400 tracking-wider mt-1";
+                    } else if (diff === 0) {
+                        cdEl.innerText = `📚 HAPPENING NOW!`;
+                        cdEl.className = "text-[10px] font-black text-blue-500 tracking-wider mt-1 animate-pulse";
+                    } else {
+                        cdEl.innerText = `⏰ Completed for Today`;
+                        cdEl.className = "text-[10px] font-bold text-slate-500 tracking-wider mt-1";
+                    }
+                }
+            }
+        }, 1000);
+
+        // 🟢 LOAD TODAY STUDY SESSIONS (LARGE CARD)
+        async function loadDashboardTodayStudySessions() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const res = await fetch(`/api/study/sessions?date=${todayStr}&t=` + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+                const data = await res.json();
+                const container = document.getElementById('dashboardTodayStudyCard');
+                if (!container) return;
+
+                if (data.success && data.sessions && data.sessions.length > 0) {
+                    container.innerHTML = data.sessions.map(s => `
+                        <div class="bg-[#030408] border border-blue-500/30 p-5 rounded-2xl flex flex-col justify-between gap-3 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                            <div>
+                                <span class="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-1 rounded font-black uppercase tracking-widest inline-block mb-2">📚 Today Study Core</span>
+                                <h4 class="font-black text-base text-white">${s.sessionName || s.topic || 'Study Session'}</h4>
+                                <p class="text-xs text-blue-400 font-bold mt-1">📖 Subject: ${s.subjectName || 'General'}</p>
+                            </div>
+                            <div class="bg-[#07090f] p-3 rounded-xl border border-white/5 flex items-center justify-between text-xs">
+                                <span class="text-slate-400 font-bold">⏰ Time Block:</span>
+                                <span class="text-emerald-400 font-black">${s.startTime || '--:--'} - ${s.endTime || '--:--'}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-bold">⏱️ Duration: ${s.durationMinutes} Minutes</div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 col-span-full py-4 text-center">No study sessions scheduled for today. Add from Time Management Tab.</p>`;
+                }
+            } catch (err) {}
+        }
+
+        // 🟢 LOAD SMART DATE NOTES & REMINDERS (WITH DAYS LEFT & TODAY FILTERING)
+        async function loadDashboardNotesReminders() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const res = await fetch(`/api/notes-reminders?date=${todayStr}&t=` + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+                const data = await res.json();
+                const container = document.getElementById('dashboardNotesList');
+                if (!container) return;
+
+                if (data.success && data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.map(item => {
+                        let daysLeftText = "";
+                        if (item.date) {
+                            let itemDate = new Date(item.date);
+                            let todayDate = new Date(todayStr);
+                            let diffDays = Math.ceil((itemDate - todayDate) / (1000 * 60 * 60 * 24));
+                            if (diffDays === 0) daysLeftText = "Today";
+                            else if (diffDays === 1) daysLeftText = "1 Day Left";
+                            else if (diffDays > 1) daysLeftText = `${diffDays} Days Left`;
+                            else daysLeftText = `${Math.abs(diffDays)} Days Ago`;
+                        }
+
+                        return `
+                            <div class="bg-[#030408] border ${item.completed ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30'} p-5 rounded-2xl flex flex-col justify-between gap-3 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                        <span class="text-[9px] ${item.isReminder ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'} px-2.5 py-1 rounded font-black uppercase tracking-widest">${item.isReminder ? '⏰ Reminder' : '📝 Note'}</span>
+                                        ${item.date ? `<span class="text-[10px] font-black text-amber-400">${item.date} (${daysLeftText})</span>` : ''}
+                                    </div>
+                                    <h4 class="font-black text-sm text-white ${item.completed ? 'line-through text-emerald-400' : ''}">${item.title}</h4>
+                                    <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                                    <span class="text-[10px] text-slate-500 uppercase font-bold">Priority: ${item.priority || 'Medium'}</span>
+                                    <button type="button" onclick="toggleDashboardNote('${item.id}')" class="px-3 py-1.5 ${item.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-600 hover:bg-amber-500 text-white'} text-xs font-bold rounded-xl transition cursor-pointer">
+                                        ${item.completed ? 'Completed ✅' : 'Mark Done'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-500 col-span-full py-4 text-center">No notes or reminders for today.</p>`;
+                }
+            } catch (err) {}
+        }
+
+        async function toggleDashboardNote(id) {
+            try {
+                const res = await fetch(`/api/notes-reminders/${id}/toggle`, { method: 'POST', credentials: 'include' });
+                if (res.ok) {
+                    showStatusMessage("Note status updated!", "success");
+                    loadDashboardNotesReminders();
                 }
             } catch (err) {}
         }
@@ -1268,6 +1439,8 @@
             loadWeather();
             loadDashboardData();
             loadDashboardSchedules();
+            loadDashboardTodayStudySessions();
+            loadDashboardNotesReminders();
             loadDashboardTargets();
             loadMonsterLog();
         });

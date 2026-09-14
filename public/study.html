@@ -43,7 +43,6 @@
         .dynamic-border { border-color: var(--accent-primary) !important; }
         .dynamic-glow { box-shadow: 0 0 30px var(--accent-glow) !important; }
 
-        /* Custom Scrollbar for Infinite/Smooth Flow */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -58,7 +57,6 @@
             background: rgba(239, 68, 68, 0.5);
         }
 
-        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
         @keyframes successGlow {
             0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
             50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
@@ -70,7 +68,6 @@
             border-color: rgba(16, 185, 129, 0.5) !important;
         }
 
-        /* ✨ CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW (NO DELETION UPDATES) ✨ */
         html {
             scroll-behavior: smooth !important;
         }
@@ -91,7 +88,6 @@
             border-color: rgba(16, 185, 129, 0.6) !important;
         }
 
-        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
         #successOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -225,10 +221,30 @@
             </div>
         </div>
 
+        <!-- 🟢 DAILY STUDY LOGS TRACKER (UPCOMING, TODAY, PREVIOUS WITH PRE-PLANNING) 🟢 -->
+        <div class="glass-card p-6 sm:p-8 rounded-2xl border-l-4 border-l-blue-500 glow-blue space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 flex items-center gap-2"><span>🗓️</span> Daily Study Logs & Pre-planning Tracker</h3>
+                    <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest">Upcoming Pre-plans, Today Execution, and Previous Log History</p>
+                </div>
+            </div>
+
+            <!-- Tab Switcher for Habit-Tracker Style Layout -->
+            <div class="flex bg-[#05070b] p-1.5 rounded-xl border border-white/10 max-w-md">
+                <button type="button" onclick="switchLogsTab('upcoming')" id="tabUpcoming" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Upcoming</button>
+                <button type="button" onclick="switchLogsTab('today')" id="tabToday" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg">Today</button>
+                <button type="button" onclick="switchLogsTab('previous')" id="tabPrevious" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Previous</button>
+            </div>
+
+            <!-- Dynamic Logs Container -->
+            <div id="logsTabContentContainer" class="space-y-4">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
         <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md inline-block">📚 Study Core Vector</span>
@@ -332,7 +348,6 @@
     </main>
 
     <script>
-        // Proper Local Date String Getter (Avoids UTC shifting issues)
         function getLocalDateString(date = new Date()) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -342,6 +357,7 @@
 
         let currentSelectedDate = getLocalDateString();
         let categoriesData = [];
+        let currentLogsTab = 'today';
         let pomoTimer = null;
         let isPomoRunning = false;
         let isBreakMode = false;
@@ -351,6 +367,35 @@
         let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
         let pomoDurationMinutes = savedDefaultMins;
         let pomoSecondsLeft = pomoDurationMinutes * 60;
+
+        function switchLogsTab(tab) {
+            currentLogsTab = tab;
+            const todayStr = getLocalDateString();
+
+            ['upcoming', 'today', 'previous'].forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if(btn) {
+                    btn.className = t === tab ? "flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg" : "flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white";
+                }
+            });
+
+            if (tab === 'today') {
+                document.getElementById('targetDateInput').value = todayStr;
+                fetchStudyData(todayStr);
+            } else if (tab === 'upcoming') {
+                let tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                let tomStr = getLocalDateString(tomorrow);
+                document.getElementById('targetDateInput').value = tomStr;
+                fetchStudyData(tomStr);
+            } else if (tab === 'previous') {
+                let yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                let yestStr = getLocalDateString(yesterday);
+                document.getElementById('targetDateInput').value = yestStr;
+                fetchStudyData(yestStr);
+            }
+        }
 
         async function verifyGlobalSystemLock() {
             try {
@@ -385,9 +430,7 @@
                         return;
                     }
                 }
-            } catch (err) {
-                console.error("Lock verification failed", err);
-            }
+            } catch (err) {}
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -456,7 +499,7 @@
             
             currentSelectedDate = dateStr;
             const dateInput = document.getElementById('targetDateInput');
-            if (!dateInput.value) {
+            if (dateInput.value !== dateStr) {
                 dateInput.value = dateStr;
             }
             document.getElementById('serverDateDisplay').innerText = `Server Date: ${dateStr}`;
@@ -488,34 +531,10 @@
                         renderCategories(categoriesData);
                         renderSessions(data.sessions || [], categoriesData, dateInput.value);
                         populateSelects(categoriesData);
-                    } else {
-                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
-                } else {
-                    throw new Error("Server Response Error");
                 }
             } catch (err) {
                 console.error("Cloud Connection Error:", err);
-                
-                document.getElementById('targetTimeLabel').innerText = "0h 00m";
-                document.getElementById('studiedTimeLabel').innerText = "0h 00m";
-                document.getElementById('studyStreakLabel').innerText = "🔥 0 Days";
-                document.getElementById('progressPercentText').innerText = "0%";
-                document.getElementById('progressBarFill').style.width = "0%";
-                document.getElementById('sessionCountText').innerText = `0 Sessions Logged`;
-
-                updateStatusBanner('ERROR', dateInput.value);
-
-                document.getElementById('categoriesList').innerHTML = `
-                    <div class="col-span-full glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cloud Connection Failed</p>
-                    </div>`;
-                document.getElementById('sessionsList').innerHTML = `
-                    <div class="glass-card p-6 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                        <p class="text-red-400 text-xs font-black uppercase tracking-widest">⚠️ Cannot reach MongoDB Cloud</p>
-                    </div>`;
-                
-                populateSelects([]);
             }
         }
 
@@ -545,7 +564,7 @@
             const isPastDate = targetDate < todayStr;
             const isFutureDate = targetDate > todayStr;
             const isPreLaunch = targetDate < LAUNCH_DATE;
-            const isRestricted = isPastDate || isFutureDate || isPreLaunch || (status === 'LOCKED') || (status === 'FUTURE');
+            const isRestricted = isPreLaunch;
 
             if (isRestricted) {
                 loggingSection.style.opacity = "0.5";
@@ -559,21 +578,18 @@
                 pomoCardWrapper.style.pointerEvents = "auto";
             }
 
-            if (status === 'ERROR') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
-                badge.innerText = "❌ SERVER OFFLINE";
-            } else if (isPreLaunch) {
+            if (isPreLaunch) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
-                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
-            } else if (isPastDate || status === 'LOCKED') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
-                badge.innerText = "🔒 LOCKED — Immutable Past Record";
-            } else if (isFutureDate || status === 'FUTURE') {
+                badge.innerText = "🔒 PRE-LAUNCH: Locked";
+            } else if (isFutureDate) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
+                badge.innerText = "⚪ UPCOMING PRE-PLAN (Active)";
+            } else if (isPastDate) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-white/5 whitespace-nowrap";
+                badge.innerText = "📜 PREVIOUS LOG";
             } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
+                badge.innerText = "🟢 TODAY EXECUTION ACTIVE";
             }
         }
 
@@ -601,9 +617,6 @@
 
         function renderSessions(sessions, categories, viewingDate) {
             const container = document.getElementById('sessionsList');
-            const todayStr = getLocalDateString();
-            const isRestricted = viewingDate !== todayStr;
-
             if (!sessions || sessions.length === 0) {
                 container.innerHTML = `<p class="text-xs text-zinc-500">No study sessions recorded for this date.</p>`;
                 return;
@@ -617,7 +630,7 @@
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
                             <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes ${s.startTime && s.endTime ? '| (' + s.startTime + ' - ' + s.endTime + ')' : ''}</p>
                         </div>
-                        ${!isRestricted ? `<button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>` : ''}
+                        <button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
                     </div>
                 `;
             }).join('');

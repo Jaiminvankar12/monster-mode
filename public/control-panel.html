@@ -405,11 +405,11 @@
                     </div>
                 </div>
 
-                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS, MULTI-STUDY SESSIONS WITH START/END TIME, & NOTES / REMINDERS) 🟢 -->
+                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS, MULTI-STUDY SESSIONS WITH SESSION NAME, SUBJECT NAME, START/END TIME, & NOTES / REMINDERS) 🟢 -->
                 <div id="sectionSchedules" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
                         <h3 class="text-sm font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-2"><span>⏰</span> Time Management & Sessions Matrix</h3>
-                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule, multiple timed study sessions (with start and end time), and notes/reminders.</p>
+                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule, multiple timed study sessions (with Session Name, Subject Name, and Start/End time), and notes/reminders.</p>
                         
                         <!-- 1. Workout & Study Timed Alerts Form -->
                         <form id="updateSchedulesForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
@@ -425,12 +425,20 @@
                             <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Execution Schedules</button>
                         </form>
 
-                        <!-- 2. Multiple Study Sessions Scheduler (Start & End Time) -->
+                        <!-- 2. Multiple Study Sessions Scheduler (Session Name, Subject Name, Start & End Time) -->
                         <form id="createStudySessionScheduleForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-blue-400">📚 Schedule Specific Study Session Time-Block</h4>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject / Topic Name</label>
-                                <input type="text" id="schedStudyTopic" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., Node.js Backend Routing">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Session Name (e.g., Chapter 1 Revision)</label>
+                                <input type="text" id="schedStudySessionName" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., React Hooks Practice">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name (e.g., Web Development)</label>
+                                <input type="text" id="schedStudySubjectName" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., BCA Sem 5">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Topic / Sub-topic</label>
+                                <input type="text" id="schedStudyTopic" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Optional topic details...">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
@@ -448,7 +456,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Duration (Minutes)</label>
-                                <input type="number" id="schedStudyDuration" value="30" min="5" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                                <input type="number" id="schedStudyDuration" value="60" min="5" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
                             </div>
                             <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Deploy Study Session Time-Block</button>
                         </form>
@@ -1027,32 +1035,32 @@
             });
         }
 
-        // 🟢 SUBMIT SCHEDULED STUDY TIME BLOCK FROM TIME MANAGEMENT TAB
+        // 🟢 SUBMIT SCHEDULED STUDY TIME BLOCK FROM TIME MANAGEMENT TAB (With Session Name & Subject Name)
         const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
         if (studySessionScheduleForm) {
             studySessionScheduleForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 requestSecureAuthorization('add', async (password) => {
-                    const topic = document.getElementById('schedStudyTopic').value;
+                    const sessionName = document.getElementById('schedStudySessionName').value;
+                    const subjectName = document.getElementById('schedStudySubjectName').value;
+                    const topic = document.getElementById('schedStudyTopic').value || sessionName;
                     const startTime = document.getElementById('schedStudyStart').value;
                     const endTime = document.getElementById('schedStudyEnd').value;
                     const date = document.getElementById('schedStudyDate').value;
                     const durationMinutes = document.getElementById('schedStudyDuration').value;
 
                     try {
-                        // We fetch the first available study category or create a general one, then post session
                         const catRes = await fetch('/api/study/categories', { credentials: 'include' });
                         const catData = await catRes.json();
                         let categoryId = "";
                         if (catData.success && catData.categories.length > 0) {
                             categoryId = catData.categories[0].id;
                         } else {
-                            // Create default category
                             const newCatRes = await fetch('/api/study/categories', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 credentials: 'include',
-                                body: JSON.stringify({ name: "General Study", dailyTargetMinutes: 120, password })
+                                body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
                             });
                             const newCatData = await newCatRes.json();
                             categoryId = newCatData.category.id;
@@ -1062,7 +1070,7 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ categoryId, topic, durationMinutes, date, startTime, endTime })
+                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime, endTime })
                         });
 
                         if (res.ok) {
@@ -1710,28 +1718,6 @@
             loadStudy(); 
             loadHygiene();
             loadModuleLocksStatus();
-        });
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playCyberClick() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            try {
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } catch(e) {}
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
-            }
         });
     </script>
 </body>
