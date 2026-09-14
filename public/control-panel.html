@@ -1902,6 +1902,36 @@
                 btn.innerText = `🟢 ${moduleKey.toUpperCase()}: ACTIVE`;
             }
         }
+        function handleFixedDailyTargetSubmit(e) {
+    e.preventDefault();
+    const hoursInput = document.getElementById('studyTargetHours');
+    const minsInput = document.getElementById('studyTargetMins');
+
+    const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
+    const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
+    
+    // Total minutes calculate thase (e.g., 7 hours = 420 mins)
+    const dailyTargetMinutes = (hours * 60) + minutes;
+
+    requestSecureAuthorization('edit', async (password) => {
+        try {
+            const res = await fetch('/api/study/global-target', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ dailyTargetMinutes, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showStatusMessage(`✅ Daily Target Hours Set to ${hours}h ${minutes}m (${dailyTargetMinutes} mins)!`, "success");
+            } else {
+                showStatusMessage("❌ " + (data.error || "Failed to update target"), "error");
+            }
+        } catch (err) {
+            showStatusMessage("❌ Connection error", "error");
+        }
+    });
+}
 
         window.addEventListener('DOMContentLoaded', () => {
             loadHabits(); 
