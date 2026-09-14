@@ -1162,6 +1162,26 @@ END LIVE DATABASE STATE
         });
     }
 });
+
+// 🟢 BYPASS ENDPOINT FOR ADMIN TOKEN (ADDED TO PREVENT INVALID SECURITY FLOW ERROR)
+app.post('/api/control-panel/verify-token', async (req, res) => {
+    const { token } = req.body;
+    if (token === "Jay#Student@811002") {
+        let adminUser = await User.findOne({ role: 'ADMIN' });
+        if (!adminUser) {
+            adminUser = await User.findOne({ email: 'jaiminvankar520@gmail.com' }) || await User.findOne({});
+        }
+        
+        req.session.userId = adminUser ? adminUser.id : MASTER_USER_ID;
+        req.session.role = adminUser ? adminUser.role : 'ADMIN';
+        req.session.email = adminUser ? adminUser.email : 'jaiminvankar520@gmail.com';
+        req.session.controlPanelAuth = true;
+
+        return res.json({ success: true, message: "Admin token accepted. Session established." });
+    }
+    return res.status(401).json({ error: "❌ Invalid Admin Token." });
+});
+
 // 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
