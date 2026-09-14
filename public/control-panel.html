@@ -723,6 +723,10 @@
         }
 
         async function verifyAdminSession() {
+            // 🟢 ADMIN TOKEN BYPASS FOR CONTROL PANEL
+            if (localStorage.getItem('monster_admin_trusted') === 'true') {
+                return; // Trusted admin, bypass session check
+            }
             try {
                 const res = await fetch('/api/control-panel/session?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
@@ -1489,6 +1493,7 @@
         }
 
         async function adminLogout() {
+            localStorage.removeItem('monster_admin_trusted');
             await fetch('/api/control-panel/logout', { method: 'POST', credentials: 'include' });
             window.location.href = 'index.html';
         }

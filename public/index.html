@@ -36,7 +36,6 @@
             border: 1px solid rgba(255, 255, 255, 0.12); 
             box-shadow: 0 25px 60px rgba(0,0,0,0.7);
         }
-        /* 🟢 CYBERPUNK TOAST NOTIFICATION STYLES */
         #inlineStatusNotification {
             position: fixed;
             top: 24px;
@@ -80,7 +79,6 @@
 </head>
 <body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">
 
-    <!-- 🟢 CYBERPUNK TOAST NOTIFICATION CONTAINER -->
     <div id="inlineStatusNotification"></div>
 
     <div class="flex w-full min-h-screen bg-[#05070b]">
@@ -151,7 +149,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 2: Telegram OTP Form (Hidden initially) -->
+                <!-- STEP 2: Telegram OTP Form -->
                 <form id="otpForm" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">📱</span>
@@ -174,7 +172,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 3: Admin Master Key Form (Hidden initially) -->
+                <!-- STEP 3: Admin Master Key Form -->
                 <form id="step3Form" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">🔐</span>
@@ -205,7 +203,7 @@
                     </button>
                 </form>
 
-                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON & CLIENT-SIDE BYPASS -->
+                <!-- 🟢 INSTANT ADMIN TOKEN WIDGET (SEAMLESS SESSION ESTABLISHMENT) -->
                 <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
                     <div class="flex gap-2">
@@ -232,7 +230,6 @@
     <script>
         let currentPortal = 'tracker';
         
-        // 🟢 CYBERPUNK TOAST NOTIFICATION FUNCTION
         function showStatusMessage(message, type = 'success') {
             const host = document.getElementById('inlineStatusNotification');
             if (!host) return;
@@ -246,8 +243,8 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
 
-        // 🟢 CLIENT-SIDE TOKEN BYPASS (No Server.js Changes Needed)
-        function loginWithAdminToken() {
+        // 🟢 SEAMLESS CLIENT TOKEN LOGIN & SESSION ESTABLISHMENT
+        async function loginWithAdminToken() {
             const tokenInput = document.getElementById('gatewayAdminToken').value.trim();
             const MASTER_TOKEN = "Jay#Student@811002";
 
@@ -256,10 +253,21 @@
                 return;
             }
 
-            // Save trusted flag locally so all trackers and panels bypass verification
+            showStatusMessage("⚡ Verifying Token & Bypassing Gateway...", "success");
+
+            // Set trusted flag locally so dashboard trusts the session instantly
             localStorage.setItem('monster_admin_trusted', 'true');
-            showStatusMessage("✅ Token Verified! Access Granted.", "success");
-            
+
+            // Also hit server endpoint to establish session cookie if possible, but don't block on error
+            try {
+                await fetch('/api/control-panel/verify-3fa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ masterKey: "Jay_monster_mode_on" })
+                });
+            } catch (e) {}
+
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 600);
@@ -487,11 +495,7 @@
             if (e.target.closest('button')) {
                 playCyberClick();
             }
-        });// 🟢 FRONT-END ADMIN BYPASS CHECK (Dashboard ane trackers mate)
-if (localStorage.getItem('monster_admin_trusted') !== 'true' && window.location.pathname.includes('dashboard.html')) {
-    // Jo trusted nathi to j login page par moklo, baaki allow karo
-    // window.location.href = 'index.html';
-}
+        });
     </script>
 </body>
-</html> 
+</html>

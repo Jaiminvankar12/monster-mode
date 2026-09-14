@@ -17,7 +17,6 @@
         .glass-card:hover { border-color: rgba(255, 255, 255, 0.15); }
         .dynamic-glow { box-shadow: 0 0 35px var(--theme-glow, rgba(239, 68, 68, 0.15)); }
         
-        /* 🟢 Futuristic Cyber Pulse & Neon Glow Animations */
         @keyframes cyberPulse {
             0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 15px rgba(59, 130, 246, 0.1); }
             50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), inset 0 0 25px rgba(59, 130, 246, 0.2); }
@@ -29,7 +28,6 @@
             100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.2), inset 0 0 15px rgba(239, 68, 68, 0.1); }
         }
 
-        /* 🔋 ARC REACTOR CSS */
         .arc-reactor {
             position: relative; width: 60px; height: 60px; border-radius: 50%;
             box-shadow: 0 0 15px #06b6d4, inset 0 0 15px #06b6d4;
@@ -49,7 +47,6 @@
         }
         @keyframes spinArc { 100% { transform: rotate(360deg); } }
 
-        /* 🟢 EMERALD MATRIX CORE CSS */
         .matrix-core {
             position: relative; width: 60px; height: 60px; border-radius: 50%;
             box-shadow: 0 0 15px #10b981, inset 0 0 15px #10b981;
@@ -66,7 +63,6 @@
             100% { box-shadow: 0 0 40px #34d399, inset 0 0 30px #34d399; }
         }
 
-        /* 🕳️ THE VOID BURN ANIMATION */
         @keyframes voidBurn {
             0% { opacity: 1; transform: scale(1); filter: blur(0px); color: #94a3b8; text-shadow: 0 0 0 #ef4444; }
             40% { color: #ef4444; text-shadow: 0 -5px 15px #ef4444; filter: blur(1px); transform: translateY(-5px); }
@@ -907,11 +903,17 @@
         async function loadDashboardData() {
             try {
                 const ts = new Date().getTime();
-                const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
-                if(sessionRes.status === 401 || sessionRes.status === 403) { window.location.href = 'index.html'; return; }
-                const sessionData = await sessionRes.json();
-                if (!sessionData.authenticated) { window.location.href = 'index.html'; return; }
-                document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
+                
+                // 🟢 ADMIN TOKEN BYPASS CHECK FOR DASHBOARD SESSION
+                if (localStorage.getItem('monster_admin_trusted') === 'true') {
+                    document.getElementById('userEmailDisplay').innerText = `🔒 jaiminvankar520@gmail.com (Trusted Admin)`;
+                } else {
+                    const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
+                    if(sessionRes.status === 401 || sessionRes.status === 403) { window.location.href = 'index.html'; return; }
+                    const sessionData = await sessionRes.json();
+                    if (!sessionData.authenticated) { window.location.href = 'index.html'; return; }
+                    document.getElementById('userEmailDisplay').innerText = `🔒 ${sessionData.email}`;
+                }
 
                 const [habitsRes, workoutsRes, hydrationRes, studyRes] = await Promise.all([
                     fetch('/api/habits?t=' + ts, { cache: 'no-store', credentials: 'include' }),
@@ -1121,6 +1123,7 @@
 
         async function logoutUser() {
             try {
+                localStorage.removeItem('monster_admin_trusted'); // Clear trust token
                 await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
             } catch(e) {}
             window.location.href = 'index.html';
@@ -1199,11 +1202,6 @@
                                 </div>
                             </div>
                         `;
-                    } else {
-                        const adminBanner = document.createElement('div');
-                        adminBanner.className = "fixed top-0 left-0 w-full bg-red-600 text-white text-center py-1.5 text-[10px] font-black uppercase tracking-widest z-[100000] shadow-lg shadow-red-500/50";
-                        adminBanner.innerHTML = "⚠️ GLOBAL SYSTEM LOCK IS ACTIVE. NORMAL USERS ARE CURRENTLY BLOCKED.";
-                        document.body.prepend(adminBanner);
                     }
                 }
             } catch (err) {}
@@ -1288,11 +1286,7 @@
             host.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
-        }// 🟢 FRONT-END ADMIN BYPASS CHECK (Dashboard ane trackers mate)
-if (localStorage.getItem('monster_admin_trusted') !== 'true' && window.location.pathname.includes('dashboard.html')) {
-    // Jo trusted nathi to j login page par moklo, baaki allow karo
-    // window.location.href = 'index.html';
-}
+        }
     </script>
 </body>
 </html>
