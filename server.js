@@ -176,7 +176,7 @@ initDB();
 
 app.set('trust proxy', 1);
 
-const MONSTER_LAUNCH_DATE = "2026-09-14";
+const MONSTER_LAUNCH_DATE = "2026-09-15";
 const MASTER_USER_ID = "u_admin";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -1488,7 +1488,7 @@ app.post('/api/targets', requireAuth, trackerApiGuard, async (req, res) => {
             id: 't_' + Date.now().toString(),
             userId: MASTER_USER_ID,
             name,
-            date: date || "2026-09-14",
+            date: date || "2026-09-15",
             completed: false,
             createdAt: new Date().toISOString()
         });
