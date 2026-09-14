@@ -234,49 +234,6 @@
             </div>
         </header>
 
-        <!-- 🤖 JARVIS AI SYSTEM ASSISTANT WIDGET -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl mb-8 border-2 border-cyan-400 shadow-[0_0_50px_rgba(6,182,212,0.35)] relative overflow-hidden bg-gradient-to-br from-[#080c14] via-[#04060b] to-[#020408] transition-all duration-500 hover:shadow-[0_0_70px_rgba(6,182,212,0.6)]">
-            <div class="absolute right-[-20px] bottom-[-20px] opacity-10 pointer-events-none">
-                <div class="arc-reactor arc-reactor-large" style="width: 250px; height: 250px;"></div>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
-                <div class="flex items-center gap-4">
-                    <div class="arc-reactor shrink-0" style="width: 48px; height: 48px;"></div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-base font-black tracking-widest text-cyan-400 uppercase">J.A.R.V.I.S. Neural Core</h3>
-                            <span class="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded font-black uppercase tracking-widest animate-pulse">Online</span>
-                        </div>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Autonomous Universal Data Intelligence Assistant</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Response Terminal Screen -->
-            <div class="relative mb-6">
-                <div class="absolute top-3 left-3 flex items-center gap-1.5 opacity-40">
-                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                </div>
-                <div id="jarvis-response" class="w-full bg-[#020305] border border-cyan-500/20 rounded-2xl p-5 pt-8 text-cyan-100 font-mono text-xs sm:text-sm min-h-[90px] max-h-[250px] overflow-y-auto scrollbar-thin shadow-inner leading-relaxed whitespace-pre-wrap">Awaiting your command, sir. Ask me about system locks, lifelines, XP, workouts, or daily progress.</div>
-            </div>
-
-            <!-- Input & Action Bar -->
-            <div class="flex flex-col sm:flex-row gap-3">
-                <div class="relative flex-1">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500 font-mono font-black">></span>
-                    <input type="text" id="jarvis-input" placeholder="Ask Jarvis anything (e.g., Status?, Lifelines?, Workout done?)..." class="w-full bg-[#03050a] border border-cyan-500/30 focus:border-cyan-400 text-white font-mono text-xs sm:text-sm rounded-xl pl-10 pr-4 py-3.5 outline-none transition shadow-inner placeholder:text-slate-600" autocomplete="off">
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="askJarvis()" class="flex-1 sm:flex-none px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-lg shadow-cyan-600/30 transition cursor-pointer flex items-center justify-center gap-2">
-                        <span>⚡</span> Transmit
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- 🟢 HUD WIDGET -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
@@ -904,7 +861,6 @@
             try {
                 const ts = new Date().getTime();
                 
-                // 🟢 ADMIN TOKEN BYPASS CHECK FOR DASHBOARD SESSION (Zero lines removed)
                 if (localStorage.getItem('monster_admin_trusted') === 'true') {
                     document.getElementById('userEmailDisplay').innerText = `🔒 jaiminvankar520@gmail.com (Trusted Admin)`;
                 } else {
@@ -1059,49 +1015,6 @@
             }).join('');
         }
 
-        async function askJarvis() {
-            const questionInput = document.getElementById('jarvis-input');
-            const responseBox = document.getElementById('jarvis-response');
-            const question = questionInput.value.trim();
-
-            if (!question) return;
-
-            responseBox.innerText = "⚡ Establishing secure link with neural database... Analyzing nodes...";
-
-            try {
-                const res = await fetch('/api/jarvis/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ question })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    responseBox.innerText = data.reply;
-                } else {
-                    responseBox.innerText = "❌ Error: " + (data.error || "Failed to retrieve system records.");
-                }
-            } catch (err) {
-                console.error("Jarvis frontend error:", err);
-                responseBox.innerText = "❌ Neural network connection anomaly detected.";
-            }
-            
-            questionInput.value = "";
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const jInput = document.getElementById('jarvis-input');
-            if (jInput) {
-                jInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        askJarvis();
-                    }
-                });
-            }
-        });
-
         async function loadMonsterCoach() {
             try {
                 const res = await fetch('/api/monster-coach?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
@@ -1123,7 +1036,7 @@
 
         async function logoutUser() {
             try {
-                localStorage.removeItem('monster_admin_trusted'); // Clear trust token
+                localStorage.removeItem('monster_admin_trusted'); 
                 await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
             } catch(e) {}
             window.location.href = 'index.html';

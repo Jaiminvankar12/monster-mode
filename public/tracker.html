@@ -86,14 +86,14 @@
             <div class="glass-card p-12 rounded-2xl text-center text-zinc-500 text-sm font-medium">Loading discipline vectors...</div>
         </div>
 
-        <!-- VIEW-ONLY NOTES & REMINDERS SECTION -->
+        <!-- NOTES & REMINDERS SECTION WITH PRIORITY, DUE TIME, RECURRING & STATUS -->
         <div class="pt-6 border-t border-white/5">
             <div class="mb-4 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
                         <span>📌</span> Notes & Reminders
                     </h3>
-                    <p class="text-xs text-zinc-400 mt-0.5">Tick to complete. Manage from Control Panel.</p>
+                    <p class="text-xs text-zinc-400 mt-0.5">Manage priorities, due times, and recurring reminders.</p>
                 </div>
             </div>
             <div id="trackerNotesContainer" class="grid gap-3">
@@ -212,16 +212,24 @@
                 
                 if (data.success && data.items.length > 0) {
                     container.innerHTML = data.items.map(item => `
-                        <div class="glass-card p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div class="flex items-start gap-3 min-w-0">
+                        <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="flex items-start gap-3 min-w-0 flex-1">
                                 <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTrackerNote('${item.id}')" class="w-5 h-5 mt-0.5 rounded-lg accent-amber-500 cursor-pointer shrink-0">
-                                <div class="min-w-0">
+                                <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <h4 class="font-extrabold text-sm text-white truncate ${item.completed ? 'line-through opacity-50' : ''}">${item.title}</h4>
-                                        ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : ''}
+                                        <span class="text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${item.priority === 'High' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : (item.priority === 'Low' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30')}">⚡ ${item.priority || 'Medium'}</span>
+                                        ${item.dueTime ? `<span class="text-[9px] bg-zinc-800 text-zinc-300 border border-zinc-700 px-2 py-0.5 rounded-md font-bold">⏰ Due: ${item.dueTime}</span>` : ''}
+                                        ${item.recurring && item.recurring !== 'None' ? `<span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">🔁 ${item.recurring}</span>` : ''}
+                                        ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">🔔 ${item.date} ${item.time}</span>` : ''}
                                     </div>
                                     <p class="text-xs text-zinc-400 mt-1 truncate ${item.completed ? 'line-through opacity-50' : ''}">${item.description || ''}</p>
                                 </div>
+                            </div>
+                            <div class="shrink-0">
+                                <span class="text-[10px] font-black uppercase px-3 py-1 rounded-lg ${item.completed ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'}">
+                                    ${item.completed ? 'Completed' : 'Pending'}
+                                </span>
                             </div>
                         </div>
                     `).join('');
@@ -268,6 +276,14 @@
 
         async function toggleHabit(id, completed) {
              const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+             const todayStr = getLocalDateString();
+             
+             // Strict enforcement on client side as well
+             if (targetDate !== todayStr) {
+                 alert("🔒 Action denied: Past or future dates are locked and immutable.");
+                 return;
+             }
+
              try {
                 const res = await fetch(`/api/habits/${id}/toggle`, {
                     method: 'POST',
@@ -323,7 +339,7 @@
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
             } else if (targetDate > todayStr || status === 'FUTURE') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
+                badge.innerText = "⏳ Upcoming Day (Locked)";
             } else if (window.isHabitsLocked) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
                 badge.innerText = "🛑 SYSTEM ADMIN LOCK ACTIVE";
@@ -342,7 +358,11 @@
 
             const todayStr = getLocalDateString();
             
-            // STRICT DATE LOCKING CONDITIONS
+            // STRICT DATE LOCKING RULES:
+            // - Today: Open and checkable
+            // - Past dates: Locked & Not editable
+            // - Future dates: Upcoming Day & Locked
+            // - Before start date: Locked
             const isPastDate = viewingDate < todayStr;
             const isFutureDate = viewingDate > todayStr;
             const isPreLaunch = viewingDate < LAUNCH_DATE;
@@ -367,7 +387,7 @@
                         </div>
                         <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
                             <button type="button" ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (h.completedToday ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
-                                ${isDisabled ? '🔒 Locked' : (h.completedToday ? '✓ Complete' : '○ Pending')}
+                                ${isDisabled ? (isFutureDate ? '⏳ Upcoming' : '🔒 Locked') : (h.completedToday ? '✓ Complete' : '○ Pending')}
                             </button>
                         </div>
                     </div>
