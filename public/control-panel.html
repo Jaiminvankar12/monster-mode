@@ -328,7 +328,7 @@
                             <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Habit Name</label><input type="text" id="habitName" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
                             <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Category</label><input type="text" id="habitCategory" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
                             <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description</label><input type="text" id="habitDesc" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-red-500 transition shadow-inner"></div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Date</label><input type="date" id="habitStartDate" value="2026-09-15" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Date</label><input type="date" id="habitStartDate" value="2026-09-16" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner"></div>
                             <div class="flex gap-3 pt-2">
                                 <button type="submit" id="habitSubmitBtn" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Deploy / Update Habit</button>
                                 <button type="button" onclick="resetHabitForm()" class="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer">Cancel</button>
@@ -353,7 +353,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Launch Date</label>
-                                <input type="date" id="targetDate" value="2026-09-15" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner">
+                                <input type="date" id="targetDate" value="2026-09-16" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm shadow-inner">
                             </div>
                             <div class="flex gap-3 pt-2">
                                 <button type="submit" class="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-purple-500/30">Deploy Milestone</button>
@@ -443,7 +443,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Execution Start Date</label>
-                                <input type="date" id="studyStartDate" value="2026-09-15" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                                <input type="date" id="studyStartDate" value="2026-09-16" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
@@ -1508,7 +1508,7 @@
                 if (data.success && data.habits.length > 0) {
                     container.innerHTML = data.habits.map(h => `
                         <div class="bg-[#030408] border border-white/5 p-4 rounded-2xl flex items-center justify-between gap-4">
-                            <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-15'}</span></div>
+                            <div><h4 class="font-extrabold text-sm text-white">${h.name}</h4><span class="text-[10px] text-slate-400 uppercase tracking-widest">Start: ${h.startDate || '2026-09-16'}</span></div>
                             <div class="flex gap-2">
                                 <button type="button" onclick="editHabit('${h.id}', '${h.name.replace(/'/g, "\\'")}', '${(h.category || '').replace(/'/g, "\\'")}', '${(h.description || '').replace(/'/g, "\\'")}', '${h.startDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
                                 <button type="button" onclick="confirmAndDeleteHabit('${h.id}')" class="px-3 py-1.5 bg-red-500/15 text-red-400 rounded-xl text-xs font-bold cursor-pointer">Delete</button>
@@ -1531,7 +1531,7 @@
             if (hName) hName.value = name;
             if (hCat) hCat.value = category;
             if (hDesc) hDesc.value = desc;
-            if (hStart) hStart.value = startDate || "2026-09-15";
+            if (hStart) hStart.value = startDate || "2026-09-16";
             if (hTitle) hTitle.innerText = "✏️ Edit Habit Vector";
         }
 
@@ -1558,7 +1558,7 @@
                 const name = nameEl ? nameEl.value : '';
                 const category = categoryEl ? (categoryEl.value || 'General') : 'General';
                 const description = descEl ? descEl.value : '';
-                const startDate = startDateEl ? (startDateEl.value || "2026-09-15") : "2026-09-15";
+                const startDate = startDateEl ? (startDateEl.value || "2026-09-15") : "2026-09-16";
                 const actionType = editId ? 'edit' : 'add';
 
                 requestSecureAuthorization(actionType, async (password) => {
@@ -1650,7 +1650,7 @@
                     try {
                         let url = editId ? `/api/workouts/${editId}` : '/api/workouts';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-15", password }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, sets, value, unit, startDate: "2026-09-16", password }) });
                         if (res.ok) { showStatusMessage(editId ? "Workout updated successfully!" : "Workout added successfully!", "success"); resetWorkoutForm(); loadWorkouts(); }
                     } catch (err) {}
                 });
@@ -1681,7 +1681,7 @@
                             <div>
                                 <h4 class="font-extrabold text-sm text-white">${c.name}</h4>
                                 <span class="text-[10px] text-blue-400 uppercase tracking-widest block mt-1">Target: ${c.dailyTargetMinutes}m/day</span>
-                                <span class="text-[9px] text-slate-400 uppercase tracking-wider block">Start: ${c.startDate || '2026-09-15'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
+                                <span class="text-[9px] text-slate-400 uppercase tracking-wider block">Start: ${c.startDate || '2026-09-16'} ${c.endDate ? '| Deadline: ' + c.endDate : ''}</span>
                             </div>
                             <div class="flex gap-2 shrink-0">
                                 <button type="button" onclick="editStudy('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${c.dailyTargetMinutes}', '${c.startDate || ''}', '${c.endDate || ''}')" class="px-3 py-1.5 bg-blue-500/15 text-blue-400 rounded-xl text-xs font-bold cursor-pointer">Edit</button>
@@ -1704,7 +1704,7 @@
             if (esId) esId.value = id;
             if (sName) sName.value = name;
             if (sTarget) sTarget.value = target;
-            if (sStart) sStart.value = startDate || "2026-09-15";
+            if (sStart) sStart.value = startDate || "2026-09-16";
             if (sEnd) sEnd.value = endDate || "";
             if (sTitle) sTitle.innerText = "✏️ Edit Study Subject";
         }
@@ -1731,7 +1731,7 @@
                 const editId = editIdEl ? editIdEl.value : '';
                 const name = nameEl ? nameEl.value : '';
                 const dailyTargetMinutes = targetEl ? targetEl.value : '';
-                const startDate = startDateEl ? (startDateEl.value || "2026-09-15") : "2026-09-15";
+                const startDate = startDateEl ? (startDateEl.value || "2026-09-16") : "2026-09-16";
                 const endDate = endDateEl ? endDateEl.value : '';
                 const actionType = editId ? 'edit' : 'add';
 
@@ -1818,7 +1818,7 @@
                     try {
                         let url = editId ? `/api/hygiene/${editId}` : '/api/hygiene';
                         let method = editId ? 'PUT' : 'POST';
-                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, frequency, startDate: "2026-09-15", password }) });
+                        const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ name, frequency, startDate: "2026-09-16", password }) });
                         if (res.ok) { showStatusMessage(editId ? "Task updated successfully!" : "Hygiene task added successfully!", "success"); resetHygieneForm(); loadHygiene(); }
                     } catch (err) {}
                 });
