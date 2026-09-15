@@ -25,7 +25,8 @@ const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
 
 // 🟢 Corrected: pass 'MONGO_URI' instead of 'process.env.MONGO_URI'
-mongoose.connect(MONGO_URI)
+// 🟢 FIX 3: Added { family: 4 } to force IPv4! (Render tries IPv6 by default which causes MongoDB to timeout and data doesn't load)
+mongoose.connect(MONGO_URI, { family: 4, serverSelectionTimeoutMS: 15000 })
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
@@ -172,7 +173,8 @@ const JarvisMessage = mongoose.model('JarvisMessage', jarvisMessageSchema);
 async function initDB() {
     // 🟢 FIX 1: Smart Wait Logic (Solves 502 Timeout Crash without deleting anything)
     if (mongoose.connection.readyState !== 1) {
-        await new Promise(resolve => mongoose.connection.once('connected', resolve));
+        // 🟢 Added try/catch to ensure wait logic doesn't throw a fatal unhandled error
+        try { await new Promise((resolve, reject) => { mongoose.connection.once('connected', resolve); mongoose.connection.once('error', reject); }); } catch(e) { console.log('Init Wait Skipped'); }
     }
 
     let uCount = await User.countDocuments();
