@@ -82,6 +82,21 @@
         <p class="text-emerald-300 font-bold tracking-widest mt-2 uppercase text-xs">Vector Synced Successfully</p>
     </div>
 
+    <!-- 🏆 ALL BADGES MODAL (VIEW ALL 1-100 LEVELS) -->
+    <div id="allBadgesModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex-col items-center pt-10 sm:pt-20 p-4 transition-opacity">
+        <div class="w-full max-w-5xl bg-[#07090f] border border-white/20 rounded-2xl overflow-hidden flex flex-col h-[85vh]">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                <div>
+                    <h2 class="text-xl font-black uppercase text-amber-400 flex items-center gap-2"><span>🏆</span> Study Master — Road to Level 100</h2>
+                    <p class="text-xs text-slate-400 font-medium">Unique Academic Rewards Unlocked Every 5 Levels</p>
+                </div>
+                <button type="button" onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
+            </div>
+            <div id="allBadgesScrollContainer" class="p-6 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 scrollbar-thin">
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -128,17 +143,34 @@
             </div>
         </div>
 
+        <!-- 🏆 STUDY TRACKER LEVEL & ACTIVE BADGE WIDGET -->
+        <div class="glass-card p-5 rounded-2xl border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 bg-amber-500/5">
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div id="studyActiveBadgeIcon" class="text-4xl w-14 h-14 bg-black/40 border border-amber-500/40 rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">🎓</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="studyLevelBadge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded font-black uppercase tracking-widest">Level 1 Study</span>
+                    </div>
+                    <h3 id="studyActiveBadgeName" class="text-base font-black text-white mt-1 tracking-wide">Scholar Initiate</h3>
+                    <p class="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5"><span id="studyXpLabel">0</span> XP — Next reward at Level <span id="studyNextReward">5</span></p>
+                </div>
+            </div>
+            <button type="button" onclick="openAllBadgesModal()" class="w-full sm:w-auto px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer whitespace-nowrap shadow-lg">
+                View All Badges ➔
+            </button>
+        </div>
+
         <!-- Date Carousel Navigation Bar -->
         <div class="glass-card glow-blue p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
                 <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
-                <div class="text-center px-2">
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                <div class="text-center px-2 cursor-pointer" onclick="document.getElementById('targetDateInput').showPicker()">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date (Click)</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider underline decoration-blue-500/50">---</span>
                 </div>
                 <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
-            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="bg-[#030408] border border-white/10 text-white text-xs rounded-xl px-3 py-2.5 outline-none cursor-pointer">
             <div id="studyStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
                 Loading status...
             </div>
@@ -158,15 +190,12 @@
             </div>
             
             <div class="flex flex-col xl:flex-row items-center justify-between gap-8">
-                <!-- Huge Timer Display -->
                 <div class="text-6xl sm:text-7xl md:text-[90px] font-black text-white tracking-wider font-mono text-center w-full xl:w-auto drop-shadow-2xl" id="pomoTimerDisplay">
                     00:00:00
                 </div>
 
-                <!-- Controls Layout (Fully Automated from Panel Selection) -->
                 <div class="flex flex-col sm:flex-row flex-wrap items-end justify-center xl:justify-end gap-4 w-full">
                     
-                    <!-- Subject Dropdown -->
                     <div class="flex flex-col gap-2 w-full sm:w-auto flex-1 min-w-[200px] max-w-[260px]">
                         <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">1. Select Subject</label>
                         <select id="pomoCategorySelect" onchange="onPomoCategoryChange()" class="w-full bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3.5 outline-none focus:border-blue-500 transition">
@@ -174,7 +203,6 @@
                         </select>
                     </div>
 
-                    <!-- Planned Session Dropdown (Auto sets duration) -->
                     <div class="flex flex-col gap-2 w-full sm:w-auto flex-1 min-w-[200px] max-w-[260px]">
                         <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">2. Select Panel Session (Auto-Time)</label>
                         <select id="pomoPlannedSessionSelect" onchange="onPomoSessionChange()" class="w-full bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3.5 outline-none focus:border-blue-500 transition">
@@ -182,7 +210,6 @@
                         </select>
                     </div>
 
-                    <!-- Target Display / Setup & Buttons -->
                     <div class="flex items-center gap-3 w-full sm:w-auto">
                         <div class="flex flex-col gap-2 w-full sm:w-auto">
                             <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Target (HH:MM)</label>
@@ -260,6 +287,106 @@
     </main>
 
     <script>
+        // 🏆 STUDY TRACKER LEVEL & BADGES SYSTEM (1 to 100 Levels)
+        let studyLevel = 1;
+        let studyXp = 0;
+        let allStudyBadges = [];
+        let currentBadgeRenderIndex = 0;
+        const BADGE_CHUNK_SIZE = 40;
+
+        function getStudyBadgeName(lvl) {
+            if (lvl === 1) return { name: "Scholar Initiate", icon: "🎓" };
+            if (lvl >= 100) return { name: "OMNISCIENT MASTER", icon: "👑" };
+            
+            const materials = ["Paper", "Ink", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Obsidian", "Astral", "Cosmic"];
+            const titles = ["Novice", "Reader", "Scholar", "Savant", "Sage", "Mage", "Oracle", "Architect", "Grandmaster", "Luminary"];
+            const icons = ["📖","💡","📜","🔬","🧠","⚡","🏆","💎","🔮","🌟"];
+            
+            let matIdx = Math.floor(lvl / 20) % materials.length;
+            let titleIdx = Math.floor(lvl / 5) % titles.length;
+            let iconIdx = Math.floor(lvl / 10) % icons.length;
+            
+            return {
+                name: `${materials[matIdx]} ${titles[titleIdx]}`,
+                icon: icons[iconIdx]
+            };
+        }
+
+        function generateStudyBadges() {
+            allStudyBadges = [];
+            allStudyBadges.push({ levelRequired: 1, ...getStudyBadgeName(1), unlocked: 1 <= studyLevel });
+            for (let i = 5; i <= 100; i += 5) {
+                let info = getStudyBadgeName(i);
+                allStudyBadges.push({
+                    levelRequired: i,
+                    name: info.name,
+                    icon: info.icon,
+                    unlocked: i <= studyLevel
+                });
+            }
+        }
+
+        function updateStudyBadgeWidget() {
+            generateStudyBadges();
+            let currentBadge = allStudyBadges.slice().reverse().find(b => b.unlocked) || allStudyBadges[0];
+            let nextReward = allStudyBadges.find(b => b.levelRequired > studyLevel) || allStudyBadges[allStudyBadges.length - 1];
+
+            document.getElementById('studyActiveBadgeIcon').innerText = currentBadge.icon;
+            document.getElementById('studyLevelBadge').innerText = `Level ${studyLevel} Study`;
+            document.getElementById('studyActiveBadgeName').innerText = currentBadge.name;
+            document.getElementById('studyXpLabel').innerText = studyXp;
+            document.getElementById('studyNextReward').innerText = nextReward.levelRequired;
+        }
+
+        function createStudyBadgeHTML(b) {
+            return `
+                <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-white/5 opacity-50'} p-5 rounded-2xl flex flex-col items-center text-center gap-3 transition hover:scale-105 hover:border-amber-500/60 cursor-default">
+                    <span class="text-4xl filter drop-shadow-lg">${b.icon}</span>
+                    <div class="space-y-1 w-full">
+                        <h4 class="font-extrabold text-sm text-white tracking-wide">${b.name}</h4>
+                        <div class="w-full h-[1px] bg-white/10 my-1"></div>
+                        <span class="text-[9px] ${b.unlocked ? 'text-amber-400' : 'text-zinc-500'} font-bold uppercase tracking-widest block">Lvl ${b.levelRequired} Reqd</span>
+                    </div>
+                    <span class="text-[10px] px-3 py-1 mt-1 rounded-lg uppercase font-black tracking-widest ${b.unlocked ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
+                </div>
+            `;
+        }
+
+        let isRenderingChunk = false;
+        function openAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.remove('hidden');
+            document.getElementById('allBadgesModal').classList.add('flex');
+            currentBadgeRenderIndex = 0;
+            document.getElementById('allBadgesScrollContainer').innerHTML = '';
+            renderNextBadgeChunk();
+        }
+
+        function closeAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.add('hidden');
+            document.getElementById('allBadgesModal').classList.remove('flex');
+        }
+
+        function renderNextBadgeChunk() {
+            isRenderingChunk = true;
+            const container = document.getElementById('allBadgesScrollContainer');
+            const end = Math.min(currentBadgeRenderIndex + BADGE_CHUNK_SIZE, allStudyBadges.length);
+            let htmlStr = "";
+            for(let i = currentBadgeRenderIndex; i < end; i++) {
+                htmlStr += createStudyBadgeHTML(allStudyBadges[i]);
+            }
+            container.insertAdjacentHTML('beforeend', htmlStr);
+            currentBadgeRenderIndex = end;
+            setTimeout(() => isRenderingChunk = false, 100);
+        }
+
+        document.getElementById('allBadgesScrollContainer').addEventListener('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 300) {
+                if (currentBadgeRenderIndex < allStudyBadges.length && !isRenderingChunk) {
+                    renderNextBadgeChunk();
+                }
+            }
+        });
+
         let globalTargetMinutes = 0;
         let globalStudiedMinutes = 0;
         let pendingSessionsData = []; 
@@ -269,19 +396,14 @@
             try {
                 const res = await fetch('/api/module-locks', { credentials: 'include' });
                 const data = await res.json();
-                
                 if (data.success && data.studyLocked) {
                     document.body.innerHTML = `
                         <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                             <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
                                 <span class="text-5xl animate-bounce">🔒</span>
                                 <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">STUDY TRACKER LOCKED</h2>
-                                <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                    This specific module has been locked by the administrator.
-                                </p>
-                                <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                    Return to Dashboard
-                                </button>
+                                <p class="text-xs sm:text-sm text-slate-300 font-medium">This specific module has been locked by the administrator.</p>
+                                <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Dashboard</button>
                             </div>
                         </div>
                     `;
@@ -425,7 +547,6 @@
                     const data = await res.json();
                     if (data.success) {
                         categoriesData = data.categories || [];
-                        
                         let finalTargetMins = customTargetMins !== null ? customTargetMins : (data.totalTargetMinutes || 0);
 
                         globalTargetMinutes = finalTargetMins;
@@ -433,7 +554,14 @@
 
                         document.getElementById('targetTimeLabel').innerText = formatMinutes(finalTargetMins);
                         document.getElementById('studiedTimeLabel').innerText = formatMinutes(globalStudiedMinutes);
-                        document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
+                        
+                        let streak = data.studyStreak || 0;
+                        document.getElementById('studyStreakLabel').innerText = `🔥 ${streak} Days`;
+
+                        // Calculate XP & Level from studied minutes (10 XP per studied hour)
+                        studyXp = (streak * 25) + Math.floor(globalStudiedMinutes / 6);
+                        studyLevel = Math.min(100, Math.floor(studyXp / 80) + 1);
+                        updateStudyBadgeWidget();
                         
                         let progressPercent = finalTargetMins > 0 ? Math.min(Math.round((globalStudiedMinutes / finalTargetMins) * 100), 100) : 0;
                         document.getElementById('progressPercentText').innerText = `${progressPercent}%`;
@@ -557,29 +685,22 @@
 
         function populateSelects(categories) {
             const select2 = document.getElementById('pomoCategorySelect');
-
             if (!categories || categories.length === 0) {
                 select2.innerHTML = `<option value="">No subjects available</option>`;
                 return;
             }
-
             const optionsHtml = `<option value="">Select Subject</option>` + categories.map(c => `
                 <option value="${c.id}">${c.name}</option>
             `).join('');
-
             select2.innerHTML = optionsHtml;
             onPomoCategoryChange(); 
         }
 
-        // 🟢 AUTOMATIC DURATION BINDING FROM PANEL SESSIONS
         function onPomoCategoryChange() {
             const catId = document.getElementById('pomoCategorySelect').value;
             const sessionSelect = document.getElementById('pomoPlannedSessionSelect');
-            
             sessionSelect.innerHTML = '<option value="">-- Freestyle (No Plan) --</option>';
-            
             if (catId) {
-                // Filter pending sessions belonging to this subject
                 const filtered = pendingSessionsData.filter(s => s.categoryId === catId);
                 filtered.forEach(s => {
                     sessionSelect.innerHTML += `<option value="${s.id}" data-dur="${s.durationMinutes}">${s.sessionName || s.topic} (${formatMinutes(s.durationMinutes)})</option>`;
@@ -599,7 +720,6 @@
             }
         }
 
-        // ================= TIMER LOGIC =================
         function startPomodoro() {
             if (globalTargetMinutes > 0 && globalStudiedMinutes >= globalTargetMinutes) {
                 alert("🏆 Target Already Achieved! You have dominated today's mission. Execution locked.");
@@ -632,10 +752,7 @@
             if (targetMins <= 0) { alert("Please set a valid duration!"); return; }
 
             const categoryId = document.getElementById('pomoCategorySelect').value;
-            if (!categoryId) {
-                alert("Please select a study subject for the Session!");
-                return;
-            }
+            if (!categoryId) { alert("Please select a study subject for the Session!"); return; }
 
             const selectEl = document.getElementById('pomoCategorySelect');
             const subjectName = selectEl.options[selectEl.selectedIndex].text;
@@ -678,7 +795,6 @@
 
                 const startTs = parseInt(localStorage.getItem('pomo_startTimestamp'));
                 const targetSecs = parseInt(localStorage.getItem('pomo_targetSeconds'));
-                
                 const elapsedSecs = Math.floor((Date.now() - startTs) / 1000);
 
                 if (elapsedSecs >= targetSecs) {
@@ -756,11 +872,8 @@
                 const data = await res.json();
                 if (data.success) {
                     fetchStudyData(targetDate);
-                } else {
-                    alert("Error logging session: " + data.error);
                 }
             } catch (err) {
-                console.error(err);
                 alert("❌ Connection Error: Could not sync session with MongoDB Cloud.");
             }
         }
@@ -775,7 +888,6 @@
             localStorage.removeItem('pomo_plannedSessionId');
             
             updatePomoDisplay(0);
-            
             document.getElementById('pomoModeBadge').innerText = "Standby";
             document.getElementById('pomoStartBtn').innerText = "Start Focus";
             document.getElementById('pomoStartBtn').className = "flex-1 sm:flex-none px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
@@ -784,25 +896,17 @@
         function playSuccessAnimation() {
             const overlay = document.getElementById('successOverlay');
             overlay.classList.add('active');
-            
             const circle = overlay.querySelector('.success-checkmark__circle');
             const check = overlay.querySelector('.success-checkmark__check');
-            circle.style.animation = 'none';
-            check.style.animation = 'none';
-            void circle.offsetWidth;
-            void check.offsetWidth;
+            circle.style.animation = 'none'; check.style.animation = 'none';
+            void circle.offsetWidth; void check.offsetWidth;
             circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
             check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
-
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 2500);
+            setTimeout(() => overlay.classList.remove('active'), 2500);
         }
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
-            try {
-                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-            } catch(e) {}
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
             window.location.href = 'index.html';
         });
 
@@ -823,9 +927,7 @@
         }
 
         document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
-            }
+            if (e.target.closest('button')) playCyberClick();
         });
     </script>
 </body>

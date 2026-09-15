@@ -35,12 +35,10 @@
         .study-hud { animation: cyberPulse 4s infinite ease-in-out; border-color: rgba(59, 130, 246, 0.4); }
         .workout-hud { animation: workoutPulse 4s infinite ease-in-out; border-color: rgba(239, 68, 68, 0.4); }
 
-        /* Premium Chat Scrollbar */
         .premium-scroll::-webkit-scrollbar { width: 4px; }
         .premium-scroll::-webkit-scrollbar-track { background: transparent; }
         .premium-scroll::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 4px; }
         
-        /* ✨ CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW ✨ */
         html {
             scroll-behavior: smooth !important;
         }
@@ -62,7 +60,6 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(239, 68, 68, 0.8) !important;
         }
 
-        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
         @keyframes successGlow {
             0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
             50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
@@ -75,7 +72,6 @@
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
 
-        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
         #successOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -145,6 +141,21 @@
         <p class="text-emerald-300 font-bold tracking-widest mt-2 uppercase text-xs">Vector Synced Successfully</p>
     </div>
 
+    <!-- 🏆 ALL BADGES MODAL (VIEW ALL 1-100 LEVELS) -->
+    <div id="allBadgesModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex-col items-center pt-10 sm:pt-20 p-4 transition-opacity">
+        <div class="w-full max-w-5xl bg-[#07090f] border border-white/20 rounded-2xl overflow-hidden flex flex-col h-[85vh]">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                <div>
+                    <h2 class="text-xl font-black uppercase text-amber-400 flex items-center gap-2"><span>🏆</span> Workout Master — Road to Level 100</h2>
+                    <p class="text-xs text-slate-400 font-medium">Unique Iron Rewards Unlocked Every 5 Levels</p>
+                </div>
+                <button type="button" onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
+            </div>
+            <div id="allBadgesScrollContainer" class="p-6 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 scrollbar-thin">
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
@@ -163,10 +174,10 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8">
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 space-y-8">
         
         <!-- Page Title & Streak Badge Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <span class="text-xs font-black tracking-widest text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">⚡ Global Launch: 15 Sept 2026</span>
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Iron & Muscle Matrix</h2>
@@ -182,8 +193,25 @@
             </div>
         </div>
 
+        <!-- 🏆 WORKOUT TRACKER LEVEL & ACTIVE BADGE WIDGET -->
+        <div class="glass-card p-5 rounded-2xl border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 bg-amber-500/5">
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div id="workoutActiveBadgeIcon" class="text-4xl w-14 h-14 bg-black/40 border border-amber-500/40 rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">🏋️</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="workoutLevelBadge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded font-black uppercase tracking-widest">Level 1 Workout</span>
+                    </div>
+                    <h3 id="workoutActiveBadgeName" class="text-base font-black text-white mt-1 tracking-wide">Iron Lifter</h3>
+                    <p class="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5"><span id="workoutXpLabel">0</span> XP — Next reward at Level <span id="workoutNextReward">5</span></p>
+                </div>
+            </div>
+            <button type="button" onclick="openAllBadgesModal()" class="w-full sm:w-auto px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer whitespace-nowrap shadow-lg">
+                View All Badges ➔
+            </button>
+        </div>
+
         <!-- 🤖 PREMIUM ELITE AI WORKOUT COACH WIDGET -->
-        <div class="glass-card p-6 rounded-3xl mb-8 border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-4 shadow-[0_0_40px_rgba(239,68,68,0.1)]">
+        <div class="glass-card p-6 rounded-3xl border-l-4 border-l-red-500 bg-gradient-to-r from-red-500/10 via-transparent to-transparent space-y-4 shadow-[0_0_40px_rgba(239,68,68,0.1)]">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="text-2xl animate-pulse">🤖</span>
@@ -195,15 +223,13 @@
                 <span class="hidden sm:inline-block text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase">Online</span>
             </div>
             
-            <!-- Dynamic Chat Response Area -->
             <div id="aiCoachChatBox" class="bg-[#05070b] border border-white/10 p-5 rounded-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-h-[300px] overflow-y-auto premium-scroll shadow-inner">
                 <div class="text-slate-400">
                     <span class="text-red-500 font-bold block mb-1">SYSTEM BOOT: APEX AI INITIATED</span>
-                    I am your elite personal coach. Forget the generic advice. Ask me for a structured <b class="text-white">hypertrophy plan</b>, <b class="text-white">perfect biomechanical form cues</b>, <b class="text-white">macro breakdowns</b>, or <b class="text-white">scientific recovery protocols</b>. Time to dominate.
+                    I am your elite personal coach. Ask me for a structured <b class="text-white">hypertrophy plan</b>, <b class="text-white">biomechanical form cues</b>, or <b class="text-white">recovery protocols</b>. Time to dominate.
                 </div>
             </div>
 
-            <!-- Input & Send Control -->
             <div class="flex flex-col sm:flex-row gap-3">
                 <input type="text" id="aiCoachInput" placeholder="e.g., Generate a 4-week Push/Pull/Legs hypertrophy routine..." class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:border-red-500 outline-none transition shadow-inner">
                 <button type="button" onclick="sendPromptToAiCoach()" class="px-6 py-3.5 bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition cursor-pointer shrink-0 shadow-lg shadow-red-600/30">
@@ -211,17 +237,15 @@
                 </button>
             </div>
 
-            <!-- Premium Quick Trigger Pills -->
             <div class="flex flex-wrap gap-2 pt-2 border-t border-white/5 mt-2">
                 <button type="button" onclick="quickAskAI('hypertrophy')" class="text-[10px] bg-zinc-900 hover:bg-red-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">📊 Generate Elite Workout Plan</button>
                 <button type="button" onclick="quickAskAI('form')" class="text-[10px] bg-zinc-900 hover:bg-blue-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-blue-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🧬 Biomechanical Form Breakdown</button>
                 <button type="button" onclick="quickAskAI('recovery')" class="text-[10px] bg-zinc-900 hover:bg-emerald-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-emerald-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🔋 Science-Based Recovery Protocol</button>
-                <button type="button" onclick="quickAskAI('macros')" class="text-[10px] bg-zinc-900 hover:bg-amber-500/20 text-slate-300 hover:text-white border border-white/10 hover:border-amber-500/50 px-4 py-2 rounded-xl font-bold uppercase tracking-wider transition cursor-pointer">🥩 Macro & Nutrition Calculation</button>
             </div>
         </div>
 
-        <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- FUSION FUTURISTIC WORKOUT HUD WIDGET -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
@@ -233,17 +257,17 @@
         </div>
 
         <!-- Date Carousel Navigation Bar -->
-        <div class="glass-card glow-red p-5 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="glass-card glow-red p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-start">
                 <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">← Prev</button>
-                <div class="text-center px-2">
-                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider">---</span>
+                <div class="text-center px-2 cursor-pointer" onclick="document.getElementById('targetDateInput').showPicker()">
+                    <span class="text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date (Click)</span>
+                    <span id="activeDateLabel" class="text-sm font-black text-white tracking-wider underline decoration-red-500/50">---</span>
                 </div>
                 <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
 
-            <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
+            <input type="date" id="targetDateInput" onchange="onDateChange()" class="bg-[#030408] border border-white/10 text-white text-xs rounded-xl px-3 py-2.5 outline-none cursor-pointer">
 
             <div id="workoutStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
                 Loading status...
@@ -251,7 +275,7 @@
         </div>
 
         <!-- Motivational Athlete Quote Banner -->
-        <div id="quoteBanner" class="hidden glass-card p-5 rounded-2xl mb-6 border-l-4 border-l-red-500 bg-red-500/5">
+        <div id="quoteBanner" class="hidden glass-card p-5 rounded-2xl border-l-4 border-l-red-500 bg-red-500/5">
             <span class="text-[10px] font-black tracking-widest text-red-400 uppercase">🔥 Athlete Milestone Achieved</span>
             <p class="text-sm font-bold text-white mt-1 italic">"Pain is temporary. Pride is forever. The iron never lies."</p>
         </div>
@@ -263,37 +287,125 @@
     </main>
 
     <script>
-        async function checkModuleLockStatus() {
-    try {
-        const res = await fetch('/api/module-locks', { credentials: 'include' });
-        const data = await res.json();
-        
-        // Workout mate workoutsLocked check karvanu chhe
-        if (data.success && data.workoutsLocked) {
-            document.body.innerHTML = `
-                <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                    <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                        <span class="text-5xl animate-bounce">🔒</span>
-                        <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">WORKOUT TRACKER LOCKED</h2>
-                        <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                            This specific module has been locked by the administrator.
-                        </p>
-                        <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                            Return to Dashboard
-                        </button>
+        // 🏆 WORKOUT TRACKER LEVEL & BADGES SYSTEM (1 to 100 Levels)
+        let workoutLevel = 1;
+        let workoutXp = 0;
+        let allWorkoutBadges = [];
+        let currentBadgeRenderIndex = 0;
+        const BADGE_CHUNK_SIZE = 40;
+
+        function getWorkoutBadgeName(lvl) {
+            if (lvl === 1) return { name: "Iron Lifter", icon: "🏋️" };
+            if (lvl >= 100) return { name: "OLYMPUS TITAN", icon: "👑" };
+            
+            const materials = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Obsidian", "Void", "Astral", "Cosmic"];
+            const titles = ["Lifter", "Striker", "Warrior", "Vanguard", "Sentinel", "Gladiator", "Commander", "Warlord", "Conqueror", "Titan"];
+            const icons = ["🥉","🥈","🥇","🏅","🎖️","🏆","💎","🧿","🔮","⚡","🔥"];
+            
+            let matIdx = Math.floor(lvl / 20) % materials.length;
+            let titleIdx = Math.floor(lvl / 5) % titles.length;
+            let iconIdx = Math.floor(lvl / 10) % icons.length;
+            
+            return {
+                name: `${materials[matIdx]} ${titles[titleIdx]}`,
+                icon: icons[iconIdx]
+            };
+        }
+
+        function generateWorkoutBadges() {
+            allWorkoutBadges = [];
+            allWorkoutBadges.push({ levelRequired: 1, ...getWorkoutBadgeName(1), unlocked: 1 <= workoutLevel });
+            for (let i = 5; i <= 100; i += 5) {
+                let info = getWorkoutBadgeName(i);
+                allWorkoutBadges.push({
+                    levelRequired: i,
+                    name: info.name,
+                    icon: info.icon,
+                    unlocked: i <= workoutLevel
+                });
+            }
+        }
+
+        function updateWorkoutBadgeWidget() {
+            generateWorkoutBadges();
+            let currentBadge = allWorkoutBadges.slice().reverse().find(b => b.unlocked) || allWorkoutBadges[0];
+            let nextReward = allWorkoutBadges.find(b => b.levelRequired > workoutLevel) || allWorkoutBadges[allWorkoutBadges.length - 1];
+
+            document.getElementById('workoutActiveBadgeIcon').innerText = currentBadge.icon;
+            document.getElementById('workoutLevelBadge').innerText = `Level ${workoutLevel} Workout`;
+            document.getElementById('workoutActiveBadgeName').innerText = currentBadge.name;
+            document.getElementById('workoutXpLabel').innerText = workoutXp;
+            document.getElementById('workoutNextReward').innerText = nextReward.levelRequired;
+        }
+
+        function createWorkoutBadgeHTML(b) {
+            return `
+                <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-white/5 opacity-50'} p-5 rounded-2xl flex flex-col items-center text-center gap-3 transition hover:scale-105 hover:border-amber-500/60 cursor-default">
+                    <span class="text-4xl filter drop-shadow-lg">${b.icon}</span>
+                    <div class="space-y-1 w-full">
+                        <h4 class="font-extrabold text-sm text-white tracking-wide">${b.name}</h4>
+                        <div class="w-full h-[1px] bg-white/10 my-1"></div>
+                        <span class="text-[9px] ${b.unlocked ? 'text-amber-400' : 'text-zinc-500'} font-bold uppercase tracking-widest block">Lvl ${b.levelRequired} Reqd</span>
                     </div>
+                    <span class="text-[10px] px-3 py-1 mt-1 rounded-lg uppercase font-black tracking-widest ${b.unlocked ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
                 </div>
             `;
         }
-    } catch (err) {}
-}
 
-// DOMContentLoaded ma call karo:
-window.addEventListener('DOMContentLoaded', () => {
-    checkModuleLockStatus();
-    // Tamaru baki nu workout load logic ahiya hase...
-});
-        // Proper Local Date String Getter (Avoids UTC shifting issues)
+        let isRenderingChunk = false;
+        function openAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.remove('hidden');
+            document.getElementById('allBadgesModal').classList.add('flex');
+            currentBadgeRenderIndex = 0;
+            document.getElementById('allBadgesScrollContainer').innerHTML = '';
+            renderNextBadgeChunk();
+        }
+
+        function closeAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.add('hidden');
+            document.getElementById('allBadgesModal').classList.remove('flex');
+        }
+
+        function renderNextBadgeChunk() {
+            isRenderingChunk = true;
+            const container = document.getElementById('allBadgesScrollContainer');
+            const end = Math.min(currentBadgeRenderIndex + BADGE_CHUNK_SIZE, allWorkoutBadges.length);
+            let htmlStr = "";
+            for(let i = currentBadgeRenderIndex; i < end; i++) {
+                htmlStr += createWorkoutBadgeHTML(allWorkoutBadges[i]);
+            }
+            container.insertAdjacentHTML('beforeend', htmlStr);
+            currentBadgeRenderIndex = end;
+            setTimeout(() => isRenderingChunk = false, 100);
+        }
+
+        document.getElementById('allBadgesScrollContainer').addEventListener('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 300) {
+                if (currentBadgeRenderIndex < allWorkoutBadges.length && !isRenderingChunk) {
+                    renderNextBadgeChunk();
+                }
+            }
+        });
+
+        async function checkModuleLockStatus() {
+            try {
+                const res = await fetch('/api/module-locks', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success && data.workoutsLocked) {
+                    document.body.innerHTML = `
+                        <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                <span class="text-5xl animate-bounce">🔒</span>
+                                <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">WORKOUT TRACKER LOCKED</h2>
+                                <p class="text-xs sm:text-sm text-slate-300 font-medium">This specific module has been locked by the administrator.</p>
+                                <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Dashboard</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {}
+        }
+
         function getLocalDateString(date = new Date()) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -308,97 +420,79 @@ window.addEventListener('DOMContentLoaded', () => {
             const prompts = {
                 hypertrophy: "Generate an elite, science-based 4-week Push/Pull/Legs hypertrophy routine. Give exact sets, reps, and RPE for each exercise.",
                 form: "Break down the exact biomechanics and perfect form cues for a Barbell Squat and Deadlift.",
-                recovery: "What is the scientifically optimal protocol for post-workout muscle recovery, sleep optimization, and CNS repair?",
-                macros: "Explain exactly how to calculate protein, carb, and fat macros for a lean muscle-building phase (bulking without fat)."
+                recovery: "What is the scientifically optimal protocol for post-workout muscle recovery, sleep optimization, and CNS repair?"
             };
             document.getElementById('aiCoachInput').value = prompts[type];
             sendPromptToAiCoach();
         }
 
         async function sendPromptToAiCoach() {
-    const input = document.getElementById('aiCoachInput');
-    const chatBox = document.getElementById('aiCoachChatBox');
-    const prompt = input.value.trim();
-    if(!prompt) return;
+            const input = document.getElementById('aiCoachInput');
+            const chatBox = document.getElementById('aiCoachChatBox');
+            const prompt = input.value.trim();
+            if(!prompt) return;
 
-    chatBox.innerHTML = `
-        <div class="flex items-center gap-3 text-red-400 p-2">
-            <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol via AI Cloud...</span>
-        </div>`;
-    
-    try {
-        // 🟢 FIX: Correct endpoint URL mapped with backend (/api/ai-coach/ask)
-        const res = await fetch('/api/ai-coach/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ prompt })
-        });
-        const data = await res.json();
-        
-        const replyText = data.reply || data.message || (data.success ? data.text : null);
+            chatBox.innerHTML = `
+                <div class="flex items-center gap-3 text-red-400 p-2">
+                    <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span class="animate-pulse font-bold tracking-widest uppercase text-[10px]">Processing Elite Biomechanics & Protocol via AI Cloud...</span>
+                </div>`;
+            
+            try {
+                const res = await fetch('/api/ai-coach/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                const replyText = data.reply || data.message || (data.success ? data.text : null);
 
-        if (res.ok && replyText) {
-            let formattedReply = replyText
-                .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
-                .replace(/\n/g, '<br>')
-                .replace(/\*\s/g, '• ');
-
-            chatBox.innerHTML = `<div class="text-slate-300 whitespace-pre-wrap">${formattedReply}</div>`;
-        } else {
-            chatBox.innerHTML = `<div class="text-red-400 font-bold">Execute your workout regardless of motivation. No excuses.</div>`;
+                if (res.ok && replyText) {
+                    let formattedReply = replyText
+                        .replace(/\*\*(.*?)\*\*/g, '<b class="text-white font-extrabold">$1</b>')
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\s/g, '• ');
+                    chatBox.innerHTML = `<div class="text-slate-300 whitespace-pre-wrap">${formattedReply}</div>`;
+                } else {
+                    chatBox.innerHTML = `<div class="text-red-400 font-bold">Execute your workout regardless of motivation. No excuses.</div>`;
+                }
+            } catch(err) {
+                chatBox.innerHTML = `<div class="text-red-400 font-bold">System offline. Push through the barrier on your own.</div>`;
+            }
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
-    } catch(err) {
-        chatBox.innerHTML = `<div class="text-red-400 font-bold">System offline. Push through the barrier on your own.</div>`;
-    }
-    input.value = '';
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
 
-document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        sendPromptToAiCoach();
-    }
-});
+        document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendPromptToAiCoach();
+            }
+        });
 
         async function verifyGlobalSystemLock() {
             try {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
-                
                 if (data.locked || data.workoutsLocked) {
                     const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                     const sessionData = await sessionRes.json();
-                    
                     if (sessionData.role !== 'ADMIN') {
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
                                     <span class="text-5xl animate-bounce">🛡️</span>
-                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
-                                        ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
-                                    </h2>
-                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                        This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
-                                    </p>
-                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                        Access Denied / Contact Admin
-                                    </div>
-                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                        Return to Gateway
-                                    </button>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED</h2>
+                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Gateway</button>
                                 </div>
                             </div>
                         `;
                         return;
                     }
                 }
-            } catch (err) {
-                console.error("Lock verification failed", err);
-            }
+            } catch (err) {}
         }
 
         async function loadDashboardSchedules() {
@@ -407,14 +501,11 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
                 const data = await res.json();
                 if (data.success) {
                     const workoutEl = document.getElementById('dashWorkoutTime');
-                    const studyEl = document.getElementById('dashStudyTime');
                     if (workoutEl) workoutEl.innerText = data.workoutReminderTime ? data.workoutReminderTime : "NOT SET";
-                    if (studyEl) studyEl.innerText = data.studyReminderTime ? data.studyReminderTime : "NOT SET";
                 }
             } catch (err) {}
         }
 
-        // 🔥 NEW: DAILY MOTIVATION QUOTES FUNCTION 🔥
         function initDailyWorkoutQuote() {
             const dailyIronQuotes = [
                 "The body achieves what the mind believes. Push harder.",
@@ -423,40 +514,13 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
                 "Sweat is just fat crying. Make it pour.",
                 "Discipline is doing what needs to be done, even if you don't want to.",
                 "The only bad workout is the one that didn't happen.",
-                "Excuses don't build muscle. Reps do.",
-                "Your body can stand almost anything. It's your mind that you have to convince.",
-                "Obsessed is just a word the lazy use to describe the dedicated.",
-                "Sore today, strong tomorrow.",
-                "If it doesn't challenge you, it doesn't change you.",
-                "Doubt me, hate me, you're the inspiration I need.",
-                "Focus on your goals, not your obstacles.",
-                "A one-hour workout is 4% of your day. No excuses.",
-                "Tough times don't last. Tough people do.",
-                "Don't stop when you're tired. Stop when you're done.",
-                "Rome wasn't built in a day, but they worked on it every single day.",
-                "Motivation gets you started. Habit keeps you going.",
-                "The iron never lies. It is the ultimate measuring stick.",
-                "Be stronger than your strongest excuse.",
-                "Some people want it to happen, some wish it would happen, others make it happen.",
-                "Success starts with self-discipline.",
-                "What seems impossible today will one day become your warm-up.",
-                "Push yourself, because no one else is going to do it for you.",
-                "Great things never came from comfort zones.",
-                "Train insane or remain the same.",
-                "Wake up with determination. Go to bed with satisfaction.",
-                "It comes down to one simple thing: How bad do you want it?",
-                "If you still look cute after your workout, you didn't train hard enough.",
-                "Don't count the days, make the days count.",
-                "Your only limit is you. Break it."
+                "Excuses don't build muscle. Reps do."
             ];
-            
-            const today = new Date().getDate(); // Returns day of month (1 to 31)
+            const today = new Date().getDate();
             const quoteToDisplay = dailyIronQuotes[(today - 1) % dailyIronQuotes.length];
             const banner = document.getElementById('quoteBanner');
-            
             if (banner) {
                 banner.classList.remove('hidden');
-                banner.querySelector('span').innerText = "🔥 DAILY IRON COMMANDMENT";
                 banner.querySelector('p').innerText = '"' + quoteToDisplay + '"';
             }
         }
@@ -464,12 +528,10 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
         async function fetchWorkouts(dateStr = "") {
             const todayStr = getLocalDateString();
             if (!dateStr) dateStr = todayStr;
-            
             currentSelectedDate = dateStr;
             const dateInput = document.getElementById('targetDateInput');
-            if (!dateInput.value) {
-                dateInput.value = dateStr;
-            }
+            if (!dateInput.value) dateInput.value = dateStr;
+            
             document.getElementById('serverDateDisplay').innerText = `Server Date: ${dateStr}`;
             document.getElementById('activeDateLabel').innerText = dateInput.value;
 
@@ -485,25 +547,23 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
-                        document.getElementById('workoutStreakLabel').innerText = `${data.currentStreak || 0} Days`;
+                        let streak = data.currentStreak || 0;
+                        document.getElementById('workoutStreakLabel').innerText = `${streak} Days`;
+
+                        // Calculate XP from completed workouts (Sets * Reps * 2 XP)
+                        let totalRepsCompleted = (data.workouts || []).filter(w => w.completed).reduce((acc, w) => acc + (parseInt(w.sets || 1) * parseInt(w.value || w.reps || 10)), 0);
+                        workoutXp = (streak * 20) + totalRepsCompleted;
+                        workoutLevel = Math.min(100, Math.floor(workoutXp / 100) + 1);
+                        updateWorkoutBadgeWidget();
+
                         updateStatusBanner(data.dateStatus || 'UNLOCKED', data.allDone || false, dateInput.value);
                         renderWorkouts(data.workouts || [], data.dateStatus || 'UNLOCKED', dateInput.value);
-                    } else {
-                        throw new Error(data.error || "Failed to fetch from Cloud");
                     }
-                } else {
-                    throw new Error("Server Response Error");
                 }
             } catch (err) {
-                console.error("Cloud Connection Error:", err);
                 document.getElementById('workoutStreakLabel').innerText = "0 Days";
-                updateStatusBanner('ERROR', false, dateInput.value);
-                document.getElementById('workoutsContainer').innerHTML = `
-                    <div class="glass-card p-12 rounded-2xl text-center border border-red-500/20 bg-red-500/5">
-                        <span class="text-4xl mb-4 block">⚠️</span>
-                        <p class="text-red-400 text-sm font-black uppercase tracking-widest">Cloud Connection Failed</p>
-                        <p class="text-slate-400 text-xs mt-2">Cannot reach MongoDB. Please check if your backend server is running.</p>
-                    </div>`;
+                workoutXp = 0; workoutLevel = 1;
+                updateWorkoutBadgeWidget();
             }
         }
 
@@ -511,7 +571,6 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
             const dateInput = document.getElementById('targetDateInput');
             let currentDate = new Date(dateInput.value || currentSelectedDate);
             currentDate.setDate(currentDate.getDate() + days);
-            
             const newDateStr = getLocalDateString(currentDate);
             dateInput.value = newDateStr;
             fetchWorkouts(newDateStr);
@@ -519,52 +578,54 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
 
         function onDateChange() {
             const chosenDate = document.getElementById('targetDateInput').value;
-            if (chosenDate) {
-                fetchWorkouts(chosenDate);
-            }
+            if (chosenDate) fetchWorkouts(chosenDate);
         }
 
         function updateStatusBanner(status, allDone, targetDate) {
             const badge = document.getElementById('workoutStatusBadge');
             const todayStr = getLocalDateString();
 
-            if (status === 'ERROR') {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-900/40 text-red-300 border border-red-500/50 whitespace-nowrap";
-                badge.innerText = "❌ SERVER OFFLINE";
-            } else if (targetDate < MONSTER_LAUNCH_DATE) {
+            if (targetDate < MONSTER_LAUNCH_DATE) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
-                badge.innerText = "🔒 PRE-LAUNCH: Planning Mode (Locked)";
+                badge.innerText = "🔒 PRE-LAUNCH Mode (Locked)";
             } else if (targetDate < todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
-                badge.innerText = "🔒 LOCKED — Immutable Past Record";
+                badge.innerText = "🔒 PAST DATE — Immutable Record";
             } else if (targetDate > todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ NOT ACTIVE — Future Date Locked";
+                badge.innerText = "⏳ FUTURE DATE — Upcoming";
             } else if (allDone) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "⚡ ALL WORKOUTS CONQUERED";
             } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "🟢 UNLOCKED — ACTIVE EXECUTION DAY";
+                badge.innerText = "🟢 TODAY — Active Execution Day";
             }
         }
 
         function renderWorkouts(workouts, dateStatus, targetDate) {
             const container = document.getElementById('workoutsContainer');
             if (!workouts || workouts.length === 0) {
-                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the cloud.</p><p class="text-red-500/70 text-xs mt-1">Please add workouts from your Control Panel.</p></div>`;
+                container.innerHTML = `<div class="glass-card p-12 rounded-2xl text-center"><p class="text-zinc-400 text-sm font-semibold">No exercises deployed in the cloud.</p></div>`;
                 return;
             }
 
             const todayStr = getLocalDateString();
-            
-            // STRICT LOCK CONDITIONS:
-            const isRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE) || (dateStatus === 'LOCKED') || (dateStatus === 'FUTURE');
+            const isRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE);
 
             container.innerHTML = workouts.map(w => {
                 const workoutCardStyle = w.completed 
                     ? 'glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 completed-glow-anim bg-emerald-500/5 transition group' 
                     : 'glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-red-500/30 transition group';
+
+                let buttonLabel = '✓ Done';
+                if (isRestricted) {
+                    if (targetDate < todayStr) buttonLabel = '🔒 Past Locked';
+                    else if (targetDate > todayStr) buttonLabel = '⏳ Future Locked';
+                    else buttonLabel = '🔒 Locked';
+                } else {
+                    buttonLabel = w.completed ? '✓ Done' : '○ Pending';
+                }
 
                 return `
                 <div class="${workoutCardStyle}">
@@ -578,7 +639,7 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
                     </div>
                     <div class="flex items-center gap-3 w-full sm:w-auto justify-end shrink-0">
                         <button type="button" ${isRestricted ? 'disabled' : ''} onclick="toggleWorkout('${w.id}', ${!w.completed})" class="px-6 py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer ${isRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (w.completed ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-zinc-300 border border-white/10 hover:bg-red-500/10 hover:text-red-400')}">
-                            ${isRestricted ? '🔒 Locked' : (w.completed ? '✓ Done' : '○ Pending')}
+                            ${buttonLabel}
                         </button>
                     </div>
                 </div>
@@ -586,32 +647,28 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
             }).join('');
         }
 
-        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
         function playSuccessAnimation() {
             const overlay = document.getElementById('successOverlay');
             overlay.classList.add('active');
-            
             const circle = overlay.querySelector('.success-checkmark__circle');
             const check = overlay.querySelector('.success-checkmark__check');
-            circle.style.animation = 'none';
-            check.style.animation = 'none';
-            void circle.offsetWidth;
-            void check.offsetWidth;
+            circle.style.animation = 'none'; check.style.animation = 'none';
+            void circle.offsetWidth; void check.offsetWidth;
             circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
             check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
-
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 2500); 
+            setTimeout(() => overlay.classList.remove('active'), 2500);
         }
 
         async function toggleWorkout(id, completed) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+            const todayStr = getLocalDateString();
 
-            // TRIGGER OVERLAY IF WE ARE MARKING AS "DONE"
-            if (completed) {
-                playSuccessAnimation();
+            if (targetDate !== todayStr) {
+                alert("🔒 Action denied: You can only execute workouts for TODAY's active date.");
+                return;
             }
+
+            if (completed) playSuccessAnimation();
 
             try {
                 const res = await fetch(`/api/workouts/${id}/toggle`, {
@@ -620,14 +677,9 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
                     credentials: 'include',
                     body: JSON.stringify({ date: targetDate, completed })
                 });
-                
-                if(!res.ok) {
-                    throw new Error("Cloud update failed");
-                }
-                
+                if(!res.ok) throw new Error("Cloud update failed");
                 fetchWorkouts(targetDate);
             } catch (err) {
-                console.error(err);
                 alert("❌ Connection Error: Could not sync with MongoDB Cloud.");
             }
         }
@@ -638,12 +690,12 @@ document.getElementById('aiCoachInput').addEventListener('keydown', (e) => {
         });
 
         window.addEventListener('DOMContentLoaded', () => {
+            checkModuleLockStatus();
             verifyGlobalSystemLock();
             loadDashboardSchedules();
-            initDailyWorkoutQuote(); // Initialize the Daily Motivation Quote
+            initDailyWorkoutQuote();
             fetchWorkouts();
         });
-
     </script>
 </body>
 </html>

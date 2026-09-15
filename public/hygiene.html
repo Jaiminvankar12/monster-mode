@@ -23,12 +23,10 @@
         .dynamic-bg { background-color: var(--accent-primary) !important; }
         .dynamic-border { border-color: var(--accent-primary) !important; }
         
-        /* ✨ SMOOTH SCROLLING FOR ENTIRE WEB APP ✨ */
         html {
             scroll-behavior: smooth !important;
         }
 
-        /* 🌌 CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW (CYAN THEME) 🌌 */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -46,7 +44,6 @@
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(6, 182, 212, 0.8) !important;
         }
 
-        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
         @keyframes successGlow {
             0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
             50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.3); }
@@ -59,7 +56,6 @@
             background-color: rgba(16, 185, 129, 0.05) !important;
         }
 
-        /* 🚀 NEW: PHONEPE STYLE SUCCESS OVERLAY ANIMATION 🚀 */
         #successOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -129,6 +125,21 @@
         <p class="text-emerald-300 font-bold tracking-widest mt-2 uppercase text-xs">Vector Synced Successfully</p>
     </div>
 
+    <!-- 🏆 ALL BADGES MODAL (VIEW ALL 1-100 LEVELS) -->
+    <div id="allBadgesModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex-col items-center pt-10 sm:pt-20 p-4 transition-opacity">
+        <div class="w-full max-w-5xl bg-[#07090f] border border-white/20 rounded-2xl overflow-hidden flex flex-col h-[85vh]">
+            <div class="p-5 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                <div>
+                    <h2 class="text-xl font-black uppercase text-amber-400 flex items-center gap-2"><span>🏆</span> Hygiene Master — Road to Level 100</h2>
+                    <p class="text-xs text-slate-400 font-medium">Unique Grooming Rewards Unlocked Every 5 Levels</p>
+                </div>
+                <button type="button" onclick="closeAllBadgesModal()" class="text-slate-400 hover:text-white font-black text-2xl px-4 cursor-pointer">&times;</button>
+            </div>
+            <div id="allBadgesScrollContainer" class="p-6 overflow-y-auto flex-1 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 scrollbar-thin">
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <header class="border-b border-white/5 bg-[#07090f]/90 backdrop-blur-md px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
@@ -147,6 +158,23 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
+        <!-- 🏆 HYGIENE TRACKER LEVEL & ACTIVE BADGE WIDGET -->
+        <div class="glass-card p-5 rounded-2xl border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 bg-amber-500/5">
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div id="hygieneActiveBadgeIcon" class="text-4xl w-14 h-14 bg-black/40 border border-amber-500/40 rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">🧼</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="hygieneLevelBadge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded font-black uppercase tracking-widest">Level 1 Hygiene</span>
+                    </div>
+                    <h3 id="hygieneActiveBadgeName" class="text-base font-black text-white mt-1 tracking-wide">Pure Initiate</h3>
+                    <p class="text-[10px] text-zinc-400 uppercase tracking-wider mt-0.5"><span id="hygieneXpLabel">0</span> XP — Next reward at Level <span id="hygieneNextReward">5</span></p>
+                </div>
+            </div>
+            <button type="button" onclick="openAllBadgesModal()" class="w-full sm:w-auto px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer whitespace-nowrap shadow-lg">
+                View All Badges ➔
+            </button>
+        </div>
+
         <!-- Hygiene Status Badge/Card -->
         <div class="bg-[#121520] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -156,21 +184,21 @@
                     <p id="hygieneStatusText" class="text-base font-black text-white">Loading Protocol...</p>
                 </div>
             </div>
-            <span id="xpBadge" class="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Level 1 Apex</span>
+            <span id="xpBadge" class="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-xl uppercase font-bold">Apex Active</span>
         </div>
 
-        <!-- 🚀 UPDATED: FIXED HORIZONTAL IMAGE-1 STYLE DATE NAVIGATOR 🚀 -->
+        <!-- FIXED HORIZONTAL DATE NAVIGATOR -->
         <div class="glass-card hygiene-glow p-3 sm:p-5 rounded-2xl flex flex-row items-center justify-between gap-2 overflow-x-auto scrollbar-none w-full">
             <div class="flex items-center gap-2 shrink-0">
                 <button type="button" onclick="shiftDate(-1)" class="px-3 sm:px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer whitespace-nowrap">← Prev</button>
-                <div class="text-center px-1 sm:px-2 min-w-[85px] shrink-0">
+                <div class="text-center px-1 sm:px-2 min-w-[85px] shrink-0 cursor-pointer" onclick="document.getElementById('targetDateInput').showPicker()">
                     <span class="text-[9px] text-zinc-500 uppercase tracking-widest block font-bold">Viewing Date</span>
-                    <span id="activeDateLabel" class="text-xs sm:text-sm font-black text-white tracking-wider whitespace-nowrap">2026-09-15</span>
+                    <span id="activeDateLabel" class="text-xs sm:text-sm font-black text-white tracking-wider whitespace-nowrap underline decoration-cyan-500/50">2026-09-15</span>
                 </div>
                 <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer whitespace-nowrap">Next →</button>
             </div>
 
-            <input type="date" id="targetDateInput" value="2026-09-15" onchange="onDateChange()" class="hidden">
+            <input type="date" id="targetDateInput" value="2026-09-15" onchange="onDateChange()" class="bg-[#030408] border border-white/10 text-white text-xs rounded-xl px-3 py-2.5 outline-none cursor-pointer">
 
             <div id="hydrationStatusBadge" class="text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap shrink-0 ml-auto">
                 Loading status...
@@ -193,38 +221,130 @@
     </main>
 
     <script>
-        async function checkModuleLockStatus() {
-    try {
-        const res = await fetch('/api/module-locks', { credentials: 'include' });
-        const data = await res.json();
-        
-        // Hygiene mate hygieneLocked check karvanu chhe
-        if (data.success && data.hygieneLocked) {
-            document.body.innerHTML = `
-                <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                    <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                        <span class="text-5xl animate-bounce">🔒</span>
-                        <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">HYGIENE TRACKER LOCKED</h2>
-                        <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                            This specific module has been locked by the administrator.
-                        </p>
-                        <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                            Return to Dashboard
-                        </button>
+        // 🏆 HYGIENE TRACKER LEVEL & BADGES SYSTEM (1 to 100 Levels)
+        let hygieneLevel = 1;
+        let hygieneXp = 0;
+        let allHygieneBadges = [];
+        let currentBadgeRenderIndex = 0;
+        const BADGE_CHUNK_SIZE = 40;
+
+        function getHygieneBadgeName(lvl) {
+            if (lvl === 1) return { name: "Pure Initiate", icon: "🧼" };
+            if (lvl >= 100) return { name: "APEX IMMACULATE", icon: "👑" };
+            
+            const materials = ["Soap", "Mint", "Silver", "Gold", "Platinum", "Diamond", "Obsidian", "Void", "Astral", "Cosmic"];
+            const titles = ["Fresh", "Clean", "Groomed", "Polished", "Radiant", "Immaculate", "Flawless", "Divine", "Pristine", "Transcendent"];
+            const icons = ["🫧","✨","🌿","💧","🚿","💎","🪞","🔮","⚡","🌟"];
+            
+            let matIdx = Math.floor(lvl / 20) % materials.length;
+            let titleIdx = Math.floor(lvl / 5) % titles.length;
+            let iconIdx = Math.floor(lvl / 10) % icons.length;
+            
+            return {
+                name: `${materials[matIdx]} ${titles[titleIdx]}`,
+                icon: icons[iconIdx]
+            };
+        }
+
+        function generateHygieneBadges() {
+            allHygieneBadges = [];
+            allHygieneBadges.push({ levelRequired: 1, ...getHygieneBadgeName(1), unlocked: 1 <= hygieneLevel });
+            for (let i = 5; i <= 100; i += 5) {
+                let info = getHygieneBadgeName(i);
+                allHygieneBadges.push({
+                    levelRequired: i,
+                    name: info.name,
+                    icon: info.icon,
+                    unlocked: i <= hygieneLevel
+                });
+            }
+        }
+
+        function updateHygieneBadgeWidget() {
+            generateHygieneBadges();
+            let currentBadge = allHygieneBadges.slice().reverse().find(b => b.unlocked) || allHygieneBadges[0];
+            let nextReward = allHygieneBadges.find(b => b.levelRequired > hygieneLevel) || allHygieneBadges[allHygieneBadges.length - 1];
+
+            document.getElementById('hygieneActiveBadgeIcon').innerText = currentBadge.icon;
+            document.getElementById('hygieneLevelBadge').innerText = `Level ${hygieneLevel} Hygiene`;
+            document.getElementById('hygieneActiveBadgeName').innerText = currentBadge.name;
+            document.getElementById('hygieneXpLabel').innerText = hygieneXp;
+            document.getElementById('hygieneNextReward').innerText = nextReward.levelRequired;
+        }
+
+        function createHygieneBadgeHTML(b) {
+            return `
+                <div class="bg-[#030408] border ${b.unlocked ? 'border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-white/5 opacity-50'} p-5 rounded-2xl flex flex-col items-center text-center gap-3 transition hover:scale-105 hover:border-amber-500/60 cursor-default">
+                    <span class="text-4xl filter drop-shadow-lg">${b.icon}</span>
+                    <div class="space-y-1 w-full">
+                        <h4 class="font-extrabold text-sm text-white tracking-wide">${b.name}</h4>
+                        <div class="w-full h-[1px] bg-white/10 my-1"></div>
+                        <span class="text-[9px] ${b.unlocked ? 'text-amber-400' : 'text-zinc-500'} font-bold uppercase tracking-widest block">Lvl ${b.levelRequired} Reqd</span>
                     </div>
+                    <span class="text-[10px] px-3 py-1 mt-1 rounded-lg uppercase font-black tracking-widest ${b.unlocked ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">${b.unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
                 </div>
             `;
         }
-    } catch (err) {}
-}
 
-// DOMContentLoaded ma call karo:
-window.addEventListener('DOMContentLoaded', () => {
-    checkModuleLockStatus();
-    // Tamaru baki nu hygiene load logic ahiya hase...
-});
-        function getLocalDateString() {
-            return "2026-09-15";
+        let isRenderingChunk = false;
+        function openAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.remove('hidden');
+            document.getElementById('allBadgesModal').classList.add('flex');
+            currentBadgeRenderIndex = 0;
+            document.getElementById('allBadgesScrollContainer').innerHTML = '';
+            renderNextBadgeChunk();
+        }
+
+        function closeAllBadgesModal() {
+            document.getElementById('allBadgesModal').classList.add('hidden');
+            document.getElementById('allBadgesModal').classList.remove('flex');
+        }
+
+        function renderNextBadgeChunk() {
+            isRenderingChunk = true;
+            const container = document.getElementById('allBadgesScrollContainer');
+            const end = Math.min(currentBadgeRenderIndex + BADGE_CHUNK_SIZE, allHygieneBadges.length);
+            let htmlStr = "";
+            for(let i = currentBadgeRenderIndex; i < end; i++) {
+                htmlStr += createHygieneBadgeHTML(allHygieneBadges[i]);
+            }
+            container.insertAdjacentHTML('beforeend', htmlStr);
+            currentBadgeRenderIndex = end;
+            setTimeout(() => isRenderingChunk = false, 100);
+        }
+
+        document.getElementById('allBadgesScrollContainer').addEventListener('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 300) {
+                if (currentBadgeRenderIndex < allHygieneBadges.length && !isRenderingChunk) {
+                    renderNextBadgeChunk();
+                }
+            }
+        });
+
+        async function checkModuleLockStatus() {
+            try {
+                const res = await fetch('/api/module-locks', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success && data.hygieneLocked) {
+                    document.body.innerHTML = `
+                        <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                <span class="text-5xl animate-bounce">🔒</span>
+                                <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">HYGIENE TRACKER LOCKED</h2>
+                                <p class="text-xs sm:text-sm text-slate-300 font-medium">This specific module has been locked by the administrator.</p>
+                                <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Dashboard</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {}
+        }
+
+        function getLocalDateString(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         let currentSelectedDate = getLocalDateString();
@@ -259,6 +379,12 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (data.success) {
                         renderHygieneTasks(data.tasks || []);
                         document.getElementById('hygieneStatusText').innerText = data.allDone ? "All Protocols Met ✅" : "Execution Pending ⏳";
+                        
+                        let completedCount = (data.tasks || []).filter(t => t.completed).length;
+                        hygieneXp = completedCount * 25;
+                        hygieneLevel = Math.min(100, Math.floor(hygieneXp / 50) + 1);
+                        updateHygieneBadgeWidget();
+
                         if (data.level) {
                             document.getElementById('xpBadge').innerText = `Level ${data.level} Apex (${data.xp} XP)`;
                         }
@@ -299,30 +425,27 @@ window.addEventListener('DOMContentLoaded', () => {
             }).join('');
         }
 
-        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
         function playSuccessAnimation() {
             const overlay = document.getElementById('successOverlay');
             overlay.classList.add('active');
-            
-            // Re-trigger SVG animation cleanly
             const circle = overlay.querySelector('.success-checkmark__circle');
             const check = overlay.querySelector('.success-checkmark__check');
-            circle.style.animation = 'none';
-            check.style.animation = 'none';
-            void circle.offsetWidth; // trigger reflow
-            void check.offsetWidth;
+            circle.style.animation = 'none'; check.style.animation = 'none';
+            void circle.offsetWidth; void check.offsetWidth;
             circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
             check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
-
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 2500); // Overlay stays for 2.5 seconds before fading out
+            setTimeout(() => overlay.classList.remove('active'), 2500);
         }
 
         async function toggleHygiene(id, currentState) {
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+            const todayStr = getLocalDateString();
+
+            if (targetDate !== todayStr) {
+                alert("🔒 Action denied: You can only execute hygiene protocols for TODAY's active date.");
+                return;
+            }
             
-            // TRIGGER OVERLAY IF WE ARE MARKING AS "DONE"
             if (!currentState) {
                  playSuccessAnimation();
             }
@@ -347,28 +470,30 @@ window.addEventListener('DOMContentLoaded', () => {
             let currentDate = new Date(dateInput.value || currentSelectedDate);
             currentDate.setDate(currentDate.getDate() + days);
             
-            const year = currentDate.getFullYear();
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const day = String(currentDate.getDate()).padStart(2, '0');
-            const newDateStr = `${year}-${month}-${day}`;
-
+            const newDateStr = getLocalDateString(currentDate);
             dateInput.value = newDateStr;
             fetchHygieneData(newDateStr);
         }
 
         function onDateChange() {
             const chosenDate = document.getElementById('targetDateInput').value;
-            if (chosenDate) {
-                fetchHygieneData(chosenDate);
-            }
+            if (chosenDate) fetchHygieneData(chosenDate);
         }
 
         function updateStatusBanner(status, targetDate) {
             const badge = document.getElementById('hydrationStatusBadge');
+            const todayStr = getLocalDateString();
             const isPreLaunch = targetDate < LAUNCH_DATE;
+            
             if (isPreLaunch) {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap shrink-0 ml-auto";
                 badge.innerText = "🔒 PRE-LAUNCH: Locked";
+            } else if (targetDate < todayStr) {
+                badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap shrink-0 ml-auto";
+                badge.innerText = "🔒 PAST — Immutable";
+            } else if (targetDate > todayStr) {
+                badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap shrink-0 ml-auto";
+                badge.innerText = "⏳ FUTURE — Upcoming";
             } else {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 whitespace-nowrap shrink-0 ml-auto";
                 badge.innerText = "🟢 UNLOCKED — ACTIVE DAY";
@@ -380,28 +505,16 @@ window.addEventListener('DOMContentLoaded', () => {
                 const ts = new Date().getTime();
                 const res = await fetch('/api/system-lock?t=' + ts, { cache: 'no-store', credentials: 'include' });
                 const data = await res.json();
-                
                 if (data.locked || data.hygieneLocked) {
                     const sessionRes = await fetch('/api/auth/session?t=' + ts, { cache: 'no-store', credentials: 'include' });
                     const sessionData = await sessionRes.json();
-                    
                     if (sessionData.role !== 'ADMIN') {
                         document.body.innerHTML = `
                             <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
                                 <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
                                     <span class="text-5xl animate-bounce">🛡️</span>
-                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">
-                                        ${data.locked ? 'SYSTEM GLOBALLY LOCKED' : 'MODULE LOCKED BY ADMIN'}
-                                    </h2>
-                                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                                        This tracking sector has been securely locked by the administrator. All execution vectors and data are completely hidden.
-                                    </p>
-                                    <div class="text-xs bg-red-500/10 border border-red-500/20 text-red-400 py-3 px-4 rounded-xl font-bold uppercase tracking-widest">
-                                        Access Denied / Contact Admin
-                                    </div>
-                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                        Return to Gateway
-                                    </button>
+                                    <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">SYSTEM LOCKED</h2>
+                                    <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">Return to Gateway</button>
                                 </div>
                             </div>
                         `;
@@ -420,6 +533,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            checkModuleLockStatus();
             verifyGlobalSystemLock();
             fetchHygieneData(getLocalDateString());
         });
@@ -441,9 +555,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         document.addEventListener('click', function(e) {
-            if (e.target.closest('button')) {
-                playCyberClick();
-            }
+            if (e.target.closest('button')) playCyberClick();
         });
     </script>
 </body>
