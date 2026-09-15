@@ -22,10 +22,13 @@ const PORT = process.env.PORT || 5001;
 // ============================================================================
 // ⚠️ SECURITY NOTE: Move this to .env as MONGO_URI and rotate the password —
 // it was hardcoded here before and should be treated as compromised.
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
+
+// 🟢 FIX 4: Removed 'process.env.MONGO_URI ||' entirely. 
+// Now it is FORCED to use Atlas URL. This fixes the '127.0.0.1 ECONNREFUSED' error seen in logs!
+const MONGO_URI = "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
 
 // 🟢 Corrected: pass 'MONGO_URI' instead of 'process.env.MONGO_URI'
-// 🟢 FIX 3: Added { family: 4 } to force IPv4! (Render tries IPv6 by default which causes MongoDB to timeout and data doesn't load)
+// 🟢 FIX 3: Added { family: 4 } to force IPv4!
 mongoose.connect(MONGO_URI, { family: 4, serverSelectionTimeoutMS: 15000 })
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
