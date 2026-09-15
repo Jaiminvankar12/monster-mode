@@ -156,6 +156,16 @@ const globalSettingsSchema = new mongoose.Schema({
 });
 const GlobalSettings = mongoose.model('GlobalSettings', globalSettingsSchema);
 
+// 🤖 JARVIS AI CHAT MEMORY SCHEMA (permanent, per-user conversation history)
+const jarvisMessageSchema = new mongoose.Schema({
+    id: String,
+    userId: String,
+    role: { type: String, enum: ['user', 'model'], required: true },
+    content: String,
+    createdAt: { type: String, default: () => new Date().toISOString() }
+});
+const JarvisMessage = mongoose.model('JarvisMessage', jarvisMessageSchema);
+
 async function initDB() {
     let uCount = await User.countDocuments();
     if(uCount === 0) {
@@ -1654,6 +1664,146 @@ app.post('/api/telegram-webhook', async (req, res) => {
 
 // 🧠 REAL GEMINI AI INTEGRATION
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
+
+// ============================================================================
+// 🤖 JARVIS AI — LIVE CONTEXT-AWARE PERSONAL ASSISTANT (permanent memory in MongoDB)
+// ============================================================================
+
+// 🧠 Builds a live snapshot of the user's current app state for Jarvis to reason about
+async function buildJarvisContext(userId = MASTER_USER_ID) {
+    const today = getServerToday();
+
+    const [habits, workouts, hygieneTasks, studyCategories, targets, xpInfo, hydData, syncResult, workoutStreak, habitStreak, studyStreak, hygieneStreak, hydStreak] = await Promise.all([
+        Habit.find({ userId }),
+        Workout.find({ userId }),
+        HygieneTask.find({ userId }),
+        StudyCategory.find({ userId }),
+        Target.find({ userId }),
+        getUserXP(userId),
+        getHydrationData(userId),
+        runServerSyncEngine(userId, today),
+        calculateWorkoutStreak(userId),
+        calculateHabitStreak(userId),
+        calculateStudyStreak(userId),
+        calculateHygieneStreak(userId),
+        calculateHydrationStreak(userId)
+    ]);
+
+    const habitLogsToday = await HabitLog.find({ userId, date: today });
+    const workoutLogsToday = await WorkoutLog.find({ userId, date: today });
+    const hygieneLogsToday = await HygieneLog.find({ userId, date: today });
+    const pendingTargets = targets.filter(t => !t.completed);
+
+    const habitsStatus = habits.map(h => {
+        const log = habitLogsToday.find(l => l.habitId === h.id);
+        return `${h.name} [${h.category}] - ${log && log.completed ? 'DONE' : 'PENDING'}`;
+    }).join('; ') || 'No habits added yet';
+
+    const workoutsStatus = workouts.map(w => {
+        const log = workoutLogsToday.find(l => l.workoutId === w.id);
+        return `${w.name} (${w.sets}x${w.value}${w.unit}) - ${log && log.completed ? 'DONE' : 'PENDING'}`;
+    }).join('; ') || 'No workouts added yet';
+
+    const hygieneStatus = hygieneTasks.map(t => {
+        const log = hygieneLogsToday.find(l => l.taskId === t.id);
+        return `${t.name} [${t.frequency}] - ${log && log.completed ? 'DONE' : 'PENDING'}`;
+    }).join('; ') || 'No hygiene tasks added yet';
+
+    const consumedWater = hydData.logs[today] || 0;
+
+    return `
+=== LIVE MONSTER MODE DASHBOARD DATA (as of ${today}) ===
+User Level: ${xpInfo.level} | XP: ${xpInfo.xp}
+Habit Streak: ${habitStreak} days | Workout Streak: ${workoutStreak} days | Study Streak: ${studyStreak} days | Hygiene Streak: ${hygieneStreak} days | Hydration Streak: ${hydStreak} days
+
+Today's Habits: ${habitsStatus}
+Today's Workouts: ${workoutsStatus} | All workouts done today: ${syncResult.allWorkoutsDone ? 'YES' : 'NO'}
+Today's Hygiene Tasks: ${hygieneStatus}
+Today's Study: ${syncResult.totalStudiedMinutes}/${syncResult.totalTargetMinutes} minutes studied | Target met: ${syncResult.studyDone ? 'YES' : 'NO'}
+Today's Hydration: ${consumedWater}/${hydData.goal} ml | Target met: ${syncResult.hydrationDone ? 'YES' : 'NO'}
+Pending Milestones: ${pendingTargets.map(t => `${t.name} (due ${t.date})`).join('; ') || 'None'}
+=== END LIVE DATA ===
+`.trim();
+}
+
+const JARVIS_SYSTEM_PROMPT = `You are "JARVIS", the personal AI assistant embedded inside a user's "Monster Mode" personal-discipline dashboard (habits, workouts, study, hygiene, hydration tracking).
+You have access to the user's LIVE dashboard data below every message — always use it to give accurate, specific, real-time answers about their progress, streaks, pending tasks, etc.
+You can also answer general knowledge questions on any topic, just like a normal capable assistant.
+Personality: sharp, direct, slightly hardcore/motivational (Goggins-style) but not annoying — be USEFUL first, motivational second.
+Keep answers reasonably concise unless the user asks for detail. Use markdown formatting (bold, bullet points) when helpful.`;
+
+async function callJarvisAI(userId, userMessage) {
+    const liveContext = await buildJarvisContext(userId);
+
+    // Pull last 12 messages (6 turns) for conversational memory
+    const pastMessages = await JarvisMessage.find({ userId }).sort({ createdAt: -1 }).limit(12);
+    const history = pastMessages.reverse().map(m => ({
+        role: m.role,
+        parts: [{ text: m.content }]
+    }));
+
+    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+    let replyText = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                systemInstruction: JARVIS_SYSTEM_PROMPT
+            });
+            const chat = model.startChat({ history });
+            const result = await chat.sendMessage(`${liveContext}\n\nUser's message: ${userMessage}`);
+            replyText = result.response.text().trim();
+            if (replyText) break;
+        } catch (err) {
+            console.error(`Jarvis model ${modelName} failed:`, err.message);
+        }
+    }
+
+    if (!replyText) {
+        replyText = "⚠️ Neural core temporarily unreachable. Try again in a moment, soldier.";
+    }
+    return replyText;
+}
+
+// 🤖 JARVIS: Send message, get AI reply, save both to memory
+app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
+        const userId = MASTER_USER_ID;
+
+        // Save user's message
+        await new JarvisMessage({ id: 'jm_' + Date.now(), userId, role: 'user', content: message }).save();
+
+        // Get AI reply
+        const reply = await callJarvisAI(userId, message);
+
+        // Save AI's reply
+        await new JarvisMessage({ id: 'jm_' + (Date.now() + 1), userId, role: 'model', content: reply }).save();
+
+        res.json({ success: true, reply });
+    } catch (err) {
+        console.error("Jarvis Chat Error:", err);
+        res.status(500).json({ error: "Jarvis is offline right now." });
+    }
+});
+
+// 🤖 JARVIS: Load chat history (for widget on page load)
+app.get('/api/jarvis/history', requireAuth, async (req, res) => {
+    const messages = await JarvisMessage.find({ userId: MASTER_USER_ID }).sort({ createdAt: 1 }).limit(50);
+    res.json({ success: true, messages });
+});
+
+// 🤖 JARVIS: Clear chat / start new conversation
+app.delete('/api/jarvis/history', requireAuth, async (req, res) => {
+    await JarvisMessage.deleteMany({ userId: MASTER_USER_ID });
+    res.json({ success: true, message: "Jarvis memory wiped. Fresh start." });
+});
+
+// ============================================================================
+// END JARVIS AI SECTION
+// ============================================================================
 
 app.get('/api/monster-coach', async (req, res) => {
     try {
