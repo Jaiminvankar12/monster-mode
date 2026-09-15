@@ -97,29 +97,43 @@
             box-shadow: 0 0 15px rgba(245, 59, 59, 0.9), inset 0 0 8px rgba(245, 59, 59, 0.6) !important;
         }
 
-        /* 🔥 GLOWING PULSE ANIMATION FOR COMPLETED ITEMS 🔥 */
-        @keyframes successGlow {
-            0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
-            50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 25px rgba(16, 185, 129, 0.4); }
-            100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.1); }
+        /* 🔥 NEW ANIMATIONS FOR HERO SECTION 🔥 */
+        @keyframes floatAnim {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
         }
-        .completed-glow-anim {
-            animation: successGlow 2.5s infinite ease-in-out;
-            border-color: rgba(16, 185, 129, 0.6) !important;
-            background-color: rgba(16, 185, 129, 0.05) !important;
+        @keyframes subtleZoom {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .floating-content {
+            animation: floatAnim 6s ease-in-out infinite;
+        }
+        .zoom-bg-anim {
+            animation: subtleZoom 15s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white">
+<body class="bg-[#05070b] text-white min-h-screen w-full flex items-center justify-center m-0 p-0 selection:bg-red-500 selection:text-white overflow-x-hidden">
 
     <div id="inlineStatusNotification"></div>
 
     <div class="flex w-full min-h-screen bg-[#05070b]">
-        <!-- Left Side: Cinematic Background -->
-        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 hero-bg" id="heroBgContainer">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-transparent to-transparent opacity-60"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#05070b]/40"></div>
-            <div class="z-10 max-w-xl">
+        
+        <!-- Left Side: Cinematic Background (FIXED EDGE & ADDED ANIMATION) -->
+        <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 overflow-hidden">
+            <!-- Animated Background Div -->
+            <div id="heroBgContainer" class="absolute inset-0 hero-bg zoom-bg-anim w-full h-full"></div>
+            
+            <!-- Gradient Overlays for Smooth Blending -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-[#05070b]/50 to-transparent opacity-80 z-10"></div>
+            
+            <!-- This specific gradient removes the sharp straight line by fading it to the right -->
+            <div class="absolute inset-y-0 right-0 w-48 bg-gradient-to-l from-[#05070b] via-[#05070b]/90 to-transparent z-10"></div>
+            
+            <div class="z-20 max-w-xl floating-content">
                 <span class="px-3.5 py-1.5 rounded-full bg-red-500/25 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-4 inline-block shadow-lg shadow-red-500/20">
                     ⚡ Apex Predator System (Launch: 15 Sept 2026)
                 </span>
@@ -133,7 +147,7 @@
         </div>
 
         <!-- Right Side: Authentication Panel -->
-        <div class="w-full lg:w-[40%] flex flex-col justify-center px-6 sm:px-14 lg:px-16 py-12 bg-[#05070b] m-auto">
+        <div class="w-full lg:w-[40%] flex flex-col justify-center px-6 sm:px-14 lg:px-16 py-12 bg-[#05070b] m-auto z-20">
             
             <div class="auth-card p-8 sm:p-10 rounded-3xl relative">
                 <div class="mb-8">
@@ -182,7 +196,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 2: Telegram OTP Form (Hidden initially) -->
+                <!-- STEP 2: Telegram OTP Form -->
                 <form id="otpForm" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">📱</span>
@@ -205,7 +219,7 @@
                     </button>
                 </form>
 
-                <!-- STEP 3: Admin Master Key Form (Hidden initially) -->
+                <!-- STEP 3: Admin Master Key Form -->
                 <form id="step3Form" class="hidden space-y-4">
                     <div class="text-center mb-6">
                         <span class="text-4xl">🔐</span>
@@ -236,7 +250,7 @@
                     </button>
                 </form>
 
-                <!-- 🟢 ADMIN TOKEN WIDGET WITH EYE ICON & BYPASS -->
+                <!-- ADMIN TOKEN WIDGET -->
                 <div class="mt-6 pt-6 border-t border-white/10 text-center space-y-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">⚡ Instant Admin Token Access</span>
                     <div class="flex gap-2">
@@ -256,7 +270,6 @@
                 </div>
 
             </div>
-
         </div>
     </div>
 
@@ -285,7 +298,6 @@
                 return;
             }
 
-            // 🔥 ADMIN TOKEN RESTRICTION LOGIC ADDED HERE 🔥
             if (currentPortal === 'admin') {
                 showStatusMessage("⚠️ Admin token is only used for access tracker portal. If you want to login admin portal, follow steps and login.", "error");
                 return;
@@ -314,7 +326,7 @@
                 const data = await res.json();
                 const heroDiv = document.getElementById('heroBgContainer');
                 if (heroDiv && data.success && data.url) {
-                    heroDiv.style.backgroundImage = `linear-gradient(180deg, rgba(5,7,11,0.1) 0%, rgba(5,7,11,0.5) 85%, #05070b 100%), url('${data.url}')`;
+                    heroDiv.style.backgroundImage = `url('${data.url}')`;
                 }
             } catch (err) {}
         }
@@ -435,7 +447,7 @@
 
                 if (!res.ok) {
                     otpErrDiv.textContent = data.error || "Verification failed.";
-                    otpErrDiv.classList.add('hidden');
+                    otpErrDiv.classList.remove('hidden');
                 } else if (data.require3fa) {
                     document.getElementById('otpForm').classList.add('hidden');
                     document.getElementById('step3Form').classList.remove('hidden');
@@ -453,7 +465,7 @@
                 }
             } catch (err) {
                 otpErrDiv.textContent = "Connection error verifying OTP.";
-                otpErrDiv.classList.add('hidden');
+                otpErrDiv.classList.remove('hidden');
             }
         });
 
@@ -474,7 +486,7 @@
 
                 if (!res.ok) {
                     errDiv.textContent = data.error || "Verification failed.";
-                    errDiv.classList.add('hidden');
+                    errDiv.classList.remove('hidden');
                 } else {
                     document.getElementById('verify3faBtn').innerText = "CLEARANCE GRANTED";
                     document.getElementById('verify3faBtn').classList.replace('bg-purple-600', 'bg-emerald-600');
@@ -489,7 +501,7 @@
                 }
             } catch (err) {
                 errDiv.textContent = "Connection error verifying Master Key.";
-                errDiv.classList.add('hidden');
+                errDiv.classList.remove('hidden');
             }
         });
 
