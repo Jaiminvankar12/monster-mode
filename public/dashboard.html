@@ -315,15 +315,13 @@
 
         <!-- 🟢 HUD WIDGET (WITH LIVE COUNTDOWN TIMERS) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex items-center justify-between">
-                <div class="space-y-1">
-                    <span class="text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/20 border border-red-500/30 px-2.5 py-1 rounded-md inline-block">🏋️ Workout Protocol</span>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2">Scheduled Execution Time</h3>
-                    <div id="dashWorkoutTime" class="text-2xl sm:text-3xl font-black text-white tracking-widest mt-1">--:--</div>
-                    <div id="dashWorkoutCountdown" class="text-[10px] font-bold text-red-400 tracking-wider mt-1">Time Left: Calculating...</div>
-                </div>
-                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl animate-pulse">⚡</div>
-            </div>
+            <<div class="workout-dashboard-card" style="background: #111; padding: 20px; border-radius: 10px; color: white; border: 1px solid #333; margin-bottom: 20px;">
+    <h3 style="margin-top: 0; color: #ff4757;">🏋️ Today's Workout</h3>
+    <p><strong>Date:</strong> <span id="dash-workout-date">--</span></p>
+    <p><strong>Scheduled Time:</strong> <span id="dash-workout-time">--</span></p>
+    <p><strong>Status:</strong> <span id="dash-workout-status" style="font-weight: bold;">Loading...</span></p>
+    <button onclick="window.location.href='/workout.html'" style="background: #ff4757; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px;">Go to Tracker</button>
+</div>
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex items-center justify-between">
                 <div class="space-y-1">
                     <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md inline-block">📚 Study Core Vector</span>
@@ -621,6 +619,23 @@
                 if (data.success && data.isOledTime) document.body.style.backgroundColor = "#000000";
             } catch (err) {}
         }
+        // 🟢 DASHBOARD WORKOUT STATUS API (Card mate)
+app.get('/api/dashboard/workout-status', requireAuth, async (req, res) => {
+    try {
+        const today = getServerToday();
+        const syncResult = await runServerSyncEngine(MASTER_USER_ID, today);
+        let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
+        
+        res.json({
+            success: true,
+            date: today,
+            time: gs && gs.workoutReminderTime ? gs.workoutReminderTime : "--:--",
+            status: syncResult.allWorkoutsDone ? "Complete" : "Pending"
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch status" });
+    }
+});
 
         async function submitMonsterLog() {
             const content = document.getElementById('monsterLogInput').value.trim();
@@ -1272,6 +1287,32 @@
                 </div>
             `;
         }
+        async function loadDashboardWorkoutStatus() {
+    try {
+        const res = await fetch('/api/dashboard/workout-status');
+        const data = await res.json();
+        
+        if(data.success) {
+            document.getElementById('dash-workout-date').innerText = data.date;
+            document.getElementById('dash-workout-time').innerText = data.time;
+            
+            const statusEl = document.getElementById('dash-workout-status');
+            statusEl.innerText = data.status;
+            
+            // Status mujab color change
+            if(data.status === 'Complete') {
+                statusEl.style.color = '#2ed573'; // Green
+            } else {
+                statusEl.style.color = '#ffa502'; // Orange / Pending
+            }
+        }
+    } catch (error) {
+        console.error("Error loading workout status:", error);
+    }
+}
+
+// Page load thay tyare aane call karavavu
+document.addEventListener('DOMContentLoaded', loadDashboardWorkoutStatus);
 
         function renderDashboardStudyMatrix(categories, totalStudiedMins) {
             const container = document.getElementById('dashboardStudyList');

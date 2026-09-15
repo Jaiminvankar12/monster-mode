@@ -565,6 +565,26 @@ cron.schedule('59 23 * * *', async () => {
         console.error("Punishment Protocol Error:", err);
     }
 }, { timezone: 'Asia/Kolkata' });
+// ⏳ 4-HOUR WORKOUT PENDING ALERT (Dar 4 kalake check karshe)
+cron.schedule('0 */4 * * *', async () => {
+    try {
+        const today = getServerToday();
+        
+        // Existing sync engine thi aaje nu workout status check karo
+        const syncResult = await runServerSyncEngine(MASTER_USER_ID, today);
+        
+        // Jo allWorkoutsDone false hoy (etle ke Pending che) to j message moklo
+        if (!syncResult.allWorkoutsDone) {
+            let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
+            let workoutTime = gs && gs.workoutReminderTime ? gs.workoutReminderTime : "Not Set";
+            
+            const msg = `⚠️ *MONSTER MODE ALERT*\n\nAaj nu workout haju *PENDING* che!\n⏰ Scheduled Time: ${workoutTime}\n\nTime is ticking. Get up and execute right now. Zero excuses!`;
+            await sendTelegramNotification(msg);
+        }
+    } catch (err) {
+        console.error("4-Hour Workout Alert Error:", err);
+    }
+}, { timezone: 'Asia/Kolkata' });
 
 // 🛡️ 🌙 10:00 PM ZERO MERCY & LIFELINE SYSTEM CRON
 cron.schedule('0 22 * * *', async () => {
