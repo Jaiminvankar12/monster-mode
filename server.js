@@ -20,7 +20,9 @@ const PORT = process.env.PORT || 5001;
 // ============================================================================
 // 🟢 MONGODB CLOUD CONNECTION & SCHEMAS
 // ============================================================================
-const MONGO_URI = "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
+// ⚠️ SECURITY NOTE: Move this to .env as MONGO_URI and rotate the password —
+// it was hardcoded here before and should be treated as compromised.
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log("🔥 MONSTER MODE: MongoDB Atlas કનેક્ટ થઈ ગયું! (Database is LIVE)"))
@@ -42,18 +44,18 @@ const studyCategorySchema = new mongoose.Schema({ id: String, userId: String, na
 const StudyCategory = mongoose.model('StudyCategory', studyCategorySchema);
 
 // 🟢 STUDY SESSIONS SCHEMA UPDATED (isCompleted flag added for strict Pomodoro sync)
-const studySessionSchema = new mongoose.Schema({ 
-    id: String, 
-    userId: String, 
-    categoryId: String, 
+const studySessionSchema = new mongoose.Schema({
+    id: String,
+    userId: String,
+    categoryId: String,
     topic: String,
     sessionName: { type: String, default: "" },
     subjectName: { type: String, default: "" },
-    durationMinutes: Number, 
-    date: String, 
+    durationMinutes: Number,
+    date: String,
     startTime: { type: String, default: "" }, // 🟢 NEW
     isCompleted: { type: Boolean, default: false }, // 🟢 NEW: Track if it's planned or actually studied
-    createdAt: String 
+    createdAt: String
 });
 const StudySession = mongoose.model('StudySession', studySessionSchema);
 
@@ -133,22 +135,22 @@ const globalSettingsSchema = new mongoose.Schema({
     studyLocked: { type: Boolean, default: false },
     hydrationLocked: { type: Boolean, default: false },
     hygieneLocked: { type: Boolean, default: false },
-    
+
     landingBgUrl: { type: String, default: "https://i.pinimg.com/736x/df/30/d5/df30d598c580b20a013158fa0b76bd81.jpg" },
     dashboardBgColor: { type: String, default: "#07090f" },
     gatewayHeadline: { type: String, default: "BECOME A<br>MONSTER.<br>DOMINATE REALITY." },
     gatewaySubtext: { type: String, default: "Pure discipline. Zero excuses. Absolute control." },
-    
+
     workoutReminderTime: { type: String, default: "" },
     workoutReminderFreq: { type: String, default: "daily" },
     workoutReminderDays: { type: [String], default: [] },
     workoutReminderDate: { type: String, default: "" },
-    
+
     studyReminderTime: { type: String, default: "" },
     studyReminderFreq: { type: String, default: "daily" },
     studyReminderDays: { type: [String], default: [] },
     studyReminderDate: { type: String, default: "" },
-    
+
     masterTargetHours: { type: Number, default: 8 },
 
     workoutNotifiedDate: { type: String, default: "" },
@@ -168,7 +170,7 @@ const JarvisMessage = mongoose.model('JarvisMessage', jarvisMessageSchema);
 
 async function initDB() {
     let uCount = await User.countDocuments();
-    if(uCount === 0) {
+    if (uCount === 0) {
         const salt = bcrypt.genSaltSync(10);
         await User.create([
             { id: 'u_admin', email: 'admin@monstermode.com', passwordHash: bcrypt.hashSync('MonsterAdmin@2026', salt), role: 'ADMIN' },
@@ -176,7 +178,7 @@ async function initDB() {
         ]);
     }
     let gsCount = await GlobalSettings.countDocuments();
-    if(gsCount === 0) {
+    if (gsCount === 0) {
         await GlobalSettings.create({ key: 'GLOBAL' });
     }
 }
@@ -257,8 +259,8 @@ function moduleApiGuard(moduleName) {
         if (moduleName === 'study' && lockStatus.studyLocked) return res.status(403).json({ error: "🔒 Study Tracker is locked by Admin." });
         if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
         if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
-        
-        return next(); 
+
+        return next();
     };
 }
 
@@ -277,8 +279,8 @@ async function sendTelegramNotification(message) {
 
 async function getSystemLockStatus() {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    return { 
-        locked: gs ? gs.systemLocked : false, 
+    return {
+        locked: gs ? gs.systemLocked : false,
         lockedAt: gs ? gs.lockedAt : null,
         habitsLocked: gs ? gs.habitsLocked : false,
         workoutsLocked: gs ? gs.workoutsLocked : false,
@@ -461,7 +463,7 @@ async function calculateStudyStreak(userId = MASTER_USER_ID) {
         // 🟢 ONLY count sessions that are strictly 'isCompleted' true
         let daySessions = allSessions.filter(s => s.date === dateStr && s.isCompleted === true);
         let totalStudied = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
-        
+
         let dayDone = dailyTarget > 0 && totalStudied >= dailyTarget && daySessions.length > 0;
         if (dayDone) {
             streak++;
@@ -495,7 +497,7 @@ async function calculateHygieneStreak(userId = MASTER_USER_ID) {
         let targetDateObj = new Date(dateStr);
         let isSunday = targetDateObj.getDay() === 0;
         let applicableTasks = tasks.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
-        
+
         let dayDone = applicableTasks.length > 0 && applicableTasks.every(t => {
             let log = logs.find(l => l.taskId === t.id && l.date === dateStr);
             return log ? log.completed : false;
@@ -531,7 +533,7 @@ async function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     const sessions = await StudySession.find({ userId, date: targetDate });
     let examData = await getExamModeData(userId);
     let totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) || 90 : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-    
+
     // 🟢 ONLY count sessions completed by Pomodoro
     let totalStudiedMinutes = sessions.filter(s => s.isCompleted === true).reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
     let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes && categories.length > 0 && sessions.filter(s => s.isCompleted).length > 0;
@@ -563,9 +565,9 @@ cron.schedule('0 7 * * *', async () => {
 cron.schedule('59 23 * * *', async () => {
     try {
         const today = getServerToday();
-        const userId = MASTER_USER_ID; 
+        const userId = MASTER_USER_ID;
         const syncResult = await runServerSyncEngine(userId, today);
-        
+
         if (!syncResult.allWorkoutsDone || !syncResult.studyDone || !syncResult.hydrationDone) {
             const msg = `🩸 *PUNISHMENT PROTOCOL INITIATED*\n\n⚠️ You FAILED today's core objectives.\n\n🏋️ Workouts: ${syncResult.allWorkoutsDone ? '✅' : '❌'}\n📚 Study: ${syncResult.studyDone ? '✅' : '❌'}\n💧 Hydration: ${syncResult.hydrationDone ? '✅' : '❌'}\n\n"You didn't push hard enough today. Tomorrow, you pay the price in sweat and focus!"`;
             await sendTelegramMessage(msg);
@@ -582,11 +584,11 @@ cron.schedule('0 */4 * * *', async () => {
     try {
         const today = getServerToday();
         const syncResult = await runServerSyncEngine(MASTER_USER_ID, today);
-        
+
         if (!syncResult.allWorkoutsDone) {
             let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
             let workoutTime = gs && gs.workoutReminderTime ? gs.workoutReminderTime : "Not Set";
-            
+
             const msg = `⚠️ *MONSTER MODE ALERT*\n\nAaj nu workout haju *PENDING* che!\n⏰ Scheduled Time: ${workoutTime}\n\nTime is ticking. Get up and execute right now. Zero excuses!`;
             await sendTelegramNotification(msg);
         }
@@ -601,7 +603,7 @@ cron.schedule('0 22 * * *', async () => {
         let userId = MASTER_USER_ID;
         let today = getServerToday();
         let currentMonthStr = today.substring(0, 7); // YYYY-MM
-        
+
         let ud = await UserData.findOne({ userId });
         if (!ud) { ud = new UserData({ userId }); }
 
@@ -659,7 +661,7 @@ cron.schedule('* * * * *', async () => {
     try {
         let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
         let istNow = new Date(istTimeStr);
-        
+
         let todayStr = istNow.getFullYear() + "-" + String(istNow.getMonth() + 1).padStart(2, '0') + "-" + String(istNow.getDate()).padStart(2, '0');
         let currentHours = String(istNow.getHours()).padStart(2, '0');
         let currentMinutes = String(istNow.getMinutes()).padStart(2, '0');
@@ -676,7 +678,7 @@ cron.schedule('* * * * *', async () => {
                 processedRemindersLock.add(lockKey);
                 item.notifiedToday = true;
                 await item.save();
-                
+
                 let text = `⏰ *MONSTER REMINDER ALERT*\n\n📌 *${item.title}*\n📝 ${item.description || 'No details.'}\n\n🔥 *Execute immediately!*`;
                 await sendTelegramMessage(text);
             }
@@ -757,20 +759,20 @@ app.get('/api/system-lock', async (req, res) => {
 app.post('/api/system-lock', requireAuth, async (req, res) => {
     const { locked, adminPassword, password } = req.body;
     const pwdToVerify = adminPassword || password;
-    
+
     if (pwdToVerify !== "monster_mode_on_Jay" && pwdToVerify !== "Jay_monster_mode_on") {
         return res.status(403).json({ error: "❌ Wrong Password! Incorrect Admin Master Password for System Control." });
     }
-    
+
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
     gs.systemLocked = locked !== undefined ? locked : true;
     gs.lockedAt = gs.systemLocked ? new Date().toISOString() : null;
     await gs.save();
-    
+
     // 🔔 TELEGRAM ALERT ADDED HERE
     const statusText = gs.systemLocked ? "🔴 *SYSTEM GLOBALLY LOCKED*" : "🟢 *SYSTEM UNLOCKED*";
     await sendTelegramNotification(`🛡️ *SECURITY EVENT*\n\n${statusText}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-    
+
     res.json({ success: true, message: `System is now ${gs.systemLocked ? 'LOCKED' : 'UNLOCKED'}`, locked: gs.systemLocked });
 });
 
@@ -795,13 +797,13 @@ app.post('/api/control-panel/gateway-text', requireAuth, async (req, res) => {
 
 app.get('/api/schedules', async (req, res) => {
     let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
-    res.json({ 
-        success: true, 
-        workoutReminderTime: gs ? gs.workoutReminderTime : "", 
+    res.json({
+        success: true,
+        workoutReminderTime: gs ? gs.workoutReminderTime : "",
         workoutReminderFreq: gs ? gs.workoutReminderFreq : "daily",
         workoutReminderDays: gs ? gs.workoutReminderDays : [],
         workoutReminderDate: gs ? gs.workoutReminderDate : "",
-        studyReminderTime: gs ? gs.studyReminderTime : "", 
+        studyReminderTime: gs ? gs.studyReminderTime : "",
         studyReminderFreq: gs ? gs.studyReminderFreq : "daily",
         studyReminderDays: gs ? gs.studyReminderDays : [],
         studyReminderDate: gs ? gs.studyReminderDate : "",
@@ -810,20 +812,20 @@ app.get('/api/schedules', async (req, res) => {
 });
 
 app.post('/api/control-panel/schedules', requireAuth, async (req, res) => {
-    const { 
-        workoutReminderTime, workoutReminderFreq, workoutReminderDays, workoutReminderDate, 
-        studyReminderTime, studyReminderFreq, studyReminderDays, studyReminderDate, 
-        masterTargetHours 
+    const {
+        workoutReminderTime, workoutReminderFreq, workoutReminderDays, workoutReminderDate,
+        studyReminderTime, studyReminderFreq, studyReminderDays, studyReminderDate,
+        masterTargetHours
     } = req.body;
-    
+
     let gs = await GlobalSettings.findOneAndUpdate(
         { key: 'GLOBAL' },
-        { 
-            workoutReminderTime: workoutReminderTime !== undefined ? workoutReminderTime : "", 
+        {
+            workoutReminderTime: workoutReminderTime !== undefined ? workoutReminderTime : "",
             workoutReminderFreq: workoutReminderFreq || "daily",
             workoutReminderDays: workoutReminderDays || [],
             workoutReminderDate: workoutReminderDate || "",
-            studyReminderTime: studyReminderTime !== undefined ? studyReminderTime : "", 
+            studyReminderTime: studyReminderTime !== undefined ? studyReminderTime : "",
             studyReminderFreq: studyReminderFreq || "daily",
             studyReminderDays: studyReminderDays || [],
             studyReminderDate: studyReminderDate || "",
@@ -834,8 +836,8 @@ app.post('/api/control-panel/schedules', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Workout & Study schedules updated successfully." });
 });
 
-app.get('/api/landing-bg', async (req, res) => { 
-    res.json({ success: true, ...(await getLandingBg()) }); 
+app.get('/api/landing-bg', async (req, res) => {
+    res.json({ success: true, ...(await getLandingBg()) });
 });
 
 app.post('/api/control-panel/landing-bg', requireAuth, async (req, res) => {
@@ -847,8 +849,8 @@ app.post('/api/control-panel/landing-bg', requireAuth, async (req, res) => {
     res.json({ success: true, message: "Landing background updated successfully." });
 });
 
-app.get('/api/dashboard-bg', async (req, res) => { 
-    res.json({ success: true, ...(await getDashboardBg()) }); 
+app.get('/api/dashboard-bg', async (req, res) => {
+    res.json({ success: true, ...(await getDashboardBg()) });
 });
 
 app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
@@ -986,7 +988,7 @@ app.post('/api/auth/logout', async (req, res) => {
     req.session.destroy(async () => {
         try {
             await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🔴 *TRACKER PORTAL LOGOUT*\nUser: ${email}\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-        } catch (e) {}
+        } catch (e) { }
         res.json({ success: true, message: "Logged out successfully." });
     });
 });
@@ -996,12 +998,12 @@ app.get('/api/auth/session', requireAuth, async (req, res) => {
     res.json({ authenticated: true, email: req.session.email || "jaiminvankar520@gmail.com", role: req.session.role || 'TRACKER_USER', ...xpInfo });
 });
 
-app.post('/api/control-panel/logout', async (req, res) => { 
-    req.session.controlPanelAuth = false; 
+app.post('/api/control-panel/logout', async (req, res) => {
+    req.session.controlPanelAuth = false;
     try {
         await sendTelegramNotification(`🐲 *MONSTER MODE ON*\n🛑 *ADMIN PANEL LOGOUT*\nStatus: Session Ended\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}`);
-    } catch (e) {}
-    res.json({ success: true, message: "Control Panel logged out." }); 
+    } catch (e) { }
+    res.json({ success: true, message: "Control Panel logged out." });
 });
 
 app.get('/api/control-panel/session', requireAuth, (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
@@ -1014,7 +1016,7 @@ app.get('/api/exam-mode', requireAuth, trackerApiGuard, async (req, res) => {
 app.post('/api/exam-mode', requireAuth, trackerApiGuard, async (req, res) => {
     const { enabled, targetMinutes } = req.body;
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if(!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
     ud.examEnabled = enabled !== undefined ? enabled : false;
     ud.examTargetMinutes = targetMinutes ? parseInt(targetMinutes) : 90;
     await ud.save();
@@ -1029,9 +1031,9 @@ app.get('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
 app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     const { enabled, reason } = req.body;
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if(!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
     let today = getServerToday();
-    
+
     let currentStatus = ud.sanctuaryEnabled;
     let newStatus = enabled !== undefined ? enabled : false;
 
@@ -1045,14 +1047,14 @@ app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
         ud.sanctuaryReason = reason || ud.sanctuaryReason;
         await ud.save();
     }
-    
+
     res.json({ success: true, message: "Sanctuary updated.", enabled: ud.sanctuaryEnabled, activatedAt: ud.sanctuaryActivatedAt, reason: ud.sanctuaryReason });
 });
 
 app.get('/api/hydration', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
-    
+
     let hydData = await getHydrationData(MASTER_USER_ID);
     let consumed = hydData.logs[targetDate] || 0;
     let percent = Math.min(Math.round((consumed / hydData.goal) * 100), 100);
@@ -1062,24 +1064,24 @@ app.get('/api/hydration', requireAuth, trackerApiGuard, async (req, res) => {
 
 app.post('/api/hydration/drink', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('hydration')(req, res, () => true);
-    if(moduleLock !== true) return; // Locked response already sent by guard
+    if (moduleLock !== true) return; // Locked response already sent by guard
 
     const today = getServerToday();
     const targetDate = req.body.date || today;
-    
+
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if(!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+
     let logs = ud.hydrationLogs || {};
     let current = logs[targetDate] || 0;
     let added = ud.hydrationGlassSize || 250;
     let newTotal = current + added;
-    
+
     logs[targetDate] = newTotal;
     ud.hydrationLogs = logs;
-    ud.markModified('hydrationLogs'); 
+    ud.markModified('hydrationLogs');
     await ud.save();
-    
+
     let percent = Math.min(Math.round((newTotal / ud.hydrationGoal) * 100), 100);
     let hydrationStreak = await calculateHydrationStreak(MASTER_USER_ID);
     let xpInfo = await getUserXP(MASTER_USER_ID);
@@ -1089,8 +1091,8 @@ app.post('/api/hydration/drink', requireAuth, trackerApiGuard, async (req, res) 
 app.post('/api/hydration/settings', requireAuth, trackerApiGuard, async (req, res) => {
     const { goal, glassSize } = req.body;
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if(!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+
     if (goal) ud.hydrationGoal = parseInt(goal);
     if (glassSize) ud.hydrationGlassSize = parseInt(glassSize);
     await ud.save();
@@ -1101,8 +1103,8 @@ app.get('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) =
     let todayStr = getServerToday();
     let queryDate = req.query.date || todayStr;
 
-    let items = await NoteReminder.find({ 
-        userId: MASTER_USER_ID, 
+    let items = await NoteReminder.find({
+        userId: MASTER_USER_ID,
         $or: [
             { date: queryDate },
             { isReminder: false }
@@ -1116,21 +1118,16 @@ app.get('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) =
 app.post('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) => {
     const { title, description, priority, dueTime, recurring, isReminder, date, time } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required." });
-    
-    const newItem = new NoteReminder({ 
-        id: Date.now().toString(), 
-        userId: MASTER_USER_ID, 
-        title, 
-        description: description || "", 
+
+    const newItem = new NoteReminder({
+        id: Date.now().toString(), userId: MASTER_USER_ID, title,
+        description: description || "",
         priority: priority || "Medium",
         dueTime: dueTime || "",
         recurring: recurring || "None",
-        isReminder: isReminder ? true : false, 
-        date: date || getServerToday(), 
-        time: time || "", 
-        completed: false, 
-        notifiedToday: false, 
-        createdAt: new Date().toISOString() 
+        isReminder: isReminder ? true : false,
+        date: date || getServerToday(), time: time || "", completed: false, notifiedToday: false,
+        createdAt: new Date().toISOString()
     });
     await newItem.save();
     res.json({ success: true, item: newItem });
@@ -1139,7 +1136,7 @@ app.post('/api/notes-reminders', requireAuth, trackerApiGuard, async (req, res) 
 app.post('/api/notes-reminders/:id/toggle', requireAuth, trackerApiGuard, async (req, res) => {
     let item = await NoteReminder.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!item) return res.status(404).json({ error: "Item not found." });
-    
+
     item.completed = !item.completed;
     await item.save();
     res.json({ success: true, completed: item.completed });
@@ -1154,10 +1151,10 @@ app.get('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
     const dateStatus = validateDateAccess(targetDate);
-    
+
     const habits = await Habit.find({ userId: MASTER_USER_ID });
     const logs = await HabitLog.find({ userId: MASTER_USER_ID });
-    
+
     const habitsWithStatus = habits.map(habit => {
         const targetLog = logs.find(l => l.habitId === habit.id && l.date === targetDate);
         const habitLogs = logs.filter(l => l.habitId === habit.id && l.completed);
@@ -1171,10 +1168,10 @@ app.get('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
 app.post('/api/habits', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, category, description, endDate, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Habit name required." });
-    
-    const newHabit = new Habit({ 
-        id: 'hab_' + Date.now().toString(), userId: MASTER_USER_ID, name, category: category || "General", 
-        description: description || "", startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() 
+
+    const newHabit = new Habit({
+        id: 'hab_' + Date.now().toString(), userId: MASTER_USER_ID, name, category: category || "General",
+        description: description || "", startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString()
     });
     await newHabit.save();
     res.json({ success: true, habit: newHabit });
@@ -1184,13 +1181,13 @@ app.put('/api/habits/:id', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, category, description, startDate } = req.body;
     let habit = await Habit.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!habit) return res.status(404).json({ error: "Habit not found." });
-    
+
     if (name) habit.name = name;
     if (category !== undefined) habit.category = category;
     if (description !== undefined) habit.description = description;
     if (startDate) habit.startDate = startDate;
     await habit.save();
-    
+
     res.json({ success: true, message: "Habit updated." });
 });
 
@@ -1202,22 +1199,22 @@ app.delete('/api/habits/:id', requireAuth, trackerApiGuard, async (req, res) => 
 
 app.post('/api/habits/:id/toggle', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('habits')(req, res, () => true);
-    if(moduleLock !== true) return; // Locked response already sent by guard
+    if (moduleLock !== true) return; // Locked response already sent by guard
 
     const habitId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
-    
+
     let log = await HabitLog.findOne({ habitId: habitId, date: targetDate, userId: MASTER_USER_ID });
-    
-    if (log) { 
-        log.completed = completed; 
-        await log.save(); 
-    } else { 
-        await new HabitLog({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId, date: targetDate, completed }).save(); 
+
+    if (log) {
+        log.completed = completed;
+        await log.save();
+    } else {
+        await new HabitLog({ id: Date.now().toString(), userId: MASTER_USER_ID, habitId, date: targetDate, completed }).save();
     }
-    
+
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 50);
     const currentStreak = await calculateHabitStreak(MASTER_USER_ID);
@@ -1228,15 +1225,15 @@ app.get('/api/workouts', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
     const dateStatus = validateDateAccess(targetDate);
-    
+
     const workouts = await Workout.find({ userId: MASTER_USER_ID });
     const logs = await WorkoutLog.find({ date: targetDate, userId: MASTER_USER_ID });
-    
+
     const workoutsWithStatus = workouts.map(w => {
         const log = logs.find(l => l.workoutId === w.id);
         return { ...w._doc, completed: log ? log.completed : false };
     });
-    
+
     const syncResult = await runServerSyncEngine(MASTER_USER_ID, targetDate);
     const currentStreak = targetDate < MONSTER_LAUNCH_DATE ? 0 : await calculateWorkoutStreak(MASTER_USER_ID);
     let xpInfo = await getUserXP(MASTER_USER_ID);
@@ -1246,10 +1243,10 @@ app.get('/api/workouts', requireAuth, trackerApiGuard, async (req, res) => {
 app.post('/api/workouts', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, sets, value, reps, unit, category, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Exercise name required." });
-    
-    const newWorkout = new Workout({ 
-        id: 'w_' + Date.now().toString(), userId: MASTER_USER_ID, name, sets: sets || 3, value: value || reps || 10, unit: unit || 'reps', 
-        category: category || "Strength", startDate: startDate || MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString() 
+
+    const newWorkout = new Workout({
+        id: 'w_' + Date.now().toString(), userId: MASTER_USER_ID, name, sets: sets || 3, value: value || reps || 10, unit: unit || 'reps',
+        category: category || "Strength", startDate: startDate || MONSTER_LAUNCH_DATE, createdAt: new Date().toISOString()
     });
     await newWorkout.save();
     res.json({ success: true, workout: newWorkout });
@@ -1259,15 +1256,15 @@ app.put('/api/workouts/:id', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, sets, value, unit, category, startDate } = req.body;
     let workout = await Workout.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!workout) return res.status(404).json({ error: "Workout not found." });
-    
-    if(name) workout.name = name;
-    if(sets !== undefined) workout.sets = sets;
-    if(value !== undefined) workout.value = value;
-    if(unit) workout.unit = unit;
-    if(category) workout.category = category;
-    if(startDate) workout.startDate = startDate;
+
+    if (name) workout.name = name;
+    if (sets !== undefined) workout.sets = sets;
+    if (value !== undefined) workout.value = value;
+    if (unit) workout.unit = unit;
+    if (category) workout.category = category;
+    if (startDate) workout.startDate = startDate;
     await workout.save();
-    
+
     res.json({ success: true, message: "Workout updated." });
 });
 
@@ -1279,18 +1276,18 @@ app.delete('/api/workouts/:id', requireAuth, trackerApiGuard, async (req, res) =
 
 app.post('/api/workouts/:id/toggle', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('workouts')(req, res, () => true);
-    if(moduleLock !== true) return; // Locked response already sent by guard
+    if (moduleLock !== true) return; // Locked response already sent by guard
 
     const workoutId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
-    
+
     let log = await WorkoutLog.findOne({ workoutId: workoutId, date: targetDate, userId: MASTER_USER_ID });
-    
-    if (log) { log.completed = completed; await log.save(); } 
+
+    if (log) { log.completed = completed; await log.save(); }
     else { await new WorkoutLog({ id: Date.now().toString(), userId: MASTER_USER_ID, workoutId, date: targetDate, completed }).save(); }
-    
+
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 100);
     const syncResult = await runServerSyncEngine(MASTER_USER_ID, targetDate);
@@ -1306,10 +1303,10 @@ app.get('/api/study/categories', requireAuth, trackerApiGuard, async (req, res) 
 app.post('/api/study/categories', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     if (!name) return res.status(400).json({ error: "Category name required." });
-    
-    const newCat = new StudyCategory({ 
-        id: 's_' + Date.now().toString(), userId: MASTER_USER_ID, name: name.trim(), dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120, 
-        startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString() 
+
+    const newCat = new StudyCategory({
+        id: 's_' + Date.now().toString(), userId: MASTER_USER_ID, name: name.trim(), dailyTargetMinutes: parseInt(dailyTargetMinutes) || 120,
+        startDate: startDate || MONSTER_LAUNCH_DATE, endDate: endDate || "", createdAt: new Date().toISOString()
     });
     await newCat.save();
     res.json({ success: true, category: newCat });
@@ -1319,11 +1316,11 @@ app.put('/api/study/categories/:id', requireAuth, trackerApiGuard, async (req, r
     const { name, dailyTargetMinutes, startDate, endDate } = req.body;
     let category = await StudyCategory.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!category) return res.status(404).json({ error: "Category not found." });
-    
-    if(name) category.name = name.trim();
-    if(dailyTargetMinutes !== undefined) category.dailyTargetMinutes = parseInt(dailyTargetMinutes);
-    if(startDate) category.startDate = startDate;
-    if(endDate !== undefined) category.endDate = endDate;
+
+    if (name) category.name = name.trim();
+    if (dailyTargetMinutes !== undefined) category.dailyTargetMinutes = parseInt(dailyTargetMinutes);
+    if (startDate) category.startDate = startDate;
+    if (endDate !== undefined) category.endDate = endDate;
     await category.save();
     res.json({ success: true, message: "Category updated." });
 });
@@ -1347,7 +1344,7 @@ app.post('/api/study/target', requireAuth, trackerApiGuard, async (req, res) => 
 
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
     if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    
+
     if (!ud.customDailyTargets) { ud.customDailyTargets = new Map(); }
     ud.customDailyTargets.set(targetDate, parseInt(targetMinutes));
     ud.markModified('customDailyTargets');
@@ -1362,10 +1359,10 @@ app.post('/api/study/global-target', requireAuth, async (req, res) => {
     if (password !== "Jay#edit@monster" && password !== "Jay_monster_mode_on" && req.session.role !== 'ADMIN') {
         return res.status(403).json({ error: "❌ Unauthorized Password!" });
     }
-    
+
     let ud = await UserData.findOne({ userId: MASTER_USER_ID });
     if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    
+
     let targetDate = date || getServerToday();
     if (!ud.customDailyTargets) { ud.customDailyTargets = new Map(); }
     ud.customDailyTargets.set(targetDate, parseInt(dailyTargetMinutes) || 420);
@@ -1381,37 +1378,37 @@ app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =>
     const today = getServerToday();
     const targetDate = req.query.date || today;
     const dateStatus = validateDateAccess(targetDate);
-    
+
     const categories = await StudyCategory.find({ userId: MASTER_USER_ID });
     const sessions = await StudySession.find({ date: targetDate, userId: MASTER_USER_ID });
     const syncResult = await runServerSyncEngine(MASTER_USER_ID, targetDate);
     let xpInfo = await getUserXP(MASTER_USER_ID);
     const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
-    
+
     res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, currentStreak, studyStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
 
-// 🟢 POST SESSIONS (From Panel OR Freestyle Pomodoro): 
+// 🟢 POST SESSIONS (From Panel OR Freestyle Pomodoro):
 app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
-    if(moduleLock !== true) return;
+    if (moduleLock !== true) return;
 
-    const { categoryId, topic, sessionName, subjectName, durationMinutes, date,startTime, isCompleted } = req.body;
+    const { categoryId, topic, sessionName, subjectName, durationMinutes, date, startTime, isCompleted } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
-    
+
     const targetDate = date || getServerToday();
     const finalIsCompleted = isCompleted || false; // Default false (Panel pre-planning)
-    
+
     try {
         const newSession = new StudySession({
-            id: Date.now().toString(), 
-            userId: MASTER_USER_ID, 
-            categoryId, 
+            id: Date.now().toString(),
+            userId: MASTER_USER_ID,
+            categoryId,
             topic: topic || "Deep Work",
             sessionName: sessionName || topic || "Study Session",
             subjectName: subjectName || "General",
-            durationMinutes: parseInt(durationMinutes), 
-            date: targetDate, 
+            durationMinutes: parseInt(durationMinutes),
+            date: targetDate,
             startTime: startTime || "", // 🟢 NEW
             isCompleted: finalIsCompleted,
             createdAt: new Date().toISOString()
@@ -1435,25 +1432,25 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
 
 // 🟢 PUT SESSIONS: Mark planned session as completed from Pomodoro
 app.put('/api/study/sessions/:id/complete', requireAuth, trackerApiGuard, async (req, res) => {
-    let moduleLock = await moduleApiGuard('study')(req, res, () => true); 
-    if(moduleLock !== true) return;
-    
+    let moduleLock = await moduleApiGuard('study')(req, res, () => true);
+    if (moduleLock !== true) return;
+
     try {
         const session = await StudySession.findOne({ id: req.params.id, userId: MASTER_USER_ID });
         if (!session) return res.status(404).json({ error: "Session not found." });
-        
+
         session.isCompleted = true;
         if (req.body.durationMinutes) session.durationMinutes = parseInt(req.body.durationMinutes);
         await session.save();
 
         let updatedXP = await addXP(MASTER_USER_ID, parseInt(session.durationMinutes) * 2);
         const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
-        
+
         await sendTelegramMessage(`🏁 *POMODORO SESSION COMPLETED*\n\n🎯 Session: *${session.sessionName}*\n📖 Subject: *${session.subjectName}*\n⏱️ Duration: ${session.durationMinutes} mins\n🔥 Exceptional focus!`);
 
         res.json({ success: true, session, currentStreak, studyStreak: currentStreak, ...updatedXP });
-    } catch (error) { 
-        res.status(500).json({ error: "Failed to complete session." }); 
+    } catch (error) {
+        res.status(500).json({ error: "Failed to complete session." });
     }
 });
 
@@ -1469,15 +1466,15 @@ app.get('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
     const dateStatus = validateDateAccess(targetDate);
     let targetDateObj = new Date(targetDate);
     let isSunday = targetDateObj.getDay() === 0;
-    
+
     const tasks = await HygieneTask.find({ userId: MASTER_USER_ID });
     const logs = await HygieneLog.find({ date: targetDate, userId: MASTER_USER_ID });
-    
+
     const tasksWithStatus = tasks.map(t => {
         const log = logs.find(l => l.taskId === t.id);
         return { ...t._doc, completed: log ? log.completed : false, isSundayTask: t.frequency === 'sunday' };
     });
-    
+
     let applicableTasks = tasksWithStatus.filter(t => t.frequency === 'daily' || (isSunday && t.frequency === 'sunday'));
     let allDone = applicableTasks.length > 0 && applicableTasks.every(t => t.completed);
     let xpInfo = await getUserXP(MASTER_USER_ID);
@@ -1488,9 +1485,9 @@ app.get('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
 app.post('/api/hygiene', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, frequency, startDate } = req.body;
     if (!name) return res.status(400).json({ error: "Task name required." });
-    
-    const newTask = new HygieneTask({ 
-        id: 'h_' + Date.now().toString(), userId: MASTER_USER_ID, name, frequency: frequency || 'daily', startDate: startDate || MONSTER_LAUNCH_DATE 
+
+    const newTask = new HygieneTask({
+        id: 'h_' + Date.now().toString(), userId: MASTER_USER_ID, name, frequency: frequency || 'daily', startDate: startDate || MONSTER_LAUNCH_DATE
     });
     await newTask.save();
     res.json({ success: true, task: newTask });
@@ -1500,12 +1497,12 @@ app.put('/api/hygiene/:id', requireAuth, trackerApiGuard, async (req, res) => {
     const { name, frequency, startDate } = req.body;
     let task = await HygieneTask.findOne({ id: req.params.id, userId: MASTER_USER_ID });
     if (!task) return res.status(404).json({ error: "Task not found." });
-    
-    if(name) task.name = name;
-    if(frequency !== undefined) task.frequency = frequency;
-    if(startDate) task.startDate = startDate;
+
+    if (name) task.name = name;
+    if (frequency !== undefined) task.frequency = frequency;
+    if (startDate) task.startDate = startDate;
     await task.save();
-    
+
     res.json({ success: true, message: "Task updated." });
 });
 
@@ -1517,18 +1514,18 @@ app.delete('/api/hygiene/:id', requireAuth, trackerApiGuard, async (req, res) =>
 
 app.post('/api/hygiene/:id/toggle', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('hygiene')(req, res, () => true);
-    if(moduleLock !== true) return; // Locked response already sent by guard
+    if (moduleLock !== true) return; // Locked response already sent by guard
 
     const taskId = req.params.id;
     const { date, completed } = req.body;
     const today = getServerToday();
     const targetDate = date || today;
-    
+
     let log = await HygieneLog.findOne({ taskId: taskId, date: targetDate, userId: MASTER_USER_ID });
-    
-    if (log) { log.completed = completed; await log.save(); } 
+
+    if (log) { log.completed = completed; await log.save(); }
     else { await new HygieneLog({ id: Date.now().toString(), userId: MASTER_USER_ID, taskId, date: targetDate, completed }).save(); }
-    
+
     let updatedXP = await getUserXP(MASTER_USER_ID);
     if (completed) updatedXP = await addXP(MASTER_USER_ID, 40);
     const currentStreak = await calculateHygieneStreak(MASTER_USER_ID);
@@ -1600,7 +1597,7 @@ app.get('/api/nuclear/status', requireAuth, async (req, res) => {
 app.post('/api/nuclear/log-overtime', requireAuth, async (req, res) => {
     let { minutes } = req.body;
     let state = await getNuclearState(MASTER_USER_ID);
-    
+
     state.overtimeCompletedMinutes += parseInt(minutes) || 30;
     if (state.overtimeCompletedMinutes >= state.overtimeRequiredMinutes) {
         state.hardcoreLocked = false;
@@ -1621,6 +1618,23 @@ app.post('/api/user-heartbeat', requireAuth, async (req, res) => {
     res.json({ success: true });
 });
 
+// 🟢 NEW: DASHBOARD WORKOUT STATUS (fixes missing route that dashboard.html was calling)
+app.get('/api/dashboard/workout-status', requireAuth, async (req, res) => {
+    try {
+        const today = getServerToday();
+        let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
+        const syncResult = await runServerSyncEngine(MASTER_USER_ID, today);
+        res.json({
+            success: true,
+            time: gs && gs.workoutReminderTime ? gs.workoutReminderTime : "",
+            status: syncResult.allWorkoutsDone ? 'Complete' : 'Pending'
+        });
+    } catch (err) {
+        console.error("Dashboard Workout Status Error:", err);
+        res.status(500).json({ success: false, error: "Failed to fetch workout status." });
+    }
+});
+
 // 🤖 TELEGRAM INTERACTIVE AI BOT
 app.post('/api/telegram-webhook', async (req, res) => {
     try {
@@ -1636,7 +1650,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 let ud = await UserData.findOne({ userId });
                 const reply = `📊 *TODAY'S APEX STATUS*\n\n🔥 Level: ${xpInfo.level} (${xpInfo.xp} XP)\n🛡️ Lifelines Left: ${ud ? ud.lifelinesRemaining : 5}/5\n🏋️ Workouts: ${sync.allWorkoutsDone ? '✅ DONE' : '❌ PENDING'}\n📚 Study: ${sync.totalStudiedMinutes} / ${sync.totalTargetMinutes} mins\n💧 Hydration: ${sync.hydrationDone ? '✅ DONE' : '❌ PENDING'}`;
                 await sendTelegramNotification(reply);
-            } 
+            }
             else if (text === '/roast' || text === '/motivation') {
                 let coachMessage = "Discipline equals absolute freedom.";
                 if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
@@ -1644,12 +1658,12 @@ app.post('/api/telegram-webhook', async (req, res) => {
                         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
                         const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
                         coachMessage = result.response.text().trim();
-                    } catch(e1) {
+                    } catch (e1) {
                         try {
                             const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                             const resFlash = await modelFlash.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
                             coachMessage = resFlash.response.text().trim();
-                        } catch(e2) {}
+                        } catch (e2) { }
                     }
                 }
                 await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
@@ -1732,15 +1746,24 @@ You can also answer general knowledge questions on any topic, just like a normal
 Personality: sharp, direct, slightly hardcore/motivational (Goggins-style) but not annoying — be USEFUL first, motivational second.
 Keep answers reasonably concise unless the user asks for detail. Use markdown formatting (bold, bullet points) when helpful.`;
 
+// 🟢 FIXED: history is now fetched BEFORE the current turn is saved, so Gemini
+// never sees two consecutive "user" turns (which was silently corrupting replies
+// and duplicating the live message inside chat history).
 async function callJarvisAI(userId, userMessage) {
     const liveContext = await buildJarvisContext(userId);
 
-    // Pull last 12 messages (6 turns) for conversational memory
+    // Pull last 12 messages (6 turns) for conversational memory — BEFORE this turn is saved
     const pastMessages = await JarvisMessage.find({ userId }).sort({ createdAt: -1 }).limit(12);
     const history = pastMessages.reverse().map(m => ({
         role: m.role,
         parts: [{ text: m.content }]
     }));
+
+    // Fail fast with a clear message if the key isn't configured, instead of
+    // silently retrying 4 models and burning time on every single message.
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+        return "⚠️ Neural core offline: GEMINI_API_KEY is not configured on the server.";
+    }
 
     const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
     let replyText = null;
@@ -1767,20 +1790,22 @@ async function callJarvisAI(userId, userMessage) {
 }
 
 // 🤖 JARVIS: Send message, get AI reply, save both to memory
+// 🟢 FIXED: both user + model turns are now saved AFTER the AI reply is generated,
+// so buildJarvisContext/history never sees a stray duplicate "user" entry.
 app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
     try {
         const { message } = req.body;
         if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
         const userId = MASTER_USER_ID;
+        const trimmedMsg = message.trim();
 
-        // Save user's message
-        await new JarvisMessage({ id: 'jm_' + Date.now(), userId, role: 'user', content: message }).save();
+        // 1. Generate the AI reply first (history fetched inside still excludes this turn)
+        const reply = await callJarvisAI(userId, trimmedMsg);
 
-        // Get AI reply
-        const reply = await callJarvisAI(userId, message);
-
-        // Save AI's reply
-        await new JarvisMessage({ id: 'jm_' + (Date.now() + 1), userId, role: 'model', content: reply }).save();
+        // 2. THEN persist both turns, in correct order
+        const stamp = Date.now();
+        await new JarvisMessage({ id: 'jm_' + stamp, userId, role: 'user', content: trimmedMsg }).save();
+        await new JarvisMessage({ id: 'jm_' + (stamp + 1), userId, role: 'model', content: reply }).save();
 
         res.json({ success: true, reply });
     } catch (err) {
@@ -1814,18 +1839,18 @@ app.get('/api/monster-coach', async (req, res) => {
                 const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
                 const result = await model.generateContent(prompt);
                 coachMessage = result.response.text().trim().replace(/"/g, '');
-            } catch(e1) {
+            } catch (e1) {
                 try {
                     const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                     const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
                     const resFlash = await modelFlash.generateContent(prompt);
                     coachMessage = resFlash.response.text().trim().replace(/"/g, '');
-                } catch(e2) {}
+                } catch (e2) { }
             }
         }
         let xpInfo = await getUserXP(MASTER_USER_ID);
         res.json({ success: true, message: "Monster Coach active.", coachMessage: coachMessage, xp: xpInfo });
-    } catch(e) {
+    } catch (e) {
         let xpInfo = await getUserXP(MASTER_USER_ID);
         res.json({ success: true, message: "Monster Coach active.", coachMessage: "Execution is everything. Stop complaining.", xp: xpInfo });
     }
@@ -1835,7 +1860,7 @@ app.post('/api/ai-coach/ask', async (req, res) => {
     try {
         const { prompt } = req.body;
         let reply = "Focus on your execution vectors. Discipline equals absolute freedom.";
-        
+
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
             let aiSuccess = false;
             const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach. 
@@ -1848,13 +1873,13 @@ app.post('/api/ai-coach/ask', async (req, res) => {
             2. STRUCTURED: Use Markdown (**bold text**) for emphasis and formatting. Use bullet points or numbered lists. Do NOT output plain paragraphs.
             3. NO FLUFF: Be direct, highly intelligent, and authoritative. Do not act like a basic chatbot.
             4. BRUTAL ACCOUNTABILITY: End every single response with a strict, uncompromising, hardcore command to execute the plan immediately. No feelings, just execution.`;
-            
+
             try {
                 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
                 const result = await model.generateContent(aiPrompt);
                 reply = result.response.text().trim();
                 aiSuccess = true;
-            } catch(e1) {}
+            } catch (e1) { }
 
             if (!aiSuccess) {
                 try {
@@ -1862,7 +1887,7 @@ app.post('/api/ai-coach/ask', async (req, res) => {
                     const resFlash = await modelFlash.generateContent(aiPrompt);
                     reply = resFlash.response.text().trim();
                     aiSuccess = true;
-                } catch(e2) {}
+                } catch (e2) { }
             }
         } else {
             const query = (prompt || "").toLowerCase();
@@ -1898,7 +1923,7 @@ app.get('/api/monster-log', requireAuth, async (req, res) => {
 app.post('/api/monster-log', requireAuth, async (req, res) => {
     const { content } = req.body;
     let today = getServerToday();
-    
+
     let aiFeedback = "Execute blindly. No emotions.";
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
         try {
@@ -1907,14 +1932,14 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
                 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
                 const result = await model.generateContent(prompt);
                 aiFeedback = result.response.text().trim().replace(/"/g, '');
-            } catch(e1) {
+            } catch (e1) {
                 const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
                 const resFlash = await modelFlash.generateContent(prompt);
                 aiFeedback = resFlash.response.text().trim().replace(/"/g, '');
             }
-        } catch(e) {}
+        } catch (e) { }
     }
-    
+
     let log = await MonsterLog.findOne({ userId: MASTER_USER_ID, date: today });
     if (log) {
         log.content = content;
@@ -1939,10 +1964,10 @@ app.post('/api/send-telegram', async (req, res) => {
         const { message } = req.body;
         const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
         const CHAT_ID = process.env.TELEGRAM_CHAT_ID || 'YOUR_CHAT_ID_HERE';
-        
+
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
         });
         res.json({ success: true });
@@ -1955,25 +1980,25 @@ app.post('/api/send-telegram', async (req, res) => {
 app.get('/api/badges', requireAuth, async (req, res) => {
     let xpInfo = await getUserXP(MASTER_USER_ID);
     let lvl = xpInfo.level;
-    
+
     const allBadges = [
         { id: 'b1', name: 'Novice Executor', icon: '🥉', levelRequired: 1 },
         { id: 'b2', name: 'Discipline Initiate', icon: '🥈', levelRequired: 5 },
         { id: 'b3', name: 'Apex Predator', icon: '🥇', levelRequired: 10 },
         { id: 'b4', name: 'Iron Mindset', icon: '🏆', levelRequired: 20 },
     ];
-    
+
     const badges = allBadges.map(b => ({
         ...b,
         unlocked: lvl >= b.levelRequired
     }));
-    
+
     res.json({ success: true, badges });
 });
 
 app.get('/api/weather', async (req, res) => {
     try {
-        const apiKey = process.env.WEATHER_API_KEY || "91765ab33e096c422ccec03ab5977a6e"; 
+        const apiKey = process.env.WEATHER_API_KEY || "91765ab33e096c422ccec03ab5977a6e";
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Ahmedabad&units=metric&appid=${apiKey}`);
         const data = await response.json();
         if (data.main) {
