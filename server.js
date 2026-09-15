@@ -1,3 +1,4 @@
+
 let systemSleepData = {
     failedAttempts: 0,
     lockedUntil: null
@@ -23,10 +24,9 @@ const PORT = process.env.PORT || 5001;
 // ⚠️ SECURITY NOTE: Move this to .env as MONGO_URI and rotate the password —
 // it was hardcoded here before and should be treated as compromised.
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
-
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("🔥 MONSTER MODE: MongoDB Atlas કનેક્ટ થઈ ગયું! (Database is LIVE)"))
-    .catch(err => console.error("❌ MongoDB Connection Error:", err));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 const habitSchema = new mongoose.Schema({ id: String, userId: String, name: String, category: String, description: String, startDate: String, endDate: String, createdAt: String });
 const Habit = mongoose.model('Habit', habitSchema);
