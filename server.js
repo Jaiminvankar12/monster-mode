@@ -1652,20 +1652,8 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 await sendTelegramNotification(reply);
             }
             else if (text === '/roast' || text === '/motivation') {
-                let coachMessage = "Discipline equals absolute freedom.";
-                if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-                    try {
-                        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-                        const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
-                        coachMessage = result.response.text().trim();
-                    } catch (e1) {
-                        try {
-                            const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                            const resFlash = await modelFlash.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
-                            coachMessage = resFlash.response.text().trim();
-                        } catch (e2) { }
-                    }
-                }
+                const aiReply = await generateWithGemini("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                const coachMessage = aiReply || "Discipline equals absolute freedom.";
                 await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
             }
         }
@@ -1678,6 +1666,35 @@ app.post('/api/telegram-webhook', async (req, res) => {
 
 // 🧠 REAL GEMINI AI INTEGRATION
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
+
+// 🟢 CURRENT LIVE MODEL LIST (updated Sept 2026 — gemini-2.0-flash / gemini-1.5-* / gemini-pro
+// are all permanently shut down by Google as of mid-2026, so they NEVER worked and every
+// Gemini call was silently falling through to the offline/fallback text).
+// "-latest" aliases auto-point to Google's newest model in that tier, so this list stays
+// current without needing future edits when Google retires a model again.
+const GEMINI_MODELS_TO_TRY = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-pro-latest", "gemini-2.5-pro"];
+
+// Shared helper: tries each live model in order, returns the first successful reply.
+// Centralizes the retry logic that used to be duplicated (with dead model names) in
+// 4 different routes.
+async function generateWithGemini(prompt, systemInstruction) {
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+        return null;
+    }
+    for (const modelName of GEMINI_MODELS_TO_TRY) {
+        try {
+            const modelOpts = { model: modelName };
+            if (systemInstruction) modelOpts.systemInstruction = systemInstruction;
+            const model = genAI.getGenerativeModel(modelOpts);
+            const result = await model.generateContent(prompt);
+            const text = result.response.text().trim();
+            if (text) return text;
+        } catch (err) {
+            console.error(`Gemini model ${modelName} failed:`, err.message);
+        }
+    }
+    return null;
+}
 
 // ============================================================================
 // 🤖 JARVIS AI — LIVE CONTEXT-AWARE PERSONAL ASSISTANT (permanent memory in MongoDB)
@@ -1765,10 +1782,9 @@ async function callJarvisAI(userId, userMessage) {
         return "⚠️ Neural core offline: GEMINI_API_KEY is not configured on the server.";
     }
 
-    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
     let replyText = null;
 
-    for (const modelName of modelsToTry) {
+    for (const modelName of GEMINI_MODELS_TO_TRY) {
         try {
             const model = genAI.getGenerativeModel({
                 model: modelName,
@@ -1832,22 +1848,8 @@ app.delete('/api/jarvis/history', requireAuth, async (req, res) => {
 
 app.get('/api/monster-coach', async (req, res) => {
     try {
-        let coachMessage = "Discipline equals absolute freedom.";
-        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            try {
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-                const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
-                const result = await model.generateContent(prompt);
-                coachMessage = result.response.text().trim().replace(/"/g, '');
-            } catch (e1) {
-                try {
-                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                    const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
-                    const resFlash = await modelFlash.generateContent(prompt);
-                    coachMessage = resFlash.response.text().trim().replace(/"/g, '');
-                } catch (e2) { }
-            }
-        }
+        const aiReply = await generateWithGemini("You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.");
+        const coachMessage = aiReply ? aiReply.replace(/"/g, '') : "Discipline equals absolute freedom.";
         let xpInfo = await getUserXP(MASTER_USER_ID);
         res.json({ success: true, message: "Monster Coach active.", coachMessage: coachMessage, xp: xpInfo });
     } catch (e) {
@@ -1862,7 +1864,6 @@ app.post('/api/ai-coach/ask', async (req, res) => {
         let reply = "Focus on your execution vectors. Discipline equals absolute freedom.";
 
         if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-            let aiSuccess = false;
             const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach. 
             You combine the hardcore, no-excuse accountability of David Goggins with the elite sports science, biomechanics, and neurobiology of Andrew Huberman.
             
@@ -1874,21 +1875,8 @@ app.post('/api/ai-coach/ask', async (req, res) => {
             3. NO FLUFF: Be direct, highly intelligent, and authoritative. Do not act like a basic chatbot.
             4. BRUTAL ACCOUNTABILITY: End every single response with a strict, uncompromising, hardcore command to execute the plan immediately. No feelings, just execution.`;
 
-            try {
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-                const result = await model.generateContent(aiPrompt);
-                reply = result.response.text().trim();
-                aiSuccess = true;
-            } catch (e1) { }
-
-            if (!aiSuccess) {
-                try {
-                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                    const resFlash = await modelFlash.generateContent(aiPrompt);
-                    reply = resFlash.response.text().trim();
-                    aiSuccess = true;
-                } catch (e2) { }
-            }
+            const aiReply = await generateWithGemini(aiPrompt);
+            if (aiReply) reply = aiReply;
         } else {
             const query = (prompt || "").toLowerCase();
             if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
@@ -1924,21 +1912,9 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
     const { content } = req.body;
     let today = getServerToday();
 
-    let aiFeedback = "Execute blindly. No emotions.";
-    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-        try {
-            const prompt = `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`;
-            try {
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-                const result = await model.generateContent(prompt);
-                aiFeedback = result.response.text().trim().replace(/"/g, '');
-            } catch (e1) {
-                const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                const resFlash = await modelFlash.generateContent(prompt);
-                aiFeedback = resFlash.response.text().trim().replace(/"/g, '');
-            }
-        } catch (e) { }
-    }
+    const journalPrompt = `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`;
+    const aiReply = await generateWithGemini(journalPrompt);
+    let aiFeedback = aiReply ? aiReply.replace(/"/g, '') : "Execute blindly. No emotions.";
 
     let log = await MonsterLog.findOne({ userId: MASTER_USER_ID, date: today });
     if (log) {
