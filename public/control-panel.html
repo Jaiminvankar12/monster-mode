@@ -12,9 +12,9 @@
     <meta name="theme-color" content="#ef4444">
     <style>
         #secureActionModal {
-    background: rgba(0, 0, 0, 0.85) !important;
-    backdrop-filter: blur(16px) !important;
-}
+            background: rgba(3, 4, 8, 0.85) !important;
+            backdrop-filter: blur(20px) !important;
+        }
         * { font-family: 'Outfit', sans-serif; scroll-behavior: smooth; }
         body { background-color: #07090f; color: #f3f4f6; transition: background-color 0.5s ease; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
@@ -499,7 +499,7 @@
                     </div>
                     <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                         <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Hygiene Tasks</h3>
-                        <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-slate-500 text-center py-10">Loading...</p></div>
+                        <div id="hygieneListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1"><p class="text-xs text-zinc-500 text-center py-10">Loading...</p></div>
                     </div>
                 </div>
 
@@ -1144,7 +1144,7 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <h4 class="font-extrabold text-sm text-white">${item.title}</h4>
-                                    ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : `<span class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-md font-bold">📝 Note</span>`}
+                                    ${item.isReminder && item.time ? `<span class="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">⏰ ${item.date} ${item.time}</span>` : `<span class="text-[9px] bg-blue-500/20 text-blue-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-bold">📝 Note</span>`}
                                 </div>
                                 <p class="text-xs text-slate-400 mt-1">${item.description || ''}</p>
                             </div>
@@ -1389,7 +1389,7 @@
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active milestones deployed yet.</p>`;
+                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No active milestones deployed yet.</p>`;
                 }
             } catch (err) {
                 const container = document.getElementById('targetsListContainer');
