@@ -330,7 +330,6 @@ const checkSystemSleep = (req, res, next) => {
     next();
 };
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Apply system sleep check to all API routes
@@ -1895,11 +1894,11 @@ async function callJarvisAI(userId, userMessage) {
     }
     return replyText;
 }
-
+app.use(express.json());
 // 🤖 JARVIS: Send message, get AI reply, save both to memory
 app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
     try {
-        const { message } = req.body;
+        const { message } = req.body || {};
         if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
         const userId = MASTER_USER_ID;
 
