@@ -109,7 +109,7 @@
                 <h2 class="text-2xl sm:text-4xl font-black uppercase tracking-tight text-white mt-2">Academic & Skill Command</h2>
                 <p class="text-xs text-zinc-400 mt-1" id="serverDateDisplay">Server Date: Loading...</p>
             </div>
-            <!-- Target vs Progress Summary Badge with Study Streak -->
+            <!-- Target vs Progress Summary Badge -->
             <div class="glass-card px-6 py-4 rounded-2xl border border-blue-500/30 flex items-center gap-4 glow-blue bg-blue-500/5 w-full md:w-auto justify-around md:justify-start">
                 <div>
                     <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Today Target</span>
@@ -147,7 +147,7 @@
         </div>
 
         <!-- 🚀 FUSION FUTURISTIC SCHEDULE HUD & POMODORO TIMER -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             
             <!-- Scheduled Session Time HUD (Takes 1 Col) -->
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex flex-col justify-center relative">
@@ -158,7 +158,7 @@
             </div>
 
             <!-- Pomodoro Focus Timer Matrix (Takes 2 Cols) -->
-            <div id="pomodoroCardWrapper" class="lg:col-span-2 glass-card p-6 rounded-3xl border-l-4 border-l-blue-500 glow-blue">
+            <div id="pomodoroCardWrapper" class="xl:col-span-2 glass-card p-6 rounded-3xl border-l-4 border-l-blue-500 glow-blue">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
                         <span>⏱️</span> Live Session Tracker (0 to Target)
@@ -166,29 +166,44 @@
                     <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Standby</span>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div class="text-5xl sm:text-6xl font-black text-white tracking-wider font-mono" id="pomoTimerDisplay">
+                <div class="flex flex-col xl:flex-row items-center justify-between gap-6">
+                    <div class="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-wider font-mono text-center w-full xl:w-auto" id="pomoTimerDisplay">
                         00:00:00
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                        <div class="flex items-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto">
+                    <div class="flex flex-wrap items-center justify-center xl:justify-end gap-3 w-full">
+                        <div class="flex items-center justify-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto shrink-0">
                             <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Target:</span>
                             <input type="number" id="pomoHours" value="1" min="0" max="24" placeholder="HH" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
                             <span class="text-zinc-500 font-bold">:</span>
                             <input type="number" id="pomoMins" value="30" min="0" max="59" placeholder="MM" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
                         </div>
-                        <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto">
+                        <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto shrink-0">
                             <option value="">Select Subject</option>
                         </select>
-                        <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
+                        <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer shrink-0">
                             Start Focus
                         </button>
-                        <button type="button" onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                        <button type="button" onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer shrink-0">
                             Reset
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="glass-card p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Academic Progress</span>
+                <span id="progressPercentText" class="text-xs font-black text-blue-400">0%</span>
+            </div>
+            <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
+                <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-emerald-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-2">
+                <div id="studyDateStatusText" class="text-xs text-zinc-400 font-semibold">Viewing active execution day</div>
+                <div class="text-xs text-zinc-500 font-semibold" id="sessionCountText">0 Sessions Logged</div>
             </div>
         </div>
 
@@ -214,22 +229,7 @@
             </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="glass-card p-6 rounded-3xl space-y-4">
-            <div class="flex justify-between items-center">
-                <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Academic Progress</span>
-                <span id="progressPercentText" class="text-xs font-black text-blue-400">0%</span>
-            </div>
-            <div class="w-full bg-zinc-900 rounded-full h-3 overflow-hidden border border-white/5">
-                <div id="progressBarFill" class="bg-gradient-to-r from-blue-600 to-emerald-500 h-full w-0 transition-all duration-500"></div>
-            </div>
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 gap-2">
-                <div id="studyDateStatusText" class="text-xs text-zinc-400 font-semibold">Viewing active execution day</div>
-                <div class="text-xs text-zinc-500 font-semibold" id="sessionCountText">0 Sessions Logged</div>
-            </div>
-        </div>
-
-        <!-- Active Subjects Only (Manual Form Removed) -->
+        <!-- Active Subjects Only -->
         <div id="studyLoggingSection" class="space-y-6 mb-10">
             <div class="glass-card p-6 rounded-3xl border border-white/5">
                 <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Subjects (From Control Panel)</h3>
@@ -242,6 +242,10 @@
     </main>
 
     <script>
+        // Global variables for target validation
+        let globalTargetMinutes = 0;
+        let globalStudiedMinutes = 0;
+
         async function checkModuleLockStatus() {
             try {
                 const res = await fetch('/api/module-locks', { credentials: 'include' });
@@ -462,6 +466,10 @@
                         
                         let finalTargetMins = customTargetMins !== null ? customTargetMins : (data.totalTargetMinutes || 0);
 
+                        // Set global variables for target validation
+                        globalTargetMinutes = finalTargetMins;
+                        globalStudiedMinutes = data.totalStudiedMinutes || 0;
+
                         document.getElementById('targetTimeLabel').innerText = formatMinutes(finalTargetMins);
                         document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes || 0);
                         document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
@@ -570,7 +578,6 @@
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
                             <p class="text-[10px] text-emerald-400 font-bold mt-0.5 truncate">Duration: ${formatMinutes(s.durationMinutes)}</p>
                         </div>
-                        <button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
                     </div>
                 `;
             }).join('');
@@ -593,6 +600,12 @@
 
         // ================= TIMER LOGIC (COUNT UP) =================
         function startPomodoro() {
+            // Check if Target is already completed
+            if (globalTargetMinutes > 0 && globalStudiedMinutes >= globalTargetMinutes) {
+                alert("🏆 Target Already Achieved! You cannot start a new Pomodoro session for this date.");
+                return;
+            }
+
             if (isPomoRunning) {
                 // Pause Timer
                 clearInterval(pomoTimer);
@@ -762,19 +775,6 @@
             setTimeout(() => {
                 overlay.classList.remove('active');
             }, 2500);
-        }
-
-        async function deleteSession(id) {
-            if (!confirm("Delete this session?")) return;
-            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
-            try {
-                const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE', credentials: 'include' });
-                if (!res.ok) throw new Error("Cloud Sync Failed");
-                fetchStudyData(targetDate);
-            } catch (err) {
-                console.error(err);
-                alert("❌ Connection Error: Could not delete session from MongoDB Cloud.");
-            }
         }
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
