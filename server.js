@@ -14,7 +14,7 @@ const { getServerToday, validateDateAccess } = require('./server/services/dateSe
 const { GoogleGenAI } = require('@google/genai'); // 🟢 Gemini AI Integration (v2 SDK)
 require('dotenv').config();
 
-// 🟢 MOVED TO TOP to fix "Cannot access 'genAI' before initialization" Error
+// 🟢 NEW: genAI અહી સૌથી ઉપર ડિફાઇન કર્યું છે જેથી ReferenceError ના આવે
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY" });
 
 const app = express();
@@ -93,7 +93,7 @@ CATEGORIES: ${categories.map(c => c.name).join(', ') || 'None'}
 }
 
 // 🟢 MAIN JARVIS CHAT ENDPOINT — real conversation, live data, memory
-app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
+app.post('/api/jarvis/chat_old', requireAuth, async (req, res) => { // 🟢 લાઈન ડીલીટ ના કરવી પડે એટલે માત્ર રૂટ નું નામ _old કર્યું છે 
     try {
         const { message } = req.body;
         if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
@@ -132,7 +132,7 @@ ${liveContext}`;
         ];
 
         const response = await genAI.models.generateContent({
-            model: 'gemini-1.5-flash', // 🟢 Fixed Model Name
+            model: 'gemini-1.5-flash', // 🟢 3.6 ની જગ્યાએ 1.5 કર્યું
             contents
         });
 
@@ -334,6 +334,7 @@ const checkSystemSleep = (req, res, next) => {
 };
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // 🟢 NEW: આ લાઈન છેલ્લે હતી એટલે કોઈ ડેટા કે image URL સર્વરને મળતા નહોતા. મેં આને અહી ઉપર લીધી છે.
 
 // Apply system sleep check to all API routes
 app.use('/api/', checkSystemSleep);
@@ -1780,7 +1781,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
 });
 
 // 🧠 REAL GEMINI AI INTEGRATION
-// const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); // 🟢 Commented out to avoid re-declaration error (moved to top)
+// const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); // 🟢 આ લાઈન ડીલીટ નથી કરી, તેને ઉપર મૂકી છે એટલે અહી કમેન્ટ કરી છે
 // 🤖 UNIVERSAL GEMINI HELPER — naavu SDK, ek j jagya thi call thay
 async function askGemini(promptText, fallbackText = "Execution is everything. Stop complaining.") {
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
@@ -1788,7 +1789,7 @@ async function askGemini(promptText, fallbackText = "Execution is everything. St
     }
     try {
         const response = await genAI.models.generateContent({
-            model: 'gemini-1.5-flash', // 🟢 Fixed Model Name
+            model: 'gemini-1.5-flash', // 🟢 3.6 ને બદલે સાચું નામ 1.5 કર્યું છે
             contents: promptText
         });
         return response.text.trim().replace(/"/g, '');
@@ -1879,16 +1880,24 @@ async function callJarvisAI(userId, userMessage) {
 
     for (const modelName of modelsToTry) {
         try {
-            // 🟢 Updated to v2 SDK syntax without deleting the structure
-            const contents = [
-                { role: 'user', parts: [{ text: JARVIS_SYSTEM_PROMPT }] },
-                { role: 'model', parts: [{ text: "Understood. Ready." }] },
-                ...history,
-                { role: 'user', parts: [{ text: `${liveContext}\n\nUser's message: ${userMessage}` }] }
-            ];
+            // 🟢 લાઈનો ડીલીટ નથી કરી, ફક્ત કમેન્ટ કરી છે (જૂની સિન્ટેક્સ)
+            // const model = genAI.getGenerativeModel({
+            //     model: modelName,
+            //     systemInstruction: JARVIS_SYSTEM_PROMPT
+            // });
+            // const chat = model.startChat({ history });
+            // const result = await chat.sendMessage(`${liveContext}\n\nUser's message: ${userMessage}`);
+            // replyText = result.response.text().trim();
+            
+            // 🟢 નવો v2 SDK મુજબનો કોડ
             const response = await genAI.models.generateContent({
-                model: modelName,
-                contents: contents
+                model: modelName.includes('flash') ? modelName : 'gemini-1.5-flash',
+                contents: [
+                    { role: 'user', parts: [{ text: JARVIS_SYSTEM_PROMPT }] },
+                    { role: 'model', parts: [{ text: "Understood." }] },
+                    ...history,
+                    { role: 'user', parts: [{ text: `${liveContext}\n\nUser's message: ${userMessage}` }] }
+                ]
             });
             replyText = response.text.trim();
             if (replyText) break;
@@ -1902,7 +1911,8 @@ async function callJarvisAI(userId, userMessage) {
     }
     return replyText;
 }
-app.use(express.json());
+// app.use(express.json()); // 🟢 આ લાઈન ડીલીટ નથી કરી પણ અહી નીચેથી હટાવીને 326 નંબરની લાઈન પર મૂકી છે, જેથી તારો ડેટા સર્વરને બરાબર મળે. 
+
 // 🤖 JARVIS: Send message, get AI reply, save both to memory
 app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
     try {
