@@ -1,4 +1,3 @@
-
 let systemSleepData = {
     failedAttempts: 0,
     lockedUntil: null
@@ -171,6 +170,11 @@ const jarvisMessageSchema = new mongoose.Schema({
 const JarvisMessage = mongoose.model('JarvisMessage', jarvisMessageSchema);
 
 async function initDB() {
+    // 🟢 FIX 1: Smart Wait Logic (Solves 502 Timeout Crash without deleting anything)
+    if (mongoose.connection.readyState !== 1) {
+        await new Promise(resolve => mongoose.connection.once('connected', resolve));
+    }
+
     let uCount = await User.countDocuments();
     if (uCount === 0) {
         const salt = bcrypt.genSaltSync(10);
@@ -196,6 +200,11 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 const processedRemindersLock = new Set();
 let isCronRunning = false;
+
+// 🟢 FIX 2: Midnight Memory Cleanup (Prevents App Crash due to RAM full)
+cron.schedule('0 0 * * *', () => {
+    processedRemindersLock.clear();
+}, { timezone: 'Asia/Kolkata' });
 
 // 🛡️ SYSTEM SLEEP GUARD MIDAS/MIDDLEWARE (Blocks even Admin if 3 strikes reached)
 const checkSystemSleep = (req, res, next) => {
