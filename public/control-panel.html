@@ -510,13 +510,12 @@
                     </div>
                 </div>
 
-                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS, ACTIVE STUDY SESSIONS, & NOTES/REMINDERS) 🟢 -->
+                <!-- TAB 5.5: TIME MANAGEMENT -->
                 <div id="sectionSchedules" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
                         <h3 class="text-sm font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-2"><span>⏰</span> Time Management & Sessions Matrix</h3>
                         <p class="text-xs text-slate-400 font-medium">Manage workout schedule, multiple timed study sessions, and notes/reminders.</p>
                         
-                        <!-- 1. Workout Timed Alerts Form -->
                         <form id="updateSchedulesForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-red-400">⚡ Workout Execution Schedule</h4>
                             <div>
@@ -530,15 +529,14 @@
                             <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Workout Schedule</button>
                         </form>
 
-                        <!-- 2. Multiple Study Sessions Scheduler -->
                         <form id="createStudySessionScheduleForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-blue-400">📚 Schedule Specific Study Session Time-Block</h4>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Session Name (e.g., Chapter 1 Revision)</label>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Session Name</label>
                                 <input type="text" id="schedStudySessionName" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., React Hooks Practice">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name (e.g., Web Development)</label>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Subject Name</label>
                                 <input type="text" id="schedStudySubjectName" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="e.g., BCA Sem 5">
                             </div>
                             <div>
@@ -559,7 +557,7 @@
                                     <input type="number" id="schedStudyMins" value="30" min="0" max="59" step="5" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
                                 </div>
                                 <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">⏰ Start Time (Execution Time)</label>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">⏰ Start Time</label>
                                 <input type="time" id="schedStudyStartTime" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
                             </div>
                             </div>
@@ -568,7 +566,6 @@
 
                         <hr class="border-white/5">
 
-                        <!-- 3. Notes & Optional Reminders Form -->
                         <form id="createNoteForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-amber-400">📌 Notes & Optional Reminders</h4>
                             <div>
@@ -594,7 +591,6 @@
                         </form>
                     </div>
 
-                    <!-- ACTIVE PLANNED STUDY SESSIONS & NOTES LIST -->
                     <div class="space-y-6">
                         <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[350px]">
                             <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2"><span>📚</span> Active Planned Study Sessions</h3>
@@ -625,22 +621,6 @@
                     <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">🌊</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Hydration Control</h3><p class="text-xs text-slate-400 max-w-xs">Manage your global water intake goal and glass size.</p></div>
                 </div>
 
-                <!-- TAB 7: EXAM MODE -->
-                <div id="sectionExamMode" class="hidden grid grid-cols-1 gap-8">
-                    <div class="glass-card p-6 sm:p-8 rounded-3xl">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 mb-6 flex items-center gap-2"><span>⚡</span> Configure Exam Mode</h3>
-                        <form id="updateExamModeForm" class="space-y-4">
-                            <div class="flex items-center justify-between bg-[#030408] border border-white/10 p-4 rounded-xl">
-                                <div><label class="block text-xs font-black text-white uppercase tracking-wider cursor-pointer">Enable Exam Mode</label></div>
-                                <input type="checkbox" id="examModeEnabled" class="w-6 h-6 rounded-lg accent-amber-500 cursor-pointer">
-                            </div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label><input type="number" id="examModeTarget" value="90" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner"></div>
-                            <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-amber-600/30">Save Exam Mode</button>
-                        </form>
-                    </div>
-                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col justify-center items-center text-center"><span class="text-5xl mb-4 animate-bounce">📝</span><h3 class="text-lg font-black uppercase tracking-wider text-white mb-2">Exam Mode Matrix</h3></div>
-                </div>
-
                 <!-- TAB 8: SANCTUARY -->
                 <div id="sectionSanctuary" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl">
@@ -660,7 +640,6 @@
                 <!-- TAB 9: GATEWAY SETTINGS -->
                 <div id="sectionLandingBg" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
-                        <!-- Image Update -->
                         <div>
                             <h3 class="text-sm font-black uppercase tracking-wider text-red-500 mb-4 flex items-center gap-2"><span>🖼️</span> Update Gateway Image</h3>
                             <form id="updateLandingBgForm" class="space-y-3">
@@ -673,12 +652,11 @@
                         
                         <hr class="border-white/5">
 
-                        <!-- Text Update -->
                         <div>
                             <h3 class="text-sm font-black uppercase tracking-wider text-amber-500 mb-4 flex items-center gap-2"><span>📝</span> Customize Gateway Text</h3>
                             <form id="updateGatewayTextForm" class="space-y-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Big Headline (Use &lt;br&gt; for new line)</label>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Big Headline</label>
                                     <input type="text" id="gatewayHeadlineInput" required class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="BECOME A MONSTER.">
                                 </div>
                                 <div>
@@ -726,16 +704,12 @@
                             <p class="text-xs text-slate-400">Choose between a Single Solid Color or a Smooth Two-Color Gradient.</p>
                         </div>
 
-                        <!-- Theme Mode Switcher Tabs -->
                         <div class="flex bg-[#030408] p-1 rounded-xl border border-white/10">
                             <button type="button" id="modeSolidBtn" onclick="setThemeMode('solid')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-red-600 text-white">Single Color</button>
                             <button type="button" id="modeGradientBtn" onclick="setThemeMode('gradient')" class="flex-1 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-slate-400 hover:text-white">Gradient Color</button>
                         </div>
 
-                        <!-- Form Controls -->
                         <form onsubmit="handleCustomThemeSubmit(event)" class="space-y-4">
-                            
-                            <!-- Solid Color Controls -->
                             <div id="solidControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -754,7 +728,6 @@
                                 </div>
                             </div>
 
-                            <!-- Gradient Color Controls -->
                             <div id="gradientControls" class="bg-[#030408] border border-white/10 p-5 rounded-2xl space-y-4 hidden">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="space-y-2">
@@ -774,7 +747,6 @@
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
                             <div class="flex gap-3">
                                 <button type="submit" class="flex-1 py-4 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform active:scale-95">
                                     🚀 Deploy Theme
@@ -1034,6 +1006,48 @@
             });
         }
 
+        // --- DASHBOARD BG COLOR FORM ---
+        const dashboardBgForm = document.getElementById('updateDashboardBgForm');
+        if (dashboardBgForm) {
+            dashboardBgForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const colorInput = document.getElementById('dashboardBgColorInput');
+                const bgColor = colorInput ? colorInput.value.trim() : '#07090f';
+
+                requestSecureAuthorization('edit', async (password) => {
+                    try {
+                        const res = await fetch('/api/control-panel/dashboard-bg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ bgColor, password })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            showStatusMessage("🎨 Dashboard background color updated successfully!", "success");
+                            localStorage.setItem('monster_dashboard_bg', bgColor);
+                            document.body.style.backgroundColor = bgColor;
+                            // 🟢 Telegram Notification Trigger
+                            await fetch('/api/send-telegram', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ message: `🎨 *ADMIN ACTION*\n\nDashboard background color updated to: ${bgColor}` })
+                            });
+                        } else {
+                            showStatusMessage("❌ " + (data.error || "Failed to update dashboard BG"), "error");
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
+            });
+        }
+
+        function loadDashboardBgConfig() {
+            const savedBg = localStorage.getItem('monster_dashboard_bg');
+            const input = document.getElementById('dashboardBgColorInput');
+            if (input && savedBg) input.value = savedBg;
+        }
+
         // --- FIXED DAILY TARGET (MODIFIED WITH DATE) ---
         function handleFixedDailyTargetSubmit(e) {
             e.preventDefault();
@@ -1107,7 +1121,7 @@
         }
 
         function switchTab(tab) {
-            ['habits', 'workouts', 'study', 'targets', 'hygiene', 'schedules', 'hydration', 'examMode', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
+            ['habits', 'workouts', 'study', 'targets', 'hygiene', 'schedules', 'hydration', 'sanctuary', 'landingBg', 'dashboardBg', 'theme'].forEach(t => {
                 const sec = document.getElementById(`section${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
                 if (sec) sec.classList.add('hidden');
@@ -1120,7 +1134,6 @@
             
             if (tab === 'schedules') { loadSchedulesConfig(); loadNotesReminders(); loadPanelStudySessions(); }
             if (tab === 'hydration') loadHydrationConfig();
-            if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
             if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
             if (tab === 'dashboardBg') loadDashboardBgConfig();
@@ -1238,7 +1251,6 @@
             });
         }
 
-        // 🟢 LOAD ACTIVE STUDY SESSIONS IN PANEL (TIME MANAGEMENT TAB)
         async function loadPanelStudySessions() {
             try {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1278,83 +1290,83 @@
             });
         }
 
-        // --- SCHEDULE STUDY SESSION ---
-       const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
-if (studySessionScheduleForm) {
-    studySessionScheduleForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const sessionNameEl = document.getElementById('schedStudySessionName');
-        const subjectNameEl = document.getElementById('schedStudySubjectName');
-        const topicEl = document.getElementById('schedStudyTopic');
-        const dateEl = document.getElementById('schedStudyDate');
-        const startTimeEl = document.getElementById('schedStudyStartTime'); 
-        const hoursEl = document.getElementById('schedStudyHours');
-        const minsEl = document.getElementById('schedStudyMins');
+        const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
+        if (studySessionScheduleForm) {
+            studySessionScheduleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const sessionNameEl = document.getElementById('schedStudySessionName');
+                const subjectNameEl = document.getElementById('schedStudySubjectName');
+                const topicEl = document.getElementById('schedStudyTopic');
+                const dateEl = document.getElementById('schedStudyDate');
+                const startTimeEl = document.getElementById('schedStudyStartTime'); 
+                const hoursEl = document.getElementById('schedStudyHours');
+                const minsEl = document.getElementById('schedStudyMins');
 
-        const sessionName = sessionNameEl ? sessionNameEl.value : '';
-        const subjectName = subjectNameEl ? subjectNameEl.value : '';
-        const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
-        const date = dateEl ? dateEl.value : '';
-        const startTime = startTimeEl ? startTimeEl.value : ''; 
-        
-        const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
-        const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
-        const durationMinutes = (hours * 60) + minutes;
+                const sessionName = sessionNameEl ? sessionNameEl.value : '';
+                const subjectName = subjectNameEl ? subjectNameEl.value : '';
+                const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
+                const date = dateEl ? dateEl.value : '';
+                const startTime = startTimeEl ? startTimeEl.value : ''; 
+                
+                const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
+                const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
+                const durationMinutes = (hours * 60) + minutes;
 
-        if (durationMinutes <= 0) {
-            showStatusMessage("Duration must be greater than 0", "error");
-            return;
+                if (durationMinutes <= 0) {
+                    showStatusMessage("Duration must be greater than 0", "error");
+                    return;
+                }
+
+                requestSecureAuthorization('add', async (password) => {
+                    try {
+                        const catRes = await fetch('/api/study/categories', { credentials: 'include' });
+                        const catData = await catRes.json();
+                        let categoryId = "";
+                        
+                        let existingCat = null;
+                        if (catData.success && catData.categories) {
+                            existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
+                        }
+
+                        if (existingCat) {
+                            categoryId = existingCat.id;
+                        } else {
+                            const newCatRes = await fetch('/api/study/categories', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
+                            });
+                            const newCatData = await newCatRes.json();
+                            if(newCatData.success) {
+                                categoryId = newCatData.category.id;
+                            } else {
+                                showStatusMessage("Failed to create new subject category.", "error");
+                                return;
+                            }
+                        }
+
+                        const res = await fetch('/api/study/sessions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime })
+                        });
+
+                        if (res.ok) {
+                            showStatusMessage("Study session pre-planned successfully!", "success");
+                            studySessionScheduleForm.reset();
+                            const sDate = document.getElementById('schedStudyDate');
+                            if (sDate) sDate.value = new Date().toISOString().split('T')[0];
+                            loadPanelStudySessions();
+                        } else {
+                            showStatusMessage("Failed to schedule study session", "error");
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                });
+            });
         }
 
-        requestSecureAuthorization('add', async (password) => {
-            try {
-                const catRes = await fetch('/api/study/categories', { credentials: 'include' });
-                const catData = await catRes.json();
-                let categoryId = "";
-                
-                let existingCat = null;
-                if (catData.success && catData.categories) {
-                    existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
-                }
-
-                if (existingCat) {
-                    categoryId = existingCat.id;
-                } else {
-                    const newCatRes = await fetch('/api/study/categories', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
-                    });
-                    const newCatData = await newCatRes.json();
-                    if(newCatData.success) {
-                        categoryId = newCatData.category.id;
-                    } else {
-                        showStatusMessage("Failed to create new subject category.", "error");
-                        return;
-                    }
-                }
-
-                const res = await fetch('/api/study/sessions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime })
-                });
-
-                if (res.ok) {
-                    showStatusMessage("Study session pre-planned successfully!", "success");
-                    studySessionScheduleForm.reset();
-                    const sDate = document.getElementById('schedStudyDate');
-                    if (sDate) sDate.value = new Date().toISOString().split('T')[0];
-                    loadPanelStudySessions();
-                } else {
-                    showStatusMessage("Failed to schedule study session", "error");
-                }
-            } catch (err) { showStatusMessage("Connection error", "error"); }
-        });
-    });
-}
         async function loadSchedulesConfig() {
             try {
                 const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
@@ -1856,37 +1868,6 @@ if (studySessionScheduleForm) {
             });
         }
 
-        async function loadExamModeConfig() {
-            try {
-                const res = await fetch('/api/exam-mode?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    const emd = document.getElementById('examModeEnabled');
-                    const emt = document.getElementById('examModeTarget');
-                    if (emd) emd.checked = data.enabled;
-                    if (emt) emt.value = data.targetMinutes || 90;
-                }
-            } catch (err) {}
-        }
-
-        const examForm = document.getElementById('updateExamModeForm');
-        if (examForm) {
-            examForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const enabledEl = document.getElementById('examModeEnabled');
-                const targetMinutesEl = document.getElementById('examModeTarget');
-                const enabled = enabledEl ? enabledEl.checked : false;
-                const targetMinutes = targetMinutesEl ? targetMinutesEl.value : '';
-
-                requestSecureAuthorization('edit', async (password) => {
-                    try {
-                        const res = await fetch('/api/exam-mode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, targetMinutes, password }) });
-                        if (res.ok) showStatusMessage("Exam mode updated successfully!", "success");
-                    } catch (err) {}
-                });
-            });
-        }
-
         async function loadSanctuaryConfig() {
             try {
                 const res = await fetch('/api/sanctuary?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
@@ -1907,13 +1888,30 @@ if (studySessionScheduleForm) {
                 const enabledEl = document.getElementById('sanctuaryEnabled');
                 const reasonEl = document.getElementById('sanctuaryReason');
                 const enabled = enabledEl ? enabledEl.checked : false;
-                const reason = reasonEl ? reasonEl.value : '';
+                const reason = reasonEl ? reasonEl.value.trim() : '';
 
                 requestSecureAuthorization('edit', async (password) => {
                     try {
-                        const res = await fetch('/api/sanctuary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled, reason, password }) });
-                        if (res.ok) showStatusMessage("Sanctuary updated successfully!", "success");
-                    } catch (err) {}
+                        const res = await fetch('/api/sanctuary', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            credentials: 'include', 
+                            body: JSON.stringify({ enabled, reason, password }) 
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            showStatusMessage("🛡️ Sanctuary protocol updated successfully!", "success");
+                            // 🟢 Telegram Notification Trigger
+                            await fetch('/api/send-telegram', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ message: `🛡️ *ADMIN ACTION*\n\nSanctuary Mode is now: *${enabled ? 'ENABLED' : 'DISABLED'}*\nReason: ${reason || 'N/A'}` })
+                            });
+                        } else {
+                            showStatusMessage("❌ " + (data.error || "Failed to update sanctuary"), "error");
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
                 });
             });
         }
@@ -1974,6 +1972,7 @@ if (studySessionScheduleForm) {
                 });
             });
         }
+
         const textForm = document.getElementById('updateGatewayTextForm');
         if (textForm) {
             textForm.addEventListener('submit', async (e) => {
@@ -2037,7 +2036,6 @@ if (studySessionScheduleForm) {
                 if (res.ok) { 
                     showStatusMessage("✅ " + data.message, "success"); 
                     closeSecureActionModal();
-                    // 🟢 CHANGED FROM 1000 to 2500 FOR POPUP VISIBILITY 🟢
                     setTimeout(() => location.reload(), 2500); 
                 } else { 
                     showStatusMessage("❌ " + (data.error || "Wrong Password! Incorrect System Lock Password."), "error"); 
