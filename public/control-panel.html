@@ -310,7 +310,6 @@
                 <button type="button" onclick="switchTab('hygiene')" id="tabHygiene" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🧼 Hygiene <span>➔</span></button>
                 <button type="button" onclick="switchTab('schedules')" id="tabSchedules" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">⏰ Time Mgmt & Sessions <span>➔</span></button>
                 <button type="button" onclick="switchTab('hydration')" id="tabHydration" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">💧 Hydration <span>➔</span></button>
-                <button type="button" onclick="switchTab('examMode')" id="tabExamMode" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">⚡ Exam Mode <span>➔</span></button>
                 <button type="button" onclick="switchTab('sanctuary')" id="tabSanctuary" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🛡️ Sanctuary <span>➔</span></button>
                 <button type="button" onclick="switchTab('landingBg')" id="tabLandingBg" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🖼️ Gateway <span>➔</span></button>
                 <button type="button" onclick="switchTab('dashboardBg')" id="tabDashboardBg" class="w-full text-left px-4 py-3.5 text-slate-400 hover:text-white hover:bg-white/5 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between">🎨 Dash BG <span>➔</span></button>
@@ -988,37 +987,51 @@
 
         function handleCustomThemeSubmit(e) {
             e.preventDefault();
-            if (currentThemeMode === 'solid') {
-                const hexInput = document.getElementById('solidHexInput');
-                if (!hexInput) return;
-                let hex = hexInput.value.trim();
-                if (!hex.startsWith('#')) hex = '#' + hex;
-                if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
-                    showStatusMessage("❌ Invalid Hex Code!", "error");
-                    return;
+            requestSecureAuthorization('edit', async (password) => {
+                try {
+                    if (currentThemeMode === 'solid') {
+                        const hexInput = document.getElementById('solidHexInput');
+                        if (!hexInput) return;
+                        let hex = hexInput.value.trim();
+                        if (!hex.startsWith('#')) hex = '#' + hex;
+                        if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
+                            showStatusMessage("❌ Invalid Hex Code!", "error");
+                            return;
+                        }
+                        localStorage.setItem('monster_accent_theme', 'solid');
+                        localStorage.setItem('monster_custom_hex', hex);
+                        document.documentElement.style.setProperty('--theme-primary', hex);
+                        document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
+                        document.documentElement.style.setProperty('--theme-glow', hex + '40');
+                        showStatusMessage(`✅ Solid Theme Deployed: ${hex.toUpperCase()}`, 'success');
+                    } else {
+                        const gh1 = document.getElementById('gradHex1');
+                        const gh2 = document.getElementById('gradHex2');
+                        if (!gh1 || !gh2) return;
+                        let c1 = gh1.value.trim();
+                        let c2 = gh2.value.trim();
+                        if (!c1.startsWith('#')) c1 = '#' + c1;
+                        if (!c2.startsWith('#')) c2 = '#' + c2;
+                        localStorage.setItem('monster_accent_theme', 'gradient');
+                        localStorage.setItem('monster_grad_1', c1);
+                        localStorage.setItem('monster_grad_2', c2);
+                        document.documentElement.style.setProperty('--theme-primary', c1);
+                        document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
+                        document.documentElement.style.setProperty('--theme-glow', c1 + '40');
+                        showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
+                    }
+
+                    // 🟢 Telegram Notification Trigger
+                    await fetch('/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ message: "🎨 *ADMIN ACTION*\n\nDashboard theme matrix updated successfully!" })
+                    });
+                } catch (err) {
+                    showStatusMessage("❌ Failed to deploy theme", "error");
                 }
-                localStorage.setItem('monster_accent_theme', 'solid');
-                localStorage.setItem('monster_custom_hex', hex);
-                document.documentElement.style.setProperty('--theme-primary', hex);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${hex} 0%, #b91c1c 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', hex + '40');
-                showStatusMessage(`✅ Solid Theme Deployed: ${hex.toUpperCase()}`, 'success');
-            } else {
-                const gh1 = document.getElementById('gradHex1');
-                const gh2 = document.getElementById('gradHex2');
-                if (!gh1 || !gh2) return;
-                let c1 = gh1.value.trim();
-                let c2 = gh2.value.trim();
-                if (!c1.startsWith('#')) c1 = '#' + c1;
-                if (!c2.startsWith('#')) c2 = '#' + c2;
-                localStorage.setItem('monster_accent_theme', 'gradient');
-                localStorage.setItem('monster_grad_1', c1);
-                localStorage.setItem('monster_grad_2', c2);
-                document.documentElement.style.setProperty('--theme-primary', c1);
-                document.documentElement.style.setProperty('--theme-gradient', `linear-gradient(180deg, ${c1} 0%, ${c2} 100%)`);
-                document.documentElement.style.setProperty('--theme-glow', c1 + '40');
-                showStatusMessage(`✅ Gradient Theme Deployed!`, 'success');
-            }
+            });
         }
 
         // --- FIXED DAILY TARGET (MODIFIED WITH DATE) ---
@@ -1934,7 +1947,7 @@ if (studySessionScheduleForm) {
             bgForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const urlEl = document.getElementById('landingBgUrlInput');
-                const url = urlEl ? urlEl.value : '';
+                const url = urlEl ? urlEl.value.trim() : '';
 
                 requestSecureAuthorization('edit', async (password) => {
                     try {
@@ -1946,23 +1959,29 @@ if (studySessionScheduleForm) {
                         });
                         const data = await res.json();
                         if (res.ok) {
-                            showStatusMessage("Gateway background updated successfully!", "success");
+                            showStatusMessage("🖼️ Gateway background updated successfully!", "success");
+                            // 🟢 Telegram Notification Trigger
+                            await fetch('/api/send-telegram', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ message: "🖼️ *ADMIN ACTION*\n\nGateway background image updated successfully!" })
+                            });
                         } else {
-                            alert("❌ " + data.error);
+                            showStatusMessage("❌ " + (data.error || "Failed to update BG"), "error");
                         }
                     } catch (err) { showStatusMessage("Connection error", "error"); }
                 });
             });
         }
-
         const textForm = document.getElementById('updateGatewayTextForm');
         if (textForm) {
             textForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const headlineEl = document.getElementById('gatewayHeadlineInput');
                 const subtextEl = document.getElementById('gatewaySubtextInput');
-                const headline = headlineEl ? headlineEl.value : '';
-                const subtext = subtextEl ? subtextEl.value : '';
+                const headline = headlineEl ? headlineEl.value.trim() : '';
+                const subtext = subtextEl ? subtextEl.value.trim() : '';
 
                 requestSecureAuthorization('edit', async (password) => {
                     try {
@@ -1972,8 +1991,20 @@ if (studySessionScheduleForm) {
                             credentials: 'include',
                             body: JSON.stringify({ headline, subtext, password })
                         });
-                        if (res.ok) showStatusMessage("Gateway text updated!", "success");
-                    } catch (err) {}
+                        const data = await res.json();
+                        if (res.ok) {
+                            showStatusMessage("📝 Gateway text updated successfully!", "success");
+                            // 🟢 Telegram Notification Trigger
+                            await fetch('/api/send-telegram', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ message: "📝 *ADMIN ACTION*\n\nGateway headline & subtext updated successfully!" })
+                            });
+                        } else {
+                            showStatusMessage("❌ " + (data.error || "Failed to update text"), "error");
+                        }
+                    } catch (err) { showStatusMessage("Connection error", "error"); }
                 });
             });
         }

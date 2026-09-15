@@ -1538,6 +1538,17 @@
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 350); }, 3000);
         }
+        async function checkSanctuaryRedirect() {
+    try {
+        const res = await fetch('/api/sanctuary', { credentials: 'include' });
+        const data = await res.json();
+        
+        if (data.success && data.enabled && !window.location.pathname.includes('sanctuary-workout.html')) {
+            window.location.href = 'sanctuary-workout.html';
+        }
+    } catch (e) {}
+}
+window.addEventListener('DOMContentLoaded', checkSanctuaryRedirect);
     </script>
 </body>
 </html>

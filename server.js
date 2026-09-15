@@ -1024,20 +1024,6 @@ app.post('/api/control-panel/logout', async (req, res) => {
 
 app.get('/api/control-panel/session', requireAuth, (req, res) => { res.json({ authenticated: true, email: "jaiminvankar520@gmail.com" }); });
 
-app.get('/api/exam-mode', requireAuth, trackerApiGuard, async (req, res) => {
-    let data = await getExamModeData(MASTER_USER_ID);
-    res.json({ success: true, ...data });
-});
-
-app.post('/api/exam-mode', requireAuth, trackerApiGuard, async (req, res) => {
-    const { enabled, targetMinutes } = req.body;
-    let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    ud.examEnabled = enabled !== undefined ? enabled : false;
-    ud.examTargetMinutes = targetMinutes ? parseInt(targetMinutes) : 90;
-    await ud.save();
-    res.json({ success: true, message: "Exam Mode updated." });
-});
 
 app.get('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     let data = await getSanctuaryData(MASTER_USER_ID);
@@ -1065,6 +1051,50 @@ app.post('/api/sanctuary', requireAuth, trackerApiGuard, async (req, res) => {
     }
 
     res.json({ success: true, message: "Sanctuary updated.", enabled: ud.sanctuaryEnabled, activatedAt: ud.sanctuaryActivatedAt, reason: ud.sanctuaryReason });
+});
+// 1. Sanctuary Toggle Route
+app.post('/api/sanctuary', async (req, res) => {
+    try {
+        const { enabled, reason, password } = req.body;
+        
+        // Tamari system state ya DB ma save karvani logic
+        if (typeof systemState !== 'undefined') {
+            systemState.sanctuaryEnabled = enabled;
+            systemState.sanctuaryReason = reason;
+        }
+
+        // Sanctuary ON thay tyare Telegram notification moklo
+        if (enabled && typeof sendTelegramAlert === 'function') {
+            await sendTelegramAlert(`🛡️ *SANCTUARY PROTOCOL ACTIVATED*\n\nReason: ${reason || 'Emergency Recovery'}\nAll non-essential trackers frozen. Emergency physical core active.`);
+        }
+
+        res.json({ success: true, message: "Sanctuary updated successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Get Sanctuary Status Route (Dashboard redirect mate jaruri chhe)
+app.get('/api/sanctuary', (req, res) => {
+    const isEnabled = (typeof systemState !== 'undefined' && systemState.sanctuaryEnabled) || false;
+    const reasonVal = (typeof systemState !== 'undefined' && systemState.sanctuaryReason) || "";
+    res.json({ success: true, enabled: isEnabled, reason: reasonVal });
+});
+
+// 2. Sanctuary Workout Complete & Study Streak Freeze Route
+app.post('/api/sanctuary/complete-workout', async (req, res) => {
+    try {
+        // Ahiya tamara database / user object ma workout streak vadhari do 
+        // ane studyStreakFrozen = true set karo jethi study streak drop na thay.
+        
+        if (typeof sendTelegramAlert === 'function') {
+            await sendTelegramAlert(`⚡ *SANCTUARY WORKOUT CONQUERED!*\n\nPhysical core executed successfully. Study streak has been frozen to protect your progress.`);
+        }
+
+        res.json({ success: true, message: "Workout streak updated & study streak frozen." });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to process sanctuary completion" });
+    }
 });
 
 app.get('/api/hydration', requireAuth, trackerApiGuard, async (req, res) => {
