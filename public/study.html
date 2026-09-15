@@ -100,7 +100,7 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-8 space-y-8">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 space-y-8">
         
         <!-- Header & Target Overview -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -138,55 +138,67 @@
                 </div>
                 <button type="button" onclick="shiftDate(1)" class="px-3 sm:px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl text-xs font-extrabold uppercase tracking-wider transition cursor-pointer">Next →</button>
             </div>
-
             <input type="date" id="targetDateInput" onchange="onDateChange()" class="hidden">
-
             <div id="studyStatusBadge" class="w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-900 text-zinc-300 border border-white/5 whitespace-nowrap">
                 Loading status...
             </div>
         </div>
 
-        <!-- 🚀 FUSION FUTURISTIC SCHEDULE HUD & POMODORO TIMER -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            
-            <!-- Scheduled Session Time HUD (Takes 1 Col) -->
-            <div class="cyber-hud-card study-hud p-6 rounded-3xl flex flex-col justify-center relative">
-                <div class="absolute top-4 right-4 w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-xl animate-pulse">🛰️</div>
-                <span class="text-[9px] font-black uppercase tracking-widest text-blue-400 bg-blue-500/20 border border-blue-500/30 px-2.5 py-1 rounded-md w-max mb-3">📚 Core Vector</span>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Scheduled Session Time</h3>
-                <div id="dashStudyTime" class="text-3xl sm:text-4xl font-black text-white tracking-widest mt-1">--:--</div>
-            </div>
-
-            <!-- Pomodoro Focus Timer Matrix (Takes 2 Cols) -->
-            <div id="pomodoroCardWrapper" class="xl:col-span-2 glass-card p-6 rounded-3xl border-l-4 border-l-blue-500 glow-blue">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
-                        <span>⏱️</span> Live Session Tracker (0 to Target)
-                    </span>
-                    <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Standby</span>
-                </div>
-                
-                <div class="flex flex-col xl:flex-row items-center justify-between gap-6">
-                    <div class="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-wider font-mono text-center w-full xl:w-auto" id="pomoTimerDisplay">
-                        00:00:00
+        <!-- 🚀 FULL-WIDTH POMODORO FOCUS TIMER MATRIX 🚀 -->
+        <div id="pomodoroCardWrapper" class="glass-card p-6 sm:p-8 rounded-3xl border border-blue-500/30 glow-blue">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-xl animate-pulse">⏱️</div>
+                    <div>
+                        <h3 class="text-sm font-black tracking-widest text-blue-400 uppercase">Live Session Tracker</h3>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Execute Deep Work</p>
                     </div>
+                </div>
+                <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Standby</span>
+            </div>
+            
+            <div class="flex flex-col xl:flex-row items-center justify-between gap-8">
+                <!-- Huge Timer Display -->
+                <div class="text-6xl sm:text-7xl md:text-[90px] font-black text-white tracking-wider font-mono text-center w-full xl:w-auto drop-shadow-2xl" id="pomoTimerDisplay">
+                    00:00:00
+                </div>
 
-                    <div class="flex flex-wrap items-center justify-center xl:justify-end gap-3 w-full">
-                        <div class="flex items-center justify-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto shrink-0">
-                            <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Target:</span>
-                            <input type="number" id="pomoHours" value="1" min="0" max="24" placeholder="HH" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
-                            <span class="text-zinc-500 font-bold">:</span>
-                            <input type="number" id="pomoMins" value="30" min="0" max="59" placeholder="MM" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
-                        </div>
-                        <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto shrink-0">
+                <!-- Controls Layout (Responsive Wrap) -->
+                <div class="flex flex-col sm:flex-row flex-wrap items-end justify-center xl:justify-end gap-4 w-full">
+                    <!-- Subject & Session Dropdowns -->
+                    <div class="flex flex-col gap-2 w-full sm:w-auto flex-1 min-w-[200px] max-w-[280px]">
+                        <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Subject</label>
+                        <select id="pomoCategorySelect" onchange="onPomoCategoryChange()" class="w-full bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3.5 outline-none focus:border-blue-500 transition">
                             <option value="">Select Subject</option>
                         </select>
-                        <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer shrink-0">
-                            Start Focus
-                        </button>
-                        <button type="button" onclick="resetPomodoro()" class="w-full sm:w-auto px-4 py-3 bg-[#05070b] border border-white/10 hover:border-blue-500 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer shrink-0">
-                            Reset
-                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full sm:w-auto flex-1 min-w-[200px] max-w-[280px]">
+                        <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Planned Session</label>
+                        <select id="pomoPlannedSessionSelect" onchange="onPomoSessionChange()" class="w-full bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3.5 outline-none focus:border-blue-500 transition">
+                            <option value="">-- Freestyle (No Plan) --</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Setup & Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <div class="flex flex-col gap-2 w-full sm:w-auto">
+                            <label class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Target (HH:MM)</label>
+                            <div class="flex items-center justify-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2.5">
+                                <input type="number" id="pomoHours" value="1" min="0" max="24" placeholder="HH" class="bg-transparent text-white text-sm font-black w-10 outline-none text-center">
+                                <span class="text-zinc-500 font-bold">:</span>
+                                <input type="number" id="pomoMins" value="30" min="0" max="59" placeholder="MM" class="bg-transparent text-white text-sm font-black w-10 outline-none text-center">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 self-end w-full sm:w-auto">
+                            <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="flex-1 sm:flex-none px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
+                                Start Focus
+                            </button>
+                            <button type="button" onclick="resetPomodoro()" class="flex-1 sm:flex-none px-4 py-3.5 bg-zinc-800 border border-white/10 hover:border-red-500 hover:text-red-400 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-widest transition cursor-pointer">
+                                Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,36 +219,39 @@
             </div>
         </div>
 
-        <!-- 🟢 DAILY STUDY LOGS TRACKER (WITH TABS) 🟢 -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/5 glow-blue space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2"><span>🗓️</span> Daily Study Logs Tracker</h3>
-                    <p class="text-[10px] text-zinc-400 mt-1 uppercase tracking-widest">Upcoming Pre-plans, Today Execution, and Previous Log History</p>
+        <!-- 🚀 2 COLUMNS: ACTIVE PLANNED (LEFT) & DAILY LOGS (RIGHT) 🚀 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 items-start">
+            
+            <!-- LEFT: PENDING PLANNED SESSIONS -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/5 h-full">
+                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+                    <span>⏳</span> Active Planned Sessions (From Panel)
+                </h3>
+                <div id="activePlannedListContainer" class="flex flex-col gap-3">
+                    <p class="text-xs text-zinc-500">Loading planned sessions...</p>
                 </div>
             </div>
 
-            <!-- Tab Switcher -->
-            <div class="flex bg-[#05070b] p-1.5 rounded-xl border border-white/10 max-w-md">
-                <button type="button" onclick="switchLogsTab('upcoming')" id="tabUpcoming" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Upcoming</button>
-                <button type="button" onclick="switchLogsTab('today')" id="tabToday" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg">Today</button>
-                <button type="button" onclick="switchLogsTab('previous')" id="tabPrevious" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Previous</button>
-            </div>
+            <!-- RIGHT: COMPLETED LOGS TRACKER (WITH TABS) -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/5 glow-blue h-full flex flex-col">
+                <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2 mb-2">
+                    <span>✅</span> Finished Study Logs
+                </h3>
+                <p class="text-[10px] text-zinc-400 mb-6 uppercase tracking-widest">History of execution.</p>
 
-            <!-- Dynamic Logs Container -->
-            <div id="logsTabContentContainer" class="space-y-3 bg-[#030408] border border-white/5 p-4 rounded-2xl min-h-[150px]">
-                <p class="text-xs text-zinc-500 text-center py-6">Loading sessions...</p>
-            </div>
-        </div>
+                <!-- Tab Switcher -->
+                <div class="flex bg-[#05070b] p-1.5 rounded-xl border border-white/10 mb-6 w-full">
+                    <button type="button" onclick="switchLogsTab('upcoming')" id="tabUpcoming" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Upcoming</button>
+                    <button type="button" onclick="switchLogsTab('today')" id="tabToday" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg">Today</button>
+                    <button type="button" onclick="switchLogsTab('previous')" id="tabPrevious" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Previous</button>
+                </div>
 
-        <!-- Active Subjects Only -->
-        <div id="studyLoggingSection" class="space-y-6 mb-10">
-            <div class="glass-card p-6 rounded-3xl border border-white/5">
-                <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4">📋 Active Study Subjects (From Control Panel)</h3>
-                <div id="categoriesList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <p class="text-xs text-zinc-500">Loading subjects...</p>
+                <!-- Dynamic Logs Container -->
+                <div id="logsTabContentContainer" class="flex-1 space-y-3 bg-[#030408] border border-white/5 p-4 rounded-2xl overflow-y-auto max-h-[400px]">
+                    <p class="text-xs text-zinc-500 text-center py-6">Loading sessions...</p>
                 </div>
             </div>
+
         </div>
 
     </main>
@@ -245,6 +260,8 @@
         // Global variables for target validation
         let globalTargetMinutes = 0;
         let globalStudiedMinutes = 0;
+        let pendingSessionsData = []; 
+        let completedSessionsData = []; 
 
         async function checkModuleLockStatus() {
             try {
@@ -286,7 +303,7 @@
         let currentLogsTab = 'today';
         const LAUNCH_DATE = "2026-09-15";
 
-        // TIMER VARIABLES (Counting UP)
+        // TIMER VARIABLES
         let pomoTimer = null;
         let isPomoRunning = false;
 
@@ -358,7 +375,7 @@
                                         Access Denied / Contact Admin
                                     </div>
                                     <button type="button" onclick="window.location.href='index.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                                        Return to Gateway
+                                        Return to Dashboard
                                     </button>
                                 </div>
                             </div>
@@ -371,7 +388,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
-            loadDashboardSchedules();
             
             const isActive = localStorage.getItem('pomo_active') === 'true';
             if (isActive) {
@@ -399,17 +415,6 @@
 
             fetchStudyData();
         });
-
-        async function loadDashboardSchedules() {
-            try {
-                const res = await fetch('/api/schedules?t=' + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
-                const data = await res.json();
-                if (data.success) {
-                    const studyEl = document.getElementById('dashStudyTime');
-                    if (studyEl) studyEl.innerText = data.studyReminderTime ? data.studyReminderTime : "NOT SET";
-                }
-            } catch (err) {}
-        }
 
         function playBeepSound() {
             try {
@@ -441,7 +446,7 @@
             try {
                 const ts = new Date().getTime();
                 
-                // Fetch Exact Target Mins from Panel
+                // Fetch Target Mins from Panel
                 const targetRes = await fetch(`/api/study/target?t=${ts}&date=${dateStr}`, { cache: 'no-store', credentials: 'include' });
                 let customTargetMins = null;
                 if (targetRes.ok) {
@@ -451,7 +456,7 @@
                     }
                 }
 
-                // Fetch Study Sessions Data
+                // Fetch ALL sessions
                 const res = await fetch(`/api/study/sessions?t=${ts}&date=${dateStr}`, { cache: 'no-store', credentials: 'include' });
                 
                 if(res.status === 401 || res.status === 403) {
@@ -466,23 +471,28 @@
                         
                         let finalTargetMins = customTargetMins !== null ? customTargetMins : (data.totalTargetMinutes || 0);
 
-                        // Set global variables for target validation
                         globalTargetMinutes = finalTargetMins;
                         globalStudiedMinutes = data.totalStudiedMinutes || 0;
 
                         document.getElementById('targetTimeLabel').innerText = formatMinutes(finalTargetMins);
-                        document.getElementById('studiedTimeLabel').innerText = formatMinutes(data.totalStudiedMinutes || 0);
+                        document.getElementById('studiedTimeLabel').innerText = formatMinutes(globalStudiedMinutes);
                         document.getElementById('studyStreakLabel').innerText = `🔥 ${data.studyStreak || 0} Days`;
                         
-                        let progressPercent = finalTargetMins > 0 ? Math.min(Math.round((data.totalStudiedMinutes / finalTargetMins) * 100), 100) : 0;
+                        let progressPercent = finalTargetMins > 0 ? Math.min(Math.round((globalStudiedMinutes / finalTargetMins) * 100), 100) : 0;
                         document.getElementById('progressPercentText').innerText = `${progressPercent}%`;
                         document.getElementById('progressBarFill').style.width = `${progressPercent}%`;
-                        
-                        document.getElementById('sessionCountText').innerText = `${(data.sessions || []).length} Sessions Logged`;
 
                         updateStatusBanner(data.dateStatus || 'UNLOCKED', dateInput.value);
-                        renderSessions(data.sessions || [], categoriesData, dateInput.value); 
-                        renderCategories(categoriesData);
+
+                        // Split into pending (Active) and completed (Logs)
+                        const allSessions = data.sessions || [];
+                        pendingSessionsData = allSessions.filter(s => !s.isCompleted);
+                        completedSessionsData = allSessions.filter(s => s.isCompleted);
+
+                        document.getElementById('sessionCountText').innerText = `${completedSessionsData.length} Sessions Completed`;
+
+                        renderPendingSessions(pendingSessionsData, categoriesData);
+                        renderSessions(completedSessionsData, categoriesData);
                         populateSelects(categoriesData);
                     }
                 }
@@ -547,36 +557,42 @@
             return `${h}h ${m < 10 ? '0' : ''}${m}m`;
         }
 
-        function renderCategories(categories) {
-            const container = document.getElementById('categoriesList');
-            if (!categories || categories.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 col-span-full">No active subjects found. Add from Control Panel.</p>`;
-                return;
-            }
-            container.innerHTML = categories.map(c => `
-                <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2 transition hover:border-blue-500/30">
-                    <div class="min-w-0">
-                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-black">Subject</span>
-                        <h4 class="font-bold text-sm text-white mt-1 truncate">${c.name}</h4>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderSessions(sessions, categories, viewingDate) {
-            const container = document.getElementById('logsTabContentContainer');
+        function renderPendingSessions(sessions, categories) {
+            const container = document.getElementById('activePlannedListContainer');
             if (!sessions || sessions.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No study sessions recorded for this date.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 py-6">No planned sessions pending for this date.</p>`;
                 return;
             }
             container.innerHTML = sessions.map(s => {
                 const cat = categories.find(c => c.id === s.categoryId);
                 return `
-                    <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-4 transition hover:border-white/10 shadow-sm">
-                        <div class="min-w-0">
-                            <span class="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
-                            <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
-                            <p class="text-[10px] text-emerald-400 font-bold mt-0.5 truncate">Duration: ${formatMinutes(s.durationMinutes)}</p>
+                    <div class="bg-[#05070b] border border-blue-500/20 p-4 rounded-xl flex items-center justify-between gap-4 transition hover:border-blue-500/50 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+                        <div class="min-w-0 pl-2">
+                            <span class="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
+                            <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.sessionName || s.topic}</h4>
+                            <p class="text-[10px] text-zinc-400 font-bold mt-0.5">Target: ${formatMinutes(s.durationMinutes)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSessions(sessions, categories) {
+            const container = document.getElementById('logsTabContentContainer');
+            if (!sessions || sessions.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No study sessions finished for this date.</p>`;
+                return;
+            }
+            container.innerHTML = sessions.map(s => {
+                const cat = categories.find(c => c.id === s.categoryId);
+                return `
+                    <div class="bg-[#05070b] border border-emerald-500/20 p-4 rounded-xl flex items-center justify-between gap-4 transition hover:border-emerald-500/50 shadow-sm relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+                        <div class="min-w-0 pl-2">
+                            <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
+                            <h4 class="font-bold text-sm text-white mt-1.5 truncate line-through opacity-80">${s.sessionName || s.topic}</h4>
+                            <p class="text-[10px] text-emerald-400 font-bold mt-0.5 truncate">Studied: ${formatMinutes(s.durationMinutes)}</p>
                         </div>
                     </div>
                 `;
@@ -584,30 +600,57 @@
         }
 
         function populateSelects(categories) {
-            const select2 = document.getElementById('pomoCategorySelect');
+            const categorySelect = document.getElementById('pomoCategorySelect');
+            const sessionSelect = document.getElementById('pomoPlannedSessionSelect');
 
             if (!categories || categories.length === 0) {
-                select2.innerHTML = `<option value="">No subjects available</option>`;
+                categorySelect.innerHTML = `<option value="">No subjects available</option>`;
+                sessionSelect.innerHTML = `<option value="">-- Freestyle (No Plan) --</option>`;
                 return;
             }
 
-            const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
+            const optionsHtml = `<option value="">Select Subject</option>` + categories.map(c => `
                 <option value="${c.id}">${c.name}</option>
             `).join('');
 
-            select2.innerHTML = optionsHtml;
+            categorySelect.innerHTML = optionsHtml;
+            onPomoCategoryChange(); 
         }
 
-        // ================= TIMER LOGIC (COUNT UP) =================
+        function onPomoCategoryChange() {
+            const catId = document.getElementById('pomoCategorySelect').value;
+            const sessionSelect = document.getElementById('pomoPlannedSessionSelect');
+            
+            sessionSelect.innerHTML = '<option value="">-- Freestyle (No Plan) --</option>';
+            
+            if (catId) {
+                const filtered = pendingSessionsData.filter(s => s.categoryId === catId);
+                filtered.forEach(s => {
+                    sessionSelect.innerHTML += `<option value="${s.id}" data-dur="${s.durationMinutes}">${s.sessionName || s.topic}</option>`;
+                });
+            }
+        }
+
+        function onPomoSessionChange() {
+            const sessionSelect = document.getElementById('pomoPlannedSessionSelect');
+            if (sessionSelect.selectedIndex > 0) {
+                const selectedOpt = sessionSelect.options[sessionSelect.selectedIndex];
+                const dur = parseInt(selectedOpt.getAttribute('data-dur'));
+                if (dur && !isNaN(dur)) {
+                    document.getElementById('pomoHours').value = Math.floor(dur / 60);
+                    document.getElementById('pomoMins').value = dur % 60;
+                }
+            }
+        }
+
+        // ================= TIMER LOGIC =================
         function startPomodoro() {
-            // Check if Target is already completed
             if (globalTargetMinutes > 0 && globalStudiedMinutes >= globalTargetMinutes) {
-                alert("🏆 Target Already Achieved! You cannot start a new Pomodoro session for this date.");
+                alert("🏆 Target Already Achieved! You have dominated today's mission. Execution locked.");
                 return;
             }
 
             if (isPomoRunning) {
-                // Pause Timer
                 clearInterval(pomoTimer);
                 isPomoRunning = false;
                 localStorage.setItem('pomo_active', 'false');
@@ -626,7 +669,6 @@
                 return;
             }
 
-            // Start or Resume
             let h = parseInt(document.getElementById('pomoHours').value) || 0;
             let m = parseInt(document.getElementById('pomoMins').value) || 0;
             let targetMins = (h * 60) + m;
@@ -640,10 +682,19 @@
             }
 
             const selectEl = document.getElementById('pomoCategorySelect');
-            const topicName = selectEl.options[selectEl.selectedIndex].text;
+            const subjectName = selectEl.options[selectEl.selectedIndex].text;
+            
+            const sessionSelectEl = document.getElementById('pomoPlannedSessionSelect');
+            const plannedSessionId = sessionSelectEl.value;
+            let topicName = "Freestyle Study";
+            if (plannedSessionId) {
+                topicName = sessionSelectEl.options[sessionSelectEl.selectedIndex].text;
+            }
             
             localStorage.setItem('pomo_categoryId', categoryId);
-            localStorage.setItem('pomo_topic', `${topicName}`);
+            localStorage.setItem('pomo_subjectName', subjectName);
+            localStorage.setItem('pomo_topic', topicName);
+            localStorage.setItem('pomo_plannedSessionId', plannedSessionId);
             localStorage.setItem('pomo_targetSeconds', targetMins * 60);
 
             let pausedElapsed = parseInt(localStorage.getItem('pomo_pausedElapsed')) || 0;
@@ -691,13 +742,17 @@
             localStorage.removeItem('pomo_pausedElapsed');
             localStorage.removeItem('pomo_startTimestamp');
 
-            const categoryId = localStorage.getItem('pomo_categoryId') || document.getElementById('pomoCategorySelect').value;
+            const categoryId = localStorage.getItem('pomo_categoryId');
+            const subjectName = localStorage.getItem('pomo_subjectName') || "Study Session";
+            const topic = localStorage.getItem('pomo_topic') || "Freestyle Study";
+            const plannedSessionId = localStorage.getItem('pomo_plannedSessionId');
             const targetMins = Math.floor(targetSecs / 60);
-            const topic = localStorage.getItem('pomo_topic') || "Study Session";
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
 
             localStorage.removeItem('pomo_categoryId');
+            localStorage.removeItem('pomo_subjectName');
             localStorage.removeItem('pomo_topic');
+            localStorage.removeItem('pomo_plannedSessionId');
             localStorage.removeItem('pomo_targetSeconds');
 
             document.getElementById('pomoStartBtn').innerText = "Start Focus";
@@ -708,19 +763,32 @@
             playSuccessAnimation();
 
             try {
-                const res = await fetch('/api/study/sessions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        categoryId: categoryId,
-                        topic: topic,
-                        sessionName: topic,
-                        subjectName: topic,
-                        durationMinutes: targetMins,
-                        date: targetDate
-                    })
-                });
+                let res;
+                if (plannedSessionId) {
+                    // Update existing planned session to Completed
+                    res = await fetch(`/api/study/sessions/${plannedSessionId}/complete`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ durationMinutes: targetMins })
+                    });
+                } else {
+                    // Post a new freestyle completed session
+                    res = await fetch('/api/study/sessions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            categoryId: categoryId,
+                            topic: topic,
+                            sessionName: topic,
+                            subjectName: subjectName,
+                            durationMinutes: targetMins,
+                            date: targetDate,
+                            isCompleted: true // Force completed since generated from Pomodoro
+                        })
+                    });
+                }
                 
                 if (!res.ok) {
                     if (res.status === 403) {
@@ -750,12 +818,13 @@
             localStorage.removeItem('pomo_pausedElapsed');
             localStorage.removeItem('pomo_startTimestamp');
             localStorage.removeItem('pomo_targetSeconds');
+            localStorage.removeItem('pomo_plannedSessionId');
             
             updatePomoDisplay(0);
             
             document.getElementById('pomoModeBadge').innerText = "Standby";
             document.getElementById('pomoStartBtn').innerText = "Start Focus";
-            document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
+            document.getElementById('pomoStartBtn').className = "flex-1 sm:flex-none px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
         }
 
         // 🚀 PLAY SUCCESS ANIMATION FUNCTION

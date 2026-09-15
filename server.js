@@ -41,7 +41,7 @@ const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 const studyCategorySchema = new mongoose.Schema({ id: String, userId: String, name: String, dailyTargetMinutes: Number, startDate: String, endDate: String, createdAt: String });
 const StudyCategory = mongoose.model('StudyCategory', studyCategorySchema);
 
-// 🟢 STUDY SESSIONS SCHEMA UPDATED (Start/End time removed, strictly Duration based now)
+// 🟢 STUDY SESSIONS SCHEMA UPDATED (isCompleted flag added for strict Pomodoro sync)
 const studySessionSchema = new mongoose.Schema({ 
     id: String, 
     userId: String, 
@@ -51,6 +51,7 @@ const studySessionSchema = new mongoose.Schema({
     subjectName: { type: String, default: "" },
     durationMinutes: Number, 
     date: String, 
+    isCompleted: { type: Boolean, default: false }, // 🟢 NEW: Track if it's planned or actually studied
     createdAt: String 
 });
 const StudySession = mongoose.model('StudySession', studySessionSchema);
@@ -422,7 +423,7 @@ async function calculateHabitStreak(userId = MASTER_USER_ID) {
     return streak;
 }
 
-// 🟢 NEW FUNCTION: Calculate strict Study target streak
+// 🟢 NEW FUNCTION: Calculate strict Study target streak (ONLY relies on Completed Pomodoros)
 async function calculateStudyStreak(userId = MASTER_USER_ID) {
     let todayStr = getServerToday();
     if (todayStr < MONSTER_LAUNCH_DATE) return 0;
@@ -446,7 +447,8 @@ async function calculateStudyStreak(userId = MASTER_USER_ID) {
         let dailyTarget = customTargets.get ? customTargets.get(dateStr) : customTargets[dateStr];
         if (!dailyTarget) dailyTarget = baseTarget;
 
-        let daySessions = allSessions.filter(s => s.date === dateStr);
+        // 🟢 ONLY count sessions that are strictly 'isCompleted' true
+        let daySessions = allSessions.filter(s => s.date === dateStr && s.isCompleted === true);
         let totalStudied = daySessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
         
         let dayDone = dailyTarget > 0 && totalStudied >= dailyTarget && daySessions.length > 0;
@@ -518,8 +520,10 @@ async function runServerSyncEngine(userId = MASTER_USER_ID, targetDate) {
     const sessions = await StudySession.find({ userId, date: targetDate });
     let examData = await getExamModeData(userId);
     let totalTargetMinutes = examData.enabled ? parseInt(examData.targetMinutes) || 90 : categories.reduce((acc, c) => acc + (parseInt(c.dailyTargetMinutes) || 120), 0);
-    let totalStudiedMinutes = sessions.reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
-    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes && categories.length > 0 && sessions.length > 0;
+    
+    // 🟢 ONLY count sessions completed by Pomodoro
+    let totalStudiedMinutes = sessions.filter(s => s.isCompleted === true).reduce((acc, s) => acc + (parseInt(s.durationMinutes) || 0), 0);
+    let studyDone = totalTargetMinutes > 0 && totalStudiedMinutes >= totalTargetMinutes && categories.length > 0 && sessions.filter(s => s.isCompleted).length > 0;
 
     let hydData = await getHydrationData(userId);
     let consumed = hydData.logs[targetDate] || 0;
@@ -540,7 +544,7 @@ async function getNuclearState(userId = MASTER_USER_ID) {
 console.log("🔥 MONSTER MODE: Production Server & Telegram Cron System Active.");
 
 cron.schedule('0 7 * * *', async () => {
-    const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n"Discipline equals absolute freedom."\n\n✅ Check your Daily Hydration & Hygiene targets.\n🔥 Stay locked in and crush your goals today!`;
+    const msg = `🌅 *MONSTER MODE ON — MORNING AUDIT*\n\n"Discipline equals absolute freedom."\n\n✅ Check your Daily Targets.\n🔥 Stay locked in and crush your goals today!`;
     await sendTelegramMessage(msg);
 }, { timezone: 'Asia/Kolkata' });
 
@@ -561,15 +565,13 @@ cron.schedule('59 23 * * *', async () => {
         console.error("Punishment Protocol Error:", err);
     }
 }, { timezone: 'Asia/Kolkata' });
-// ⏳ 4-HOUR WORKOUT PENDING ALERT (Dar 4 kalake check karshe)
+
+// ⏳ 4-HOUR WORKOUT PENDING ALERT
 cron.schedule('0 */4 * * *', async () => {
     try {
         const today = getServerToday();
-        
-        // Existing sync engine thi aaje nu workout status check karo
         const syncResult = await runServerSyncEngine(MASTER_USER_ID, today);
         
-        // Jo allWorkoutsDone false hoy (etle ke Pending che) to j message moklo
         if (!syncResult.allWorkoutsDone) {
             let gs = await GlobalSettings.findOne({ key: 'GLOBAL' });
             let workoutTime = gs && gs.workoutReminderTime ? gs.workoutReminderTime : "Not Set";
@@ -846,6 +848,7 @@ app.post('/api/control-panel/dashboard-bg', requireAuth, async (req, res) => {
     await gs.save();
     res.json({ success: true, message: "Dashboard background color updated successfully." });
 });
+
 // 🟢 TRACKER PORTAL LOGIN (With 3-Strike 30-Min Sleep Guard Integration)
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
@@ -1342,6 +1345,27 @@ app.post('/api/study/target', requireAuth, trackerApiGuard, async (req, res) => 
     res.json({ success: true, message: "Today's study target updated successfully!" });
 });
 
+// 🟢 GLOBAL STUDY TARGET API (Control Panel Mathi Target Set Karva Mate)
+app.post('/api/study/global-target', requireAuth, async (req, res) => {
+    const { dailyTargetMinutes, date, password } = req.body;
+    if (password !== "Jay#edit@monster" && password !== "Jay_monster_mode_on" && req.session.role !== 'ADMIN') {
+        return res.status(403).json({ error: "❌ Unauthorized Password!" });
+    }
+    
+    let ud = await UserData.findOne({ userId: MASTER_USER_ID });
+    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
+    
+    let targetDate = date || getServerToday();
+    if (!ud.customDailyTargets) { ud.customDailyTargets = new Map(); }
+    ud.customDailyTargets.set(targetDate, parseInt(dailyTargetMinutes) || 420);
+    ud.markModified('customDailyTargets');
+    await ud.save();
+
+    res.json({ success: true, message: `Global daily target updated.` });
+});
+
+
+// 🟢 GET SESSIONS: Sends BOTH pending (isCompleted: false) and completed (isCompleted: true) sessions
 app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) => {
     const today = getServerToday();
     const targetDate = req.query.date || today;
@@ -1356,36 +1380,17 @@ app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =>
     res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, currentStreak, studyStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
 
-// 🟢 GLOBAL STUDY TARGET API (Control Panel Mathi Target Set Karva Mate)
-app.post('/api/study/global-target', requireAuth, async (req, res) => {
-    const { dailyTargetMinutes, password } = req.body;
-    if (password !== "Jay#edit@monster" && password !== "Jay_monster_mode_on" && req.session.role !== 'ADMIN') {
-        return res.status(403).json({ error: "❌ Unauthorized Password!" });
-    }
-    
-    let ud = await UserData.findOne({ userId: MASTER_USER_ID });
-    if (!ud) { ud = new UserData({ userId: MASTER_USER_ID }); }
-    
-    let today = getServerToday();
-    if (!ud.customDailyTargets) { ud.customDailyTargets = new Map(); }
-    ud.customDailyTargets.set(today, parseInt(dailyTargetMinutes) || 420);
-    ud.markModified('customDailyTargets');
-    await ud.save();
-
-    res.json({ success: true, message: `Global daily target updated to ${dailyTargetMinutes} minutes.` });
-});
-
+// 🟢 POST SESSIONS (From Panel OR Freestyle Pomodoro): 
 app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) => {
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
-    if(moduleLock !== true) return; // Locked response already sent by guard
+    if(moduleLock !== true) return;
 
-    // StartTime અને EndTime અહીંથી કાઢી નાખ્યા છે.
-    const { categoryId, topic, sessionName, subjectName, durationMinutes, date } = req.body;
+    const { categoryId, topic, sessionName, subjectName, durationMinutes, date, isCompleted } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     
-    const today = getServerToday();
-    const targetDate = date || today;
-
+    const targetDate = date || getServerToday();
+    const finalIsCompleted = isCompleted || false; // Default false (Panel pre-planning)
+    
     try {
         const newSession = new StudySession({
             id: Date.now().toString(), 
@@ -1396,22 +1401,50 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
             subjectName: subjectName || "General",
             durationMinutes: parseInt(durationMinutes), 
             date: targetDate, 
+            isCompleted: finalIsCompleted,
             createdAt: new Date().toISOString()
         });
         await newSession.save();
 
-        let updatedXP = await addXP(MASTER_USER_ID, parseInt(durationMinutes) * 2);
-        const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
-        
-        // 🟢 નવું ઓટોમેટિક ટેલિગ્રામ નોટિફિકેશન (જ્યારે સેશન સેવ થાય ત્યારે)
-        await sendTelegramMessage(`📚 *STUDY SESSION LOGGED*\n\n🎯 Session: *${newSession.sessionName}*\n📖 Subject: *${newSession.subjectName}*\n⏱️ Duration: ${newSession.durationMinutes} mins\n🔥 Great execution!`);
+        let updatedXP = await getUserXP(MASTER_USER_ID);
+        if (finalIsCompleted) {
+            // Give XP only if completed
+            updatedXP = await addXP(MASTER_USER_ID, parseInt(durationMinutes) * 2);
+            await sendTelegramMessage(`📚 *FREESTYLE SESSION LOGGED*\n\n🎯 Session: *${newSession.sessionName}*\n📖 Subject: *${newSession.subjectName}*\n⏱️ Duration: ${newSession.durationMinutes} mins\n🔥 Great execution!`);
+        }
 
+        const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
         res.json({ success: true, session: newSession, currentStreak, studyStreak: currentStreak, ...updatedXP });
     } catch (error) {
         console.error("MongoDB Save Error:", error);
         res.status(500).json({ error: "Failed to save session to database." });
     }
 });
+
+// 🟢 PUT SESSIONS: Mark planned session as completed from Pomodoro
+app.put('/api/study/sessions/:id/complete', requireAuth, trackerApiGuard, async (req, res) => {
+    let moduleLock = await moduleApiGuard('study')(req, res, () => true); 
+    if(moduleLock !== true) return;
+    
+    try {
+        const session = await StudySession.findOne({ id: req.params.id, userId: MASTER_USER_ID });
+        if (!session) return res.status(404).json({ error: "Session not found." });
+        
+        session.isCompleted = true;
+        if (req.body.durationMinutes) session.durationMinutes = parseInt(req.body.durationMinutes);
+        await session.save();
+
+        let updatedXP = await addXP(MASTER_USER_ID, parseInt(session.durationMinutes) * 2);
+        const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
+        
+        await sendTelegramMessage(`🏁 *POMODORO SESSION COMPLETED*\n\n🎯 Session: *${session.sessionName}*\n📖 Subject: *${session.subjectName}*\n⏱️ Duration: ${session.durationMinutes} mins\n🔥 Exceptional focus!`);
+
+        res.json({ success: true, session, currentStreak, studyStreak: currentStreak, ...updatedXP });
+    } catch (error) { 
+        res.status(500).json({ error: "Failed to complete session." }); 
+    }
+});
+
 
 app.delete('/api/study/sessions/:id', requireAuth, trackerApiGuard, async (req, res) => {
     await StudySession.deleteOne({ id: req.params.id, userId: MASTER_USER_ID });
@@ -1646,7 +1679,6 @@ app.get('/api/monster-coach', async (req, res) => {
     }
 });
 
-// 🟢 PREMIUM ELITE AI COACH BOT API (UPGRADED)
 app.post('/api/ai-coach/ask', async (req, res) => {
     try {
         const { prompt } = req.body;
@@ -1697,7 +1729,6 @@ app.post('/api/ai-coach/ask', async (req, res) => {
     }
 });
 
-// 🟢 OLED AUTO-SWITCH API
 app.get('/api/oled-status', (req, res) => {
     let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
     let istNow = new Date(istTimeStr);
@@ -1706,7 +1737,6 @@ app.get('/api/oled-status', (req, res) => {
     res.json({ success: true, isOledTime });
 });
 
-// 🟢 DAILY MONSTER LOG APIs
 app.get('/api/monster-log', requireAuth, async (req, res) => {
     let today = getServerToday();
     let log = await MonsterLog.findOne({ userId: MASTER_USER_ID, date: today });
@@ -1752,7 +1782,6 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
     res.json({ success: true, log });
 });
 
-// TELEGRAM ACHIEVEMENT NOTIFICATION ROUTE
 app.post('/api/send-telegram', async (req, res) => {
     try {
         const { message } = req.body;
@@ -1771,7 +1800,6 @@ app.post('/api/send-telegram', async (req, res) => {
     }
 });
 
-// 🟢 BADGES API
 app.get('/api/badges', requireAuth, async (req, res) => {
     let xpInfo = await getUserXP(MASTER_USER_ID);
     let lvl = xpInfo.level;
@@ -1791,7 +1819,6 @@ app.get('/api/badges', requireAuth, async (req, res) => {
     res.json({ success: true, badges });
 });
 
-// 🌦️ WEATHER API ROUTE (Ahmedabad)
 app.get('/api/weather', async (req, res) => {
     try {
         const apiKey = process.env.WEATHER_API_KEY || "91765ab33e096c422ccec03ab5977a6e"; 
