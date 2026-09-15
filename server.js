@@ -51,6 +51,7 @@ const studySessionSchema = new mongoose.Schema({
     subjectName: { type: String, default: "" },
     durationMinutes: Number, 
     date: String, 
+    startTime: { type: String, default: "" }, // 🟢 NEW
     isCompleted: { type: Boolean, default: false }, // 🟢 NEW: Track if it's planned or actually studied
     createdAt: String 
 });
@@ -1385,7 +1386,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
     if(moduleLock !== true) return;
 
-    const { categoryId, topic, sessionName, subjectName, durationMinutes, date, isCompleted } = req.body;
+    const { categoryId, topic, sessionName, subjectName, durationMinutes, date,startTime, isCompleted } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     
     const targetDate = date || getServerToday();
@@ -1401,6 +1402,7 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
             subjectName: subjectName || "General",
             durationMinutes: parseInt(durationMinutes), 
             date: targetDate, 
+            startTime: startTime || "", // 🟢 NEW
             isCompleted: finalIsCompleted,
             createdAt: new Date().toISOString()
         });

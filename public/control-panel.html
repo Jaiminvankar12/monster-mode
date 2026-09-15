@@ -451,6 +451,10 @@ main {
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Deadline / End Date</label>
                                 <input type="date" id="studyEndDate" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
                             </div>
+                            <div>
+    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">⏰ Start Time (Execution Time)</label>
+    <input type="time" id="schedStudyStartTime" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
+</div>
                             <div class="flex gap-3 pt-2">
                                 <button type="submit" id="studySubmitBtn" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
                                     Deploy / Update Study Vector
@@ -1263,80 +1267,83 @@ main {
         }
 
         // --- SCHEDULE STUDY SESSION ---
-        const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
-        if (studySessionScheduleForm) {
-            studySessionScheduleForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const sessionNameEl = document.getElementById('schedStudySessionName');
-                const subjectNameEl = document.getElementById('schedStudySubjectName');
-                const topicEl = document.getElementById('schedStudyTopic');
-                const dateEl = document.getElementById('schedStudyDate');
-                const hoursEl = document.getElementById('schedStudyHours');
-                const minsEl = document.getElementById('schedStudyMins');
+       const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
+if (studySessionScheduleForm) {
+    studySessionScheduleForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const sessionNameEl = document.getElementById('schedStudySessionName');
+        const subjectNameEl = document.getElementById('schedStudySubjectName');
+        const topicEl = document.getElementById('schedStudyTopic');
+        const dateEl = document.getElementById('schedStudyDate');
+        const startTimeEl = document.getElementById('schedStudyStartTime'); // 🟢 Added
+        const hoursEl = document.getElementById('schedStudyHours');
+        const minsEl = document.getElementById('schedStudyMins');
 
-                const sessionName = sessionNameEl ? sessionNameEl.value : '';
-                const subjectName = subjectNameEl ? subjectNameEl.value : '';
-                const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
-                const date = dateEl ? dateEl.value : '';
+        const sessionName = sessionNameEl ? sessionNameEl.value : '';
+        const subjectName = subjectNameEl ? subjectNameEl.value : '';
+        const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
+        const date = dateEl ? dateEl.value : '';
+        const startTime = startTimeEl ? startTimeEl.value : ''; // 🟢 Added
+        
+        const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
+        const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
+        const durationMinutes = (hours * 60) + minutes;
+
+        if (durationMinutes <= 0) {
+            showStatusMessage("Duration must be greater than 0", "error");
+            return;
+        }
+
+        requestSecureAuthorization('add', async (password) => {
+            try {
+                const catRes = await fetch('/api/study/categories', { credentials: 'include' });
+                const catData = await catRes.json();
+                let categoryId = "";
                 
-                const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
-                const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
-                const durationMinutes = (hours * 60) + minutes;
-
-                if (durationMinutes <= 0) {
-                    showStatusMessage("Duration must be greater than 0", "error");
-                    return;
+                let existingCat = null;
+                if (catData.success && catData.categories) {
+                    existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
                 }
 
-                requestSecureAuthorization('add', async (password) => {
-                    try {
-                        const catRes = await fetch('/api/study/categories', { credentials: 'include' });
-                        const catData = await catRes.json();
-                        let categoryId = "";
-                        
-                        let existingCat = null;
-                        if (catData.success && catData.categories) {
-                            existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
-                        }
+                if (existingCat) {
+                    categoryId = existingCat.id;
+                } else {
+                    const newCatRes = await fetch('/api/study/categories', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
+                    });
+                    const newCatData = await newCatRes.json();
+                    if(newCatData.success) {
+                        categoryId = newCatData.category.id;
+                    } else {
+                        showStatusMessage("Failed to create new subject category.", "error");
+                        return;
+                    }
+                }
 
-                        if (existingCat) {
-                            categoryId = existingCat.id;
-                        } else {
-                            const newCatRes = await fetch('/api/study/categories', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include',
-                                body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
-                            });
-                            const newCatData = await newCatRes.json();
-                            if(newCatData.success) {
-                                categoryId = newCatData.category.id;
-                            } else {
-                                showStatusMessage("Failed to create new subject category.", "error");
-                                return;
-                            }
-                        }
-
-                        const res = await fetch('/api/study/sessions', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
-                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date })
-                        });
-
-                        if (res.ok) {
-                            showStatusMessage("Study session pre-planned successfully!", "success");
-                            studySessionScheduleForm.reset();
-                            const sDate = document.getElementById('schedStudyDate');
-                            if (sDate) sDate.value = new Date().toISOString().split('T')[0];
-                            loadPanelStudySessions();
-                        } else {
-                            showStatusMessage("Failed to schedule study session", "error");
-                        }
-                    } catch (err) { showStatusMessage("Connection error", "error"); }
+                // 🟢 Send startTime along with payload
+                const res = await fetch('/api/study/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime })
                 });
-            });
-        }
+
+                if (res.ok) {
+                    showStatusMessage("Study session pre-planned successfully!", "success");
+                    studySessionScheduleForm.reset();
+                    const sDate = document.getElementById('schedStudyDate');
+                    if (sDate) sDate.value = new Date().toISOString().split('T')[0];
+                    loadPanelStudySessions();
+                } else {
+                    showStatusMessage("Failed to schedule study session", "error");
+                }
+            } catch (err) { showStatusMessage("Connection error", "error"); }
+        });
+    });
+}
 
         async function loadSchedulesConfig() {
             try {
