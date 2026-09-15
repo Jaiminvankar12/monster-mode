@@ -558,7 +558,6 @@
                         let streak = data.studyStreak || 0;
                         document.getElementById('studyStreakLabel').innerText = `🔥 ${streak} Days`;
 
-                        // Calculate XP & Level from studied minutes (10 XP per studied hour)
                         studyXp = (streak * 25) + Math.floor(globalStudiedMinutes / 6);
                         studyLevel = Math.min(100, Math.floor(studyXp / 80) + 1);
                         updateStudyBadgeWidget();
@@ -610,7 +609,7 @@
             const isPastDate = targetDate < todayStr;
             const isFutureDate = targetDate > todayStr;
             const isPreLaunch = targetDate < LAUNCH_DATE;
-            const isRestricted = isPreLaunch;
+            const isRestricted = isPreLaunch || isPastDate || isFutureDate;
 
             if (isRestricted) {
                 pomoCardWrapper.style.opacity = "0.5";
@@ -622,16 +621,16 @@
 
             if (isPreLaunch) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap";
-                badge.innerText = "🔒 PRE-LAUNCH: Locked";
+                badge.innerText = "🔒 PRE-LAUNCH Mode (Locked)";
             } else if (isFutureDate) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⚪ UPCOMING PRE-PLAN (Active)";
+                badge.innerText = "📝 PLANNING MODE — Locked until day occurs";
             } else if (isPastDate) {
-                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-300 border border-white/5 whitespace-nowrap";
-                badge.innerText = "📜 PREVIOUS LOG";
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
+                badge.innerText = "🔒 PAST DATE — Immutable Record";
             } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
-                badge.innerText = "🟢 TODAY EXECUTION ACTIVE";
+                badge.innerText = "🟢 TODAY — Active Execution Day";
             }
         }
 
@@ -721,6 +720,18 @@
         }
 
         function startPomodoro() {
+            const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
+            const todayStr = getLocalDateString();
+
+            if (targetDate !== todayStr) {
+                if (targetDate < todayStr) {
+                    alert("🔒 Action denied: Past dates are locked and immutable.");
+                } else if (targetDate > todayStr) {
+                    alert("📝 Action denied: Future dates are in Planning Mode and can only be executed when that day arrives.");
+                }
+                return;
+            }
+
             if (globalTargetMinutes > 0 && globalStudiedMinutes >= globalTargetMinutes) {
                 alert("🏆 Target Already Achieved! You have dominated today's mission. Execution locked.");
                 return;

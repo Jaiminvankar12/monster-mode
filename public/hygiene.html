@@ -377,7 +377,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success) {
-                        renderHygieneTasks(data.tasks || []);
+                        renderHygieneTasks(data.tasks || [], dateInput.value);
                         document.getElementById('hygieneStatusText').innerText = data.allDone ? "All Protocols Met ✅" : "Execution Pending ⏳";
                         
                         let completedCount = (data.tasks || []).filter(t => t.completed).length;
@@ -396,17 +396,28 @@
             }
         }
 
-        function renderHygieneTasks(tasks) {
+        function renderHygieneTasks(tasks, targetDate) {
             const container = document.getElementById('hygieneTasksContainer');
             if (!tasks || tasks.length === 0) {
                 container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-8">No grooming protocols deployed yet.</p>`;
                 return;
             }
 
+            const todayStr = getLocalDateString();
+            const isRestricted = (targetDate !== todayStr) || (targetDate < LAUNCH_DATE);
+
             container.innerHTML = tasks.map(t => {
                 const cardStyle = t.completed 
                     ? 'glass-card p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-4 completed-glow-anim bg-emerald-500/10 transition-all duration-500' 
                     : 'glass-card p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-4 border border-white/10 transition-all duration-500';
+
+                let buttonLabel = t.completed ? 'DONE ✅' : 'DO IT';
+                if (isRestricted) {
+                    if (targetDate < LAUNCH_DATE) buttonLabel = '🔒 Pre-Launch';
+                    else if (targetDate < todayStr) buttonLabel = '🔒 Past Locked';
+                    else if (targetDate > todayStr) buttonLabel = '📝 Planning Mode';
+                    else buttonLabel = '🔒 Locked';
+                }
 
                 return `
                 <div class="${cardStyle}">
@@ -417,8 +428,8 @@
                             <h4 class="font-extrabold text-sm text-white mt-0.5">${t.name}</h4>
                         </div>
                     </div>
-                    <button type="button" onclick="toggleHygiene('${t.id}', ${t.completed})" class="px-4 py-2.5 rounded-xl text-xs font-black uppercase transition shrink-0 ${t.completed ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg' : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg cursor-pointer'}">
-                        ${t.completed ? 'DONE ✅' : 'DO IT'}
+                    <button type="button" ${isRestricted ? 'disabled' : ''} onclick="toggleHygiene('${t.id}', ${t.completed})" class="px-4 py-2.5 rounded-xl text-xs font-black uppercase transition shrink-0 ${isRestricted ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500 border border-zinc-800' : (t.completed ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg' : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg cursor-pointer')}">
+                        ${buttonLabel}
                     </button>
                 </div>
             `;
@@ -442,7 +453,11 @@
             const todayStr = getLocalDateString();
 
             if (targetDate !== todayStr) {
-                alert("🔒 Action denied: You can only execute hygiene protocols for TODAY's active date.");
+                if (targetDate < todayStr) {
+                    alert("🔒 Action denied: Past dates are locked and immutable.");
+                } else if (targetDate > todayStr) {
+                    alert("📝 Action denied: Future dates are in Planning Mode and can only be executed when that day arrives.");
+                }
                 return;
             }
             
@@ -487,16 +502,16 @@
             
             if (isPreLaunch) {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700 whitespace-nowrap shrink-0 ml-auto";
-                badge.innerText = "🔒 PRE-LAUNCH: Locked";
+                badge.innerText = "🔒 PRE-LAUNCH Mode (Locked)";
             } else if (targetDate < todayStr) {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap shrink-0 ml-auto";
-                badge.innerText = "🔒 PAST — Immutable";
+                badge.innerText = "🔒 PAST DATE — Locked";
             } else if (targetDate > todayStr) {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap shrink-0 ml-auto";
-                badge.innerText = "⏳ FUTURE — Upcoming";
+                badge.innerText = "📝 PLANNING MODE — Locked until day occurs";
             } else {
                 badge.className = "text-center px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 whitespace-nowrap shrink-0 ml-auto";
-                badge.innerText = "🟢 UNLOCKED — ACTIVE DAY";
+                badge.innerText = "🟢 TODAY — Active Execution Day";
             }
         }
 

@@ -280,7 +280,6 @@
 
         function updateHabitBadgeWidget() {
             generateHabitBadges();
-            // Find highest unlocked or current badge
             let currentBadge = allHabitBadges.slice().reverse().find(b => b.unlocked) || allHabitBadges[0];
             let nextReward = allHabitBadges.find(b => b.levelRequired > habitLevel) || allHabitBadges[allHabitBadges.length - 1];
 
@@ -413,7 +412,6 @@
                         let streak = data.habitStreak || data.currentStreak || 0;
                         document.getElementById('habitStreakLabel').innerText = `${streak} Days`;
                         
-                        // Calculate level based on streak / completed habits (5 XP per day/streak)
                         habitXp = streak * 10;
                         habitLevel = Math.min(100, Math.floor(habitXp / 50) + 1);
                         updateHabitBadgeWidget();
@@ -477,8 +475,13 @@
              const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
              const todayStr = getLocalDateString();
              
+             // Past dates, pre-launch dates, or future dates (Planning Mode) cannot be edited until they occur (i.e., until targetDate === todayStr)
              if (targetDate !== todayStr) {
-                 alert("🔒 Action denied: Past or future dates are locked and immutable.");
+                 if (targetDate < todayStr) {
+                     alert("🔒 Action denied: Past dates are locked and immutable.");
+                 } else if (targetDate > todayStr) {
+                     alert("📝 Action denied: Future dates are in Planning Mode and can only be edited when that day arrives.");
+                 }
                  return;
              }
 
@@ -518,6 +521,9 @@
             } else if (targetDate < todayStr || status === 'LOCKED') {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 whitespace-nowrap";
                 badge.innerText = "🔒 LOCKED — Immutable Past Record";
+            } else if (targetDate > todayStr) {
+                badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30 whitespace-nowrap";
+                badge.innerText = "📝 PLANNING MODE — Future View (Locked until day occurs)";
             } else {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "🟢 UNLOCKED — Active Execution Day";
@@ -531,12 +537,26 @@
                 return;
             }
             const todayStr = getLocalDateString();
-            const isRestricted = viewingDate < todayStr || viewingDate > todayStr || viewingDate < LAUNCH_DATE;
+            // Restrict editing if the viewing date is not today (past, future/planning, or pre-launch)
+            const isRestricted = viewingDate !== todayStr || viewingDate < LAUNCH_DATE;
 
             container.innerHTML = habits.map(h => {
                 const isNotStarted = viewingDate < (h.startDate || LAUNCH_DATE);
                 const isDisabled = isNotStarted || isRestricted;
                 const cardStyle = h.completedToday ? 'glass-card p-6 rounded-2xl flex justify-between items-center completed-glow-anim bg-emerald-500/5 transition' : 'glass-card p-6 rounded-2xl flex justify-between items-center transition hover:border-red-500/30';
+
+                let buttonText = '✓ Complete';
+                if (isDisabled) {
+                    if (viewingDate > todayStr) {
+                        buttonText = '📝 Planning Mode';
+                    } else if (viewingDate < LAUNCH_DATE) {
+                        buttonText = '🔒 Pre-Launch';
+                    } else {
+                        buttonText = '🔒 Locked';
+                    }
+                } else if (!h.completedToday) {
+                    buttonText = '○ Pending';
+                }
 
                 return `
                     <div class="${cardStyle}">
@@ -546,7 +566,7 @@
                             <p class="text-xs text-zinc-400">${h.description || ''}</p>
                         </div>
                         <button type="button" ${isDisabled ? 'disabled' : ''} onclick="toggleHabit('${h.id}', ${!h.completedToday})" class="px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase transition cursor-pointer ${isDisabled ? 'opacity-40 cursor-not-allowed bg-zinc-900 text-zinc-500' : (h.completedToday ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg' : 'bg-white/5 text-zinc-300 hover:bg-red-500/10 hover:text-red-400')}">
-                            ${isDisabled ? '🔒 Locked' : (h.completedToday ? '✓ Complete' : '○ Pending')}
+                            ${buttonText}
                         </button>
                     </div>
                 `;

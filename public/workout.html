@@ -550,7 +550,6 @@
                         let streak = data.currentStreak || 0;
                         document.getElementById('workoutStreakLabel').innerText = `${streak} Days`;
 
-                        // Calculate XP from completed workouts (Sets * Reps * 2 XP)
                         let totalRepsCompleted = (data.workouts || []).filter(w => w.completed).reduce((acc, w) => acc + (parseInt(w.sets || 1) * parseInt(w.value || w.reps || 10)), 0);
                         workoutXp = (streak * 20) + totalRepsCompleted;
                         workoutLevel = Math.min(100, Math.floor(workoutXp / 100) + 1);
@@ -593,7 +592,7 @@
                 badge.innerText = "🔒 PAST DATE — Immutable Record";
             } else if (targetDate > todayStr) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 whitespace-nowrap";
-                badge.innerText = "⏳ FUTURE DATE — Upcoming";
+                badge.innerText = "📝 PLANNING MODE — Future View (Locked until day occurs)";
             } else if (allDone) {
                 badge.className = "w-full sm:w-auto text-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 whitespace-nowrap";
                 badge.innerText = "⚡ ALL WORKOUTS CONQUERED";
@@ -611,6 +610,7 @@
             }
 
             const todayStr = getLocalDateString();
+            // Restrict editing if the viewing date is not today (past, future/planning, or pre-launch)
             const isRestricted = (targetDate !== todayStr) || (targetDate < MONSTER_LAUNCH_DATE);
 
             container.innerHTML = workouts.map(w => {
@@ -621,7 +621,7 @@
                 let buttonLabel = '✓ Done';
                 if (isRestricted) {
                     if (targetDate < todayStr) buttonLabel = '🔒 Past Locked';
-                    else if (targetDate > todayStr) buttonLabel = '⏳ Future Locked';
+                    else if (targetDate > todayStr) buttonLabel = '📝 Planning Mode';
                     else buttonLabel = '🔒 Locked';
                 } else {
                     buttonLabel = w.completed ? '✓ Done' : '○ Pending';
@@ -664,7 +664,11 @@
             const todayStr = getLocalDateString();
 
             if (targetDate !== todayStr) {
-                alert("🔒 Action denied: You can only execute workouts for TODAY's active date.");
+                if (targetDate < todayStr) {
+                    alert("🔒 Action denied: Past dates are locked and immutable.");
+                } else if (targetDate > todayStr) {
+                    alert("📝 Action denied: Future dates are in Planning Mode and can only be edited when that day arrives.");
+                }
                 return;
             }
 
