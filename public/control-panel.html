@@ -11,19 +11,18 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ef4444">
     <style>
-
         /* 1. Fix Authorize & Execute Button Background */
-.red-glow-tab, 
-#secureActionModal button[type="submit"] {
-    background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
-    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important;
-    color: #ffffff !important;
-}
+        .red-glow-tab, 
+        #secureActionModal button[type="submit"] {
+            background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important;
+            color: #ffffff !important;
+        }
 
-/* 2. Fix Header Overlap on Main Content */
-main {
-    margin-top: 16px !important;
-}
+        /* 2. Fix Header Overlap on Main Content */
+        main {
+            margin-top: 16px !important;
+        }
         * { font-family: 'Outfit', sans-serif; scroll-behavior: smooth; }
         body { background-color: #07090f; color: #f3f4f6; transition: background-color 0.5s ease; }
         .glass-card { background: linear-gradient(135deg, rgba(18, 22, 34, 0.75) 0%, rgba(10, 13, 20, 0.85) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
@@ -1275,7 +1274,7 @@ if (studySessionScheduleForm) {
         const subjectNameEl = document.getElementById('schedStudySubjectName');
         const topicEl = document.getElementById('schedStudyTopic');
         const dateEl = document.getElementById('schedStudyDate');
-        const startTimeEl = document.getElementById('schedStudyStartTime'); // 🟢 આ લાઈન ઉમેરો
+        const startTimeEl = document.getElementById('schedStudyStartTime'); 
         const hoursEl = document.getElementById('schedStudyHours');
         const minsEl = document.getElementById('schedStudyMins');
 
@@ -1283,7 +1282,7 @@ if (studySessionScheduleForm) {
         const subjectName = subjectNameEl ? subjectNameEl.value : '';
         const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
         const date = dateEl ? dateEl.value : '';
-        const startTime = startTimeEl ? startTimeEl.value : ''; // 🟢 આ લાઈન ઉમેરો
+        const startTime = startTimeEl ? startTimeEl.value : ''; 
         
         const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
         const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
@@ -1323,7 +1322,6 @@ if (studySessionScheduleForm) {
                     }
                 }
 
-                // 🟢 API કોલમાં startTime પાસ કરો
                 const res = await fetch('/api/study/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2008,7 +2006,8 @@ if (studySessionScheduleForm) {
                 if (res.ok) { 
                     showStatusMessage("✅ " + data.message, "success"); 
                     closeSecureActionModal();
-                    setTimeout(() => location.reload(), 1000);
+                    // 🟢 CHANGED FROM 1000 to 2500 FOR POPUP VISIBILITY 🟢
+                    setTimeout(() => location.reload(), 2500); 
                 } else { 
                     showStatusMessage("❌ " + (data.error || "Wrong Password! Incorrect System Lock Password."), "error"); 
                 }
