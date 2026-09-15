@@ -183,7 +183,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col lg:flex-row selection:bg-red-500 selection:text-white overflow-x-hidden">
+<body class="min-h-screen flex flex-col selection:bg-red-500 selection:text-white">
 
     <div id="inlineStatusNotification"></div>
 
@@ -221,7 +221,6 @@
     </div>
 
     <!-- Futuristic Header -->
-    <!-- Futuristic Header -->
     <header class="cyber-border border-b border-white/5 bg-[#030408]/90 backdrop-blur-xl px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/40 border border-red-500/40 flex items-center justify-center hud-glow">
@@ -250,6 +249,7 @@
                 <span>⚡ APEX PREDATOR SYSTEM</span>
             </div>
         </div>
+
         <!-- System Security Lock Matrix Card -->
         <div class="glass-card p-6 sm:p-8 rounded-3xl border border-red-500/40 mb-8 hud-glow">
             <div class="flex items-center gap-3 mb-2">
@@ -474,7 +474,7 @@
                     <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[520px]">
                         <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Study Categories</h3>
                         <div id="studyListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                            <p class="text-xs text-slate-500 text-center py-10">Loading study categories...</p>
+                            <p class="text-xs text-zinc-500 text-center py-10">Loading study categories...</p>
                         </div>
                     </div>
                 </div>
@@ -499,13 +499,13 @@
                     </div>
                 </div>
 
-                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS WITH DATE, MULTI-STUDY SESSIONS, & NOTES/REMINDERS) 🟢 -->
+                <!-- 🟢 TAB 5.5: TIME MANAGEMENT (WORKOUT TIMED ALERTS, ACTIVE STUDY SESSIONS, & NOTES/REMINDERS) 🟢 -->
                 <div id="sectionSchedules" class="hidden grid grid-cols-1 gap-8">
                     <div class="glass-card p-6 sm:p-8 rounded-3xl space-y-6">
                         <h3 class="text-sm font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-2"><span>⏰</span> Time Management & Sessions Matrix</h3>
-                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule (with Date & Time), multiple timed study sessions, and notes/reminders.</p>
+                        <p class="text-xs text-slate-400 font-medium">Manage workout schedule, multiple timed study sessions, and notes/reminders.</p>
                         
-                        <!-- 1. Workout Timed Alerts Form (Updated with Date) -->
+                        <!-- 1. Workout Timed Alerts Form -->
                         <form id="updateSchedulesForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-red-400">⚡ Workout Execution Schedule</h4>
                             <div>
@@ -519,7 +519,7 @@
                             <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Workout Schedule</button>
                         </form>
 
-                        <!-- 2. Multiple Study Sessions Scheduler (Duration Based only) -->
+                        <!-- 2. Multiple Study Sessions Scheduler -->
                         <form id="createStudySessionScheduleForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-blue-400">📚 Schedule Specific Study Session Time-Block</h4>
                             <div>
@@ -579,10 +579,20 @@
                         </form>
                     </div>
 
-                    <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[650px]">
-                        <h3 class="text-sm font-black uppercase tracking-wider text-white mb-6 flex items-center gap-2"><span>📋</span> Active Notes & Reminders List</h3>
-                        <div id="notesListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                            <p class="text-xs text-slate-500 text-center py-10">Loading entries...</p>
+                    <!-- ACTIVE PLANNED STUDY SESSIONS & NOTES LIST -->
+                    <div class="space-y-6">
+                        <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[350px]">
+                            <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2"><span>📚</span> Active Planned Study Sessions</h3>
+                            <div id="panelStudySessionsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                                <p class="text-xs text-zinc-500 text-center py-6">Loading sessions...</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-6 sm:p-8 rounded-3xl flex flex-col h-[350px]">
+                            <h3 class="text-sm font-black uppercase tracking-wider text-white mb-4 flex items-center gap-2"><span>📋</span> Active Notes & Reminders List</h3>
+                            <div id="notesListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                                <p class="text-xs text-zinc-500 text-center py-6">Loading entries...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -776,8 +786,6 @@
 
     <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
     <script>
-        // ... (Keep existing script functions up to handleFixedDailyTargetSubmit) ...
-
         let audioCtx = null;
         
         function playCyberClick() {
@@ -1008,7 +1016,6 @@
             const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
             const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
             
-            // Total minutes calculate
             const dailyTargetMinutes = (hours * 60) + minutes;
 
             if (!date) {
@@ -1082,7 +1089,7 @@
             if (targetSec) targetSec.classList.remove('hidden');
             if (targetBtn) targetBtn.className = "w-full text-left px-4 py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-between";
             
-            if (tab === 'schedules') { loadSchedulesConfig(); loadNotesReminders(); }
+            if (tab === 'schedules') { loadSchedulesConfig(); loadNotesReminders(); loadPanelStudySessions(); }
             if (tab === 'hydration') loadHydrationConfig();
             if (tab === 'examMode') loadExamModeConfig();
             if (tab === 'sanctuary') loadSanctuaryConfig();
@@ -1141,7 +1148,7 @@
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No notes or reminders found.</p>`;
+                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No notes or reminders found.</p>`;
                 }
             } catch (err) {}
         }
@@ -1202,7 +1209,47 @@
             });
         }
 
-        // --- MODIFIED SCHEDULE STUDY SESSION (DURATION ONLY) ---
+        // 🟢 LOAD ACTIVE STUDY SESSIONS IN PANEL (TIME MANAGEMENT TAB)
+        async function loadPanelStudySessions() {
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const res = await fetch(`/api/study/sessions?date=${todayStr}&t=` + new Date().getTime(), { cache: 'no-store', credentials: 'include' });
+                const data = await res.json();
+                const container = document.getElementById('panelStudySessionsListContainer');
+                if (!container) return;
+
+                if (data.success && data.sessions && data.sessions.length > 0) {
+                    container.innerHTML = data.sessions.map(s => `
+                        <div class="bg-[#030408] border ${s.isCompleted ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-blue-500/30'} p-4 rounded-2xl flex items-center justify-between gap-4">
+                            <div>
+                                <span class="text-[9px] ${s.isCompleted ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'} px-2 py-0.5 rounded font-black uppercase">${s.isCompleted ? 'Completed ✅' : 'Pending ⏳'}</span>
+                                <h4 class="font-extrabold text-sm text-white mt-1">${s.sessionName || s.topic}</h4>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest block">Subject: ${s.subjectName || 'General'} | Target: ${s.durationMinutes}m | Date: ${s.date}</span>
+                            </div>
+                            <button type="button" onclick="confirmAndDeleteStudySession('${s.id}')" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">Delete</button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No study sessions scheduled.</p>`;
+                }
+            } catch (err) {}
+        }
+
+        function confirmAndDeleteStudySession(id) {
+            requestSecureAuthorization('delete', async (password) => {
+                try {
+                    const res = await fetch(`/api/study/sessions/${id}`, { method: 'DELETE', credentials: 'include' });
+                    if (res.ok) {
+                        showStatusMessage("Study session deleted.", "success");
+                        loadPanelStudySessions();
+                    } else {
+                        showStatusMessage("Failed to delete session", "error");
+                    }
+                } catch (err) { showStatusMessage("Connection error", "error"); }
+            });
+        }
+
+        // --- SCHEDULE STUDY SESSION ---
         const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
         if (studySessionScheduleForm) {
             studySessionScheduleForm.addEventListener('submit', async (e) => {
@@ -1230,12 +1277,10 @@
 
                 requestSecureAuthorization('add', async (password) => {
                     try {
-                        // First, try to fetch or create the category (Subject)
                         const catRes = await fetch('/api/study/categories', { credentials: 'include' });
                         const catData = await catRes.json();
                         let categoryId = "";
                         
-                        // Simple check to find if subject exists, otherwise create it
                         let existingCat = null;
                         if (catData.success && catData.categories) {
                             existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
@@ -1259,7 +1304,6 @@
                             }
                         }
 
-                        // Now deploy the session (Without start/endTime)
                         const res = await fetch('/api/study/sessions', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -1272,6 +1316,7 @@
                             studySessionScheduleForm.reset();
                             const sDate = document.getElementById('schedStudyDate');
                             if (sDate) sDate.value = new Date().toISOString().split('T')[0];
+                            loadPanelStudySessions();
                         } else {
                             showStatusMessage("Failed to schedule study session", "error");
                         }
@@ -1428,7 +1473,7 @@
                             </div>
                         </div>
                     `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No habits deployed yet.</p>`; }
+                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No habits deployed yet.</p>`; }
             } catch (err) {}
         }
 
@@ -1602,7 +1647,7 @@
                             </div>
                         </div>
                     `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No study subjects found.</p>`; }
+                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No study subjects found.</p>`; }
             } catch (err) {}
         }
 
@@ -1689,7 +1734,7 @@
                             </div>
                         </div>
                     `).join('');
-                } else { container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No hygiene tasks found.</p>`; }
+                } else { container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-10">No hygiene tasks found.</p>`; }
             } catch (err) {}
         }
 
