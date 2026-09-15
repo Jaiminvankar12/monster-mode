@@ -187,7 +187,7 @@
             <!-- Target vs Progress Summary Badge with Study Streak -->
             <div class="glass-card px-6 py-4 rounded-2xl border border-blue-500/30 flex items-center gap-4 glow-blue bg-blue-500/5 w-full md:w-auto justify-around md:justify-start">
                 <div>
-                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Daily Target</span>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-black block">Today Target</span>
                     <span id="targetTimeLabel" class="text-base sm:text-lg font-black text-blue-400 tracking-wider">0h 00m</span>
                 </div>
                 <div class="h-8 w-[1px] bg-white/10"></div>
@@ -236,11 +236,6 @@
                 <button type="button" onclick="switchLogsTab('today')" id="tabToday" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer bg-blue-600 text-white shadow-lg">Today</button>
                 <button type="button" onclick="switchLogsTab('previous')" id="tabPrevious" class="flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition cursor-pointer text-zinc-400 hover:text-white">Previous</button>
             </div>
-
-            <!-- Dynamic Logs Container -->
-            <div id="logsTabContentContainer" class="space-y-4">
-                <!-- Populated dynamically via JS -->
-            </div>
         </div>
 
         <!-- FUSION FUTURISTIC WORKOUT & STUDY SCHEDULE HUD WIDGET -->
@@ -259,23 +254,25 @@
         <div id="pomodoroCardWrapper" class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-500 glow-blue">
             <div class="flex items-center justify-between mb-4">
                 <span class="text-xs font-black tracking-widest text-blue-400 uppercase flex items-center gap-2">
-                    <span>⏱️</span> Pomodoro Deep Work Focus Engine
+                    <span>⏱️</span> Live Session Tracker (0 to Target)
                 </span>
-                <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Focus Mode (25m)</span>
+                <span id="pomoModeBadge" class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase">Standby</span>
             </div>
             
             <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div class="text-5xl sm:text-6xl font-black text-white tracking-wider font-mono" id="pomoTimerDisplay">
-                    25:00
+                    00:00
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                     <div class="flex items-center gap-2 bg-[#05070b] border border-white/10 rounded-xl px-3 py-2 w-full sm:w-auto">
-                        <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Mins:</span>
-                        <input type="number" id="customPomoMinutes" value="25" min="1" max="1440" onchange="setCustomPomoDuration(this.value)" class="bg-transparent text-white text-xs font-black w-16 outline-none text-center">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase whitespace-nowrap">Target:</span>
+                        <input type="number" id="pomoHours" value="1" min="0" max="24" placeholder="HH" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
+                        <span class="text-zinc-500 font-bold">:</span>
+                        <input type="number" id="pomoMins" value="30" min="0" max="59" placeholder="MM" class="bg-transparent text-white text-xs font-black w-8 outline-none text-center">
                     </div>
                     <select id="pomoCategorySelect" class="bg-[#05070b] border border-white/10 text-white text-xs font-bold rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full sm:w-auto">
-                        <option value="">Select Subject for Pomo</option>
+                        <option value="">Select Subject for Session</option>
                     </select>
                     <button type="button" onclick="startPomodoro()" id="pomoStartBtn" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer">
                         Start Focus
@@ -306,7 +303,7 @@
         <div id="studyLoggingSection" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Log Study Session</h3>
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400 mb-4">⏱️ Manual Log Session</h3>
                     <form id="logSessionForm" class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Select Subject</label>
@@ -319,8 +316,12 @@
                             <input type="text" id="sessionTopic" required placeholder="e.g., Arrays & HashMaps" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Duration (Minutes)</label>
-                            <input type="number" id="sessionDuration" required value="45" min="5" step="5" class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                            <label class="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Duration (HH:MM)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="sessionHours" value="0" min="0" max="24" placeholder="HH" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                                <span class="text-zinc-500 font-bold">:</span>
+                                <input type="number" id="sessionMins" value="45" min="0" max="59" placeholder="MM" required class="w-full bg-[#05070b] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-blue-500 outline-none transition">
+                            </div>
                         </div>
                         <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition cursor-pointer">
                             Record Study Time
@@ -349,35 +350,33 @@
 
     <script>
         async function checkModuleLockStatus() {
-    try {
-        const res = await fetch('/api/module-locks', { credentials: 'include' });
-        const data = await res.json();
-        
-        // Study mate studyLocked check karvanu chhe
-        if (data.success && data.studyLocked) {
-            document.body.innerHTML = `
-                <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
-                    <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
-                        <span class="text-5xl animate-bounce">🔒</span>
-                        <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">STUDY TRACKER LOCKED</h2>
-                        <p class="text-xs sm:text-sm text-slate-300 font-medium">
-                            This specific module has been locked by the administrator.
-                        </p>
-                        <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
-                            Return to Dashboard
-                        </button>
-                    </div>
-                </div>
-            `;
+            try {
+                const res = await fetch('/api/module-locks', { credentials: 'include' });
+                const data = await res.json();
+                
+                if (data.success && data.studyLocked) {
+                    document.body.innerHTML = `
+                        <div class="fixed inset-0 bg-[#07090f] z-[99999] flex flex-col items-center justify-center p-6 text-center">
+                            <div class="glass-card p-8 rounded-3xl border-2 border-red-500/50 max-w-xl w-full shadow-[0_0_40px_rgba(239,68,68,0.3)] space-y-4">
+                                <span class="text-5xl animate-bounce">🔒</span>
+                                <h2 class="text-2xl font-black uppercase tracking-wider text-red-500">STUDY TRACKER LOCKED</h2>
+                                <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                                    This specific module has been locked by the administrator.
+                                </p>
+                                <button type="button" onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer transition">
+                                    Return to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {}
         }
-    } catch (err) {}
-}
 
-// DOMContentLoaded ma call karo:
-window.addEventListener('DOMContentLoaded', () => {
-    checkModuleLockStatus();
-    // Tamaru baki nu study load logic ahiya hase...
-});
+        window.addEventListener('DOMContentLoaded', () => {
+            checkModuleLockStatus();
+        });
+
         function getLocalDateString(date = new Date()) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -388,15 +387,25 @@ window.addEventListener('DOMContentLoaded', () => {
         let currentSelectedDate = getLocalDateString();
         let categoriesData = [];
         let currentLogsTab = 'today';
-        let pomoTimer = null;
-        let isPomoRunning = false;
-        let isBreakMode = false;
-        
         const LAUNCH_DATE = "2026-09-15";
 
-        let savedDefaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-        let pomoDurationMinutes = savedDefaultMins;
-        let pomoSecondsLeft = pomoDurationMinutes * 60;
+        // TIMER VARIABLES (Counting UP)
+        let pomoTimer = null;
+        let isPomoRunning = false;
+
+        function formatTimeHHMMSS(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            if (h > 0) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updatePomoDisplay(elapsedSecs = 0) {
+            document.getElementById('pomoTimerDisplay').innerText = formatTimeHHMMSS(elapsedSecs);
+        }
 
         function switchLogsTab(tab) {
             currentLogsTab = tab;
@@ -467,31 +476,28 @@ window.addEventListener('DOMContentLoaded', () => {
             verifyGlobalSystemLock();
             loadDashboardSchedules();
             
-            const inputField = document.getElementById('customPomoMinutes');
-            if(inputField) inputField.value = pomoDurationMinutes;
-            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-            
             const isActive = localStorage.getItem('pomo_active') === 'true';
             if (isActive) {
                 isPomoRunning = true;
-                isBreakMode = localStorage.getItem('pomo_isBreak') === 'true';
-                pomoDurationMinutes = parseInt(localStorage.getItem('pomo_duration')) || 25;
-                
                 document.getElementById('pomoStartBtn').innerText = "Pause";
-                document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
-                if (isBreakMode) {
-                    document.getElementById('pomoModeBadge').innerText = "☕ Short Break";
-                    document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                }
+                document.getElementById('pomoStartBtn').classList.replace('bg-blue-600', 'bg-amber-600');
                 
-                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
-                if (Date.now() >= endTime) {
-                    handleTimerComplete(); 
-                } else {
-                    runPomodoroLoop();
-                }
+                const targetSecs = parseInt(localStorage.getItem('pomo_targetSeconds')) || 0;
+                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${formatMinutes(Math.floor(targetSecs/60))})`;
+                document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
+                
+                runPomodoroLoop();
             } else {
-                updatePomoDisplay();
+                let pausedElapsed = parseInt(localStorage.getItem('pomo_pausedElapsed')) || 0;
+                if (pausedElapsed > 0) {
+                    updatePomoDisplay(pausedElapsed);
+                    document.getElementById('pomoStartBtn').innerText = "Resume";
+                    
+                    const targetSecs = parseInt(localStorage.getItem('pomo_targetSeconds')) || 0;
+                    document.getElementById('pomoModeBadge').innerText = `Focus Mode (${formatMinutes(Math.floor(targetSecs/60))}) - Paused`;
+                } else {
+                    updatePomoDisplay(0);
+                }
             }
 
             fetchStudyData();
@@ -639,7 +645,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 <div class="bg-[#05070b] border border-white/5 p-4 rounded-xl flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <h4 class="font-bold text-sm text-white truncate">${c.name}</h4>
-                        ${c.startTime && c.endTime ? `<span class="text-[10px] text-blue-400 font-bold uppercase block mt-1">⏰ Time Block: ${c.startTime} - ${c.endTime}</span>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -658,7 +663,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         <div class="min-w-0">
                             <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded font-extrabold uppercase">${cat ? cat.name : 'General'}</span>
                             <h4 class="font-bold text-sm text-white mt-1.5 truncate">${s.topic}</h4>
-                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${s.durationMinutes} minutes ${s.startTime && s.endTime ? '| (' + s.startTime + ' - ' + s.endTime + ')' : ''}</p>
+                            <p class="text-[10px] text-zinc-400 mt-0.5 truncate">Duration: ${formatMinutes(s.durationMinutes)}</p>
                         </div>
                         <button type="button" onclick="deleteSession('${s.id}')" class="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg cursor-pointer transition shrink-0">Remove</button>
                     </div>
@@ -677,70 +682,68 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             const optionsHtml = `<option value="">-- Select Subject --</option>` + categories.map(c => `
-                <option value="${c.id}">${c.name} ${c.startTime ? '(' + c.startTime + ')' : ''}</option>
+                <option value="${c.id}">${c.name}</option>
             `).join('');
 
             select1.innerHTML = optionsHtml;
             select2.innerHTML = optionsHtml;
         }
 
-        function updatePomoDisplay() {
-            let mins = Math.floor(pomoSecondsLeft / 60);
-            let secs = pomoSecondsLeft % 60;
-            document.getElementById('pomoTimerDisplay').innerText = 
-                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-
-        function setCustomPomoDuration(val) {
-            if (isPomoRunning) {
-                alert("Please pause or reset the active timer before changing duration.");
-                return;
-            }
-            let mins = parseInt(val);
-            if (isNaN(mins) || mins < 1) mins = 25;
-            pomoDurationMinutes = mins;
-            pomoSecondsLeft = pomoDurationMinutes * 60;
-            isBreakMode = false;
-            updatePomoDisplay();
-            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-        }
-
+        // ================= TIMER LOGIC (COUNT UP) =================
         function startPomodoro() {
             if (isPomoRunning) {
+                // Pause Timer
                 clearInterval(pomoTimer);
                 isPomoRunning = false;
-                localStorage.setItem('pomo_active', 'false'); 
+                localStorage.setItem('pomo_active', 'false');
                 
-                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
-                pomoSecondsLeft = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+                let startTs = parseInt(localStorage.getItem('pomo_startTimestamp')) || 0;
+                if (startTs > 0) {
+                    let elapsed = Math.floor((Date.now() - startTs) / 1000);
+                    localStorage.setItem('pomo_pausedElapsed', elapsed);
+                }
                 
-                document.getElementById('pomoStartBtn').innerText = isBreakMode ? "Resume Break" : "Resume Focus";
-                document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', isBreakMode ? 'bg-emerald-600' : 'bg-blue-600');
+                document.getElementById('pomoStartBtn').innerText = "Resume";
+                document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-blue-600');
+                
+                const targetSecs = parseInt(localStorage.getItem('pomo_targetSeconds')) || 0;
+                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${formatMinutes(Math.floor(targetSecs/60))}) - Paused`;
                 return;
             }
 
-            if (!isBreakMode) {
-                const categoryId = document.getElementById('pomoCategorySelect').value;
-                if (!categoryId) {
-                    alert("Please select a study subject for the Pomodoro session!");
-                    return;
-                }
-                localStorage.setItem('pomo_categoryId', categoryId);
-                const selectEl = document.getElementById('pomoCategorySelect');
-                const topicName = selectEl.options[selectEl.selectedIndex].text;
-                localStorage.setItem('pomo_topic', `Focus: ${topicName}`);
+            // Start or Resume
+            let h = parseInt(document.getElementById('pomoHours').value) || 0;
+            let m = parseInt(document.getElementById('pomoMins').value) || 0;
+            let targetMins = (h * 60) + m;
+            
+            if (targetMins <= 0) { alert("Please set a valid duration!"); return; }
+
+            const categoryId = document.getElementById('pomoCategorySelect').value;
+            if (!categoryId) {
+                alert("Please select a study subject for the Session!");
+                return;
             }
+
+            const selectEl = document.getElementById('pomoCategorySelect');
+            const topicName = selectEl.options[selectEl.selectedIndex].text;
+            
+            localStorage.setItem('pomo_categoryId', categoryId);
+            localStorage.setItem('pomo_topic', `${topicName}`);
+            localStorage.setItem('pomo_targetSeconds', targetMins * 60);
+
+            let pausedElapsed = parseInt(localStorage.getItem('pomo_pausedElapsed')) || 0;
+            let newStartTs = Date.now() - (pausedElapsed * 1000);
+
+            localStorage.setItem('pomo_startTimestamp', newStartTs);
+            localStorage.setItem('pomo_active', 'true');
+            localStorage.removeItem('pomo_pausedElapsed');
 
             isPomoRunning = true;
             document.getElementById('pomoStartBtn').innerText = "Pause";
-            document.getElementById('pomoStartBtn').classList.replace(isBreakMode ? 'bg-emerald-600' : 'bg-blue-600', 'bg-amber-600');
-
-            const endTime = Date.now() + (pomoSecondsLeft * 1000);
-            localStorage.setItem('pomo_active', 'true');
-            localStorage.setItem('pomo_isBreak', isBreakMode);
-            localStorage.setItem('pomo_duration', pomoDurationMinutes);
-            localStorage.setItem('pomo_endTime', endTime);
+            document.getElementById('pomoStartBtn').classList.replace('bg-blue-600', 'bg-amber-600');
+            
+            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${formatMinutes(targetMins)})`;
+            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
 
             runPomodoroLoop();
         }
@@ -751,103 +754,42 @@ window.addEventListener('DOMContentLoaded', () => {
                 const isActive = localStorage.getItem('pomo_active') === 'true';
                 if (!isActive) return clearInterval(pomoTimer);
 
-                const endTime = parseInt(localStorage.getItem('pomo_endTime'));
-                const diff = endTime - Date.now();
+                const startTs = parseInt(localStorage.getItem('pomo_startTimestamp'));
+                const targetSecs = parseInt(localStorage.getItem('pomo_targetSeconds'));
+                
+                const elapsedSecs = Math.floor((Date.now() - startTs) / 1000);
 
-                if (diff <= 0) {
+                if (elapsedSecs >= targetSecs) {
                     clearInterval(pomoTimer);
-                    pomoSecondsLeft = 0;
-                    updatePomoDisplay();
-                    handleTimerComplete();
+                    updatePomoDisplay(targetSecs);
+                    handleTimerComplete(targetSecs);
                 } else {
-                    pomoSecondsLeft = Math.ceil(diff / 1000);
-                    updatePomoDisplay();
+                    updatePomoDisplay(elapsedSecs);
                 }
             }, 1000);
         }
 
-        function handleTimerComplete() {
+        async function handleTimerComplete(targetSecs) {
             isPomoRunning = false;
             playBeepSound();
             localStorage.setItem('pomo_active', 'false');
+            localStorage.removeItem('pomo_pausedElapsed');
+            localStorage.removeItem('pomo_startTimestamp');
 
-            if (!isBreakMode) {
-                alert(`🎯 Focus Session Complete! Auto-logging ${pomoDurationMinutes}m session and starting 5m Break...`);
-                completePomodoroSession();
-
-                isBreakMode = true;
-                pomoSecondsLeft = 5 * 60;
-                document.getElementById('pomoModeBadge').innerText = "☕ Short Break (5m)";
-                document.getElementById('pomoModeBadge').className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                document.getElementById('pomoStartBtn').innerText = "Start Break";
-                document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-emerald-600');
-                updatePomoDisplay();
-            } else {
-                alert(`⚡ Break Over! Get back to the focus zone.`);
-                isBreakMode = false;
-                let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-                pomoDurationMinutes = defaultMins;
-                pomoSecondsLeft = pomoDurationMinutes * 60;
-                document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
-                document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-                document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-                document.getElementById('pomoStartBtn').innerText = "Start Focus";
-                document.getElementById('pomoStartBtn').classList.replace('bg-emerald-600', 'bg-blue-600');
-                updatePomoDisplay();
-            }
-        }
-
-        function resetPomodoro() {
-            clearInterval(pomoTimer);
-            isPomoRunning = false;
-            isBreakMode = false;
-            localStorage.setItem('pomo_active', 'false');
-            
-            let defaultMins = parseInt(localStorage.getItem('monster_default_pomo_mins')) || 25;
-            pomoDurationMinutes = defaultMins;
-            pomoSecondsLeft = pomoDurationMinutes * 60;
-            document.getElementById('customPomoMinutes').value = pomoDurationMinutes;
-            document.getElementById('pomoModeBadge').innerText = `Focus Mode (${pomoDurationMinutes}m)`;
-            document.getElementById('pomoModeBadge').className = "text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-extrabold uppercase";
-            updatePomoDisplay();
-            document.getElementById('pomoStartBtn').innerText = "Start Focus";
-            document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
-        }
-
-        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
-        function playSuccessAnimation() {
-            const overlay = document.getElementById('successOverlay');
-            overlay.classList.add('active');
-            
-            // Re-trigger SVG animation cleanly
-            const circle = overlay.querySelector('.success-checkmark__circle');
-            const check = overlay.querySelector('.success-checkmark__check');
-            circle.style.animation = 'none';
-            check.style.animation = 'none';
-            void circle.offsetWidth; // trigger reflow
-            void check.offsetWidth;
-            circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
-            check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
-
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 2500); // Overlay stays for 2.5 seconds before fading out
-        }
-
-        async function completePomodoroSession() {
             const categoryId = localStorage.getItem('pomo_categoryId') || document.getElementById('pomoCategorySelect').value;
-            const dur = parseInt(localStorage.getItem('pomo_duration')) || pomoDurationMinutes;
+            const targetMins = Math.floor(targetSecs / 60);
+            const topic = localStorage.getItem('pomo_topic') || "Study Session";
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
-            
-            const selectedCat = categoriesData.find(c => c.id === categoryId);
-            const startTime = selectedCat ? selectedCat.startTime || "" : "";
-            const endTime = selectedCat ? selectedCat.endTime || "" : "";
 
             localStorage.removeItem('pomo_categoryId');
             localStorage.removeItem('pomo_topic');
-            localStorage.removeItem('pomo_duration');
+            localStorage.removeItem('pomo_targetSeconds');
 
-            // 🚀 TRIGGER OVERLAY ANIMATION ON SUCCESS 🚀
+            document.getElementById('pomoStartBtn').innerText = "Start Focus";
+            document.getElementById('pomoStartBtn').classList.replace('bg-amber-600', 'bg-blue-600');
+            document.getElementById('pomoModeBadge').innerText = "Standby";
+            updatePomoDisplay(0);
+
             playSuccessAnimation();
 
             try {
@@ -857,11 +799,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     credentials: 'include',
                     body: JSON.stringify({
                         categoryId: categoryId,
-                        topic: `Deep Work Focus (${dur}m)`,
-                        durationMinutes: dur,
-                        date: targetDate,
-                        startTime,
-                        endTime
+                        topic: topic,
+                        sessionName: topic,
+                        subjectName: topic,
+                        durationMinutes: targetMins,
+                        date: targetDate
                     })
                 });
                 
@@ -882,22 +824,61 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error(err);
-                alert("❌ Connection Error: Could not sync Pomodoro session with MongoDB Cloud.");
+                alert("❌ Connection Error: Could not sync session with MongoDB Cloud.");
             }
         }
 
+        function resetPomodoro() {
+            clearInterval(pomoTimer);
+            isPomoRunning = false;
+            localStorage.setItem('pomo_active', 'false');
+            localStorage.removeItem('pomo_pausedElapsed');
+            localStorage.removeItem('pomo_startTimestamp');
+            localStorage.removeItem('pomo_targetSeconds');
+            
+            updatePomoDisplay(0);
+            
+            document.getElementById('pomoModeBadge').innerText = "Standby";
+            document.getElementById('pomoStartBtn').innerText = "Start Focus";
+            document.getElementById('pomoStartBtn').className = "w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold rounded-xl text-xs uppercase tracking-widest transition shadow-lg shadow-blue-600/30 cursor-pointer";
+        }
+
+        // 🚀 PLAY SUCCESS ANIMATION FUNCTION
+        function playSuccessAnimation() {
+            const overlay = document.getElementById('successOverlay');
+            overlay.classList.add('active');
+            
+            const circle = overlay.querySelector('.success-checkmark__circle');
+            const check = overlay.querySelector('.success-checkmark__check');
+            circle.style.animation = 'none';
+            check.style.animation = 'none';
+            void circle.offsetWidth;
+            void check.offsetWidth;
+            circle.style.animation = 'stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards';
+            check.style.animation = 'stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards';
+
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 2500);
+        }
+
+        // Manual Form Submission
         document.getElementById('logSessionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const categoryId = document.getElementById('sessionCategorySelect').value;
             const topic = document.getElementById('sessionTopic').value;
-            const durationMinutes = document.getElementById('sessionDuration').value;
+            
+            const h = parseInt(document.getElementById('sessionHours').value) || 0;
+            const m = parseInt(document.getElementById('sessionMins').value) || 0;
+            const durationMinutes = (h * 60) + m;
+
+            if (durationMinutes <= 0) {
+                alert("Please enter a valid duration!");
+                return;
+            }
+
             const targetDate = document.getElementById('targetDateInput').value || currentSelectedDate;
 
-            const selectedCat = categoriesData.find(c => c.id === categoryId);
-            const startTime = selectedCat ? selectedCat.startTime || "" : "";
-            const endTime = selectedCat ? selectedCat.endTime || "" : "";
-
-            // 🚀 TRIGGER OVERLAY ANIMATION ON SUCCESS 🚀
             playSuccessAnimation();
 
             try {
@@ -905,7 +886,14 @@ window.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ categoryId, topic, durationMinutes, date: targetDate, startTime, endTime })
+                    body: JSON.stringify({ 
+                        categoryId, 
+                        topic, 
+                        durationMinutes, 
+                        date: targetDate,
+                        sessionName: topic,
+                        subjectName: topic
+                    })
                 });
                 
                 if (!res.ok) {
@@ -920,7 +908,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('logSessionForm').reset();
-                    document.getElementById('sessionDuration').value = "45";
+                    document.getElementById('sessionHours').value = "0";
+                    document.getElementById('sessionMins').value = "45";
                     fetchStudyData(targetDate);
                 } else {
                     alert(data.error || "Failed to log session.");

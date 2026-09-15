@@ -6,7 +6,6 @@
     <title>MONSTER MODE ON — Master Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- 🐲 Monster Favicon properly added -->
     <link rel="icon" href="images/dragon 1.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ef4444">
@@ -79,13 +78,11 @@
             --theme-gradient: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
             --theme-glow: rgba(239, 68, 68, 0.2);
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #05070b; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--theme-primary, #ef4444); }
 
-        /* 🔥 NEW ADDITIONS: CYBERPUNK ULTRA-SMOOTH FLOW & GLOW ANIMATIONS 🔥 */
         html {
             scroll-behavior: smooth !important;
         }
@@ -159,7 +156,7 @@
             </div>
             <div>
                 <h1 class="text-sm font-black uppercase tracking-wider text-white">MONSTER COMMAND HUB</h1>
-                <p class="text-[9px] text-red-500 uppercase tracking-widest font-extrabold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Secure Core Online</p>
+                <p class="text-[9px] text-red-500 uppercase tracking-widest font-extrabold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-50 animate-ping"></span> Secure Core Online</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
@@ -382,14 +379,18 @@
                     <div class="glass-card p-6 sm:p-8 rounded-3xl border border-blue-500/30">
                         <h3 class="text-sm font-black uppercase tracking-wider text-blue-400 mb-4 flex items-center gap-2"><span>🎯</span> Fixed Daily Study Target Hours</h3>
                         <form id="fixedDailyTargetForm" onsubmit="handleFixedDailyTargetSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Date (For Planning)</label>
+                                <input type="date" id="studyTargetDate" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
+                            </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Hours</label>
-                                    <input type="number" id="studyTargetHours" value="7" min="0" max="24" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Hours">
+                                    <input type="number" id="studyTargetHours" value="7" min="0" max="24" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Hours" required>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Target Minutes</label>
-                                    <input type="number" id="studyTargetMins" value="0" min="0" max="59" step="5" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Minutes">
+                                    <input type="number" id="studyTargetMins" value="0" min="0" max="59" step="5" class="w-full bg-[#030408] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Minutes" required>
                                 </div>
                             </div>
                             <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">
@@ -446,7 +447,7 @@
                             <button type="submit" class="w-full py-3.5 red-glow-tab text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg">Save Workout Schedule</button>
                         </form>
 
-                        <!-- 2. Multiple Study Sessions Scheduler (Start & End Time) -->
+                        <!-- 2. Multiple Study Sessions Scheduler (Duration Based only) -->
                         <form id="createStudySessionScheduleForm" class="space-y-4 bg-[#030408] p-5 rounded-2xl border border-white/10">
                             <h4 class="text-xs font-black uppercase text-blue-400">📚 Schedule Specific Study Session Time-Block</h4>
                             <div>
@@ -461,23 +462,19 @@
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Topic / Sub-topic</label>
                                 <input type="text" id="schedStudyTopic" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" placeholder="Optional topic details...">
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time ⏰</label>
-                                    <input type="time" id="schedStudyStart" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time 🏁</label>
-                                    <input type="time" id="schedStudyEnd" required class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
-                                </div>
-                            </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Date</label>
-                                <input type="date" id="schedStudyDate" value="2026-09-15" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                                <input type="date" id="schedStudyDate" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Duration (Minutes)</label>
-                                <input type="number" id="schedStudyDuration" value="60" min="5" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Duration (Hours)</label>
+                                    <input type="number" id="schedStudyHours" value="1" min="0" max="24" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Duration (Minutes)</label>
+                                    <input type="number" id="schedStudyMins" value="30" min="0" max="59" step="5" class="w-full bg-[#07090f] border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm outline-none shadow-inner" required>
+                                </div>
                             </div>
                             <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg shadow-blue-600/30">Deploy Study Session Time-Block</button>
                         </form>
@@ -707,6 +704,8 @@
 
     <!-- 🔊 GLOBAL CYBERPUNK SOUND EFFECTS -->
     <script>
+        // ... (Keep existing script functions up to handleFixedDailyTargetSubmit) ...
+
         let audioCtx = null;
         
         function playCyberClick() {
@@ -926,14 +925,24 @@
             }
         }
 
+        // --- FIXED DAILY TARGET (MODIFIED WITH DATE) ---
         function handleFixedDailyTargetSubmit(e) {
             e.preventDefault();
+            const dateInput = document.getElementById('studyTargetDate');
             const hoursInput = document.getElementById('studyTargetHours');
             const minsInput = document.getElementById('studyTargetMins');
 
+            const date = dateInput ? dateInput.value : '';
             const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
             const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
+            
+            // Total minutes calculate
             const dailyTargetMinutes = (hours * 60) + minutes;
+
+            if (!date) {
+                showStatusMessage("Please select a target date.", "error");
+                return;
+            }
 
             requestSecureAuthorization('edit', async (password) => {
                 try {
@@ -941,12 +950,13 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ dailyTargetMinutes, password })
+                        body: JSON.stringify({ dailyTargetMinutes, date, password })
                     });
+                    const data = await res.json();
                     if (res.ok) {
-                        showStatusMessage(`✅ Daily Target Hours Set to ${hours}h ${minutes}m (${dailyTargetMinutes} mins)!`, "success");
+                        showStatusMessage(`✅ Target for ${date} set to ${hours}h ${minutes}m!`, "success");
                     } else {
-                        showStatusMessage("❌ Failed to update global target hours", "error");
+                        showStatusMessage("❌ " + (data.error || "Failed to update target"), "error");
                     }
                 } catch (err) {
                     showStatusMessage("❌ Connection error", "error");
@@ -1007,6 +1017,10 @@
             if (tab === 'landingBg') { loadLandingBgConfig(); loadGatewayTextConfig(); }
             if (tab === 'dashboardBg') loadDashboardBgConfig();
             if (tab === 'targets') loadTargets();
+            if (tab === 'study') {
+                const tDate = document.getElementById('studyTargetDate');
+                if(tDate && !tDate.value) tDate.value = new Date().toISOString().split('T')[0];
+            }
         }
 
         function showStatusMessage(message, type = 'success') {
@@ -1116,6 +1130,7 @@
             });
         }
 
+        // --- MODIFIED SCHEDULE STUDY SESSION (DURATION ONLY) ---
         const studySessionScheduleForm = document.getElementById('createStudySessionScheduleForm');
         if (studySessionScheduleForm) {
             studySessionScheduleForm.addEventListener('submit', async (e) => {
@@ -1123,26 +1138,39 @@
                 const sessionNameEl = document.getElementById('schedStudySessionName');
                 const subjectNameEl = document.getElementById('schedStudySubjectName');
                 const topicEl = document.getElementById('schedStudyTopic');
-                const startEl = document.getElementById('schedStudyStart');
-                const endEl = document.getElementById('schedStudyEnd');
                 const dateEl = document.getElementById('schedStudyDate');
-                const durationEl = document.getElementById('schedStudyDuration');
+                const hoursEl = document.getElementById('schedStudyHours');
+                const minsEl = document.getElementById('schedStudyMins');
 
                 const sessionName = sessionNameEl ? sessionNameEl.value : '';
                 const subjectName = subjectNameEl ? subjectNameEl.value : '';
                 const topic = topicEl ? (topicEl.value || sessionName) : sessionName;
-                const startTime = startEl ? startEl.value : '';
-                const endTime = endEl ? endEl.value : '';
                 const date = dateEl ? dateEl.value : '';
-                const durationMinutes = durationEl ? durationEl.value : '';
+                
+                const hours = hoursEl ? parseInt(hoursEl.value) || 0 : 0;
+                const minutes = minsEl ? parseInt(minsEl.value) || 0 : 0;
+                const durationMinutes = (hours * 60) + minutes;
+
+                if (durationMinutes <= 0) {
+                    showStatusMessage("Duration must be greater than 0", "error");
+                    return;
+                }
 
                 requestSecureAuthorization('add', async (password) => {
                     try {
+                        // First, try to fetch or create the category (Subject)
                         const catRes = await fetch('/api/study/categories', { credentials: 'include' });
                         const catData = await catRes.json();
                         let categoryId = "";
-                        if (catData.success && catData.categories.length > 0) {
-                            categoryId = catData.categories[0].id;
+                        
+                        // Simple check to find if subject exists, otherwise create it
+                        let existingCat = null;
+                        if (catData.success && catData.categories) {
+                            existingCat = catData.categories.find(c => c.name.toLowerCase() === subjectName.toLowerCase());
+                        }
+
+                        if (existingCat) {
+                            categoryId = existingCat.id;
                         } else {
                             const newCatRes = await fetch('/api/study/categories', {
                                 method: 'POST',
@@ -1151,18 +1179,24 @@
                                 body: JSON.stringify({ name: subjectName || "General Study", dailyTargetMinutes: 120, password })
                             });
                             const newCatData = await newCatRes.json();
-                            categoryId = newCatData.category.id;
+                            if(newCatData.success) {
+                                categoryId = newCatData.category.id;
+                            } else {
+                                showStatusMessage("Failed to create new subject category.", "error");
+                                return;
+                            }
                         }
 
+                        // Now deploy the session (Without start/endTime)
                         const res = await fetch('/api/study/sessions', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date, startTime, endTime })
+                            body: JSON.stringify({ categoryId, sessionName, subjectName, topic, durationMinutes, date })
                         });
 
                         if (res.ok) {
-                            showStatusMessage("Study session time-block scheduled successfully!", "success");
+                            showStatusMessage("Study session pre-planned successfully!", "success");
                             studySessionScheduleForm.reset();
                             const sDate = document.getElementById('schedStudyDate');
                             if (sDate) sDate.value = new Date().toISOString().split('T')[0];
@@ -1181,10 +1215,8 @@
                 if (data.success) {
                     const wrd = document.getElementById('workoutReminderDateInput');
                     const wrt = document.getElementById('workoutReminderTimeInput');
-                    const srt = document.getElementById('studyReminderTimeInput');
                     if (wrd) wrd.value = data.workoutReminderDate || "";
                     if (wrt) wrt.value = data.workoutReminderTime || "";
-                    if (srt) srt.value = data.studyReminderTime || "";
                 }
             } catch (err) {}
         }
@@ -1195,11 +1227,9 @@
                 e.preventDefault();
                 const wrd = document.getElementById('workoutReminderDateInput');
                 const wrt = document.getElementById('workoutReminderTimeInput');
-                const srt = document.getElementById('studyReminderTimeInput');
 
                 const workoutReminderDate = wrd ? wrd.value : "";
                 const workoutReminderTime = wrt ? wrt.value : "";
-                const studyReminderTime = srt ? srt.value : "";
 
                 requestSecureAuthorization('edit', async (password) => {
                     try {
@@ -1207,11 +1237,11 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'include',
-                            body: JSON.stringify({ workoutReminderDate, workoutReminderTime, studyReminderTime, password })
+                            body: JSON.stringify({ workoutReminderDate, workoutReminderTime, password })
                         });
                         const data = await res.json();
                         if (res.ok) {
-                            showStatusMessage("Workout schedule and time management updated successfully!", "success");
+                            showStatusMessage("Workout schedule updated successfully!", "success");
                         } else {
                             alert("❌ " + data.error);
                         }
@@ -1902,37 +1932,7 @@
                 btn.innerText = `🟢 ${moduleKey.toUpperCase()}: ACTIVE`;
             }
         }
-        function handleFixedDailyTargetSubmit(e) {
-    e.preventDefault();
-    const hoursInput = document.getElementById('studyTargetHours');
-    const minsInput = document.getElementById('studyTargetMins');
-
-    const hours = hoursInput ? parseInt(hoursInput.value) || 0 : 0;
-    const minutes = minsInput ? parseInt(minsInput.value) || 0 : 0;
-    
-    // Total minutes calculate thase (e.g., 7 hours = 420 mins)
-    const dailyTargetMinutes = (hours * 60) + minutes;
-
-    requestSecureAuthorization('edit', async (password) => {
-        try {
-            const res = await fetch('/api/study/global-target', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ dailyTargetMinutes, password })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                showStatusMessage(`✅ Daily Target Hours Set to ${hours}h ${minutes}m (${dailyTargetMinutes} mins)!`, "success");
-            } else {
-                showStatusMessage("❌ " + (data.error || "Failed to update target"), "error");
-            }
-        } catch (err) {
-            showStatusMessage("❌ Connection error", "error");
-        }
-    });
-}
-
+        
         window.addEventListener('DOMContentLoaded', () => {
             loadHabits(); 
             loadWorkouts(); 

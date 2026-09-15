@@ -316,7 +316,7 @@
         <!-- 🟢 HUD WIDGET (WITH LIVE COUNTDOWN TIMERS) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             
-            <!-- NEW WORKOUT HUD CARD (REPLACES OLD HTML CARD) -->
+            <!-- NEW WORKOUT HUD CARD -->
             <div class="cyber-hud-card workout-hud p-6 rounded-3xl flex flex-col justify-between">
                 <div class="flex justify-between items-start mb-4">
                     <div class="space-y-1">
@@ -337,7 +337,6 @@
                     </button>
                 </div>
             </div>
-            <!-- END WORKOUT HUD CARD -->
 
             <div class="cyber-hud-card study-hud p-6 rounded-3xl flex flex-col justify-between">
                 <div class="flex justify-between items-start mb-4">
@@ -1097,10 +1096,6 @@
                                 <span class="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-1 rounded font-black uppercase tracking-widest inline-block mb-2">📚 Today Study Core</span>
                                 <h4 class="font-black text-base text-white">${s.sessionName || s.topic || 'Study Session'}</h4>
                                 <p class="text-xs text-blue-400 font-bold mt-1">📖 Subject: ${s.subjectName || 'General'}</p>
-                            </div>
-                            <div class="bg-[#07090f] p-3 rounded-xl border border-white/5 flex items-center justify-between text-xs">
-                                <span class="text-slate-400 font-bold">⏰ Time Block:</span>
-                                <span class="text-emerald-400 font-black">${s.startTime || '--:--'} - ${s.endTime || '--:--'}</span>
                             </div>
                             <div class="text-[10px] text-slate-400 font-bold">⏱️ Duration: ${s.durationMinutes} Minutes</div>
                         </div>

@@ -41,7 +41,7 @@ const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);
 const studyCategorySchema = new mongoose.Schema({ id: String, userId: String, name: String, dailyTargetMinutes: Number, startDate: String, endDate: String, createdAt: String });
 const StudyCategory = mongoose.model('StudyCategory', studyCategorySchema);
 
-// 🟢 STUDY SESSIONS SCHEMA UPDATED WITH SESSION NAME, SUBJECT NAME, START & END TIME SUPPORT
+// 🟢 STUDY SESSIONS SCHEMA UPDATED (Start/End time removed, strictly Duration based now)
 const studySessionSchema = new mongoose.Schema({ 
     id: String, 
     userId: String, 
@@ -51,10 +51,6 @@ const studySessionSchema = new mongoose.Schema({
     subjectName: { type: String, default: "" },
     durationMinutes: Number, 
     date: String, 
-    startTime: { type: String, default: "" }, 
-    endTime: { type: String, default: "" },     
-    startNotified: { type: Boolean, default: false },
-    endNotified: { type: Boolean, default: false },
     createdAt: String 
 });
 const StudySession = mongoose.model('StudySession', studySessionSchema);
@@ -250,7 +246,7 @@ function moduleApiGuard(moduleName) {
         if (moduleName === 'hydration' && lockStatus.hydrationLocked) return res.status(403).json({ error: "🔒 Hydration Matrix is locked by Admin." });
         if (moduleName === 'hygiene' && lockStatus.hygieneLocked) return res.status(403).json({ error: "🔒 Hygiene Tracker is locked by Admin." });
         
-        return next(); // 🔥 FIX: `return` add karyu jethi moduleLock proper true thai.
+        return next(); 
     };
 }
 
@@ -642,7 +638,7 @@ async function sendTelegramMessage(message) {
     await sendTelegramNotification(message);
 }
 
-// 🟢 CRON: Reminders + Workout/Study Timed Alerts + Study Session Start & End Telegram Notifications
+// 🟢 CRON: Reminders + Workout/Study Timed Alerts
 cron.schedule('* * * * *', async () => {
     if (isCronRunning) return;
     isCronRunning = true;
@@ -698,21 +694,6 @@ cron.schedule('* * * * *', async () => {
                 gs.studyNotifiedDate = todayStr;
                 await gs.save();
                 await sendTelegramMessage(`📚 *MONSTER STUDY SESSION!*\n\n⏰ Scheduled Time: *${currentTimeStr}*\n🔥 Deep work mode ON. Dominate your targets!`);
-            }
-        }
-
-        // 3. 🟢 Study Sessions Start & End Time Telegram Notifications with Session & Subject Name
-        const activeSessionsToday = await StudySession.find({ date: todayStr });
-        for (let session of activeSessionsToday) {
-            if (session.startTime && session.startTime === currentTimeStr && !session.startNotified) {
-                session.startNotified = true;
-                await session.save();
-                await sendTelegramMessage(`📚 *STUDY SESSION STARTED*\n\n🎯 Session: *${session.sessionName || session.topic}*\n📖 Subject: *${session.subjectName || 'General'}*\n⏰ Time: ${session.startTime} - ${session.endTime || 'N/A'}\n🔥 Focus locked. Let's execute!`);
-            }
-            if (session.endTime && session.endTime === currentTimeStr && !session.endNotified) {
-                session.endNotified = true;
-                await session.save();
-                await sendTelegramMessage(`🏁 *STUDY SESSION FINISHED*\n\n🎯 Session: *${session.sessionName || session.topic}*\n📖 Subject: *${session.subjectName || 'General'}*\n⏱️ Your session time is finished! Great work executing.`);
             }
         }
 
@@ -1374,6 +1355,7 @@ app.get('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =>
     
     res.json({ success: true, categories, sessions, totalTargetMinutes: syncResult.totalTargetMinutes, totalStudiedMinutes: syncResult.totalStudiedMinutes, isDone: syncResult.studyDone, currentStreak, studyStreak: currentStreak, serverDate: targetDate, dateStatus, ...xpInfo });
 });
+
 // 🟢 GLOBAL STUDY TARGET API (Control Panel Mathi Target Set Karva Mate)
 app.post('/api/study/global-target', requireAuth, async (req, res) => {
     const { dailyTargetMinutes, password } = req.body;
@@ -1397,7 +1379,8 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
     let moduleLock = await moduleApiGuard('study')(req, res, () => true);
     if(moduleLock !== true) return; // Locked response already sent by guard
 
-    const { categoryId, topic, sessionName, subjectName, durationMinutes, date, startTime, endTime } = req.body;
+    // StartTime અને EndTime અહીંથી કાઢી નાખ્યા છે.
+    const { categoryId, topic, sessionName, subjectName, durationMinutes, date } = req.body;
     if (!categoryId || !durationMinutes) return res.status(400).json({ error: "Required fields missing." });
     
     const today = getServerToday();
@@ -1413,16 +1396,16 @@ app.post('/api/study/sessions', requireAuth, trackerApiGuard, async (req, res) =
             subjectName: subjectName || "General",
             durationMinutes: parseInt(durationMinutes), 
             date: targetDate, 
-            startTime: startTime || "", 
-            endTime: endTime || "", 
-            startNotified: false, 
-            endNotified: false, 
             createdAt: new Date().toISOString()
         });
         await newSession.save();
 
         let updatedXP = await addXP(MASTER_USER_ID, parseInt(durationMinutes) * 2);
         const currentStreak = await calculateStudyStreak(MASTER_USER_ID);
+        
+        // 🟢 નવું ઓટોમેટિક ટેલિગ્રામ નોટિફિકેશન (જ્યારે સેશન સેવ થાય ત્યારે)
+        await sendTelegramMessage(`📚 *STUDY SESSION LOGGED*\n\n🎯 Session: *${newSession.sessionName}*\n📖 Subject: *${newSession.subjectName}*\n⏱️ Duration: ${newSession.durationMinutes} mins\n🔥 Great execution!`);
+
         res.json({ success: true, session: newSession, currentStreak, studyStreak: currentStreak, ...updatedXP });
     } catch (error) {
         console.error("MongoDB Save Error:", error);
