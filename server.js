@@ -11,11 +11,8 @@ const cron = require('node-cron');
 const fetch = require('node-fetch');
 const mongoose = require('mongoose');
 const { getServerToday, validateDateAccess } = require('./server/services/dateService');
-const { GoogleGenAI } = require('@google/genai'); // 🟢 Gemini AI Integration (v2 SDK)
+const { GoogleGenerativeAI } = require('@google/generative-ai'); // 🟢 Gemini AI Integration
 require('dotenv').config();
-
-// 🟢 FIXED: genAI અહી સૌથી ઉપર ડિફાઇન કર્યું છે જેથી ReferenceError ના આવે (નીચેની લાઈન કમેન્ટ કરી છે)
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY" });
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -28,134 +25,6 @@ const MONGO_URI = "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluste
 mongoose.connect(MONGO_URI)
     .then(() => console.log("🔥 MONSTER MODE: MongoDB Atlas કનેક્ટ થઈ ગયું! (Database is LIVE)"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
-// ============================================================================
-// 🤖 JARVIS — REAL AI ASSISTANT (live data + memory, not static arrays)
-// ============================================================================
-const jarvisChatSchema = new mongoose.Schema({
-    userId: String,
-    date: String,
-    messages: [{
-        role: String,       // 'user' | 'model'
-        text: String,
-        timestamp: String
-    }],
-    createdAt: String
-});
-const JarvisChat = mongoose.model('JarvisChat', jarvisChatSchema);
-// 🟢 Pulls FRESH data every single call — never stale/hardcoded
-async function buildJarvisContext(userId = MASTER_USER_ID) {
-    const today = getServerToday();
-
-    const [habits, workouts, categories, xpInfo, hydData, sync,
-        habitStreak, workoutStreak, studyStreak, hygieneStreak, sanctuary, examData, nuclear] = await Promise.all([
-        Habit.find({ userId }),
-        Workout.find({ userId }),
-        StudyCategory.find({ userId }),
-        getUserXP(userId),
-        getHydrationData(userId),
-        runServerSyncEngine(userId, today),
-        calculateHabitStreak(userId),
-        calculateWorkoutStreak(userId),
-        calculateStudyStreak(userId),
-        calculateHygieneStreak(userId),
-        getSanctuaryData(userId),
-        getExamModeData(userId),
-        getNuclearState(userId)
-    ]);
-
-    const habitLogsToday = await HabitLog.find({ userId, date: today });
-    const workoutLogsToday = await WorkoutLog.find({ userId, date: today });
-
-    const habitsStatus = habits.map(h => {
-        const log = habitLogsToday.find(l => l.habitId === h.id);
-        return `${h.name} [${log && log.completed ? 'DONE' : 'PENDING'}]`;
-    }).join(', ') || 'None configured';
-
-    const workoutsStatus = workouts.map(w => {
-        const log = workoutLogsToday.find(l => l.workoutId === w.id);
-        return `${w.name} (${w.sets}x${w.value}${w.unit}) [${log && log.completed ? 'DONE' : 'PENDING'}]`;
-    }).join(', ') || 'None configured';
-
-    const hydConsumed = hydData.logs[today] || 0;
-
-    return `
-=== LIVE MONSTER MODE DATA (${today}) ===
-LEVEL: ${xpInfo.level} | XP: ${xpInfo.xp}
-STREAKS -> Habits: ${habitStreak}d | Workouts: ${workoutStreak}d | Study: ${studyStreak}d | Hygiene: ${hygieneStreak}d
-SANCTUARY: ${sanctuary.enabled ? 'ON (protected today)' : 'OFF'}
-LOCKDOWN: ${nuclear.hardcoreLocked ? 'ACTIVE — ' + nuclear.lockReason : 'Inactive'}
-TODAY HABITS: ${habitsStatus}
-TODAY WORKOUTS: ${workoutsStatus} (All done: ${sync.allWorkoutsDone})
-TODAY STUDY: ${sync.totalStudiedMinutes}/${sync.totalTargetMinutes} min (Done: ${sync.studyDone}) | Exam Mode: ${examData.enabled}
-TODAY HYDRATION: ${hydConsumed}/${hydData.goal} ml
-CATEGORIES: ${categories.map(c => c.name).join(', ') || 'None'}
-=== END LIVE DATA ===`.trim();
-}
-
-// 🟢 MAIN JARVIS CHAT ENDPOINT — real conversation, live data, memory
-// app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
-// 🟢 FIXED: આ રૂટ નીચે ફરીવાર છે, એટલે અહી નામ બદલીને _old કર્યું છે (કોઈ લાઈન ડીલીટ નથી કરી)
-app.post('/api/jarvis/chat_old', requireAuth, async (req, res) => {
-    try {
-        const { message } = req.body;
-        if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
-
-        const userId = MASTER_USER_ID;
-        const today = getServerToday();
-
-        let chatDoc = await JarvisChat.findOne({ userId, date: today });
-        if (!chatDoc) chatDoc = new JarvisChat({ userId, date: today, messages: [], createdAt: new Date().toISOString() });
-
-        const liveContext = await buildJarvisContext(userId);
-
-        const systemInstruction = `You are JARVIS — the personal AI assistant embedded inside "MONSTER MODE", a hardcore discipline-tracking app.
-Tone: sharp, witty, loyal, slightly sarcastic like Tony Stark's JARVIS — but genuinely useful.
-You have REAL-TIME access to the user's live data below — always use it instead of guessing.
-You can answer ANYTHING: questions about this app, their progress, general knowledge, coding, motivation — you're a full general-purpose assistant, not a scripted bot.
-Keep replies concise, punchy, light Markdown when useful.
-
-${liveContext}`;
-
-        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
-            return res.json({ success: true, reply: "⚠️ Jarvis neural core offline — GEMINI_API_KEY not configured." });
-        }
-
-        // Build contents array: system context + full conversation history + new message
-        const historyContents = chatDoc.messages.slice(-20).map(m => ({
-            role: m.role === 'model' ? 'model' : 'user',
-            parts: [{ text: m.text }]
-        }));
-
-        const contents = [
-            { role: 'user', parts: [{ text: systemInstruction }] },
-            { role: 'model', parts: [{ text: "Understood. JARVIS online, live data synced. Ready." }] },
-            ...historyContents,
-            { role: 'user', parts: [{ text: message }] }
-        ];
-
-        const response = await genAI.models.generateContent({
-            // model: 'gemini-3.6-flash',
-            model: 'gemini-1.5-flash', // 🟢 FIXED: સાચું મોડલ નામ સેટ કર્યું
-            contents
-        });
-
-        const replyText = response.text.trim();
-
-        chatDoc.messages.push({ role: 'user', text: message, timestamp: new Date().toISOString() });
-        chatDoc.messages.push({ role: 'model', text: replyText, timestamp: new Date().toISOString() });
-        await chatDoc.save();
-
-        res.json({ success: true, reply: replyText });
-    } catch (err) {
-        console.error("Jarvis Chat Error:", err);
-        res.status(500).json({ error: "Jarvis neural link disrupted. Try again.", details: err.message });
-    }
-});
-
-app.get('/api/jarvis/history', requireAuth, async (req, res) => {
-    const chatDoc = await JarvisChat.findOne({ userId: MASTER_USER_ID, date: getServerToday() });
-    res.json({ success: true, messages: chatDoc ? chatDoc.messages : [] });
-});
 
 const habitSchema = new mongoose.Schema({ id: String, userId: String, name: String, category: String, description: String, startDate: String, endDate: String, createdAt: String });
 const Habit = mongoose.model('Habit', habitSchema);
@@ -336,10 +205,8 @@ const checkSystemSleep = (req, res, next) => {
     next();
 };
 
-// app.use(express.urlencoded({ extended: true }));
-// 🟢 FIXED: Image Dimension / Size Error સોલ્વ કરવા પેલોડની સાઈઝ લિમિટ 50mb કરી છે
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Apply system sleep check to all API routes
 app.use('/api/', checkSystemSleep);
@@ -1771,12 +1638,22 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 await sendTelegramNotification(reply);
             } 
             else if (text === '/roast' || text === '/motivation') {
-    const coachMessage = await askGemini(
-        "Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.",
-        "Discipline equals absolute freedom."
-    );
-    await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
-}
+                let coachMessage = "Discipline equals absolute freedom.";
+                if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+                    try {
+                        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                        const result = await model.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                        coachMessage = result.response.text().trim();
+                    } catch(e1) {
+                        try {
+                            const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                            const resFlash = await modelFlash.generateContent("Give a brutal David Goggins style roast for someone slacking on their goals. Keep it short.");
+                            coachMessage = resFlash.response.text().trim();
+                        } catch(e2) {}
+                    }
+                }
+                await sendTelegramNotification(`🤖 *AI COACH VERDICT*\n\n"${coachMessage}"`);
+            }
         }
         res.status(200).send('OK');
     } catch (err) {
@@ -1786,25 +1663,8 @@ app.post('/api/telegram-webhook', async (req, res) => {
 });
 
 // 🧠 REAL GEMINI AI INTEGRATION
-// const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); 
-// 🟢 FIXED: આ લાઈન ડીલીટ નથી કરી, તેને ઉપર મૂકી છે એટલે અહી કમેન્ટ કરી છે
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY");
 
-// 🤖 UNIVERSAL GEMINI HELPER — naavu SDK, ek j jagya thi call thay
-async function askGemini(promptText, fallbackText = "Execution is everything. Stop complaining.") {
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
-        return fallbackText;
-    }
-    try {
-        const response = await genAI.models.generateContent({
-            model: 'gemini-1.5-flash', // 🟢 FIXED: 3.6 ને બદલે સાચું નામ 1.5 કર્યું છે
-            contents: promptText
-        });
-        return response.text.trim().replace(/"/g, '');
-    } catch (err) {
-        console.error("Gemini API Error:", err.message);
-        return fallbackText;
-    }
-}
 // ============================================================================
 // 🤖 JARVIS AI — LIVE CONTEXT-AWARE PERSONAL ASSISTANT (permanent memory in MongoDB)
 // ============================================================================
@@ -1887,26 +1747,13 @@ async function callJarvisAI(userId, userMessage) {
 
     for (const modelName of modelsToTry) {
         try {
-            // 🟢 FIXED: લાઈનો ડીલીટ નથી કરી, ફક્ત કમેન્ટ કરી છે (જૂની સિન્ટેક્સ)
-            // const model = genAI.getGenerativeModel({
-            //     model: modelName,
-            //     systemInstruction: JARVIS_SYSTEM_PROMPT
-            // });
-            // const chat = model.startChat({ history });
-            // const result = await chat.sendMessage(`${liveContext}\n\nUser's message: ${userMessage}`);
-            // replyText = result.response.text().trim();
-            
-            // 🟢 નવો v2 SDK મુજબનો કોડ
-            const response = await genAI.models.generateContent({
-                model: modelName.includes('flash') ? modelName : 'gemini-1.5-flash',
-                contents: [
-                    { role: 'user', parts: [{ text: JARVIS_SYSTEM_PROMPT }] },
-                    { role: 'model', parts: [{ text: "Understood." }] },
-                    ...history,
-                    { role: 'user', parts: [{ text: `${liveContext}\n\nUser's message: ${userMessage}` }] }
-                ]
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                systemInstruction: JARVIS_SYSTEM_PROMPT
             });
-            replyText = response.text.trim();
+            const chat = model.startChat({ history });
+            const result = await chat.sendMessage(`${liveContext}\n\nUser's message: ${userMessage}`);
+            replyText = result.response.text().trim();
             if (replyText) break;
         } catch (err) {
             console.error(`Jarvis model ${modelName} failed:`, err.message);
@@ -1918,13 +1765,11 @@ async function callJarvisAI(userId, userMessage) {
     }
     return replyText;
 }
-// app.use(express.json()); 
-// 🟢 FIXED: આ લાઈન ડીલીટ નથી કરી પણ અહી નીચેથી હટાવીને ઉપર લિમિટ સાથે સેટ કરી છે. 
 
 // 🤖 JARVIS: Send message, get AI reply, save both to memory
 app.post('/api/jarvis/chat', requireAuth, async (req, res) => {
     try {
-        const { message } = req.body || {};
+        const { message } = req.body;
         if (!message || !message.trim()) return res.status(400).json({ error: "Message required." });
         const userId = MASTER_USER_ID;
 
@@ -1961,41 +1806,81 @@ app.delete('/api/jarvis/history', requireAuth, async (req, res) => {
 // ============================================================================
 
 app.get('/api/monster-coach', async (req, res) => {
-    const coachMessage = await askGemini(
-        "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.",
-        "Discipline equals absolute freedom."
-    );
-    let xpInfo = await getUserXP(MASTER_USER_ID);
-    res.json({ success: true, message: "Monster Coach active.", coachMessage, xp: xpInfo });
+    try {
+        let coachMessage = "Discipline equals absolute freedom.";
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
+                const result = await model.generateContent(prompt);
+                coachMessage = result.response.text().trim().replace(/"/g, '');
+            } catch(e1) {
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const prompt = "You are an aggressive, hardcore David Goggins style AI coach. Give a 1-sentence brutal motivational quote or roast for someone tracking their daily discipline. Keep it under 15 words.";
+                    const resFlash = await modelFlash.generateContent(prompt);
+                    coachMessage = resFlash.response.text().trim().replace(/"/g, '');
+                } catch(e2) {}
+            }
+        }
+        let xpInfo = await getUserXP(MASTER_USER_ID);
+        res.json({ success: true, message: "Monster Coach active.", coachMessage: coachMessage, xp: xpInfo });
+    } catch(e) {
+        let xpInfo = await getUserXP(MASTER_USER_ID);
+        res.json({ success: true, message: "Monster Coach active.", coachMessage: "Execution is everything. Stop complaining.", xp: xpInfo });
+    }
 });
 
 app.post('/api/ai-coach/ask', async (req, res) => {
-    const { prompt } = req.body;
-    const query = (prompt || "").toLowerCase();
+    try {
+        const { prompt } = req.body;
+        let reply = "Focus on your execution vectors. Discipline equals absolute freedom.";
+        
+        if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+            let aiSuccess = false;
+            const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach. 
+            You combine the hardcore, no-excuse accountability of David Goggins with the elite sports science, biomechanics, and neurobiology of Andrew Huberman.
+            
+            User query: "${prompt}"
 
-    let fallback = "Focus on your execution vectors. Discipline equals absolute freedom.";
-    if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
-        fallback = "**⚠️ STRICTNESS PROTOCOL INITIATED:**\n\nSkipping a scheduled execution vector triggers an immediate streak reset.\n\n**Penalties:**\n• You will run a mandatory 5km at 5:00 AM tomorrow.\n• No dopamine activities (music/social media) for 24 hours.\n\n**Do not let your mind control you. Get the work done.**";
-    } else if (query.includes('physique') || query.includes('routine') || query.includes('plan')) {
-        fallback = "**🎯 ELITE HYPERTROPHY BLUEPRINT:**\n\nTo achieve maximum muscle synthesis:\n• **Push:** Bench Press (4x8), Overhead Press (3x10), Tricep Dips (3xF).\n• **Pull:** Barbell Rows (4x8), Pull-ups (3xF), Bicep Curls (3x12).\n• **Legs:** Squats (4x8), RDLs (3x10), Calf Raises (4x15).\n\n*Maintain 2 RIR and 1.8g protein/kg bodyweight.*\n\n**The plan is set. Now shut up and lift.**";
-    } else if (query.includes('form') || query.includes('exercise')) {
-        fallback = "💡 **BIOMECHANICAL MASTERY:**\n\nFor a perfect lift:\n• **Brace Your Core:** Imagine taking a punch to the stomach.\n• **Eccentric Control:** Take 3 full seconds on the way down.\n• **Concentric Explosiveness:** Explode on the way up.\n\n**Leave your ego at the door. Execute with perfect technique.**";
+            Rules for your response:
+            1. ACTIONABLE & SCIENTIFIC: If asked for a workout plan, macros, or form, give EXACT sets, reps, RPE, rest times, and biomechanical cues. Be incredibly detailed and scientific.
+            2. STRUCTURED: Use Markdown (**bold text**) for emphasis and formatting. Use bullet points or numbered lists. Do NOT output plain paragraphs.
+            3. NO FLUFF: Be direct, highly intelligent, and authoritative. Do not act like a basic chatbot.
+            4. BRUTAL ACCOUNTABILITY: End every single response with a strict, uncompromising, hardcore command to execute the plan immediately. No feelings, just execution.`;
+            
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent(aiPrompt);
+                reply = result.response.text().trim();
+                aiSuccess = true;
+            } catch(e1) {}
+
+            if (!aiSuccess) {
+                try {
+                    const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                    const resFlash = await modelFlash.generateContent(aiPrompt);
+                    reply = resFlash.response.text().trim();
+                    aiSuccess = true;
+                } catch(e2) {}
+            }
+        } else {
+            const query = (prompt || "").toLowerCase();
+            if (query.includes('penalty') || query.includes('miss') || query.includes('skip')) {
+                reply = "**⚠️ STRICTNESS PROTOCOL INITIATED:**\n\nSkipping a scheduled execution vector triggers an immediate streak reset.\n\n**Penalties:**\n• You will run a mandatory 5km at 5:00 AM tomorrow.\n• No dopamine activities (music/social media) for 24 hours.\n\n**Do not let your mind control you. Get the work done.**";
+            } else if (query.includes('physique') || query.includes('routine') || query.includes('plan')) {
+                reply = "**🎯 ELITE HYPERTROPHY BLUEPRINT:**\n\nTo achieve maximum muscle synthesis:\n• **Push:** Bench Press (4x8), Overhead Press (3x10), Tricep Dips (3xF).\n• **Pull:** Barbell Rows (4x8), Pull-ups (3xF), Bicep Curls (3x12).\n• **Legs:** Squats (4x8), RDLs (3x10), Calf Raises (4x15).\n\n*Maintain 2 RIR (Reps in Reserve) and consume 1.8g protein per kg of bodyweight.*\n\n**The plan is set. The science is proven. Now shut up and lift.**";
+            } else if (query.includes('form') || query.includes('exercise')) {
+                reply = "💡 **BIOMECHANICAL MASTERY:**\n\nFor a perfect lift:\n• **Brace Your Core:** Imagine taking a punch to the stomach.\n• **Eccentric Control:** Take 3 full seconds on the way down.\n• **Concentric Explosiveness:** Explode on the way up.\n\n**Leave your ego at the door. Execute with perfect technique.**";
+            }
+        }
+
+        res.json({ success: true, reply });
+    } catch (err) {
+        res.json({ success: true, reply: "**SYSTEM WARNING:** Offline mode engaged.\n\nExecute your workout regardless of motivation. The iron does not care if the AI is disconnected. **GO LIFT.**" });
     }
-
-    const aiPrompt = `You are 'APEX AI', an elite, world-class $1000/month premium fitness and discipline coach.
-You combine the hardcore, no-excuse accountability of David Goggins with the elite sports science of Andrew Huberman.
-
-User query: "${prompt}"
-
-Rules:
-1. ACTIONABLE & SCIENTIFIC: exact sets, reps, RPE, rest times, biomechanical cues where relevant.
-2. STRUCTURED: Use Markdown (**bold**) and bullet points. No plain paragraphs.
-3. NO FLUFF: Direct, intelligent, authoritative.
-4. Always end with a strict, hardcore command to execute immediately.`;
-
-    const reply = await askGemini(aiPrompt, fallback);
-    res.json({ success: true, reply });
 });
+
 app.get('/api/oled-status', (req, res) => {
     let istTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
     let istNow = new Date(istTimeStr);
@@ -2014,10 +1899,21 @@ app.post('/api/monster-log', requireAuth, async (req, res) => {
     const { content } = req.body;
     let today = getServerToday();
     
-   const aiFeedback = await askGemini(
-    `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`,
-    "Execute blindly. No emotions."
-);
+    let aiFeedback = "Execute blindly. No emotions.";
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
+        try {
+            const prompt = `You are a ruthless, David Goggins style AI coach. The user logged this about their day: "${content}". Give a brutal 1-2 sentence response.`;
+            try {
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent(prompt);
+                aiFeedback = result.response.text().trim().replace(/"/g, '');
+            } catch(e1) {
+                const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                const resFlash = await modelFlash.generateContent(prompt);
+                aiFeedback = resFlash.response.text().trim().replace(/"/g, '');
+            }
+        } catch(e) {}
+    }
     
     let log = await MonsterLog.findOne({ userId: MASTER_USER_ID, date: today });
     if (log) {
