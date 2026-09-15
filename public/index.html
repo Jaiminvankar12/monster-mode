@@ -76,7 +76,6 @@
             box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
         }
 
-        /* ✨ CYBERPUNK ULTRA-SMOOTH THIN SCROLLBAR & FLOW ✨ */
         html {
             scroll-behavior: smooth !important;
         }
@@ -97,7 +96,6 @@
             box-shadow: 0 0 15px rgba(245, 59, 59, 0.9), inset 0 0 8px rgba(245, 59, 59, 0.6) !important;
         }
 
-        /* 🔥 NEW ANIMATIONS FOR HERO SECTION 🔥 */
         @keyframes floatAnim {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
@@ -122,16 +120,16 @@
 
     <div class="flex w-full min-h-screen bg-[#05070b]">
         
-        <!-- Left Side: Cinematic Background (FIXED EDGE & ADDED ANIMATION) -->
+        <!-- Left Side: Cinematic Background (FIXED - EXACTLY LIKE IMAGE) -->
         <div class="hidden lg:flex w-[60%] relative flex-col justify-end pb-20 pl-20 overflow-hidden">
             <!-- Animated Background Div -->
             <div id="heroBgContainer" class="absolute inset-0 hero-bg zoom-bg-anim w-full h-full"></div>
             
-            <!-- Gradient Overlays for Smooth Blending -->
-            <div class="absolute inset-0 bg-gradient-to-t from-[#05070b] via-[#05070b]/50 to-transparent opacity-80 z-10"></div>
+            <!-- Ekdum halko bottom gradient khali text mate, upar no bhag clear rakhyo chhe -->
+            <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#05070b] to-transparent opacity-80 z-10"></div>
             
-            <!-- This specific gradient removes the sharp straight line by fading it to the right -->
-            <div class="absolute inset-y-0 right-0 w-48 bg-gradient-to-l from-[#05070b] via-[#05070b]/90 to-transparent z-10"></div>
+            <!-- Patlo (narrow) gradient je image ni sharp line chhupavse -->
+            <div class="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#05070b] to-transparent z-10"></div>
             
             <div class="z-20 max-w-xl floating-content">
                 <span class="px-3.5 py-1.5 rounded-full bg-red-500/25 border border-red-500/50 text-red-400 font-black text-[10px] tracking-widest uppercase mb-4 inline-block shadow-lg shadow-red-500/20">
@@ -273,6 +271,7 @@
         </div>
     </div>
 
+    <!-- Script same chhe -->
     <script>
         let currentPortal = 'tracker';
         
