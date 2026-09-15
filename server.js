@@ -24,7 +24,9 @@ const PORT = process.env.PORT || 5001;
 // ⚠️ SECURITY NOTE: Move this to .env as MONGO_URI and rotate the password —
 // it was hardcoded here before and should be treated as compromised.
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://jaiminvankar520_db_user:XLVuwi5Atn2RSBE1@cluster0.iea9sdz.mongodb.net/monster_database?retryWrites=true&w=majority";
-mongoose.connect(process.env.MONGO_URI)
+
+// 🟢 Corrected: pass 'MONGO_URI' instead of 'process.env.MONGO_URI'
+mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
